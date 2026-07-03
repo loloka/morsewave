@@ -1,0 +1,572 @@
+/* =========================================================
+   MorseWave — дизайн-система
+   Тема: телеграфная лента. Тёмный минимализм, много воздуха.
+   ========================================================= */
+
+:root {
+    --bg:            #0d0f11;
+    --surface:       #16191c;
+    --surface-2:     #1e2226;
+    --border:        #262b30;
+
+    --accent:        #e8a33d;   /* тёплое свечение лампового радио */
+    --accent-dim:    #7a5b28;
+    --signal:        #4fd8c4;   /* цвет сигнальной линии */
+    --signal-dim:    #245952;
+
+    --text:          #eae6df;
+    --text-muted:    #8b9198;
+    --text-faint:    #565c62;
+
+    --danger:        #e2584f;
+    --success:       #6fcf7a;
+
+    --font-ui:    'Manrope', system-ui, sans-serif;
+    --font-mono:  'JetBrains Mono', 'Courier New', monospace;
+
+    --radius: 14px;
+    --radius-sm: 8px;
+    --gap: 24px;
+
+    --nav-h: 68px;
+    --tabbar-h: 64px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+}
+
+body {
+    min-height: 100vh;
+    padding-bottom: 0;
+}
+
+a { color: inherit; text-decoration: none; }
+h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; }
+p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
+
+::selection { background: var(--accent-dim); color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+/* ---------- Layout ---------- */
+.container {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.page {
+    padding-top: calc(var(--nav-h) + 32px);
+    padding-bottom: 64px;
+    min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+    .page { padding-bottom: calc(var(--tabbar-h) + 32px); }
+}
+
+/* ---------- Navigation (desktop top bar) ---------- */
+.topnav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: rgba(13, 15, 17, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    z-index: 100;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+}
+.brand-code {
+    color: var(--accent);
+    font-size: 13px;
+    letter-spacing: 0.05em;
+}
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+}
+.brand-text small {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 4px;
+}
+.nav-links a {
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: var(--surface-2); }
+.nav-links a.active { color: var(--bg); background: var(--accent); font-weight: 600; }
+
+.nav-stats {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.nav-stats b { color: var(--accent); }
+
+@media (max-width: 900px) {
+    .nav-links { display: none; }
+}
+
+/* ---------- Mobile bottom tab bar ---------- */
+.tabbar {
+    display: none;
+}
+@media (max-width: 900px) {
+    .tabbar {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        height: var(--tabbar-h);
+        background: rgba(22, 25, 28, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border);
+        z-index: 100;
+    }
+    .tabbar a {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        font-size: 10px;
+        color: var(--text-faint);
+    }
+    .tabbar a .tab-icon { font-size: 18px; }
+    .tabbar a.active { color: var(--accent); }
+}
+
+/* ---------- Cards & grid ---------- */
+.grid {
+    display: grid;
+    gap: var(--gap);
+}
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 720px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+}
+.card-link {
+    display: block;
+    transition: border-color .15s, transform .15s;
+}
+.card-link:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
+
+.card-icon { font-size: 26px; margin-bottom: 10px; display: block; }
+.card-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--signal);
+    margin-bottom: 6px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s;
+}
+.btn:hover { border-color: var(--accent-dim); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1a1200;
+}
+.btn-primary:hover { background: #f0b158; }
+.btn-ghost {
+    background: transparent;
+}
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s;
+}
+.chip.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #1a1200;
+    font-weight: 700;
+}
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- Hero ---------- */
+.hero {
+    padding: 20px 0 40px;
+}
+.hero h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    max-width: 640px;
+}
+.hero p.lead {
+    max-width: 520px;
+    font-size: 16px;
+}
+
+/* ---------- Signal line (signature element) ---------- */
+.signal-line {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 56px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    font-family: var(--font-mono);
+}
+.signal-bar {
+    background: var(--signal-dim);
+    width: 6px;
+    min-height: 4px;
+    border-radius: 2px;
+    transition: background .1s;
+}
+.signal-bar.dot   { flex: 0 0 6px; }
+.signal-bar.dash  { flex: 0 0 18px; }
+.signal-bar.gap   { background: transparent; }
+.signal-bar.on    { background: var(--signal); box-shadow: 0 0 10px var(--signal); }
+
+/* ---------- Morse pattern display ---------- */
+.morse-pattern {
+    font-family: var(--font-mono);
+    font-size: 32px;
+    letter-spacing: 6px;
+    color: var(--accent);
+}
+.morse-pattern .sym { display: inline-block; }
+.morse-pattern .sym.playing { color: var(--signal); text-shadow: 0 0 12px var(--signal); }
+
+.morse-tita {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+.morse-tita .unit { display: inline-block; transition: color .1s; }
+.morse-tita .unit.playing { color: var(--signal); font-weight: 700; }
+
+.morse-napev {
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-faint);
+    margin-top: 2px;
+}
+.morse-napev .syl { display: inline-block; transition: color .1s; }
+.morse-napev .syl.playing { color: var(--accent); font-weight: 700; font-style: normal; }
+
+/* ---------- Letter grid (learn page) ---------- */
+.letter-tile {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .15s;
+    gap: 4px;
+}
+.letter-tile:hover { border-color: var(--signal); }
+.letter-tile.learned { border-color: var(--accent-dim); background: linear-gradient(160deg, var(--surface), #1f1a10); }
+.letter-tile.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+.letter-tile .ch { font-size: 22px; font-weight: 700; font-family: var(--font-mono); }
+.letter-tile .code { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
+.letter-tile .check { position: absolute; }
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 8px;
+}
+@media (max-width: 720px) {
+    .tile-grid { grid-template-columns: repeat(6, 1fr); }
+}
+
+/* ---------- Telegraph key (tap button) ---------- */
+.key-wrap { display: flex; justify-content: center; padding: 20px 0; }
+.telegraph-key {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--surface-2), var(--surface) 70%);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: transform .05s, box-shadow .1s, border-color .1s;
+}
+.telegraph-key.pressed {
+    transform: scale(0.95);
+    border-color: var(--signal);
+    box-shadow: 0 0 30px var(--signal-dim);
+    color: var(--signal);
+}
+
+/* ---------- Progress bars ---------- */
+.progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+.progress-bar > span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--signal-dim), var(--signal));
+    border-radius: 4px;
+    transition: width .3s ease;
+}
+
+/* ---------- Stat blocks ---------- */
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.stat .value {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+}
+.stat .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+/* ---------- Text input for decoding answers ---------- */
+.answer-input {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 20px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+}
+.answer-input:focus { outline: none; border-color: var(--signal); }
+.answer-input.correct { border-color: var(--success); }
+.answer-input.wrong { border-color: var(--danger); }
+
+/* ---------- Badges (achievements) ---------- */
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    opacity: 0.4;
+    filter: grayscale(1);
+}
+.badge.unlocked { opacity: 1; filter: none; border-color: var(--accent-dim); }
+.badge .icon { font-size: 28px; }
+.badge .title { font-weight: 700; font-size: 14px; }
+.badge .desc { font-size: 12px; color: var(--text-muted); }
+
+/* ---------- Toast / feedback ---------- */
+.feedback {
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: var(--font-mono);
+    display: none;
+}
+.feedback.show { display: block; }
+.feedback.ok { background: rgba(111, 207, 122, 0.12); color: var(--success); }
+.feedback.bad { background: rgba(226, 88, 79, 0.12); color: var(--danger); }
+
+/* ---------- Morse lamp (визуальная альтернатива звуку) ---------- */
+.morse-lamp {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    box-shadow: inset 0 0 12px rgba(0,0,0,.5);
+    transition: background .06s, box-shadow .06s, border-color .06s;
+    flex-shrink: 0;
+}
+.morse-lamp.lit {
+    background: radial-gradient(circle at 40% 35%, #fff6da, var(--accent) 70%);
+    border-color: var(--accent);
+    box-shadow: 0 0 22px var(--accent), 0 0 46px var(--accent-dim);
+}
+.lamp-row { display: flex; align-items: center; gap: 16px; }
+
+/* ---------- Range sliders ---------- */
+input[type="range"] {
+    accent-color: var(--signal);
+    vertical-align: middle;
+    width: 140px;
+}
+.speed-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.speed-control .speed-value {
+    font-family: var(--font-mono);
+    color: var(--accent);
+    min-width: 22px;
+    display: inline-block;
+    text-align: right;
+}
+
+/* ---------- Mode switch (learn page) ---------- */
+.mode-switch { display: flex; gap: 8px; margin-bottom: 8px; }
+
+/* ---------- Recognize mode keyboard tiles ---------- */
+.recognize-tile {
+    padding: 14px 0;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all .1s;
+}
+.recognize-tile:hover { border-color: var(--signal); }
+.recognize-tile:active { transform: scale(0.94); }
+.recognize-tile.correct { border-color: var(--success); background: rgba(111,207,122,.12); }
+.recognize-tile.wrong { border-color: var(--danger); background: rgba(226,88,79,.12); }
+
+/* ---------- Info tooltip (например, объяснение Фарнсворта) ---------- */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+}
+.info-icon:hover { color: var(--signal); }
+.tooltip-box {
+    max-width: 480px;
+    margin-top: 8px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border: 1px solid var(--signal-dim);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+/* ---------- Daily challenge ---------- */
+.daily-card {
+    background: linear-gradient(135deg, var(--surface), #1f1a10 150%);
+    border: 1px solid var(--accent-dim);
+}
+.muted { color: var(--text-muted); }
+.mono { font-family: var(--font-mono); }
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-2 { margin-bottom: 16px; }
+.flex { display: flex; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-1 { gap: 8px; }
+.gap-2 { gap: 16px; }
+.center { text-align: center; }
+.section { margin-top: 48px; }
