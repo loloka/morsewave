@@ -1,0 +1,12 @@
+# Запрещаем прямой доступ к SQL-файлам и скрипту-генератору позывных.
+# schema.sql/migration_*.sql можно накатывать только через phpMyAdmin/mysql CLI,
+# а не открывать по ссылке из браузера.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>
