@@ -91,6 +91,7 @@ morse-trainer/
 │   ├── migration_2.sql       # + ачивки за режим "Приём на слух"
 │   ├── migration_3.sql       # фикс недостижимой ачивки "Мастер Коха"
 │   ├── migration_4.sql       # + ачивки за серию в "Приёме на слух"
+│   ├── migration_5.sql       # фикс пустого condition_type у streak50/streak500
 │   ├── seed_callsigns.php    # генератор пачки позывных
 │   └── .htaccess              # запрет веб-доступа к папке
 ├── includes/                 # header / footer / nav (шаблоны)
@@ -142,6 +143,7 @@ mysql -u root -p < database/schema.sql
 mysql -u root -p morse_trainer < database/migration_2.sql
 mysql -u root -p morse_trainer < database/migration_3.sql
 mysql -u root -p morse_trainer < database/migration_4.sql
+mysql -u root -p morse_trainer < database/migration_5.sql
 ```
 
 Дальше:
@@ -319,6 +321,15 @@ mysql -u root -p morse_trainer < database/migration_4.sql
     `.htaccess` блокирует папку `database/` везде, где Apache его читает,
     включая Laragon по умолчанию — это осознанный компромисс ради
     безопасности на проде.
+- **v2.10 — фикс пустого condition_type (`migration_5.sql`).**
+  - У ачивок `streak50`/`streak500` при накатке миграций по отдельности
+    поле `condition_type` иногда оставалось пустым (ENUM в нестрогом режиме
+    MySQL молча принимает пустую строку вместо значения, которого ещё нет
+    в перечне, если `ALTER TABLE` не успел примениться до `INSERT`). С
+    пустым `condition_type` ачивка была недостижима. `migration_5.sql`
+    на всякий случай повторно расширяет ENUM и точечно чинит обе строки.
+    Для новых установок через актуальный `schema.sql` этот баг не
+    воспроизводится — там всё в одном файле и в правильном порядке.
 
 ## Известные ограничения / открытые вопросы
 
