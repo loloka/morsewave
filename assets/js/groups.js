@@ -215,10 +215,16 @@
         session.finished = true;
         session.examStopped = true; // на случай досрочной остановки — обрываем цикл проигрывания
 
-        const playedGroups = session.groups.slice(0, session.playedCount || session.groups.length);
+        // ВАЖНО: без fallback на session.groups.length — иначе остановка
+        // экзамена ДО того, как отыграла хоть одна группа (playedCount === 0),
+        // засчитывалась как полный экзамен из-за приведения 0 к "ложному" в ||.
+        const playedGroups = session.groups.slice(0, session.playedCount);
+        const fullyCompleted = session.playedCount >= session.groups.length;
+
         const typed = examAnswerEl.value.toUpperCase().trim().split(/\s+/).filter(Boolean);
         let correctChars = 0;
         let totalChars = 0;
+        let wrongGroupCount = 0;
         playedGroups.forEach((expected, i) => {
             const guess = typed[i] || '';
             totalChars += expected.length;
@@ -226,14 +232,31 @@
             for (let c = 0; c < expected.length; c++) {
                 if (guess[c] === expected[c]) { correctChars++; groupCorrect++; }
             }
-            if (groupCorrect !== expected.length) session.wrongGroups.push(expected);
+            if (groupCorrect !== expected.length) { session.wrongGroups.push(expected); wrongGroupCount++; }
         });
         session.correctChars = correctChars;
         session.totalChars = totalChars;
-        session.xpEarned = Math.round(correctChars * session.xpRate * 10) / 10;
-        Progress.addXp(session.xpEarned);
-        Progress.incrementStat('groupsCompleted', playedGroups.length);
-        postStat('total_groups', playedGroups.length);
+        session.examFullyCompleted = fullyCompleted;
+        session.examWrongGroupCount = wrongGroupCount;
+
+        if (fullyCompleted) {
+            // Опыт за экзамен — только если пройден целиком, размер зависит от % точности
+            session.xpEarned = Math.round(correctChars * session.xpRate * 10) / 10;
+            Progress.addXp(session.xpEarned);
+            if (wrongGroupCount <= 3) {
+                Progress.incrementStat('examsPassed', 1);
+            }
+        } else {
+            session.xpEarned = 0;
+        }
+
+        // Частично отыгранные группы всё равно реально прозвучали и были
+        // отвечены — они честно идут в общий счётчик "групп_50/500",
+        // просто без специальной экзаменационной награды.
+        if (playedGroups.length > 0) {
+            Progress.incrementStat('groupsCompleted', playedGroups.length);
+            postStat('total_groups', playedGroups.length);
+        }
         finishSession();
     }
 
@@ -319,6 +342,21 @@
             const note = document.createElement('div');
             note.className = 'feedback show ok mt-2';
             note.textContent = 'Задание дня пройдено' + dailyBonusMsg;
+            document.getElementById('result-panel').appendChild(note);
+        }
+
+        if (session.isExam) {
+            const note = document.createElement('div');
+            if (!session.examFullyCompleted) {
+                note.className = 'feedback show bad mt-2';
+                note.textContent = `Экзамен остановлен досрочно (сыграно ${session.playedCount}/${session.groups.length} групп) — XP за экзамен не начисляется, но результат честно учтён в общем счётчике групп.`;
+            } else if (session.examWrongGroupCount <= 3) {
+                note.className = 'feedback show ok mt-2';
+                note.textContent = `Экзамен пройден: ошибок в ${session.examWrongGroupCount} из ${session.groups.length} групп — это уровень «Первая категория радиолюбителя»! 🎖️`;
+            } else {
+                note.className = 'feedback show bad mt-2';
+                note.textContent = `Экзамен пройден целиком, но ошибок многовато (${session.examWrongGroupCount} из ${session.groups.length} групп) для категории — для нужной точности их должно быть не больше 3. Продолжай тренироваться!`;
+            }
             document.getElementById('result-panel').appendChild(note);
         }
 

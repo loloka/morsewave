@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS achievements (
         'groups_completed',
         'callsigns_completed',
         'recognized_count',
-        'recognize_best_streak'
+        'recognize_best_streak',
+        'exam_passed_count'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -78,7 +79,8 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('recognize_10',  'Приём на слух: старт', 'Правильно опознайте 10 символов на слух',       '👂', 'recognized_count', 10, 16),
 ('recognize_100', 'Чуткий эфир',          'Правильно опознайте 100 символов на слух',      '🦻', 'recognized_count', 100, 17),
 ('streak50',      'Начинающий телеграфист', 'Наберите серию из 50 верных подряд в приёме на слух', '📗', 'recognize_best_streak', 50, 18),
-('streak500',     'Телеграфист со стажем',  'Наберите серию из 500 верных подряд в приёме на слух', '📘', 'recognize_best_streak', 500, 19);
+('streak500',     'Телеграфист со стажем',  'Наберите серию из 500 верных подряд в приёме на слух', '📘', 'recognize_best_streak', 500, 19),
+('exam_category1','Первая категория радиолюбителя', 'Пройдите экзамен (250 знаков) целиком не более чем с 3 ошибочными группами', '🎖️', 'exam_passed_count', 1, 20);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)

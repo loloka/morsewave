@@ -17,6 +17,7 @@ const Progress = (() => {
             sessionsCompleted: 0,
             recognizedCount: 0,
             recognizeBestStreak: 0,
+            examsPassed: 0,
             abbrCompleted: 0,
             abbrBestStreak: 0,
         },
@@ -137,6 +138,7 @@ const Progress = (() => {
                 case 'callsigns_completed': return state.stats.callsignsCompleted;
                 case 'recognized_count': return state.stats.recognizedCount;
                 case 'recognize_best_streak': return state.stats.recognizeBestStreak;
+                case 'exam_passed_count': return state.stats.examsPassed;
                 default: return 0;
             }
         };
