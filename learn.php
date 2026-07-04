@@ -28,8 +28,8 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="speed-control">
                 Скорость
-                <input type="range" id="wpm-select" min="5" max="35" step="1" value="15">
-                <span class="speed-value" id="wpm-value">15</span> wpm
+                <input type="range" id="wpm-select" min="5" max="35" step="1" value="12">
+                <span class="speed-value" id="wpm-value">12</span> wpm
             </div>
         </div>
 
@@ -78,8 +78,8 @@ include __DIR__ . '/includes/header.php';
         <div class="flex-between flex-wrap gap-2 mt-2">
             <div class="speed-control">
                 Скорость
-                <input type="range" id="rec-wpm" min="5" max="35" step="1" value="18">
-                <span class="speed-value" id="rec-wpm-value">18</span> wpm
+                <input type="range" id="rec-wpm" min="5" max="35" step="1" value="12">
+                <span class="speed-value" id="rec-wpm-value">12</span> wpm
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="rec-lamp"></div>

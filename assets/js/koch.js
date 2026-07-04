@@ -37,14 +37,39 @@
         return KOCH_ORDER.slice(0, state.kochLevel);
     }
 
+    const kochCharsetFeedback = document.getElementById('koch-charset-feedback');
+
     function renderHeader() {
         const state = Progress.load();
         const charset = currentCharset();
         kochLevelEl.textContent = state.kochLevel;
-        kochCharsetEl.textContent = charset.join(' ');
         kochProgressBar.style.width = `${(state.kochLevel / KOCH_ORDER.length) * 100}%`;
         jumpSlider.value = state.kochLevel;
         jumpValue.textContent = jumpSlider.value;
+
+        kochCharsetEl.innerHTML = '';
+        charset.forEach((ch) => {
+            const chip = document.createElement('div');
+            chip.className = 'chip mono';
+            chip.textContent = ch;
+            chip.title = 'Тапни, чтобы услышать';
+            chip.addEventListener('click', () => playCharsetLetter(ch, chip));
+            kochCharsetEl.appendChild(chip);
+        });
+    }
+
+    async function playCharsetLetter(ch, chip) {
+        const wpm = parseInt(wpmSlider.value, 10) || 12;
+        const audio = new MorseAudio({ wpm });
+        chip.classList.add('active');
+        const mnemonic = MORSE_MNEMONICS[ch];
+        const tita = MORSE_CODE[ch].split('').map(s => s === '.' ? 'ти' : 'та').join('-');
+        kochCharsetFeedback.className = 'feedback show ok';
+        kochCharsetFeedback.textContent = mnemonic
+            ? `«${ch}»: ${tita} (напев: ${mnemonic.join('-')})`
+            : `«${ch}»: ${tita}`;
+        await audio.play(ch, {});
+        chip.classList.remove('active');
     }
 
     jumpSlider.addEventListener('input', () => { jumpValue.textContent = jumpSlider.value; });

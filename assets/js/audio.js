@@ -6,7 +6,7 @@
  * аппроксимация стандартного расчёта ARRL.
  */
 class MorseAudio {
-    constructor({ freq, wpm = 20, farnsworthWpm = null, waveform } = {}) {
+    constructor({ freq, wpm = 12, farnsworthWpm = null, waveform } = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { freq: 600, waveform: 'sine' };
         this.freq = freq ?? settings.freq;
         this.waveform = waveform ?? settings.waveform;

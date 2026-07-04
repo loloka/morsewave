@@ -4,7 +4,7 @@
  * длительности нажатия и пауз (как настоящий телеграфный ключ).
  */
 class TelegraphKey {
-    constructor(el, { wpm = 15, onSymbol, onLetter, onWord, onPress, sidetone = true, freq, waveform } = {}) {
+    constructor(el, { wpm = 12, onSymbol, onLetter, onWord, onPress, sidetone = true, freq, waveform } = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { freq: 600, waveform: 'sine' };
         this.el = el;
         this.wpm = wpm;

@@ -175,7 +175,7 @@
     }
 
     const key = new TelegraphKey(keyEl, {
-        wpm: 15,
+        wpm: 12,
         onSymbol: (symbol) => signalLine.pulse(symbol === '.' ? 'dot' : 'dash'),
         onLetter: handleDecodedLetter,
         onPress: (isDown) => { if (isDown) lamp.on(); else lamp.off(); },

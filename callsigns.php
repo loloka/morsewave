@@ -15,8 +15,8 @@ include __DIR__ . '/includes/header.php';
     <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
         <div class="speed-control">
             Скорость
-            <input type="range" id="cs-wpm" min="5" max="35" step="1" value="15">
-            <span class="speed-value" id="cs-wpm-value">15</span> wpm
+            <input type="range" id="cs-wpm" min="5" max="35" step="1" value="12">
+            <span class="speed-value" id="cs-wpm-value">12</span> wpm
         </div>
         <label class="chip">Позывных в сессии:
             <select id="cs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">

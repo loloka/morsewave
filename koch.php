@@ -17,12 +17,13 @@ include __DIR__ . '/includes/header.php';
             <div class="card-eyebrow">Открыто символов</div>
             <div class="value mono" style="font-size:28px;color:var(--accent)" id="koch-level">2</div>
         </div>
-        <div style="max-width:420px;flex:1;">
-            <div class="muted" style="font-size:13px;margin-bottom:6px;">Текущий набор символов</div>
-            <div class="morse-pattern" style="font-size:20px;letter-spacing:4px;" id="koch-charset">K M</div>
+        <div style="max-width:480px;flex:1;">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;">Текущий набор символов — тапни, чтобы услышать</div>
+            <div class="chip-row" id="koch-charset"></div>
         </div>
     </div>
     <div class="progress-bar mt-2"><span id="koch-progress-bar" style="width:5%"></span></div>
+    <div class="feedback mt-1" id="koch-charset-feedback"></div>
 
     <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
         <span class="muted" style="font-size:13px;">Уже не новичок — или наоборот, хочешь начать заново? Установи нужное число открытых символов (можно и уменьшить):</span>
@@ -37,8 +38,8 @@ include __DIR__ . '/includes/header.php';
     <div class="flex-wrap gap-2 mt-1" style="align-items:center;">
         <div class="speed-control">
             Скорость символа
-            <input type="range" id="koch-wpm" min="10" max="40" step="1" value="20">
-            <span class="speed-value" id="koch-wpm-value">20</span> wpm
+            <input type="range" id="koch-wpm" min="10" max="40" step="1" value="12">
+            <span class="speed-value" id="koch-wpm-value">12</span> wpm
         </div>
 
         <label class="chip" style="gap:8px;">

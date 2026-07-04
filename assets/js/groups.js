@@ -153,7 +153,8 @@
             index: 0, wpm, farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
             xpRate: xpRateForSession(charset.length, groupLen),
-            isExam,
+            isExam, examStopped: false, playedCount: 0, finished: false,
+            wrongGroups: [],
         };
 
         setupPanel.style.display = 'none';
@@ -177,8 +178,8 @@
             examAnswerEl.style.display = 'block';
             examSubmitRow.style.display = 'flex';
             examAnswerEl.value = '';
-            examSubmitBtn.disabled = true;
-            examSubmitBtn.textContent = '⏳ Идёт передача…';
+            examSubmitBtn.disabled = false;
+            examSubmitBtn.textContent = '⏹ Остановить и проверить';
             replayBtn.style.display = 'none';
             examAnswerEl.focus();
             runExamPlayback();
@@ -196,33 +197,43 @@
 
     async function runExamPlayback() {
         for (session.index = 0; session.index < session.groups.length; session.index++) {
+            if (session.examStopped) return;
             groupIndexEl.textContent = session.index + 1;
             await playCurrentGroup();
+            session.playedCount = session.index + 1;
+            if (session.examStopped) return;
             if (session.index < session.groups.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, EXAM_GROUP_GAP_MS));
+                if (session.examStopped) return;
             }
         }
-        examSubmitBtn.disabled = false;
         examSubmitBtn.textContent = 'Проверить →';
     }
 
     function finishExamSession() {
+        if (session.finished) return;
+        session.finished = true;
+        session.examStopped = true; // на случай досрочной остановки — обрываем цикл проигрывания
+
+        const playedGroups = session.groups.slice(0, session.playedCount || session.groups.length);
         const typed = examAnswerEl.value.toUpperCase().trim().split(/\s+/).filter(Boolean);
         let correctChars = 0;
         let totalChars = 0;
-        session.groups.forEach((expected, i) => {
+        playedGroups.forEach((expected, i) => {
             const guess = typed[i] || '';
             totalChars += expected.length;
+            let groupCorrect = 0;
             for (let c = 0; c < expected.length; c++) {
-                if (guess[c] === expected[c]) correctChars++;
+                if (guess[c] === expected[c]) { correctChars++; groupCorrect++; }
             }
+            if (groupCorrect !== expected.length) session.wrongGroups.push(expected);
         });
         session.correctChars = correctChars;
         session.totalChars = totalChars;
         session.xpEarned = Math.round(correctChars * session.xpRate * 10) / 10;
         Progress.addXp(session.xpEarned);
-        Progress.incrementStat('groupsCompleted', session.groups.length);
-        postStat('total_groups', session.groups.length);
+        Progress.incrementStat('groupsCompleted', playedGroups.length);
+        postStat('total_groups', playedGroups.length);
         finishSession();
     }
 
@@ -255,6 +266,7 @@
             feedbackEl.textContent = `Верно: ${expected}`;
             feedbackEl.className = 'feedback show ok';
         } else {
+            session.wrongGroups.push(expected);
             feedbackEl.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`;
             feedbackEl.className = 'feedback show bad';
         }
@@ -282,7 +294,7 @@
         let xpEarned = session.xpEarned;
 
         let dailyBonusMsg = '';
-        if (isDailyChallenge) {
+        if (isDailyChallenge && !session.skipDailyCheck) {
             const state = Progress.load();
             if (state.dailyChallengeDate !== today()) {
                 xpEarned += 50;
@@ -309,7 +321,44 @@
             note.textContent = 'Задание дня пройдено' + dailyBonusMsg;
             document.getElementById('result-panel').appendChild(note);
         }
+
+        const mistakesBlock = document.getElementById('mistakes-block');
+        if (session.wrongGroups && session.wrongGroups.length > 0) {
+            document.getElementById('mistake-count').textContent = session.wrongGroups.length;
+            mistakesBlock.style.display = 'block';
+        } else {
+            mistakesBlock.style.display = 'none';
+        }
     }
+
+    function retrainMistakes() {
+        if (!session || !session.wrongGroups || !session.wrongGroups.length) return;
+        const retrySession = {
+            groups: [...session.wrongGroups],
+            index: 0, wpm: session.wpm, farnsworth: session.farnsworth,
+            correctChars: 0, totalChars: 0, xpEarned: 0,
+            xpRate: session.xpRate,
+            isExam: false, examStopped: false, playedCount: 0, finished: false,
+            wrongGroups: [], skipDailyCheck: true,
+        };
+        session = retrySession;
+
+        resultPanel.style.display = 'none';
+        sessionPanel.style.display = 'block';
+        answerInput.style.display = 'block';
+        groupsSubmitRow.style.display = 'flex';
+        examAnswerEl.style.display = 'none';
+        examSubmitRow.style.display = 'none';
+        replayBtn.style.display = 'inline-flex';
+        groupTotalEl.textContent = session.groups.length;
+        groupIndexEl.textContent = 1;
+        answerInput.value = '';
+        feedbackEl.textContent = `Разбираем ${session.groups.length} групп(ы), в которых были ошибки — не спеша.`;
+        feedbackEl.className = 'feedback show ok';
+        answerInput.focus();
+        playCurrentGroup();
+    }
+    document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 
     async function postStat(field, amount) {
         try {
@@ -346,7 +395,7 @@
 
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
-    examSubmitBtn.addEventListener('click', () => { if (!examSubmitBtn.disabled) finishExamSession(); });
+    examSubmitBtn.addEventListener('click', () => finishExamSession());
     replayBtn.addEventListener('click', playCurrentGroup);
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';

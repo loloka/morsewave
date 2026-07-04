@@ -48,8 +48,8 @@ include __DIR__ . '/includes/header.php';
     <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
         <div class="speed-control">
             Скорость
-            <input type="range" id="groups-wpm" min="5" max="60" step="1" value="15">
-            <span class="speed-value" id="groups-wpm-value">15</span> wpm
+            <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
+            <span class="speed-value" id="groups-wpm-value">12</span> wpm
         </div>
 
         <label class="chip" style="gap:8px;">
@@ -117,6 +117,13 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label">Верно символов</span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label">Получено XP</span></div>
     </div>
+
+    <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
+        <p class="mt-0" style="font-size:14px;">Есть символы, в которых закралась ошибка — не страшно, это нормальная
+            часть тренировки. Можно спокойно пройтись именно по ним ещё раз, отдельно от остальных.</p>
+        <button class="btn btn-primary" id="retrain-mistakes-btn">🔁 Повторить только ошибки (<span id="mistake-count">0</span>)</button>
+    </div>
+
     <button class="btn btn-primary mt-2" id="restart-btn">Новая сессия</button>
 </div>
 
@@ -132,8 +139,8 @@ include __DIR__ . '/includes/header.php';
         <div class="flex-between flex-wrap gap-2">
             <div class="speed-control">
                 Скорость
-                <input type="range" id="abbrev-wpm" min="10" max="35" step="1" value="18">
-                <span class="speed-value" id="abbrev-wpm-value">18</span> wpm
+                <input type="range" id="abbrev-wpm" min="10" max="35" step="1" value="12">
+                <span class="speed-value" id="abbrev-wpm-value">12</span> wpm
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="abbrev-lamp"></div>
