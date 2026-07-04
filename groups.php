@@ -41,7 +41,7 @@ include __DIR__ . '/includes/header.php';
             <div class="chip" data-set="custom">Свои символы</div>
         </div>
         <input type="text" id="custom-charset-input" class="answer-input mt-1"
-               placeholder="Например: A E I O U R S T (минимум 5 символов, через пробел)"
+               placeholder="Например: A E I O U (мин. 5, через пробел)"
                style="display:none; text-transform:uppercase;" autocomplete="off">
     </div>
 
@@ -96,13 +96,13 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="signal-line mt-2" id="groups-signal"></div>
-    <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="Введи услышанные символы… (можно печатать сразу)" autocomplete="off">
+    <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="Введи символы…" autocomplete="off">
     <div class="btn-row mt-2" id="groups-submit-row">
         <button class="btn btn-primary" id="submit-answer">Проверить →</button>
     </div>
 
-    <textarea id="exam-answer" class="answer-input mt-2" style="display:none; min-height:140px; text-transform:uppercase; resize:vertical;"
-        placeholder="Печатай группы по мере звучания, через пробел или с новой строки — как удобно…"></textarea>
+    <textarea id="exam-answer" class="answer-input mt-2" style="display:none; min-height:180px; resize:vertical;"
+        placeholder="Печатай группы через пробел или с новой строки…"></textarea>
     <div class="btn-row mt-2" id="exam-submit-row" style="display:none;">
         <button class="btn btn-primary" id="exam-submit-btn" disabled>⏳ Идёт передача…</button>
     </div>

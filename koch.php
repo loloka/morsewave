@@ -58,7 +58,7 @@ include __DIR__ . '/includes/header.php';
 
         <label class="chip">Групп в сессии:
             <select id="koch-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="10">10</option><option value="20" selected>20</option><option value="30">30</option>
+                <option value="10" selected>10</option><option value="20">20</option><option value="30">30</option>
             </select>
         </label>
     </div>
@@ -74,7 +74,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="signal-line mt-2" id="koch-signal"></div>
-    <input type="text" id="koch-answer" class="answer-input mt-2" placeholder="Введи услышанные символы… (можно печатать сразу)" autocomplete="off">
+    <input type="text" id="koch-answer" class="answer-input mt-2" placeholder="Введи символы…" autocomplete="off">
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="submit-answer">Проверить →</button>
     </div>

@@ -1,6 +1,6 @@
 (async function () {
     // Декоративная, но честная демонстрация сигнальной линии
-    const heroLine = new SignalLine(document.getElementById('hero-signal'), 40);
+    const heroLine = new SignalLine(document.getElementById('hero-signal'), 24);
     const demoAudio = new MorseAudio({ wpm: 18, farnsworthWpm: 12 });
     const demoText = 'CQ CQ MORSEWAVE';
 

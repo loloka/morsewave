@@ -37,7 +37,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="signal-line mt-2" id="cs-signal"></div>
-    <input type="text" id="cs-answer" class="answer-input mt-2" placeholder="Введи позывной… (можно печатать сразу)" autocomplete="off">
+    <input type="text" id="cs-answer" class="answer-input mt-2" placeholder="Введи позывной…" autocomplete="off">
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="submit-answer">Проверить →</button>
     </div>

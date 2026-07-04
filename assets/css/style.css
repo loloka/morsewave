@@ -41,6 +41,8 @@ html, body {
     color: var(--text);
     font-family: var(--font-ui);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 body {
@@ -279,6 +281,8 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     align-items: flex-end;
     gap: 3px;
     height: 56px;
+    width: 100%;
+    max-width: 100%;
     padding: 10px 14px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -434,6 +438,9 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     color: var(--text);
 }
 .answer-input:focus { outline: none; border-color: var(--signal); }
+@media (max-width: 400px) {
+    .answer-input { font-size: 16px; letter-spacing: 2px; padding: 12px 14px; }
+}
 .answer-input.correct { border-color: var(--success); }
 .answer-input.wrong { border-color: var(--danger); }
 

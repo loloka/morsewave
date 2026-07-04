@@ -37,6 +37,12 @@ include __DIR__ . '/includes/header.php';
         <div class="morse-tita" id="practice-tita"></div>
         <div class="morse-napev" id="practice-napev"></div>
 
+        <div class="flex-between mt-2 gap-2 flex-wrap">
+            <div class="muted" style="font-size:13px;">Верных повторов подряд: <b class="mono" id="streak-count">0</b> / 5</div>
+            <div class="progress-bar" style="width:120px;"><span id="streak-bar" style="width:0%"></span></div>
+        </div>
+        <div class="feedback mt-1" id="practice-feedback"></div>
+
         <div class="flex-between flex-wrap gap-2 mt-2">
             <div class="key-wrap" style="flex:1;">
                 <div class="telegraph-key" id="telegraph-key" tabindex="0">Тап или<br>пробел</div>
@@ -48,13 +54,6 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="signal-line mt-2" id="practice-signal"></div>
-
-        <div class="flex-between mt-2">
-            <div class="muted">Верных повторов подряд: <b class="mono" id="streak-count">0</b> / 5</div>
-            <div class="progress-bar" style="width:160px;"><span id="streak-bar" style="width:0%"></span></div>
-        </div>
-
-        <div class="feedback mt-2" id="practice-feedback"></div>
     </section>
 </div>
 
@@ -73,7 +72,7 @@ include __DIR__ . '/includes/header.php';
             <div class="chip" data-set="custom">Свои символы</div>
         </div>
         <input type="text" id="rec-custom-input" class="answer-input mt-1"
-               placeholder="Например: A E I O U R S T (минимум 5 символов, через пробел)"
+               placeholder="Например: A E I O U (мин. 5, через пробел)"
                style="display:none; text-transform:uppercase;" autocomplete="off">
 
         <div class="flex-between flex-wrap gap-2 mt-2">
