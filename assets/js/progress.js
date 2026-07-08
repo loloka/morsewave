@@ -29,7 +29,11 @@ const Progress = (() => {
         try {
             const raw = localStorage.getItem(KEY);
             if (!raw) return defaults();
-            return { ...defaults(), ...JSON.parse(raw) };
+            const state = { ...defaults(), ...JSON.parse(raw) };
+            // Лечим уже испорченные значения от старого бага с плавающей точкой
+            // (592.5000000000002 и т.п.) — округляем до целого при каждой загрузке.
+            state.xp = Math.round(state.xp) || 0;
+            return state;
         } catch {
             return defaults();
         }
@@ -65,7 +69,7 @@ const Progress = (() => {
 
     function addXp(amount) {
         const state = load();
-        state.xp += amount;
+        state.xp = Math.round(state.xp + amount);
         save(state);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();

@@ -112,7 +112,7 @@
     function xpRateForSession(charsetSize, len) {
         const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
         const lengthFactor = len / 3;
-        return Math.round(2 * charsetFactor * lengthFactor * 10) / 10;
+        return 2 * charsetFactor * lengthFactor;
     }
 
     async function playCurrentGroup() {
@@ -120,15 +120,21 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        const audio = new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
-        await audio.play(session.groups[session.index], {
-            onSymbol: ({ symbol, durationMs }) => {
-                signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
-                lamp.flash(durationMs);
-            },
-        });
-        isPlaying = false;
-        replayBtn.disabled = false;
+        try {
+            const audio = new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
+            await audio.play(session.groups[session.index], {
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения группы:', e);
+        } finally {
+            isPlaying = false;
+            replayBtn.disabled = false;
+            if (session && session.isExam) examAnswerEl.focus(); else answerInput.focus();
+        }
     }
 
     const examAnswerEl = document.getElementById('exam-answer');
@@ -241,7 +247,7 @@
 
         if (fullyCompleted) {
             // Опыт за экзамен — только если пройден целиком, размер зависит от % точности
-            session.xpEarned = Math.round(correctChars * session.xpRate * 10) / 10;
+            session.xpEarned = Math.round(correctChars * session.xpRate);
             Progress.addXp(session.xpEarned);
             if (wrongGroupCount <= 3) {
                 Progress.incrementStat('examsPassed', 1);
@@ -279,7 +285,7 @@
 
         // Начисляем сразу за эту группу — так прогресс не теряется,
         // даже если сессия не будет пройдена до конца.
-        const xpGain = Math.round(correct * session.xpRate * 10) / 10;
+        const xpGain = Math.round(correct * session.xpRate);
         session.xpEarned += xpGain;
         if (xpGain > 0) Progress.addXp(xpGain);
         Progress.incrementStat('groupsCompleted', 1);

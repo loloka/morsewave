@@ -1,4 +1,23 @@
 /**
+ * Единый на весь сайт AudioContext. Раньше каждый new MorseAudio() /
+ * TelegraphKey создавал СВОЙ AudioContext — при долгой тренировке (сотни
+ * проигрываний, например в "Приёме на слух") браузер упирался в лимит на
+ * число одновременно живых контекстов и начинал молча ронять создание
+ * нового с ошибкой. Эта ошибка происходила внутри await, ловилась некому,
+ * и флаг "занято" (recBusy/isPlaying) навсегда оставался true — тренировка
+ * зависала на случайной букве без звука и без реакции на нажатия.
+ */
+function getSharedAudioContext() {
+    if (!window.__morseSharedAudioCtx) {
+        window.__morseSharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (window.__morseSharedAudioCtx.state === 'suspended') {
+        window.__morseSharedAudioCtx.resume();
+    }
+    return window.__morseSharedAudioCtx;
+}
+
+/**
  * MorseAudio — проигрывает текст азбукой Морзе через Web Audio API.
  * Поддерживает интервалы Фарнсворта (Farnsworth spacing): символы звучат
  * на "скорости символа" (wpm), а паузы между буквами/словами растянуты
@@ -18,10 +37,7 @@ class MorseAudio {
     }
 
     _ensureCtx() {
-        if (!this.ctx) {
-            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (this.ctx.state === 'suspended') this.ctx.resume();
+        this.ctx = getSharedAudioContext();
     }
 
     unitMs() {

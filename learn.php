@@ -18,6 +18,10 @@ include __DIR__ . '/includes/header.php';
 
 <!-- ======================= РЕЖИМ: ОТПРАВКА ======================= -->
 <div id="send-mode">
+    <div class="chip-row mt-2" id="order-chips">
+        <div class="chip active" data-order="alphabet">Алфавит</div>
+        <div class="chip" data-order="koch">Порядок Коха</div>
+    </div>
     <div class="tile-grid mt-2" id="letter-grid"></div>
 
     <section class="section card" id="practice-panel" style="display:none;">

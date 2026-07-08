@@ -20,44 +20,51 @@ if (php_sapi_name() === 'cli') {
 $count = max(1, min($count, 1000));
 
 $letters = range('A', 'Z');
-function randLetters(array $pool, int $n): string {
+function randLetters($pool, $n) {
     $s = '';
     for ($i = 0; $i < $n; $i++) $s .= $pool[array_rand($pool)];
     return $s;
 }
-function randDigit(): string {
-    return (string) random_int(0, 9);
+function randDigit() {
+    return (string) mt_rand(0, 9);
 }
 
-// Типичные форматы российских позывных радиолюбителей
-$twoLetterPrefixes = ['A','B','C','D','E','F','G','J','K','L','M','N','O','P','Q','T','U','V','W','X','Y','Z'];
-$uPrefixLetters = ['A','B','C','D','F','G','I'];
-
-$prefixPools = [
-    // R + цифра + 2-3 буквы, напр. R1ABC, R7AB
-    fn() => 'R' . randDigit() . randLetters($GLOBALS['letters'], random_int(2, 3)),
-    // Двухбуквенные RA.. RZ + цифра + 2-3 буквы, напр. RA3XYZ, RN6AB
-    fn() => 'R' . $GLOBALS['twoLetterPrefixes'][array_rand($GLOBALS['twoLetterPrefixes'])]
-        . randDigit() . randLetters($GLOBALS['letters'], random_int(2, 3)),
+// Типичные форматы российских позывных радиолюбителей.
+// Обычная функция с switch — без стрелочных функций (fn), чтобы скрипт
+// работал даже на старых версиях PHP CLI (некоторые хостинги используют
+// для консоли более старый PHP, чем для самого сайта).
+function generateCallsign($letters, $twoLetterPrefixes, $uPrefixLetters) {
+    $variant = mt_rand(1, 3);
+    if ($variant === 1) {
+        // R + цифра + 2-3 буквы, напр. R1ABC, R7AB
+        return 'R' . randDigit() . randLetters($letters, mt_rand(2, 3));
+    }
+    if ($variant === 2) {
+        // Двухбуквенные RA.. RZ + цифра + 2-3 буквы, напр. RA3XYZ, RN6AB
+        return 'R' . $twoLetterPrefixes[array_rand($twoLetterPrefixes)]
+            . randDigit() . randLetters($letters, mt_rand(2, 3));
+    }
     // UA.. UI + цифра + 2-3 буквы, напр. UA9XYZ, UI8AB
-    fn() => 'U' . $GLOBALS['uPrefixLetters'][array_rand($GLOBALS['uPrefixLetters'])]
-        . randDigit() . randLetters($GLOBALS['letters'], random_int(2, 3)),
-];
+    return 'U' . $uPrefixLetters[array_rand($uPrefixLetters)]
+        . randDigit() . randLetters($letters, mt_rand(2, 3));
+}
+
+$twoLetterPrefixes = array('A','B','C','D','E','F','G','J','K','L','M','N','O','P','Q','T','U','V','W','X','Y','Z');
+$uPrefixLetters = array('A','B','C','D','F','G','I');
 
 $inserted = 0;
 $stmt = $pdo->prepare('INSERT IGNORE INTO callsigns (callsign, country) VALUES (:callsign, :country)');
-$seen = [];
+$seen = array();
 
 for ($i = 0; $i < $count; $i++) {
-    $generator = $prefixPools[array_rand($prefixPools)];
-    $callsign = $generator();
+    $callsign = generateCallsign($letters, $twoLetterPrefixes, $uPrefixLetters);
     if ($callsign === '' || isset($seen[$callsign])) {
         $i--; // пробуем ещё раз, не тратя итерацию впустую
         if (count($seen) > 5000) break; // защита от бесконечного цикла
         continue;
     }
     $seen[$callsign] = true;
-    $stmt->execute(['callsign' => $callsign, 'country' => 'Россия']);
+    $stmt->execute(array('callsign' => $callsign, 'country' => 'Россия'));
     $inserted += $stmt->rowCount();
 }
 

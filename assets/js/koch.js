@@ -118,18 +118,24 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        const audio = new MorseAudio({
-            wpm: session.wpm,
-            farnsworthWpm: session.farnsworth || null,
-        });
-        await audio.play(session.groups[session.index], {
-            onSymbol: ({ symbol, durationMs }) => {
-                signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
-                lamp.flash(durationMs);
-            },
-        });
-        isPlaying = false;
-        replayBtn.disabled = false;
+        try {
+            const audio = new MorseAudio({
+                wpm: session.wpm,
+                farnsworthWpm: session.farnsworth || null,
+            });
+            await audio.play(session.groups[session.index], {
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения группы:', e);
+        } finally {
+            isPlaying = false;
+            replayBtn.disabled = false;
+            answerInput.focus();
+        }
     }
 
     function startSession() {

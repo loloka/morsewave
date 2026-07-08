@@ -42,11 +42,28 @@
     let isPlaying = false;
     const signalLine = new SignalLine(signalEl);
     const lamp = new MorseLamp(lampEl);
+    let letterOrder = 'alphabet';
+
+    function orderedLetters() {
+        if (letterOrder === 'koch') {
+            return KOCH_ORDER.filter(ch => ALL_LEARNABLE.includes(ch));
+        }
+        return ALL_LEARNABLE;
+    }
+
+    document.querySelectorAll('#order-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#order-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            letterOrder = chip.dataset.order;
+            renderTiles();
+        });
+    });
 
     function renderTiles() {
         const state = Progress.load();
         grid.innerHTML = '';
-        ALL_LEARNABLE.forEach((ch) => {
+        orderedLetters().forEach((ch) => {
             const tile = document.createElement('div');
             tile.className = 'letter-tile' + (state.learnedLetters.includes(ch) ? ' learned' : '');
             tile.dataset.ch = ch;
@@ -93,28 +110,33 @@
         isPlaying = true;
         playBtn.disabled = true;
         signalLine.clear();
-        const audio = new MorseAudio({ wpm: currentWpm() });
         const spans = patternEl.querySelectorAll('.sym');
         const titaSpans = document.querySelectorAll('#practice-tita .unit');
         const napevSpans = document.querySelectorAll('#practice-napev .syl');
         let i = 0;
-        await audio.play(current, {
-            onSymbol: ({ symbol, durationMs }) => {
-                spans[i]?.classList.add('playing');
-                titaSpans[i]?.classList.add('playing');
-                napevSpans[i]?.classList.add('playing');
-                const idx = i;
-                setTimeout(() => {
-                    titaSpans[idx]?.classList.remove('playing');
-                    napevSpans[idx]?.classList.remove('playing');
-                }, durationMs);
-                i++;
-                lamp.flash(durationMs);
-            },
-        });
-        spans.forEach(s => s.classList.remove('playing'));
-        isPlaying = false;
-        playBtn.disabled = false;
+        try {
+            const audio = new MorseAudio({ wpm: currentWpm() });
+            await audio.play(current, {
+                onSymbol: ({ symbol, durationMs }) => {
+                    spans[i]?.classList.add('playing');
+                    titaSpans[i]?.classList.add('playing');
+                    napevSpans[i]?.classList.add('playing');
+                    const idx = i;
+                    setTimeout(() => {
+                        titaSpans[idx]?.classList.remove('playing');
+                        napevSpans[idx]?.classList.remove('playing');
+                    }, durationMs);
+                    i++;
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения:', e);
+        } finally {
+            spans.forEach(s => s.classList.remove('playing'));
+            isPlaying = false;
+            playBtn.disabled = false;
+        }
     }
 
     function updateStreakUI() {
@@ -282,14 +304,19 @@
         recBusy = true;
         recFeedback.className = 'feedback';
         recSignalLine.clear();
-        const audio = new MorseAudio({ wpm: parseInt(recWpmSlider.value, 10) });
-        await audio.play(recTarget, {
-            onSymbol: ({ symbol, durationMs }) => {
-                recSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
-                recLamp.flash(durationMs);
-            },
-        });
-        recBusy = false;
+        try {
+            const audio = new MorseAudio({ wpm: parseInt(recWpmSlider.value, 10) });
+            await audio.play(recTarget, {
+                onSymbol: ({ symbol, durationMs }) => {
+                    recSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    recLamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения, пропускаем символ:', e);
+        } finally {
+            recBusy = false;
+        }
     }
 
     function handleRecognizeAnswer(ch, tile) {

@@ -8,7 +8,8 @@ include __DIR__ . '/includes/header.php';
 <div class="card-eyebrow">Практика радиста</div>
 <h1>Тренировка позывных</h1>
 <p>Расшифровывай реальные по формату позывные радиолюбителей — максимально
-    приближенно к настоящему эфиру. Позывные подтягиваются из базы MySQL.</p>
+    приближенно к настоящему эфиру. База пополняется самими радиолюбителями —
+    добавь свой позывной ниже, если его тут ещё нет.</p>
 
 <div class="card mt-3" id="setup-panel">
     <h3>Настройки</h3>
@@ -52,6 +53,21 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label">Получено XP</span></div>
     </div>
     <button class="btn btn-primary mt-2" id="restart-btn">Новая сессия</button>
+</div>
+
+<div class="card mt-3">
+    <h3>Добавить свой позывной</h3>
+    <p class="mt-0 muted" style="font-size:13px;">Знаешь позывной, которого здесь ещё нет? Добавь —
+        он попадёт в общую тренировку для всех. Формат — как у настоящих позывных
+        (буквы и цифры вперемешку, например R7AB, UA3XYZ, W1AW).</p>
+    <div class="flex-wrap gap-2">
+        <input type="text" id="new-callsign-input" class="answer-input" style="flex:2;min-width:140px;"
+               placeholder="Например: R7AB" autocomplete="off">
+        <input type="text" id="new-callsign-country" class="answer-input" style="flex:1;min-width:140px;"
+               placeholder="Страна (необязательно)" autocomplete="off">
+        <button class="btn btn-primary" id="add-callsign-btn">Добавить</button>
+    </div>
+    <div class="feedback mt-2" id="add-callsign-feedback"></div>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

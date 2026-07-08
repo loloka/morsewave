@@ -30,8 +30,7 @@ class TelegraphKey {
     /** Живой звук ("сайдтон") — звучит ровно столько, сколько удержана клавиша */
     _ensureAudio() {
         if (!this.sidetone) return;
-        if (!this.audioCtx) this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+        this.audioCtx = getSharedAudioContext();
     }
 
     _startTone() {

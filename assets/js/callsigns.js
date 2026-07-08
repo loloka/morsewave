@@ -29,15 +29,21 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        const audio = new MorseAudio({ wpm: session.wpm });
-        await audio.play(session.items[session.index].callsign, {
-            onSymbol: ({ symbol, durationMs }) => {
-                signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
-                lamp.flash(durationMs);
-            },
-        });
-        isPlaying = false;
-        replayBtn.disabled = false;
+        try {
+            const audio = new MorseAudio({ wpm: session.wpm });
+            await audio.play(session.items[session.index].callsign, {
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения позывного:', e);
+        } finally {
+            isPlaying = false;
+            replayBtn.disabled = false;
+            answerInput.focus();
+        }
     }
 
     async function startSession() {
@@ -134,4 +140,43 @@
         setupPanel.style.display = 'block';
     });
     answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
+
+    /* ---------- Добавить свой позывной ---------- */
+    const newCallsignInput = document.getElementById('new-callsign-input');
+    const newCallsignCountry = document.getElementById('new-callsign-country');
+    const addCallsignBtn = document.getElementById('add-callsign-btn');
+    const addCallsignFeedback = document.getElementById('add-callsign-feedback');
+
+    async function addCallsign() {
+        const callsign = newCallsignInput.value.trim().toUpperCase();
+        const country = newCallsignCountry.value.trim();
+        if (!callsign) return;
+
+        addCallsignBtn.disabled = true;
+        try {
+            const res = await fetch('api/add_callsign.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ callsign, country: country || null }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                addCallsignFeedback.textContent = `Готово! Позывной ${data.callsign} добавлен в общую базу. Спасибо!`;
+                addCallsignFeedback.className = 'feedback show ok';
+                newCallsignInput.value = '';
+                newCallsignCountry.value = '';
+            } else {
+                addCallsignFeedback.textContent = data.error || 'Не получилось добавить позывной.';
+                addCallsignFeedback.className = 'feedback show bad';
+            }
+        } catch {
+            addCallsignFeedback.textContent = 'Не удалось связаться с сервером. Попробуй ещё раз.';
+            addCallsignFeedback.className = 'feedback show bad';
+        } finally {
+            addCallsignBtn.disabled = false;
+        }
+    }
+
+    addCallsignBtn.addEventListener('click', addCallsign);
+    newCallsignInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') addCallsign(); });
 })();
