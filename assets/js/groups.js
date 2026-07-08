@@ -120,6 +120,7 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
+        if (session && session.isExam) examAnswerEl.focus(); else answerInput.focus();
         try {
             const audio = new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
             await audio.play(session.groups[session.index], {

@@ -29,6 +29,7 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
+        answerInput.focus();
         try {
             const audio = new MorseAudio({ wpm: session.wpm });
             await audio.play(session.items[session.index].callsign, {
