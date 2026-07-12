@@ -97,11 +97,14 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     align-items: center;
     gap: 10px;
     font-family: var(--font-mono);
+    flex-shrink: 0;
+    min-width: 0;
 }
 .brand-code {
     color: var(--accent);
     font-size: 13px;
     letter-spacing: 0.05em;
+    white-space: nowrap;
 }
 .brand-text {
     display: flex;
@@ -110,6 +113,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     font-weight: 700;
     font-size: 17px;
     letter-spacing: 0.02em;
+    white-space: nowrap;
 }
 .brand-text small {
     font-size: 10px;
@@ -153,6 +157,13 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
 @media (max-width: 900px) {
     .nav-links { display: none; }
+}
+
+@media (max-width: 420px) {
+    .topnav { padding: 0 12px; }
+    .brand-code { display: none; }
+    .nav-stats { gap: 8px; font-size: 12px; }
+    .nav-stats b { max-width: 46px; }
 }
 
 /* ---------- Mobile bottom tab bar ---------- */
@@ -465,9 +476,13 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     filter: grayscale(1);
 }
 .badge.unlocked { opacity: 1; filter: none; border-color: var(--accent-dim); }
-.badge .icon { font-size: 28px; }
+.badge .icon { font-size: 28px; flex-shrink: 0; }
+.badge-text { min-width: 0; }
 .badge .title { font-weight: 700; font-size: 14px; }
-.badge .desc { font-size: 12px; color: var(--text-muted); }
+.badge .desc { font-size: 12px; color: var(--text-muted); word-wrap: break-word; }
+@media (max-width: 520px) {
+    #achievements-grid.grid-2 { grid-template-columns: 1fr; }
+}
 
 /* ---------- Toast / feedback ---------- */
 .feedback {

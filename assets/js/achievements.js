@@ -8,14 +8,14 @@
     } catch { /* пусто */ }
 
     if (!defs.length) {
-        grid.innerHTML = '<p>Не удалось загрузить достижения из базы данных. Проверь подключение к MySQL (config/database.php) и что таблица achievements заполнена.</p>';
+        grid.innerHTML = '<p>Не получилось загрузить достижения. Попробуй обновить страницу чуть позже.</p>';
         return;
     }
 
     grid.innerHTML = defs.map(a => `
         <div class="badge ${state.unlockedAchievements.includes(a.code) ? 'unlocked' : ''}">
             <div class="icon">${a.icon}</div>
-            <div>
+            <div class="badge-text">
                 <div class="title">${a.title}</div>
                 <div class="desc">${a.description}</div>
             </div>
