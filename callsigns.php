@@ -34,6 +34,7 @@ include __DIR__ . '/includes/header.php';
         <div class="muted mono">Позывной <span id="cs-index">1</span> / <span id="cs-total">5</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="cs-lamp"></div>
+            <button class="btn btn-sm" id="cs-signal-toggle"></button>
             <button class="btn btn-sm" id="replay-btn">🔁 Повторить</button>
         </div>
     </div>

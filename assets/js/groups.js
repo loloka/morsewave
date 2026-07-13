@@ -23,6 +23,7 @@
     const answerInput = document.getElementById('groups-answer');
     const feedbackEl = document.getElementById('groups-feedback');
     const signalLine = new SignalLine(document.getElementById('groups-signal'));
+    wireSignalVisibilityToggle(document.getElementById('groups-signal-toggle'), document.getElementById('groups-signal'));
     const lamp = new MorseLamp(document.getElementById('groups-lamp'));
 
     const wpmSlider = document.getElementById('groups-wpm');
@@ -488,6 +489,7 @@
     const abbrevStopBtn = document.getElementById('abbrev-stop-btn');
     const abbrevLamp = new MorseLamp(document.getElementById('abbrev-lamp'));
     const abbrevSignalLine = new SignalLine(document.getElementById('abbrev-signal'));
+    wireSignalVisibilityToggle(document.getElementById('abbrev-signal-toggle'), document.getElementById('abbrev-signal'));
     const abbrevFeedback = document.getElementById('abbrev-feedback');
     const abbrevStreakEl = document.getElementById('abbrev-streak');
     const abbrevCorrectEl = document.getElementById('abbrev-correct');

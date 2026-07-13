@@ -8,6 +8,7 @@
     const feedbackEl = document.getElementById('cs-feedback');
     const setupError = document.getElementById('setup-error');
     const signalLine = new SignalLine(document.getElementById('cs-signal'));
+    wireSignalVisibilityToggle(document.getElementById('cs-signal-toggle'), document.getElementById('cs-signal'));
     const lamp = new MorseLamp(document.getElementById('cs-lamp'));
 
     const wpmSlider = document.getElementById('cs-wpm');

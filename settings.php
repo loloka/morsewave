@@ -41,4 +41,19 @@ include __DIR__ . '/includes/header.php';
     </p>
 </div>
 
+<h1 class="mt-3">Отображение</h1>
+<div class="card mt-3">
+    <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+        <input type="checkbox" id="show-signal-line-toggle" checked>
+        <span>Показывать сигнальную линию (точки-тире) во время приёма на слух</span>
+    </label>
+    <p class="muted mt-2" style="font-size:12px;">
+        Точки-тире на экране — по сути подсказка: глазами прочитать проще, чем
+        разобрать на слух. Если хочешь тренировать именно слух, а не зрение —
+        выключи. Этот же переключатель есть прямо на каждой странице приёма
+        на слух (кнопка рядом с лампой) — настройка общая, где ни включи,
+        применится везде.
+    </p>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>

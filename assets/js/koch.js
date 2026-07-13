@@ -26,6 +26,7 @@
     const answerInput = document.getElementById('koch-answer');
     const feedbackEl = document.getElementById('koch-feedback');
     const signalLine = new SignalLine(document.getElementById('koch-signal'));
+    wireSignalVisibilityToggle(document.getElementById('koch-signal-toggle'), document.getElementById('koch-signal'));
     const lamp = new MorseLamp(document.getElementById('koch-lamp'));
 
     let session = null;

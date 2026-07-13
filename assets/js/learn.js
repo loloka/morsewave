@@ -219,6 +219,7 @@
     const recStopBtn = document.getElementById('rec-stop-btn');
     const recLamp = new MorseLamp(document.getElementById('rec-lamp'));
     const recSignalLine = new SignalLine(document.getElementById('rec-signal'));
+    wireSignalVisibilityToggle(document.getElementById('rec-signal-toggle'), document.getElementById('rec-signal'));
     const recFeedback = document.getElementById('rec-feedback');
     const recStreakEl = document.getElementById('rec-streak');
     const recBestEl = document.getElementById('rec-best');

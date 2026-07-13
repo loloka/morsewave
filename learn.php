@@ -87,6 +87,7 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="rec-lamp"></div>
+                <button class="btn btn-sm" id="rec-signal-toggle"></button>
                 <button class="btn btn-primary btn-sm" id="rec-start-btn">▶ Начать тренировку</button>
                 <button class="btn btn-sm" id="rec-stop-btn" style="display:none;">⏹ Остановить</button>
             </div>

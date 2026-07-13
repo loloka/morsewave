@@ -92,6 +92,7 @@ include __DIR__ . '/includes/header.php';
         <div class="muted mono">Группа <span id="group-index">1</span> / <span id="group-total">10</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="groups-lamp"></div>
+            <button class="btn btn-sm" id="groups-signal-toggle"></button>
             <button class="btn btn-sm" id="replay-btn">🔁 Повторить</button>
         </div>
     </div>
@@ -144,6 +145,7 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="abbrev-lamp"></div>
+                <button class="btn btn-sm" id="abbrev-signal-toggle"></button>
                 <button class="btn btn-primary btn-sm" id="abbrev-start-btn">▶ Начать тренировку</button>
                 <button class="btn btn-sm" id="abbrev-stop-btn" style="display:none;">⏹ Остановить</button>
             </div>

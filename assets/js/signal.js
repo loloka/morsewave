@@ -52,3 +52,29 @@ class MorseLamp {
         this._offTimer = setTimeout(() => this.off(), durationMs);
     }
 }
+
+/**
+ * Кнопка "показать/скрыть сигнальную линию" — общая для всех режимов
+ * приёма на слух (Кох, Группы, Сокращения, Позывные, Приём на слух).
+ * Точки-тире на экране — по сути подсказка-читерство при тренировке слуха,
+ * поэтому многим хочется её спрятать. Выбор сохраняется и применяется
+ * сразу на всех страницах — переключил один раз и забыл.
+ */
+function wireSignalVisibilityToggle(buttonEl, containerEl) {
+    function apply(visible) {
+        containerEl.style.display = visible ? 'flex' : 'none';
+        buttonEl.textContent = visible ? '🙈 Скрыть' : '👁 Показать';
+        buttonEl.title = 'Показать/скрыть точки-тире на экране во время приёма';
+        buttonEl.setAttribute('aria-pressed', String(!visible));
+    }
+    const initialVisible = DisplaySettings.load().showSignalLine !== false;
+    apply(initialVisible);
+
+    buttonEl.addEventListener('click', () => {
+        const settings = DisplaySettings.load();
+        const nextVisible = !(settings.showSignalLine !== false);
+        settings.showSignalLine = nextVisible;
+        DisplaySettings.save(settings);
+        apply(nextVisible);
+    });
+}

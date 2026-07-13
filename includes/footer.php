@@ -14,6 +14,7 @@
 <script src="<?= asset_v('assets/js/morse-data.js') ?>"></script>
 <script src="<?= asset_v('assets/js/abbreviations.js') ?>"></script>
 <script src="<?= asset_v('assets/js/audio-settings.js') ?>"></script>
+<script src="<?= asset_v('assets/js/display-settings.js') ?>"></script>
 <script src="<?= asset_v('assets/js/audio.js') ?>"></script>
 <script src="<?= asset_v('assets/js/input.js') ?>"></script>
 <script src="<?= asset_v('assets/js/signal.js') ?>"></script>

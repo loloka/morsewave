@@ -71,6 +71,7 @@ include __DIR__ . '/includes/header.php';
         <div class="muted mono">Группа <span id="group-index">1</span> / <span id="group-total">20</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="koch-lamp"></div>
+            <button class="btn btn-sm" id="koch-signal-toggle"></button>
             <button class="btn btn-sm" id="replay-btn">🔁 Повторить</button>
         </div>
     </div>

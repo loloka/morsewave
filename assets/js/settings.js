@@ -39,4 +39,13 @@
         freqValue.textContent = current.freq;
         waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
     });
+
+    /* ---------- Отображение сигнальной линии ---------- */
+    const signalToggle = document.getElementById('show-signal-line-toggle');
+    signalToggle.checked = DisplaySettings.load().showSignalLine !== false;
+    signalToggle.addEventListener('change', () => {
+        const settings = DisplaySettings.load();
+        settings.showSignalLine = signalToggle.checked;
+        DisplaySettings.save(settings);
+    });
 })();
