@@ -1,9 +1,9 @@
 <?php
-require_once __DIR__ . '/smtp_mailer.php';
+require_once __DIR__ . '/resend_mailer.php';
 
 /**
- * Отправка письма с подтверждением e-mail через SMTP (config/mail.php).
- * Если конфиг не заполнен (пароль-плейсхолдер) или отправка не удалась —
+ * Отправка письма с подтверждением e-mail через Resend (config/mail.php).
+ * Если конфиг не заполнен (ключ-плейсхолдер) или отправка не удалась —
  * не роняем регистрацию, просто логируем ссылку в error_log, чтобы можно
  * было подтвердить аккаунт вручную при разработке/отладке.
  */
@@ -25,8 +25,8 @@ function load_mail_config() {
     $path = __DIR__ . '/../config/mail.php';
     if (!file_exists($path)) return null;
     $config = require $path;
-    if (empty($config['password']) || strpos($config['password'], 'ВПИШИ_ПАРОЛЬ') !== false) {
-        return null; // конфиг ещё не заполнен реальным паролем
+    if (empty($config['resend_api_key']) || strpos($config['resend_api_key'], 'ВПИШИ_КЛЮЧ') !== false) {
+        return null; // конфиг ещё не заполнен реальным ключом
     }
     return $config;
 }
@@ -126,7 +126,7 @@ function send_verification_email($email, $name, $token) {
         return false;
     }
 
-    $result = send_smtp_mail($config, $email, $subject, $textBody, $htmlBody);
+    $result = send_via_resend($config, $email, $subject, $textBody, $htmlBody);
     if (!$result['success']) {
         error_log("MorseWave: не удалось отправить письмо на {$email}: {$result['error']}. Ссылка для ручной проверки: {$link}");
     }

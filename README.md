@@ -83,8 +83,10 @@ docker compose up -d --build
 ```bash
 cp config/mail.example.php config/mail.php
 ```
-и впиши реальный пароль от почтового ящика (взять в панели хостинга,
-раздел «Настройка почты»). Без этого шага аккаунты по-прежнему создаются,
+и впиши реальный API-ключ [Resend](https://resend.com/api-keys) (бесплатный
+тариф — сотен писем в месяц достаточно). Без домена по умолчанию письма
+уходят с sandbox-адреса `onboarding@resend.dev` — работает сразу, без
+дополнительной настройки DNS. Без этого шага аккаунты по-прежнему создаются,
 письма просто не отправляются — ссылка на подтверждение падает в
 `error_log` (`docker compose logs -f app`), можно подтвердить вручную при
 разработке.
@@ -190,7 +192,8 @@ morse-trainer/
 │   ├── migration_9.sql       # защита от подбора пароля (failed_login_attempts, locked_until)
 │   ├── seed_callsigns.php    # генератор пачки позывных
 │   └── .htaccess              # запрет веб-доступа к папке
-├── includes/                 # header / footer / nav (шаблоны)
+├── includes/                 # header / footer / nav (шаблоны) + auth.php,
+│                             #   mailer.php, resend_mailer.php, captcha.php
 ├── assets/
 │   ├── css/style.css         # дизайн-система
 │   └── js/                   # morse-data, abbreviations, audio, audio-settings, display-settings, input, signal, progress, страницы
@@ -236,7 +239,7 @@ git clone <URL_ТВОЕГО_РЕПО> morse-trainer
 cd morse-trainer
 cp config/database.example.php config/database.php
 cp config/mail.example.php config/mail.php
-# впиши реальный пароль от noreply@... в config/mail.php — иначе письма
+# впиши реальный API-ключ Resend в config/mail.php — иначе письма
 # подтверждения не будут отправляться (ссылка упадёт в error_log)
 mysql -u root -p < database/schema.sql
 mysql -u root -p morse_trainer < database/migration_2.sql
@@ -600,6 +603,27 @@ mysql -u root -p morse_trainer < database/migration_9.sql
     узнать, какие адреса зарегистрированы.
   - Сессионная кука укреплена: `HttpOnly` (недоступна из JS), `SameSite=Lax`
     (базовая защита от CSRF), `Secure` автоматически на HTTPS.
+- **v2.21 — HTML-письмо + переход с SMTP на Resend API.**
+  - **Диагностика на живом проде**: письма доходили до `admin@r9o.ru`
+    (локальная доставка на том же сервере), но не до Gmail — молча, без
+    бounce. Причина нашлась в DNS: у `r9old.ru` **не настроен DKIM**, а
+    **PTR общего IP** (`188.127.239.141` → `shared-33.smartape.net`) вообще
+    не связан с доменом, плюс на этом же IP «сидят» чужие сайты — типичная
+    комбинация, из-за которой Gmail тихо режет почту с бюджетного shared-хостинга.
+  - Вместо того чтобы чинить DKIM/PTR на стороне хостинга (на shared-тарифе
+    часто просто невозможно) — **перешли на Resend** (`includes/resend_mailer.php`,
+    HTTP API, без SMTP и без внешних библиотек — простой POST через
+    `file_get_contents()` с потоковым контекстом). У них уже готовая
+    репутация и правильно настроенные SPF/DKIM на своей стороне.
+    Старый `includes/smtp_mailer.php` удалён.
+  - `config/mail.php` теперь хранит `resend_api_key` вместо SMTP-кредов
+    (шаблон обновлён в `config/mail.example.php`). По умолчанию письма
+    уходят с sandbox-адреса `onboarding@resend.dev` — работает сразу, без
+    верификации домена.
+  - Письмо подтверждения стало **HTML** в тёмной палитре сайта (логотип
+    R9O морзянкой, кнопка вместо голого текста) — уходит как
+    `multipart/alternative`, с текстовым вариантом на случай, если чей-то
+    клиент HTML не показывает.
 
 ## Известные ограничения / открытые вопросы
 
@@ -609,14 +633,20 @@ mysql -u root -p morse_trainer < database/migration_9.sql
   защиты нет, только email-подтверждение как барьер против моментального
   создания кучи аккаунтов + мягкое предупреждение (`confirm()`) при
   повторной публикации с тем же браузером под другим аккаунтом.
-- Письма подтверждения шлются через SMTP (`config/mail.php`, реальные
-  креды с хостинга) — надёжнее старого `mail()`, но доставляемость всё
-  равно зависит от репутации домена/SPF/DKIM на стороне почтового сервера
-  хостинга; письмо может попасть в спам. В Docker локально `config/mail.php`
-  по умолчанию не настроен (пароль-плейсхолдер) — писем не будет, ссылка
-  на подтверждение падает в `error_log` (`docker compose logs -f app`).
-  Восстановление забытого пароля по почте (отдельный от подтверждения
-  e-mail функционал) пока не реализовано.
+- Письма подтверждения шлются через **Resend API** (`config/mail.php`,
+  `includes/resend_mailer.php`) — надёжнее и SMTP через shared-хостинг
+  (там был конкретный кейс: у `mail.r9old.ru` не настроен DKIM, а PTR
+  общего IP вообще не указывал на домен — Gmail тихо резал письма).
+  Без верификации домена в Resend письма уходят с sandbox-адреса
+  `onboarding@resend.dev` — работает сразу, но выглядит не как «родной»
+  адрес; для `noreply@r9old.ru` нужно верифицировать домен в Resend
+  (Domains → Add Domain, добавить их DNS-записи). В Docker локально
+  `config/mail.php` по умолчанию не настроен (ключ-плейсхолдер) — писем
+  не будет, ссылка на подтверждение падает в `error_log`
+  (`docker compose logs -f app`). Восстановление забытого пароля по почте
+  (отдельный от подтверждения e-mail функционал) пока не реализовано.
+  Старый SMTP-клиент (`includes/smtp_mailer.php`) удалён как избыточный —
+  если понадобится SMTP-путь снова, см. историю в changelog v2.20/v2.21.
 - Капча на азбуке Морзе (`includes/captcha.php`) — базовая защита от
   примитивных скриптов, не от целенаправленного обхода. Этого достаточно
   для небольшого сообщества, не для публичного сервиса с высокой нагрузкой.
