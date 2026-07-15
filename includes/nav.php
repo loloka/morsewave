@@ -7,6 +7,7 @@ $navItems = [
     'groups'      => ['label' => 'Группы',      'icon' => '🔢', 'href' => 'groups.php'],
     'callsigns'   => ['label' => 'Позывные',    'icon' => '📡', 'href' => 'callsigns.php'],
     'achievements'=> ['label' => 'Ачивки',      'icon' => '🏆', 'href' => 'achievements.php'],
+    'account'     => ['label' => 'Профиль',     'icon' => '👤', 'href' => 'account.php'],
     'settings'    => ['label' => 'Звук',        'icon' => '⚙️', 'href' => 'settings.php'],
 ];
 ?>
@@ -20,11 +21,11 @@ $navItems = [
             <a href="<?= $item['href'] ?>" class="<?= $activePage === $key ? 'active' : '' ?>"><?= $item['label'] ?></a>
         <?php endforeach; ?>
     </div>
-    <div class="nav-stats">
+    <a href="account.php" class="nav-stats" title="Открыть профиль">
         <span>XP <b data-nav-xp>0</b></span>
         <span>Ур. <b data-nav-level>1</b></span>
         <span>🔥 <b data-nav-streak>0</b></span>
-    </div>
+    </a>
 </nav>
 
 <div class="tabbar">

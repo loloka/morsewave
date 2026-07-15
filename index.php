@@ -88,4 +88,23 @@ include __DIR__ . '/includes/header.php';
         <b class="mono" id="stat-callsigns">…</b> позывных.</p>
 </section>
 
+<section class="section" id="leaderboard-section">
+    <div class="flex-between flex-wrap gap-2">
+        <h2 class="mt-0">🏆 Таблица лидеров</h2>
+        <a href="account.php" class="btn btn-sm">Присоединиться</a>
+    </div>
+    <p class="muted mt-0" style="font-size:13px;">Публикуют свои цифры те, кто завёл аккаунт — это
+        не обязательно, весь прогресс и без аккаунта прекрасно живёт у тебя в браузере.</p>
+    <div class="grid grid-2 mt-2">
+        <div class="card">
+            <div class="card-eyebrow">⭐ По опыту</div>
+            <div id="leaderboard-xp"><p class="muted">Загрузка…</p></div>
+        </div>
+        <div class="card">
+            <div class="card-eyebrow">🔥 По серии дней</div>
+            <div id="leaderboard-streak"><p class="muted">Загрузка…</p></div>
+        </div>
+    </div>
+</section>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>

@@ -8,3 +8,9 @@ node_modules/
 # Реальный конфиг с кредами БД — в репозиторий не попадает.
 # При клонировании скопируй config/database.example.php → config/database.php
 config/database.php
+
+# Реальные креды почты — аналогично, в git не попадают
+config/mail.php
+
+# Локальные секреты для docker-compose (если заведёшь .env)
+.env

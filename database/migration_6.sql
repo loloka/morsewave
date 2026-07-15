@@ -5,6 +5,7 @@
 -- =========================================================
 
 USE morse_trainer;
+SET NAMES utf8mb4;
 
 ALTER TABLE achievements MODIFY condition_type ENUM(
     'letters_learned_count',

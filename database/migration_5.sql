@@ -6,6 +6,7 @@
 -- =========================================================
 
 USE morse_trainer;
+SET NAMES utf8mb4;
 
 -- На всякий случай ещё раз убеждаемся, что ENUM содержит нужное значение
 ALTER TABLE achievements MODIFY condition_type ENUM(

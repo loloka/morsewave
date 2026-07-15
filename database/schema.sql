@@ -1,3 +1,8 @@
+-- Явно задаём кодировку клиента ДО импорта — без этого при автозагрузке
+-- через docker-entrypoint-initdb.d кириллица может прочитаться неверно
+-- и записаться в базу как "кракозябры" (двойная перекодировка).
+SET NAMES utf8mb4;
+
 -- =========================================================
 -- MorseWave — схема базы данных
 -- Прогресс/XP/ачивки пользователя хранятся в localStorage браузера.
@@ -103,3 +108,32 @@ INSERT IGNORE INTO callsigns (callsign, country) VALUES
 -- Для более крупного банка позывных (сотни штук) запусти один раз
 -- database/seed_callsigns.php?count=200 в браузере — он сгенерирует
 -- реалистичные российские позывные и добавит их без дублей.
+
+-- ---------------------------------------------------------
+-- Простые аккаунты (опционально). Основной прогресс по-прежнему
+-- живёт в localStorage браузера — эти таблицы нужны только для
+-- витрины лидеров на главной (публичный XP/серия) и восстановления
+-- доступа к своему имени с другого устройства.
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS users (
+    id                     INT PRIMARY KEY AUTO_INCREMENT,
+    name                   VARCHAR(40) NOT NULL,
+    email                  VARCHAR(190) NOT NULL UNIQUE,
+    password_hash          VARCHAR(255) NOT NULL,
+    email_verified_at      DATETIME DEFAULT NULL,
+    verification_token     VARCHAR(64) DEFAULT NULL,
+    failed_login_attempts  INT UNSIGNED NOT NULL DEFAULT 0,
+    locked_until           DATETIME DEFAULT NULL,
+    created_at             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- Публичный "слепок" прогресса из localStorage — обновляется при каждом
+-- начислении XP/серии, пока пользователь залогинен. Только для лидерборда.
+CREATE TABLE IF NOT EXISTS user_stats (
+    user_id         INT PRIMARY KEY,
+    xp              INT UNSIGNED NOT NULL DEFAULT 0,
+    streak_count    INT UNSIGNED NOT NULL DEFAULT 0,
+    streak_last_date DATE DEFAULT NULL,
+    updated_at      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

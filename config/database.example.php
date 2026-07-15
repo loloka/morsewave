@@ -1,14 +1,17 @@
 <?php
 /**
  * Подключение к MySQL.
- * Для Laragon по умолчанию: host=localhost, user=root, пароль пустой.
- * На VPS поменяйте значения ниже (или вынесите в переменные окружения).
+ *
+ * Приоритет: переменные окружения (задаются в docker-compose.yml для
+ * Docker) → значения по умолчанию ниже (host=localhost, user=root, без
+ * пароля — подходит для большинства локальных PHP+MySQL стендов).
+ * На VPS так же можно задать переменные окружения вместо правки файла.
  */
 
-$DB_HOST = 'localhost';
-$DB_NAME = 'morse_trainer';
-$DB_USER = 'root';
-$DB_PASS = '';
+$DB_HOST = getenv('DB_HOST') ?: 'localhost';
+$DB_NAME = getenv('DB_NAME') ?: 'morse_trainer';
+$DB_USER = getenv('DB_USER') ?: 'root';
+$DB_PASS = getenv('DB_PASS') ?: '';
 
 try {
     $pdo = new PDO(

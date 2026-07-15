@@ -124,6 +124,35 @@ class MorseAudio {
         callbacks.onDone?.();
     }
 
+    /**
+     * Проигрывает уже готовый паттерн (например ".- -... -.-.") напрямую,
+     * без перевода из букв через MORSE_CODE — нужно там, где сами буквы
+     * клиенту намеренно неизвестны (капча: сервер знает слово, клиент
+     * видит только код).
+     */
+    async playPattern(pattern, callbacks = {}) {
+        this._ensureCtx();
+        this._stopped = false;
+        const unit = this.unitMs();
+        const groups = pattern.trim().split(/\s+/).filter(Boolean);
+
+        for (let g = 0; g < groups.length; g++) {
+            if (this._stopped) return;
+            const code = groups[g];
+            for (let s = 0; s < code.length; s++) {
+                if (this._stopped) return;
+                const symbol = code[s];
+                const dur = symbol === '.' ? unit : unit * 3;
+                callbacks.onSymbol?.({ symbol, durationMs: dur, groupIndex: g });
+                await this._tone(dur);
+                if (s < code.length - 1) await this._silence(unit);
+            }
+            if (g < groups.length - 1) await this._silence(unit * 3);
+        }
+
+        callbacks.onDone?.();
+    }
+
     stop() {
         this._stopped = true;
         clearTimeout(this._timer);

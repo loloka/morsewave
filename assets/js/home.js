@@ -73,4 +73,36 @@
         document.getElementById('stat-groups').textContent = '—';
         document.getElementById('stat-callsigns').textContent = '—';
     }
+
+    // Таблица лидеров
+    function renderLeaderboard(el, rows, valueKey, medalless = false) {
+        if (!rows.length) {
+            el.innerHTML = '<p class="muted" style="font-size:13px;">Пока никто не опубликовал свои цифры — будь первым!</p>';
+            return;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        el.innerHTML = rows.map((row, i) => `
+            <div class="leaderboard-row">
+                <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
+                <span class="leaderboard-name">${escapeHtml(row.name)}</span>
+                <span class="leaderboard-value">${row[valueKey]}</span>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    try {
+        const res = await fetch('api/leaderboard.php?limit=10');
+        const data = await res.json();
+        renderLeaderboard(document.getElementById('leaderboard-xp'), data.byXp || [], 'xp');
+        renderLeaderboard(document.getElementById('leaderboard-streak'), data.byStreak || [], 'streak_count');
+    } catch {
+        document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">Не удалось загрузить</p>';
+        document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">Не удалось загрузить</p>';
+    }
 })();

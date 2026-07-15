@@ -1,0 +1,12 @@
+# includes/ содержит шаблоны (header/footer/nav) и логику сессий (auth.php),
+# которые предполагают, что их подключают через include из других файлов,
+# а не открывают напрямую по ссылке.
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

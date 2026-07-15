@@ -1,0 +1,62 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+    environment:
+      DB_HOST: db
+      DB_NAME: morse_trainer
+      DB_USER: root
+      DB_PASS: morsewave_root
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: morsewave_root
+      MYSQL_DATABASE: morse_trainer
+    ports:
+      - "3307:3306"   # 3307 снаружи, чтобы не конфликтовать с локальным MySQL на 3306
+    volumes:
+      - morsewave_db_data:/var/lib/mysql
+      # Все .sql-файлы отсюда выполняются автоматически ПО АЛФАВИТУ,
+      # но только при первом создании контейнера (на пустом volume).
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
+      - ./database/migration_2.sql:/docker-entrypoint-initdb.d/2-migration_2.sql:ro
+      - ./database/migration_3.sql:/docker-entrypoint-initdb.d/3-migration_3.sql:ro
+      - ./database/migration_4.sql:/docker-entrypoint-initdb.d/4-migration_4.sql:ro
+      - ./database/migration_5.sql:/docker-entrypoint-initdb.d/5-migration_5.sql:ro
+      - ./database/migration_6.sql:/docker-entrypoint-initdb.d/6-migration_6.sql:ro
+      - ./database/migration_7.sql:/docker-entrypoint-initdb.d/7-migration_7.sql:ro
+      - ./database/migration_8.sql:/docker-entrypoint-initdb.d/8-migration_8.sql:ro
+      - ./database/migration_9.sql:/docker-entrypoint-initdb.d/9-migration_9.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pmorsewave_root"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    restart: unless-stopped
+    depends_on:
+      - db
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: morsewave_root
+
+volumes:
+  morsewave_db_data:
