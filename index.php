@@ -48,48 +48,73 @@ include __DIR__ . '/includes/header.php';
     </div>
     <p class="muted mt-0" style="font-size:13px;">Публикуют свои цифры те, кто завёл аккаунт и сам нажал
         «Опубликовать» — это не обязательно, весь прогресс и без аккаунта прекрасно живёт у тебя в браузере.</p>
-    <div class="grid grid-2 mt-2">
-        <div class="card">
-            <div class="card-eyebrow">⭐ По опыту</div>
-            <div id="leaderboard-xp"><p class="muted">Загрузка…</p></div>
+
+    <div class="card mt-2">
+        <div class="chip-row">
+            <div class="chip active" data-board="xp">⭐ По опыту</div>
+            <div class="chip" data-board="streak">🔥 По серии дней</div>
         </div>
-        <div class="card">
-            <div class="card-eyebrow">🔥 По серии дней</div>
-            <div id="leaderboard-streak"><p class="muted">Загрузка…</p></div>
-        </div>
+        <div class="mt-2" id="leaderboard-xp"><p class="muted">Загрузка…</p></div>
+        <div class="mt-2" id="leaderboard-streak" style="display:none;"><p class="muted">Загрузка…</p></div>
     </div>
 </section>
 
 <section class="section">
-    <h2>Разделы тренажёра</h2>
-    <div class="grid grid-2 mt-2">
-        <a href="learn.php" class="card card-link">
-            <span class="card-icon">📖</span>
-            <div class="card-eyebrow">Основы</div>
-            <h3>Учить буквы</h3>
-            <p>Изучай каждый символ отдельно: слушай, смотри на паттерн и воспроизводи его тапом
-                или клавиатурой, как настоящим ключом.</p>
-        </a>
-        <a href="koch.php" class="card card-link">
-            <span class="card-icon">🎯</span>
-            <div class="card-eyebrow">Классика CW</div>
-            <h3>Метод Коха</h3>
-            <p>Символы сразу звучат на целевой скорости. Новый символ открывается, когда точность
-                предыдущих стабильно высокая.</p>
-        </a>
-        <a href="groups.php" class="card card-link">
-            <span class="card-icon">🔢</span>
-            <div class="card-eyebrow">Приём на слух</div>
-            <h3>Группы символов</h3>
-            <p>Тренируй приём случайных групп по 2–5 символов: буквы, цифры или всё вместе,
-                на выбранной скорости.</p>
-        </a>
-        <a href="callsigns.php" class="card card-link">
-            <span class="card-icon">📡</span>
-            <div class="card-eyebrow">Практика радиолюбителя</div>
-            <h3>Позывные</h3>
-            <p>Расшифровывай позывные радиолюбителей со всего мира — приближайся к реальному эфиру.</p>
-        </a>
+    <div class="card-eyebrow">С чего начать</div>
+    <h2>Путь новичка: от тишины до эфира за 4 шага</h2>
+    <p class="muted">Не обязательно идти строго по порядку, но именно в такой
+        последовательности азбуку Морзе учат быстрее всего.</p>
+
+    <div class="onboarding-steps mt-3">
+        <div class="onboarding-step">
+            <div class="step-num">1</div>
+            <div class="step-content">
+                <div class="step-icon">📖</div>
+                <h3>Выучи первые символы</h3>
+                <p>Начни со страницы «Буквы» — выстукивай каждый символ ключом (тап по экрану
+                    или удержание пробела) и слушай, как он звучит. Не старайся выучить всё
+                    сразу — для старта достаточно 5–10 символов.</p>
+                <a href="learn.php" class="btn btn-primary btn-sm">Начать с букв →</a>
+            </div>
+        </div>
+
+        <div class="onboarding-step">
+            <div class="step-num">2</div>
+            <div class="step-content">
+                <div class="step-icon">🎯</div>
+                <h3>Переходи на метод Коха</h3>
+                <p>Как только выучишь первые пару символов — время для метода Коха: символы сразу
+                    звучат на боевой скорости, никакого «сначала медленно, потом быстрее». Новый
+                    символ открывается автоматически, когда точность стабильно высокая.</p>
+                <a href="koch.php" class="btn btn-sm">Метод Коха →</a>
+            </div>
+        </div>
+
+        <div class="onboarding-step">
+            <div class="step-num">3</div>
+            <div class="step-content">
+                <div class="step-icon">🔢</div>
+                <h3>Набирай скорость на группах</h3>
+                <p>Когда в Кохе открыто хотя бы 10 символов — переходи к группам: тренируй приём
+                    случайных сочетаний по 2–5 символов на слух. Здесь оттачивается именно скорость
+                    и уверенность приёма, а не заучивание.</p>
+                <a href="groups.php" class="btn btn-sm">Группы символов →</a>
+            </div>
+        </div>
+
+        <div class="onboarding-step">
+            <div class="step-num">4</div>
+            <div class="step-content">
+                <div class="step-icon">📡</div>
+                <h3>Погружайся в настоящий эфир</h3>
+                <p>Финальный этап — позывные радиолюбителей и служебные сокращения (CQ, QTH, 73…).
+                    Это уже максимально близко к тому, что реально звучит в эфире.</p>
+                <div class="btn-row">
+                    <a href="callsigns.php" class="btn btn-sm">Позывные →</a>
+                    <a href="groups.php" class="btn btn-sm">Сокращения →</a>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
 

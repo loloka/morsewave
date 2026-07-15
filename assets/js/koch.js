@@ -2,6 +2,19 @@
     const GROUP_LEN = 5;
     const PASS_THRESHOLD = 0.9;
 
+    /**
+     * Та же логика, что и в groups.js: маленький открытый набор символов
+     * (например, только K и M в начале метода Коха) — угадать куда проще,
+     * чем весь алфавит, поэтому и награда меньше. Раньше здесь была плоская
+     * ставка 2 XP/символ независимо от того, открыто 2 символа или все 38 —
+     * несоразмерно с балансом остальных режимов.
+     */
+    function xpRateForSession(charsetSize, len) {
+        const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
+        const lengthFactor = len / 3;
+        return 2 * charsetFactor * lengthFactor;
+    }
+
     const kochLevelEl = document.getElementById('koch-level');
     const kochCharsetEl = document.getElementById('koch-charset');
     const kochProgressBar = document.getElementById('koch-progress-bar');
@@ -153,6 +166,7 @@
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
+            xpRate: xpRateForSession(charset.length, GROUP_LEN),
         };
 
         setupPanel.style.display = 'none';
@@ -189,7 +203,7 @@
 
         // Начисляем сразу за эту группу — если сессия не будет
         // пройдена до конца, заработанное всё равно не потеряется.
-        const xpGain = correct * 2;
+        const xpGain = Math.round(correct * session.xpRate);
         session.xpEarned += xpGain;
         if (xpGain > 0) Progress.addXp(xpGain);
         Progress.incrementStat('groupsCompleted', 1);

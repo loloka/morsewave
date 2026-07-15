@@ -329,15 +329,24 @@
 
         let dailyBonusMsg = '';
         if (isDailyChallenge && !session.skipDailyCheck) {
-            const state = Progress.load();
-            if (state.dailyChallengeDate !== today()) {
-                xpEarned += 50;
-                Progress.addXp(50);
-                state.dailyChallengeDate = today();
-                Progress.save(state);
-                dailyBonusMsg = ' + бонус 50 XP за задание дня!';
+            const matchesRequirement = dailyRequired
+                && session.groups.length === dailyRequired.count
+                && groupLen === dailyRequired.len
+                && session.wpm === dailyRequired.wpm;
+
+            if (!matchesRequirement) {
+                dailyBonusMsg = ` (это не совпадает с заданием дня — нужно было ${dailyRequired ? dailyRequired.count : '?'} групп по ${dailyRequired ? dailyRequired.len : '?'} символов на ${dailyRequired ? dailyRequired.wpm : '?'} wpm, бонус не начислен, но обычный опыт за тренировку остаётся)`;
             } else {
-                dailyBonusMsg = ' (задание дня на сегодня уже выполнено, бонус не начисляется повторно)';
+                const state = Progress.load();
+                if (state.dailyChallengeDate !== today()) {
+                    xpEarned += 50;
+                    Progress.addXp(50);
+                    state.dailyChallengeDate = today();
+                    Progress.save(state);
+                    dailyBonusMsg = ' + бонус 50 XP за задание дня!';
+                } else {
+                    dailyBonusMsg = ' (задание дня на сегодня уже выполнено, бонус не начисляется повторно)';
+                }
             }
         }
 
@@ -351,8 +360,9 @@
 
         if (dailyBonusMsg) {
             const note = document.createElement('div');
-            note.className = 'feedback show ok mt-2';
-            note.textContent = 'Задание дня пройдено' + dailyBonusMsg;
+            const isMismatch = dailyBonusMsg.includes('не совпадает');
+            note.className = isMismatch ? 'feedback show bad mt-2' : 'feedback show ok mt-2';
+            note.textContent = isMismatch ? ('Задание дня' + dailyBonusMsg) : ('Задание дня пройдено' + dailyBonusMsg);
             document.getElementById('result-panel').appendChild(note);
         }
 
@@ -386,7 +396,7 @@
             groups: [...session.wrongGroups],
             index: 0, wpm: session.wpm, farnsworth: session.farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
-            xpRate: session.xpRate,
+            xpRate: 1, // отработка уже известных ошибок — не полная ставка свежей сессии
             isExam: false, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], skipDailyCheck: true,
         };
@@ -454,6 +464,8 @@
     answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
 
     /* ---------- Задание дня (пришли по ссылке с главной) ---------- */
+    let dailyRequired = null; // { len, count, wpm } — что реально нужно пройти
+
     (function applyDailyParams() {
         const params = new URLSearchParams(location.search);
         if (params.get('daily') !== '1') return;
@@ -462,6 +474,7 @@
         const len = parseInt(params.get('len'), 10);
         const count = parseInt(params.get('count'), 10);
         const wpm = parseInt(params.get('wpm'), 10);
+        dailyRequired = { len, count, wpm };
 
         if (len) {
             document.querySelectorAll('#length-chips .chip').forEach(c => {
@@ -472,7 +485,18 @@
         }
         if (count) {
             const countSelect = document.getElementById('groups-count');
-            if ([...countSelect.options].some(o => parseInt(o.value, 10) === count)) countSelect.value = String(count);
+            const hasOption = [...countSelect.options].some(o => parseInt(o.value, 10) === count);
+            if (!hasOption) {
+                // На случай будущего рассинхрона между генератором на главной
+                // и вариантами в select — добавляем недостающий вариант сами,
+                // а не молча оставляем старое значение (это и было причиной
+                // бага: задание требовало 15, а выбор оставался на 10).
+                const opt = document.createElement('option');
+                opt.value = String(count);
+                opt.textContent = String(count);
+                countSelect.appendChild(opt);
+            }
+            countSelect.value = String(count);
         }
         if (wpm) {
             wpmSlider.value = String(wpm);

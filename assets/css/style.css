@@ -660,3 +660,46 @@ input[type="range"] {
     font-weight: 700;
     flex-shrink: 0;
 }
+
+/* ---------- Onboarding path (главная — путь новичка) ---------- */
+.onboarding-steps {
+    display: flex;
+    flex-direction: column;
+}
+.onboarding-step {
+    display: flex;
+    gap: 18px;
+    padding-bottom: 32px;
+    position: relative;
+}
+.onboarding-step:last-child { padding-bottom: 0; }
+.onboarding-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 42px;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(var(--accent-dim), var(--border));
+}
+.step-num {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 2px solid var(--accent-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--accent);
+    position: relative;
+    z-index: 1;
+}
+.step-content { flex: 1; padding-top: 2px; min-width: 0; }
+.step-icon { font-size: 22px; margin-bottom: 4px; }
+.step-content h3 { margin: 0 0 6px 0; }
+.step-content p { margin: 0 0 14px 0; }

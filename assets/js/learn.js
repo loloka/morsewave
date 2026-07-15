@@ -336,9 +336,9 @@
             recBusy = true;
             recStreak++;
             recSessionCorrect++;
-            recFeedback.textContent = `Верно: «${recTarget}» (+3 XP)`;
+            recFeedback.textContent = `Верно: «${recTarget}» (+1 XP)`;
             recFeedback.className = 'feedback show ok';
-            Progress.addXp(3);
+            Progress.addXp(1);
             Progress.incrementStat('recognizedCount', 1);
 
             if (recStreak > recBest) {

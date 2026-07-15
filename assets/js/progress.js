@@ -67,9 +67,30 @@ const Progress = (() => {
         return Math.pow(level, 2) * 80;
     }
 
-    // Публикация в лидерборд — только по явному клику "Опубликовать" на
-    // странице профиля (account.js), сознательно НЕ автоматически: кто не
-    // хочет светиться в таблице лидеров, тот просто никогда не жмёт кнопку.
+    // Публикация в лидерборд ВПЕРВЫЕ — только по явному клику
+    // "Опубликовать" на странице профиля (account.js), сознательно НЕ
+    // автоматически: кто не хочет светиться в таблице лидеров, тот просто
+    // никогда не жмёт кнопку и никогда там не появится.
+    // А вот ОБНОВЛЕНИЕ уже опубликованных цифр — наоборот, идёт тихо в
+    // фоне (иначе после первой публикации пришлось бы жать кнопку заново
+    // на каждое изменение прогресса, что неудобно). Ключевая гарантия —
+    // api/refresh_published_stats.php умеет только UPDATE, никогда INSERT:
+    // если строки в лидерборде ещё нет, вызов тихо ничего не делает.
+    let refreshTimer = null;
+    function refreshPublishedStats(state) {
+        clearTimeout(refreshTimer);
+        refreshTimer = setTimeout(() => {
+            fetch('api/refresh_published_stats.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    xp: state.xp,
+                    streakCount: state.streak.count,
+                    streakLastDate: state.streak.lastDate,
+                }),
+            }).catch(() => {});
+        }, 800);
+    }
 
     function addXp(amount) {
         const state = load();
@@ -77,6 +98,7 @@ const Progress = (() => {
         save(state);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
+        refreshPublishedStats(state);
         return state;
     }
 
@@ -114,6 +136,7 @@ const Progress = (() => {
         save(state);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
+        refreshPublishedStats(state);
         return state;
     }
 

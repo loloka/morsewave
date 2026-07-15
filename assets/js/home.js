@@ -42,7 +42,7 @@
         const pick = (arr) => arr[seed % arr.length];
 
         const lens = [2, 3, 4, 5];
-        const counts = [10, 15, 20];
+        const counts = [10, 20, 30];
         const wpms = [12, 15, 18, 20, 24];
         const len = pick(lens);
         seed = (seed * 7 + 3) >>> 0;
@@ -105,4 +105,14 @@
         document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">Не удалось загрузить</p>';
         document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">Не удалось загрузить</p>';
     }
+
+    document.querySelectorAll('#leaderboard-section .chip[data-board]').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#leaderboard-section .chip[data-board]').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            const board = chip.dataset.board;
+            document.getElementById('leaderboard-xp').style.display = board === 'xp' ? 'block' : 'none';
+            document.getElementById('leaderboard-streak').style.display = board === 'streak' ? 'block' : 'none';
+        });
+    });
 })();

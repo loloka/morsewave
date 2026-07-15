@@ -7,6 +7,7 @@ $limit = isset($_GET['limit']) ? max(1, min((int) $_GET['limit'], 50)) : 10;
 $byXp = $pdo->prepare('
     SELECT u.name, s.xp
     FROM user_stats s JOIN users u ON u.id = s.user_id
+    WHERE s.xp > 0
     ORDER BY s.xp DESC LIMIT :limit
 ');
 $byXp->bindValue(':limit', $limit, PDO::PARAM_INT);
