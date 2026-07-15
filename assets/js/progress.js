@@ -67,24 +67,9 @@ const Progress = (() => {
         return Math.pow(level, 2) * 80;
     }
 
-    // Best-effort фоновая синхронизация публичного слепка XP/серии для
-    // лидерборда. Если пользователь не залогинен — сервер тихо игнорирует,
-    // ошибки сети тоже проглатываются: это не должно мешать офлайн-работе.
-    let syncTimer = null;
-    function syncToServer(state) {
-        clearTimeout(syncTimer);
-        syncTimer = setTimeout(() => {
-            fetch('api/sync_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    xp: state.xp,
-                    streakCount: state.streak.count,
-                    streakLastDate: state.streak.lastDate,
-                }),
-            }).catch(() => {});
-        }, 800); // небольшая задержка, чтобы не долбить сервер на каждый чих
-    }
+    // Публикация в лидерборд — только по явному клику "Опубликовать" на
+    // странице профиля (account.js), сознательно НЕ автоматически: кто не
+    // хочет светиться в таблице лидеров, тот просто никогда не жмёт кнопку.
 
     function addXp(amount) {
         const state = load();
@@ -92,7 +77,6 @@ const Progress = (() => {
         save(state);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
-        syncToServer(state);
         return state;
     }
 
@@ -130,7 +114,6 @@ const Progress = (() => {
         save(state);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
-        syncToServer(state);
         return state;
     }
 

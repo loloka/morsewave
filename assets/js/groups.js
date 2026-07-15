@@ -63,12 +63,15 @@
         });
     });
     const customInput = document.getElementById('custom-charset-input');
+    const customHint = document.getElementById('custom-charset-hint');
     document.querySelectorAll('#charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             charsetKey = chip.dataset.set;
-            customInput.style.display = charsetKey === 'custom' ? 'block' : 'none';
+            const isCustom = charsetKey === 'custom';
+            customInput.style.display = isCustom ? 'block' : 'none';
+            customHint.style.display = isCustom ? 'block' : 'none';
         });
     });
 
@@ -422,6 +425,7 @@
         document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.set === 'mixed'));
         charsetKey = 'mixed';
         customInput.style.display = 'none';
+        customHint.style.display = 'none';
         wpmSlider.value = '12'; // 60 знаков/мин по формуле PARIS = 12 wpm
         wpmValue.textContent = '12';
         fwEnabled.checked = false;

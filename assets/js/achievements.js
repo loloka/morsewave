@@ -22,13 +22,15 @@
         </div>
     `).join('');
 
-    document.getElementById('reset-progress-btn').addEventListener('click', () => {
+    document.getElementById('reset-progress-btn').addEventListener('click', async () => {
         const sure = confirm(
             'Точно сбросить весь прогресс?\n\n' +
             'XP, уровень, серия дней, выученные символы, уровень метода Коха ' +
-            'и все достижения будут обнулены. Это действие нельзя отменить.'
+            'и все достижения будут обнулены. Если ты публиковал результаты в ' +
+            'таблице лидеров — они тоже уберутся оттуда. Это действие нельзя отменить.'
         );
         if (!sure) return;
+        try { await fetch('api/unpublish_stats.php', { method: 'POST' }); } catch { /* не критично */ }
         Progress.resetAll();
         location.reload();
     });

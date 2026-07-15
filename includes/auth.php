@@ -41,3 +41,22 @@ function require_login_json() {
         exit;
     }
 }
+
+// Единственный админ определён по e-mail — для одного человека этого
+// достаточно, не городить отдельную роль/таблицу ради одного аккаунта.
+const ADMIN_EMAIL = 'admin@r9o.ru';
+
+function is_admin_user($user) {
+    return $user && strtolower($user['email']) === ADMIN_EMAIL;
+}
+
+function require_admin_json($pdo) {
+    $user = current_user($pdo);
+    if (!is_admin_user($user)) {
+        http_response_code(403);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Доступ только для администратора']);
+        exit;
+    }
+    return $user;
+}

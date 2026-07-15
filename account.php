@@ -9,9 +9,12 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card-eyebrow">Профиль</div>
 <h1>Аккаунт</h1>
-<p>Аккаунт нужен, чтобы попасть в таблицу лидеров на главной по опыту и по
-    сериям дней. Весь прогресс тренировок по-прежнему хранится у тебя в
-    браузере — аккаунт просто показывает витрину этих цифр остальным.</p>
+<p>Аккаунт нужен для двух вещей: чтобы попасть в таблицу лидеров на главной
+    по опыту и по сериям дней (по желанию — только если сам нажмёшь
+    «Опубликовать» ниже), и чтобы совсем скоро можно было подтягивать свой
+    прогресс на другом устройстве — например, продолжить с телефона то, что
+    начал на компьютере. Пока прогресс тренировок хранится только у тебя в
+    браузере — синхронизация между устройствами в разработке.</p>
 
 <div id="guest-block" style="display:none;">
     <div class="mode-switch">
@@ -59,16 +62,22 @@ include __DIR__ . '/includes/header.php';
                 <h2 class="mt-0" id="profile-name" style="margin-bottom:0;"></h2>
                 <p class="muted mt-0" id="profile-email" style="font-size:13px;"></p>
             </div>
-            <button class="btn" id="logout-btn">Выйти</button>
+            <div class="btn-row">
+                <?php if (is_admin_user($loggedInUser)): ?>
+                <a href="admin.php" class="btn btn-sm">🛠 Админка</a>
+                <?php endif; ?>
+                <button class="btn" id="logout-btn">Выйти</button>
+            </div>
         </div>
         <div class="mt-2" id="verify-status"></div>
     </div>
 
     <div class="card mt-2">
         <h3>Опубликовать текущий прогресс</h3>
-        <p class="mt-0 muted" style="font-size:13px;">Твой XP и серия дней хранятся локально в этом браузере.
-            Нажми, чтобы обновить свои цифры в таблице лидеров на главной. Пока e-mail не подтверждён —
-            публикация недоступна (это защита от случайных дублей в таблице, не от читерства).</p>
+        <p class="mt-0 muted" style="font-size:13px;">Твой XP и серия дней хранятся локально в этом браузере и
+            <b>нигде не публикуются автоматически</b>. Пока не нажмёшь кнопку ниже — тебя не будет видно
+            в таблице лидеров вообще. Пока e-mail не подтверждён — публикация недоступна (это защита от
+            случайных дублей в таблице, не от читерства).</p>
         <div class="grid grid-2 mt-2">
             <div class="stat"><span class="value" id="local-xp">0</span><span class="label">Твой XP (локально)</span></div>
             <div class="stat"><span class="value" id="local-streak">0</span><span class="label">Твоя серия дней</span></div>
