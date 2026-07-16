@@ -31,6 +31,10 @@
         );
         if (!sure) return;
         try { await fetch('api/unpublish_stats.php', { method: 'POST' }); } catch { /* не критично */ }
+        // Серверную копию полного прогресса тоже удаляем — иначе следующий
+        // логин слил бы (merge по максимуму) старые данные обратно и сброс
+        // "не сработал" бы.
+        try { await fetch('api/delete_progress.php', { method: 'POST' }); } catch { /* не критично */ }
         Progress.resetAll();
         location.reload();
     });

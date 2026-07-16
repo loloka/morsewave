@@ -40,6 +40,7 @@ services:
       - ./database/migration_7.sql:/docker-entrypoint-initdb.d/7-migration_7.sql:ro
       - ./database/migration_8.sql:/docker-entrypoint-initdb.d/8-migration_8.sql:ro
       - ./database/migration_9.sql:/docker-entrypoint-initdb.d/9-migration_9.sql:ro
+      - ./database/migration_10.sql:/docker-entrypoint-initdb.d/91-migration_10.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pmorsewave_root"]
       interval: 5s

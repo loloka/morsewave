@@ -92,6 +92,103 @@ const Progress = (() => {
         }, 800);
     }
 
+    // Полная синхронизация (в отличие от лидерборда выше — приватная и
+    // автоматическая): весь Progress-объект тихо пушится на сервер при
+    // каждом значимом изменении, пока пользователь залогинен. Без логина
+    // эндпоинт тихо отвечает not_logged_in — не ошибка. Debounce, чтобы
+    // серия быстрых начислений XP не породила очередь запросов.
+    let pushTimer = null;
+    function pushFullProgress() {
+        clearTimeout(pushTimer);
+        pushTimer = setTimeout(pushNow, 1500);
+    }
+
+    function pushNow() {
+        return fetch('api/push_progress.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(load()),
+        }).catch(() => {});
+    }
+
+    /**
+     * Слияние серверного прогресса с локальным — вызывается сразу после
+     * логина/регистрации. Стратегия: по каждому полю отдельно, НИКОГДА не
+     * выбирая меньшее — поэтому прогресс гарантированно не теряется ни с
+     * одной стороны и подтверждения у пользователя спрашивать не нужно.
+     */
+    function mergeFromServer(serverState) {
+        const local = load();
+        if (!serverState || typeof serverState !== 'object') return local;
+        const server = { ...defaults(), ...serverState };
+        const merged = { ...local };
+
+        merged.xp = Math.max(Math.round(local.xp) || 0, Math.round(server.xp) || 0);
+        merged.kochLevel = Math.max(local.kochLevel || 2, server.kochLevel || 2);
+
+        // Множества — объединение
+        merged.learnedLetters = [...new Set([
+            ...(Array.isArray(local.learnedLetters) ? local.learnedLetters : []),
+            ...(Array.isArray(server.learnedLetters) ? server.learnedLetters : []),
+        ])];
+        merged.unlockedAchievements = [...new Set([
+            ...(Array.isArray(local.unlockedAchievements) ? local.unlockedAchievements : []),
+            ...(Array.isArray(server.unlockedAchievements) ? server.unlockedAchievements : []),
+        ])];
+
+        // Числовые счётчики stats — max по каждому полю (включая поля,
+        // которых нет в defaults — на случай, если одна из сторон новее)
+        const localStats = local.stats || {};
+        const serverStats = server.stats || {};
+        merged.stats = { ...defaults().stats };
+        new Set([
+            ...Object.keys(merged.stats),
+            ...Object.keys(localStats),
+            ...Object.keys(serverStats),
+        ]).forEach((k) => {
+            merged.stats[k] = Math.max(Number(localStats[k]) || 0, Number(serverStats[k]) || 0);
+        });
+
+        // Даты — более поздняя
+        const laterDate = (a, b) => {
+            if (!a) return b || null;
+            if (!b) return a;
+            return a > b ? a : b; // строки YYYY-MM-DD сравниваются лексикографически
+        };
+        merged.streak = {
+            count: Math.max(local.streak?.count || 0, server.streak?.count || 0),
+            lastDate: laterDate(local.streak?.lastDate, server.streak?.lastDate),
+        };
+        // Более поздняя дата и тут — чтобы бонус задания дня нельзя было
+        // получить второй раз, залогинившись с другого устройства.
+        merged.dailyChallengeDate = laterDate(local.dailyChallengeDate, server.dailyChallengeDate);
+
+        return merged;
+    }
+
+    /**
+     * Полный цикл синхронизации после логина: pull → merge → save →
+     * сразу push результата слияния (иначе следующий логин на первом
+     * устройстве откатил бы мерж — на сервере остались бы старые данные).
+     */
+    async function syncWithServer() {
+        try {
+            const res = await fetch('api/pull_progress.php');
+            if (!res.ok) return null;
+            const data = await res.json();
+            if (!data.ok) return null;
+            const merged = mergeFromServer(data.progress);
+            save(merged);
+            window.dispatchEvent(new CustomEvent('progress:updated', { detail: merged }));
+            checkAchievements();
+            refreshPublishedStats(merged);
+            await pushNow();
+            return merged;
+        } catch {
+            return null;
+        }
+    }
+
     function addXp(amount) {
         const state = load();
         state.xp = Math.round(state.xp + amount);
@@ -99,6 +196,7 @@ const Progress = (() => {
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
         refreshPublishedStats(state);
+        pushFullProgress();
         return state;
     }
 
@@ -107,6 +205,7 @@ const Progress = (() => {
         if (!state.learnedLetters.includes(ch)) {
             state.learnedLetters.push(ch);
             save(state);
+            pushFullProgress();
         }
         return state;
     }
@@ -116,6 +215,7 @@ const Progress = (() => {
         state.kochLevel = level;
         save(state);
         checkAchievements();
+        pushFullProgress();
         return state;
     }
 
@@ -124,6 +224,7 @@ const Progress = (() => {
         state.stats[field] = (state.stats[field] || 0) + by;
         save(state);
         checkAchievements();
+        pushFullProgress();
         return state;
     }
 
@@ -137,6 +238,7 @@ const Progress = (() => {
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
         checkAchievements();
         refreshPublishedStats(state);
+        pushFullProgress();
         return state;
     }
 
@@ -185,6 +287,7 @@ const Progress = (() => {
         if (newly.length) {
             save(state);
             window.dispatchEvent(new CustomEvent('achievements:unlocked', { detail: newly }));
+            pushFullProgress();
         }
         return newly;
     }
@@ -197,6 +300,6 @@ const Progress = (() => {
     return {
         load, save, addXp, markLetterLearned, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
-        resetAll, markDailyActivity,
+        resetAll, markDailyActivity, mergeFromServer, syncWithServer,
     };
 })();

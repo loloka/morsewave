@@ -126,6 +126,9 @@
             const data = await res.json();
             if (res.ok) {
                 showProfile(data.user);
+                // Тихое слияние прогресса с сервером (max/union — ничего не
+                // теряется, поэтому без диалогов подтверждения).
+                Progress.syncWithServer();
             } else {
                 feedback.textContent = data.error || 'Не получилось войти';
                 feedback.className = 'feedback show bad';
@@ -159,6 +162,9 @@
             const data = await res.json();
             if (res.ok) {
                 showProfile(data.user);
+                // Для нового аккаунта на сервере пусто — merge ничего не
+                // изменит, но сразу запушится текущий локальный прогресс.
+                Progress.syncWithServer();
                 feedback.textContent = data.mail_sent
                     ? 'Аккаунт создан! Проверь почту, чтобы подтвердить e-mail.'
                     : 'Аккаунт создан, но письмо отправить не получилось — попробуй кнопку "Отправить ещё раз" ниже.';
