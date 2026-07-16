@@ -32,16 +32,6 @@ services:
       # Все .sql-файлы отсюда выполняются автоматически ПО АЛФАВИТУ,
       # но только при первом создании контейнера (на пустом volume).
       - ./database/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql:ro
-      - ./database/migration_2.sql:/docker-entrypoint-initdb.d/2-migration_2.sql:ro
-      - ./database/migration_3.sql:/docker-entrypoint-initdb.d/3-migration_3.sql:ro
-      - ./database/migration_4.sql:/docker-entrypoint-initdb.d/4-migration_4.sql:ro
-      - ./database/migration_5.sql:/docker-entrypoint-initdb.d/5-migration_5.sql:ro
-      - ./database/migration_6.sql:/docker-entrypoint-initdb.d/6-migration_6.sql:ro
-      - ./database/migration_7.sql:/docker-entrypoint-initdb.d/7-migration_7.sql:ro
-      - ./database/migration_8.sql:/docker-entrypoint-initdb.d/8-migration_8.sql:ro
-      - ./database/migration_9.sql:/docker-entrypoint-initdb.d/9-migration_9.sql:ro
-      - ./database/migration_10.sql:/docker-entrypoint-initdb.d/91-migration_10.sql:ro
-      - ./database/migration_11.sql:/docker-entrypoint-initdb.d/92-migration_11.sql:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-pmorsewave_root"]
       interval: 5s

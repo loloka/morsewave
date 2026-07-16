@@ -71,8 +71,8 @@ docker compose up -d --build
   пароль `morsewave_root`)
 
 При первом запуске (на пустой БД) MySQL-контейнер сам накатывает
-`database/schema.sql` и все `database/migration_*.sql` по порядку — руками
-ничего заливать не нужно. Это происходит один раз; при повторных
+`database/schema.sql` — это полная актуальная схема со всеми данными-сидами,
+руками ничего заливать не нужно. Происходит один раз; при повторных
 `docker compose up` существующие данные не трогаются.
 
 `config/database.php` для Docker создавать не нужно — `docker-compose.yml`
@@ -112,8 +112,8 @@ git clone <URL_ТВОЕГО_РЕПО> morse-trainer
    (сам `config/database.php` не хранится в git — там могут быть боевые
    креды, поэтому он в `.gitignore`). По умолчанию подходит
    `host=localhost`, `user=root`, пустой пароль — поправь под свой стенд.
-2. В phpMyAdmin/HeidiSQL выполни **по порядку**: `database/schema.sql`,
-   затем все `database/migration_*.sql` по возрастанию номера.
+2. В phpMyAdmin/HeidiSQL выполни `database/schema.sql` — это полная
+   актуальная схема, одного файла достаточно.
 3. Открой сайт в браузере (document root — корень репозитория).
 4. Генератор позывных: `php database/seed_callsigns.php 200`.
 
@@ -148,14 +148,14 @@ docker compose exec app php database/seed_callsigns.php 200   # сгенерир
 docker compose exec db mysql -uroot -pmorsewave_root morse_trainer   # зайти в MySQL консольно
 ```
 
-**Накатить миграцию вручную** (обычно не нужно — новые миграции подхватываются
-автоматически только на ПУСТОЙ базе; если база уже существует, новую
-миграцию нужно применить руками одним из способов):
+**Выполнить SQL на живой базе** (например, ALTER из записи CHANGELOG.md
+при обновлении — schema.sql целиком подхватывается автоматически только
+на ПУСТОЙ базе):
 ```bash
-# через phpMyAdmin (проще): http://localhost:8081 → вкладка SQL → вставить содержимое файла
+# через phpMyAdmin (проще): http://localhost:8081 → вкладка SQL → вставить команды
 
 # либо через консоль:
-docker compose exec -T db mysql -uroot -pmorsewave_root morse_trainer < database/migration_7.sql
+docker compose exec -T db mysql -uroot -pmorsewave_root morse_trainer -e "ALTER TABLE ..."
 ```
 
 **Если что-то совсем сломалось — полный сброс**
@@ -187,17 +187,8 @@ morse-trainer/
 │   ├── mail.php               # реальный конфиг почты с паролем (в .gitignore)
 │   └── .htaccess               # запрет веб-доступа к папке
 ├── database/
-│   ├── schema.sql            # схема + сид-данные (актуальна на момент установки)
-│   ├── migration_2.sql       # + ачивки за режим "Приём на слух"
-│   ├── migration_3.sql       # фикс недостижимой ачивки "Мастер Коха"
-│   ├── migration_4.sql       # + ачивки за серию в "Приёме на слух"
-│   ├── migration_5.sql       # фикс пустого condition_type у streak50/streak500
-│   ├── migration_6.sql       # ачивка за сдачу экзамена + фикс бага с преждевременной ачивкой
-│   ├── migration_7.sql       # таблицы users/user_stats — аккаунты и лидерборд
-│   ├── migration_8.sql       # подтверждение e-mail (email_verified_at, verification_token)
-│   ├── migration_9.sql       # защита от подбора пароля (failed_login_attempts, locked_until)
-│   ├── migration_10.sql      # user_progress — полная синхронизация прогресса между устройствами
-│   ├── migration_11.sql      # восстановление пароля (reset_token + троттлинг запросов)
+│   ├── schema.sql            # ЕДИНСТВЕННЫЙ источник истины по схеме БД:
+│   │                         #   полная актуальная структура + сид-данные
 │   ├── seed_callsigns.php    # генератор пачки позывных
 │   └── .htaccess              # запрет веб-доступа к папке
 ├── includes/                 # header / footer / nav (шаблоны) + auth.php,
@@ -275,14 +266,6 @@ cp config/mail.example.php config/mail.php
 # впиши реальный API-ключ Resend в config/mail.php — иначе письма
 # подтверждения не будут отправляться (ссылка упадёт в error_log)
 mysql -u root -p < database/schema.sql
-mysql -u root -p morse_trainer < database/migration_2.sql
-mysql -u root -p morse_trainer < database/migration_3.sql
-mysql -u root -p morse_trainer < database/migration_4.sql
-mysql -u root -p morse_trainer < database/migration_5.sql
-mysql -u root -p morse_trainer < database/migration_6.sql
-mysql -u root -p morse_trainer < database/migration_7.sql
-mysql -u root -p morse_trainer < database/migration_8.sql
-mysql -u root -p morse_trainer < database/migration_9.sql
 ```
 
 Дальше:
@@ -292,8 +275,9 @@ mysql -u root -p morse_trainer < database/migration_9.sql
 2. Убедиться, что установлены `php`, `pdo_mysql`.
 3. Обновить `config/database.php` под продакшн-креды MySQL (для публичного
    сервера лучше вынести их в переменные окружения).
-4. Обновления — `git pull` на сервере после `git push` с локальной машины,
-   плюс накатить новые `migration_*.sql`, если они появились.
+4. Обновления — `git pull` на сервере после `git push` с локальной машины.
+   Если обновление меняет схему БД — нужные ALTER/UPDATE-команды написаны
+   прямо в записи [CHANGELOG.md](CHANGELOG.md), выполни их вручную.
 5. **Apache**: в конфиге виртуального хоста должно быть `AllowOverride All`
    (или хотя бы `AllowOverride AuthConfig Limit`) для директорий `config/`
    и `database/` — иначе `.htaccess`-запреты на эти папки не сработают.
@@ -358,16 +342,18 @@ mysql -u root -p morse_trainer < database/migration_9.sql
 - **Стек закреплён**: PHP (без фреймворка) + MySQL через PDO + ванильный JS.
   Bootstrap сознательно не используется — своя дизайн-система в
   `assets/css/style.css` (переменные `--bg`, `--accent`, `--signal` и т.д.).
-- **Аккаунтов нет и пока не планируется** — весь прогресс в
-  `localStorage` через модуль `Progress` (`assets/js/progress.js`). MySQL —
-  только для справочных данных (`achievements`, `callsigns`) и анонимной
-  общей статистики (`global_stats`).
-- **Схема БД меняется через миграции**: не редактируй `schema.sql` молча —
-  если меняешь структуру/данные таблиц, добавляй новый
-  `database/migration_N.sql` (следующий номер по порядку) и обновляй
-  `schema.sql`, чтобы свежие установки и старые обновлялись согласованно.
-  Обязательно обнови и раздел «История изменений», и список миграций в
-  «Быстром старте»/«Деплое».
+- **localStorage — первичное хранилище прогресса** (модуль `Progress`,
+  `assets/js/progress.js`), аккаунт — опциональная надстройка: публичный
+  лидерборд (`user_stats`, публикация только вручную), приватная
+  синхронизация между устройствами (`user_progress`, слияние «только
+  вверх» при логине) и восстановление пароля. MySQL также хранит
+  справочные данные (`achievements`, `callsigns`) и анонимную общую
+  статистику (`global_stats`).
+- **`database/schema.sql` — единственный источник истины по схеме БД**
+  (миграции консолидированы в него и удалены в v2.28). Меняешь
+  структуру/данные — правь `schema.sql` и приложи ALTER/UPDATE-команды
+  для уже работающей базы прямо в записи CHANGELOG.md: владелец живой
+  установки выполняет их вручную после `git pull`.
 - **Сигнальная линия и лампа — сквозной элемент дизайна**, используется на
   каждой странице тренировки (`SignalLine`, `MorseLamp` из `signal.js`).
   Новые режимы тренировки должны их подключать для консистентности.
