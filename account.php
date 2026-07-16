@@ -29,6 +29,38 @@ include __DIR__ . '/includes/header.php';
         <input type="password" id="login-password" class="answer-input mt-2" placeholder="Пароль" autocomplete="current-password" style="text-transform:none;">
         <button class="btn btn-primary mt-2" id="login-btn">Войти</button>
         <div class="feedback mt-2" id="login-feedback"></div>
+        <p class="muted mt-2" style="font-size:13px;">
+            <a href="#" id="forgot-link">Забыл пароль?</a>
+        </p>
+    </div>
+
+    <div class="card mt-2" id="reset-request-form" style="display:none;">
+        <h3>Восстановление пароля</h3>
+        <p class="mt-0 muted" style="font-size:13px;">Пришлём на почту ссылку для установки нового пароля
+            (действует 1 час). Чаще одного раза в 5 минут письмо не отправляется.</p>
+        <input type="email" id="reset-email" class="answer-input mt-1" placeholder="E-mail аккаунта" autocomplete="email" style="text-transform:none;">
+
+        <div class="mt-2">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;">Расшифруй код Морзе — это капча, защита от ботов</div>
+            <div class="morse-pattern" id="reset-captcha-pattern" style="font-size:22px;"></div>
+            <div class="btn-row mt-1">
+                <button type="button" class="btn btn-sm" id="reset-captcha-play-btn">▶ Прослушать</button>
+                <button type="button" class="btn btn-sm" id="reset-captcha-refresh-btn">🔄 Другой код</button>
+            </div>
+            <input type="text" id="reset-captcha-answer" class="answer-input mt-1" placeholder="Что здесь зашифровано?" autocomplete="off">
+        </div>
+
+        <button class="btn btn-primary mt-2" id="reset-request-btn">Отправить ссылку</button>
+        <div class="feedback mt-2" id="reset-request-feedback"></div>
+    </div>
+
+    <div class="card mt-2" id="reset-password-form" style="display:none;">
+        <h3>Новый пароль</h3>
+        <p class="mt-0 muted" style="font-size:13px;">Ты перешёл по ссылке из письма — задай новый пароль для аккаунта.</p>
+        <input type="password" id="reset-new-password" class="answer-input mt-1" placeholder="Новый пароль (минимум 6 символов)" autocomplete="new-password" style="text-transform:none;">
+        <input type="password" id="reset-new-password-confirm" class="answer-input mt-2" placeholder="Повтори новый пароль" autocomplete="new-password" style="text-transform:none;">
+        <button class="btn btn-primary mt-2" id="reset-password-btn">Сохранить пароль</button>
+        <div class="feedback mt-2" id="reset-password-feedback"></div>
     </div>
 
     <div class="card mt-2" id="register-form" style="display:none;">
@@ -85,6 +117,34 @@ include __DIR__ . '/includes/header.php';
         </div>
         <button class="btn btn-primary mt-2" id="sync-btn">🔄 Опубликовать в лидерборд</button>
         <div class="feedback mt-2" id="sync-feedback"></div>
+    </div>
+
+    <div class="card mt-2">
+        <h3>Настройки аккаунта</h3>
+
+        <div class="mt-2">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;">Имя (видно в таблице лидеров)</div>
+            <input type="text" id="change-name-input" class="answer-input" placeholder="Имя или позывной" autocomplete="nickname" style="text-transform:none;">
+            <button class="btn btn-sm mt-1" id="change-name-btn">Сменить имя</button>
+            <div class="feedback mt-1" id="change-name-feedback"></div>
+        </div>
+
+        <div class="mt-3">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;">Смена пароля</div>
+            <input type="password" id="change-pass-current" class="answer-input" placeholder="Текущий пароль" autocomplete="current-password" style="text-transform:none;">
+            <input type="password" id="change-pass-new" class="answer-input mt-1" placeholder="Новый пароль (минимум 6 символов)" autocomplete="new-password" style="text-transform:none;">
+            <input type="password" id="change-pass-confirm" class="answer-input mt-1" placeholder="Повтори новый пароль" autocomplete="new-password" style="text-transform:none;">
+            <button class="btn btn-sm mt-1" id="change-pass-btn">Сменить пароль</button>
+            <div class="feedback mt-1" id="change-pass-feedback"></div>
+        </div>
+
+        <div class="mt-3">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;">Смена e-mail (новый адрес нужно будет подтвердить по письму)</div>
+            <input type="password" id="change-email-pass" class="answer-input" placeholder="Текущий пароль" autocomplete="current-password" style="text-transform:none;">
+            <input type="email" id="change-email-new" class="answer-input mt-1" placeholder="Новый e-mail" autocomplete="email" style="text-transform:none;">
+            <button class="btn btn-sm mt-1" id="change-email-btn">Сменить e-mail</button>
+            <div class="feedback mt-1" id="change-email-feedback"></div>
+        </div>
     </div>
 </div>
 

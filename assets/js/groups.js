@@ -334,8 +334,17 @@
                 && groupLen === dailyRequired.len
                 && session.wpm === dailyRequired.wpm;
 
+            // Защита от "прокликивания": раньше можно было жать "Ответить"
+            // с пустым полем и в конце всё равно получить бонус — проверялись
+            // только параметры сессии, но не результат. Теперь для бонуса
+            // нужно реально принять минимум половину символов.
+            const DAILY_MIN_ACCURACY = 0.5;
+            const accuracyOk = accuracy >= DAILY_MIN_ACCURACY;
+
             if (!matchesRequirement) {
                 dailyBonusMsg = ` (это не совпадает с заданием дня — нужно было ${dailyRequired ? dailyRequired.count : '?'} групп по ${dailyRequired ? dailyRequired.len : '?'} символов на ${dailyRequired ? dailyRequired.wpm : '?'} wpm, бонус не начислен, но обычный опыт за тренировку остаётся)`;
+            } else if (!accuracyOk) {
+                dailyBonusMsg = ` (для бонуса нужна точность не ниже ${Math.round(DAILY_MIN_ACCURACY * 100)}%, у тебя ${Math.round(accuracy * 100)}% — бонус не начислен, но обычный опыт за верные символы остаётся; попробуй ещё раз!)`;
             } else {
                 const state = Progress.load();
                 if (state.dailyChallengeDate !== today()) {
@@ -360,9 +369,9 @@
 
         if (dailyBonusMsg) {
             const note = document.createElement('div');
-            const isMismatch = dailyBonusMsg.includes('не совпадает');
-            note.className = isMismatch ? 'feedback show bad mt-2' : 'feedback show ok mt-2';
-            note.textContent = isMismatch ? ('Задание дня' + dailyBonusMsg) : ('Задание дня пройдено' + dailyBonusMsg);
+            const isFail = dailyBonusMsg.includes('не совпадает') || dailyBonusMsg.includes('бонус не начислен');
+            note.className = isFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2';
+            note.textContent = isFail ? ('Задание дня' + dailyBonusMsg) : ('Задание дня пройдено' + dailyBonusMsg);
             document.getElementById('result-panel').appendChild(note);
         }
 

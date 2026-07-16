@@ -124,6 +124,9 @@ CREATE TABLE IF NOT EXISTS users (
     verification_token     VARCHAR(64) DEFAULT NULL,
     failed_login_attempts  INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until           DATETIME DEFAULT NULL,
+    reset_token            VARCHAR(64) DEFAULT NULL,
+    reset_token_expires    DATETIME DEFAULT NULL,
+    last_reset_request_at  DATETIME DEFAULT NULL,
     created_at             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

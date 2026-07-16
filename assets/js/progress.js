@@ -300,6 +300,6 @@ const Progress = (() => {
     return {
         load, save, addXp, markLetterLearned, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
-        resetAll, markDailyActivity, mergeFromServer, syncWithServer,
+        resetAll, markDailyActivity, mergeFromServer, syncWithServer, pushNow,
     };
 })();

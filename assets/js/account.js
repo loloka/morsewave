@@ -3,39 +3,47 @@
     const profileBlock = document.getElementById('profile-block');
     const CLAIM_KEY = 'morsewave_claimed_by';
 
-    /* ---------- Капча (код Морзе) ---------- */
-    let currentCaptchaMorse = '';
+    /* ---------- Капча (код Морзе) ----------
+       Виджет обобщён: одна и та же капча используется на регистрации и на
+       запросе сброса пароля. ВАЖНО: серверная сессия хранит только ОДНО
+       загаданное слово — поэтому обновление капчи в одной форме
+       инвалидирует другую. На практике формы не видны одновременно, так
+       что конфликтов нет. */
+    function makeCaptchaWidget(patternId, playBtnId, refreshBtnId, answerId) {
+        let morse = '';
 
-    function renderCaptchaPattern(morse) {
-        const el = document.getElementById('captcha-pattern');
-        el.innerHTML = morse.split(' ').map(code =>
-            code.split('').map(s => `<span class="sym">${s === '.' ? '•' : '−'}</span>`).join('')
-        ).join(' &nbsp; ');
-    }
-
-    async function loadCaptcha() {
-        try {
-            const res = await fetch('api/captcha.php');
-            const data = await res.json();
-            currentCaptchaMorse = data.morse;
-            renderCaptchaPattern(currentCaptchaMorse);
-            document.getElementById('captcha-answer').value = '';
-        } catch {
-            document.getElementById('captcha-pattern').textContent = 'Не удалось загрузить капчу — обнови страницу';
+        async function load() {
+            try {
+                const res = await fetch('api/captcha.php');
+                const data = await res.json();
+                morse = data.morse;
+                document.getElementById(patternId).innerHTML = morse.split(' ').map(code =>
+                    code.split('').map(s => `<span class="sym">${s === '.' ? '•' : '−'}</span>`).join('')
+                ).join(' &nbsp; ');
+                document.getElementById(answerId).value = '';
+            } catch {
+                document.getElementById(patternId).textContent = 'Не удалось загрузить капчу — обнови страницу';
+            }
         }
+
+        document.getElementById(refreshBtnId).addEventListener('click', load);
+        document.getElementById(playBtnId).addEventListener('click', async () => {
+            if (!morse) return;
+            const spans = document.querySelectorAll(`#${patternId} .sym`);
+            let i = 0;
+            const audio = new MorseAudio({ wpm: 15 });
+            await audio.playPattern(morse, {
+                onSymbol: () => { spans[i]?.classList.add('playing'); i++; },
+            });
+            spans.forEach(s => s.classList.remove('playing'));
+        });
+
+        return { load, answer: () => document.getElementById(answerId).value.trim() };
     }
 
-    document.getElementById('captcha-refresh-btn').addEventListener('click', loadCaptcha);
-    document.getElementById('captcha-play-btn').addEventListener('click', async () => {
-        if (!currentCaptchaMorse) return;
-        const spans = document.querySelectorAll('#captcha-pattern .sym');
-        let i = 0;
-        const audio = new MorseAudio({ wpm: 15 });
-        await audio.playPattern(currentCaptchaMorse, {
-            onSymbol: () => { spans[i]?.classList.add('playing'); i++; },
-        });
-        spans.forEach(s => s.classList.remove('playing'));
-    });
+    const registerCaptcha = makeCaptchaWidget('captcha-pattern', 'captcha-play-btn', 'captcha-refresh-btn', 'captcha-answer');
+    const resetCaptcha = makeCaptchaWidget('reset-captcha-pattern', 'reset-captcha-play-btn', 'reset-captcha-refresh-btn', 'reset-captcha-answer');
+    const loadCaptcha = registerCaptcha.load; // имя сохранено — используется ниже при ошибке капчи
 
     document.querySelectorAll('.mode-switch .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -181,7 +189,27 @@
     });
 
     document.getElementById('logout-btn').addEventListener('click', async () => {
+        // Сначала дожимаем прогресс на сервер (debounce мог не успеть) —
+        // только после этого локальную копию безопасно предлагать стереть.
+        try { await Progress.pushNow(); } catch { /* не критично */ }
+
+        // Сценарий общего компьютера: следующий человек за этим браузером
+        // не должен получить чужой прогресс. Прогресс уже сохранён в
+        // аккаунте и вернётся при следующем входе — стирать локально безопасно.
+        const wipe = confirm(
+            'Убрать прогресс тренировок из этого браузера?\n\n' +
+            'ОК — убрать (выбирай, если компьютер общий): прогресс уже сохранён ' +
+            'в аккаунте и вернётся при следующем входе.\n' +
+            'Отмена — оставить: продолжишь тренироваться на этом устройстве ' +
+            'без входа в аккаунт.'
+        );
+
         await fetch('api/logout.php', { method: 'POST' });
+
+        if (wipe) {
+            Progress.resetAll();               // только localStorage — серверная копия остаётся!
+            localStorage.removeItem(CLAIM_KEY); // и метка "кто публиковался с этого браузера"
+        }
         showGuest();
     });
 
@@ -241,6 +269,144 @@
             await doSync();
         }
     }
+    /* ---------- Восстановление пароля ---------- */
+
+    document.getElementById('forgot-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        const box = document.getElementById('reset-request-form');
+        const opening = box.style.display === 'none';
+        box.style.display = opening ? 'block' : 'none';
+        if (opening) {
+            resetCaptcha.load();
+            document.getElementById('reset-email').value = document.getElementById('login-email').value;
+        }
+    });
+
+    document.getElementById('reset-request-btn').addEventListener('click', async () => {
+        const feedback = document.getElementById('reset-request-feedback');
+        const btn = document.getElementById('reset-request-btn');
+        btn.disabled = true;
+        try {
+            const res = await fetch('api/request_password_reset.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('reset-email').value.trim(),
+                    captcha: resetCaptcha.answer(),
+                }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                feedback.textContent = data.message;
+                feedback.className = 'feedback show ok';
+            } else {
+                feedback.textContent = data.error || 'Не получилось отправить';
+                feedback.className = 'feedback show bad';
+                if (data.code === 'captcha') resetCaptcha.load();
+            }
+        } catch {
+            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.className = 'feedback show bad';
+        }
+        btn.disabled = false;
+    });
+
+    // Переход по ссылке из письма: account.php?reset_token=... —
+    // показываем форму нового пароля вместо обычного входа.
+    const resetToken = new URLSearchParams(location.search).get('reset_token');
+    if (resetToken) {
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('reset-password-form').style.display = 'block';
+
+        document.getElementById('reset-password-btn').addEventListener('click', async () => {
+            const feedback = document.getElementById('reset-password-feedback');
+            try {
+                const res = await fetch('api/reset_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: resetToken,
+                        password: document.getElementById('reset-new-password').value,
+                        passwordConfirm: document.getElementById('reset-new-password-confirm').value,
+                    }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    feedback.textContent = data.message + ' Открываю форму входа…';
+                    feedback.className = 'feedback show ok';
+                    history.replaceState({}, '', location.pathname); // убираем токен из адресной строки
+                    setTimeout(() => {
+                        document.getElementById('reset-password-form').style.display = 'none';
+                        document.getElementById('login-form').style.display = 'block';
+                    }, 1500);
+                } else {
+                    feedback.textContent = data.error || 'Не получилось сменить пароль';
+                    feedback.className = 'feedback show bad';
+                }
+            } catch {
+                feedback.textContent = 'Не удалось связаться с сервером';
+                feedback.className = 'feedback show bad';
+            }
+        });
+    }
+
+    /* ---------- Настройки аккаунта (имя / пароль / e-mail) ---------- */
+
+    async function updateAccount(payload, feedbackId) {
+        const feedback = document.getElementById(feedbackId);
+        try {
+            const res = await fetch('api/update_account.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            feedback.textContent = res.ok ? data.message : (data.error || 'Не получилось');
+            feedback.className = res.ok ? 'feedback show ok' : 'feedback show bad';
+            return res.ok ? data : null;
+        } catch {
+            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.className = 'feedback show bad';
+            return null;
+        }
+    }
+
+    document.getElementById('change-name-btn').addEventListener('click', async () => {
+        const name = document.getElementById('change-name-input').value.trim();
+        const data = await updateAccount({ action: 'name', name }, 'change-name-feedback');
+        if (data) {
+            document.getElementById('profile-name').textContent = data.name;
+            document.getElementById('change-name-input').value = '';
+        }
+    });
+
+    document.getElementById('change-pass-btn').addEventListener('click', async () => {
+        const data = await updateAccount({
+            action: 'password',
+            currentPassword: document.getElementById('change-pass-current').value,
+            newPassword: document.getElementById('change-pass-new').value,
+            newPasswordConfirm: document.getElementById('change-pass-confirm').value,
+        }, 'change-pass-feedback');
+        if (data) {
+            ['change-pass-current', 'change-pass-new', 'change-pass-confirm']
+                .forEach(id => document.getElementById(id).value = '');
+        }
+    });
+
+    document.getElementById('change-email-btn').addEventListener('click', async () => {
+        const data = await updateAccount({
+            action: 'email',
+            currentPassword: document.getElementById('change-email-pass').value,
+            newEmail: document.getElementById('change-email-new').value.trim(),
+        }, 'change-email-feedback');
+        if (data) {
+            document.getElementById('change-email-pass').value = '';
+            document.getElementById('change-email-new').value = '';
+            document.getElementById('profile-email').textContent = data.email;
+            refreshAuthState(); // перерисует статус "e-mail не подтверждён" с кнопкой повторной отправки
+        }
+    });
+
     document.getElementById('sync-btn').addEventListener('click', syncNow);
 
     refreshAuthState();
