@@ -1,6 +1,6 @@
 <?php
 require __DIR__ . '/includes/auth.php';
-$pageTitle = 'Аккаунт';
+$pageTitle = 'Профиль и настройки';
 $activePage = 'account';
 $pageScript = 'account.js';
 $loggedInUser = current_user($pdo);
@@ -85,6 +85,59 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary mt-2" id="sync-btn">🔄 Опубликовать в лидерборд</button>
         <div class="feedback mt-2" id="sync-feedback"></div>
     </div>
+</div>
+
+<!-- ======================= НАСТРОЙКИ (доступны и без аккаунта) ======================= -->
+<div class="card-eyebrow mt-3">Настройки</div>
+<h1>Тон сигнала</h1>
+<p>Настройки применяются сразу и действуют на всех страницах тренажёра —
+    во время прослушивания, отправки ключом и сайдтона. Аккаунт для них не
+    нужен — хранятся в этом браузере.</p>
+
+<div class="card mt-2">
+    <div class="mt-1">
+        <div class="muted" style="font-size:13px;margin-bottom:6px;">Частота тона</div>
+        <div class="speed-control">
+            <input type="range" id="tone-freq" min="300" max="1000" step="10" value="600">
+            <span class="speed-value mono" id="tone-freq-value">600</span> Гц
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <div class="muted" style="font-size:13px;margin-bottom:6px;">Форма волны</div>
+        <div class="chip-row" id="waveform-chips">
+            <div class="chip active" data-wave="sine">Синусоида (мягкая)</div>
+            <div class="chip" data-wave="triangle">Треугольная (тёплая)</div>
+            <div class="chip" data-wave="square">Прямоугольная (резкая)</div>
+            <div class="chip" data-wave="sawtooth">Пилообразная (жужжащая)</div>
+        </div>
+    </div>
+
+    <div class="btn-row mt-3">
+        <button class="btn btn-primary" id="test-tone-btn">▶ Проверить звук</button>
+        <button class="btn" id="reset-tone-btn">Сбросить по умолчанию</button>
+    </div>
+
+    <p class="muted mt-2" style="font-size:12px;">
+        600 Гц синусоида — классический тон CW-радиостанций, ближе всего к
+        реальному эфиру. Прямоугольная/пилообразная звучат резче и жужжащее —
+        кому-то удобнее различать точки/тире на слух именно с ними.
+    </p>
+</div>
+
+<h1 class="mt-3">Отображение</h1>
+<div class="card mt-2">
+    <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+        <input type="checkbox" id="show-signal-line-toggle" checked>
+        <span>Показывать сигнальную линию (точки-тире) во время приёма на слух</span>
+    </label>
+    <p class="muted mt-2" style="font-size:12px;">
+        Точки-тире на экране — по сути подсказка: глазами прочитать проще, чем
+        разобрать на слух. Если хочешь тренировать именно слух, а не зрение —
+        выключи. Этот же переключатель есть прямо на каждой странице приёма
+        на слух (кнопка рядом с лампой) — настройка общая, где ни включи,
+        применится везде.
+    </p>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

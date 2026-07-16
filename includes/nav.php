@@ -8,7 +8,6 @@ $navItems = [
     'callsigns'   => ['label' => 'Позывные',    'icon' => '📡', 'href' => 'callsigns.php'],
     'achievements'=> ['label' => 'Ачивки',      'icon' => '🏆', 'href' => 'achievements.php'],
     'account'     => ['label' => 'Профиль',     'icon' => '👤', 'href' => 'account.php'],
-    'settings'    => ['label' => 'Звук',        'icon' => '⚙️', 'href' => 'settings.php'],
 ];
 ?>
 <nav class="topnav">
