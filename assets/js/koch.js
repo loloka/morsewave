@@ -235,8 +235,13 @@
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
         let xpEarned = session.xpEarned;
         if (accuracy >= PASS_THRESHOLD) {
-            xpEarned += 30;
-            Progress.addXp(30); // бонус за пройденную сессию — только при полном её завершении
+            // Бонус за пройденную сессию пропорционален её длине: 10/20/30
+            // групп → +10/+20/+30 XP (раньше был плоский +30 — короткая
+            // сессия из 10 групп награждалась как длинная из 30, нелогично).
+            // Клампим на случай подмены значения select в DOM.
+            const bonus = Math.min(30, Math.max(0, Math.round(session.count) || 0));
+            xpEarned += bonus;
+            Progress.addXp(bonus);
         }
 
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
