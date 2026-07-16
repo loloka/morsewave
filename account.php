@@ -99,9 +99,11 @@ include __DIR__ . '/includes/header.php';
                 <?php if (is_admin_user($loggedInUser)): ?>
                 <a href="admin.php" class="btn btn-sm">🛠 Админка</a>
                 <?php endif; ?>
-                <button class="btn" id="logout-btn">Выйти</button>
+                <button class="btn" id="logout-btn" title="Прогресс сохранён в аккаунте и вернётся при следующем входе">Выйти</button>
             </div>
         </div>
+        <p class="muted mt-1" style="font-size:12px;">При выходе прогресс тренировок убирается из этого браузера —
+            он сохранён в аккаунте и вернётся, как только войдёшь снова (удобно на общем компьютере).</p>
         <div class="mt-2" id="verify-status"></div>
     </div>
 
