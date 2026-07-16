@@ -241,7 +241,9 @@
             document.querySelectorAll('#rec-charset-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             recCharsetKey = chip.dataset.set;
-            document.getElementById('rec-custom-input').style.display = recCharsetKey === 'custom' ? 'block' : 'none';
+            const recIsCustom = recCharsetKey === 'custom';
+            document.getElementById('rec-custom-input').style.display = recIsCustom ? 'block' : 'none';
+            document.getElementById('rec-custom-hint').style.display = recIsCustom ? 'block' : 'none';
         });
     });
 

@@ -76,8 +76,9 @@ include __DIR__ . '/includes/header.php';
             <div class="chip" data-set="custom">Свои символы</div>
         </div>
         <input type="text" id="rec-custom-input" class="answer-input mt-1"
-               placeholder="Например: A E I O U (мин. 5, через пробел)"
+               placeholder="Например: A E I O U"
                style="display:none; text-transform:uppercase;" autocomplete="off">
+        <div class="muted" id="rec-custom-hint" style="display:none; font-size:11px; margin-top:4px;">Минимум 5 символов, через пробел</div>
 
         <div class="flex-between flex-wrap gap-2 mt-2">
             <div class="speed-control">
