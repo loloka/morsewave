@@ -95,9 +95,9 @@ include __DIR__ . '/includes/header.php';
                 <h2 class="mt-0" id="profile-name" style="margin-bottom:0;"></h2>
                 <p class="muted mt-0" id="profile-email" style="font-size:13px;"></p>
             </div>
-            <div class="btn-row">
+            <div class="btn-row" id="profile-actions">
                 <?php if (is_admin_user($loggedInUser)): ?>
-                <a href="admin.php" class="btn btn-sm">🛠 Админка</a>
+                <a href="admin.php" id="admin-link" class="btn btn-sm">🛠 Админка</a>
                 <?php endif; ?>
                 <button class="btn" id="logout-btn" title="Прогресс сохранён в аккаунте и вернётся при следующем входе">Выйти</button>
             </div>

@@ -81,15 +81,49 @@
         });
     }
 
+    // Кнопка «Админка» рендерится сервером только при загрузке страницы с уже
+    // активной сессией. После AJAX-логина сессия появляется без перезагрузки —
+    // поэтому кнопку добавляем/убираем на клиенте по флагу is_admin (иначе она
+    // всплывала бы только после F5).
+    function renderAdminLink(user) {
+        const actions = document.getElementById('profile-actions');
+        if (!actions) return;
+        let link = document.getElementById('admin-link');
+        if (user.is_admin) {
+            if (!link) {
+                link = document.createElement('a');
+                link.id = 'admin-link';
+                link.href = 'admin.php';
+                link.className = 'btn btn-sm';
+                link.textContent = '🛠 Админка';
+                actions.insertBefore(link, actions.firstChild);
+            }
+        } else if (link) {
+            link.remove();
+        }
+    }
+
+    // «Твой XP (локально)» и «Твоя серия дней» в профиле. Вынесено в отдельную
+    // функцию, потому что после логина слияние с сервером идёт асинхронно
+    // (Progress.syncWithServer) и по завершении шлёт progress:updated — числа
+    // нужно перерисовать, иначе они показывали бы значения ДО слияния (0 сразу
+    // после входа) до ручной перезагрузки страницы (F5).
+    function updateLocalStats(state) {
+        state = state || Progress.load();
+        const xpEl = document.getElementById('local-xp');
+        const streakEl = document.getElementById('local-streak');
+        if (xpEl) xpEl.textContent = state.xp;
+        if (streakEl) streakEl.textContent = state.streak.count;
+    }
+
     function showProfile(user) {
         guestBlock.style.display = 'none';
         profileBlock.style.display = 'block';
         document.getElementById('profile-name').textContent = user.name;
         document.getElementById('profile-email').textContent = user.email;
+        renderAdminLink(user);
         renderVerifyStatus(user);
-        const state = Progress.load();
-        document.getElementById('local-xp').textContent = state.xp;
-        document.getElementById('local-streak').textContent = state.streak.count;
+        updateLocalStats();
     }
 
     function showGuest() {
@@ -402,6 +436,11 @@
     });
 
     document.getElementById('sync-btn').addEventListener('click', syncNow);
+
+    // Слияние прогресса с сервером после логина завершается асинхронно и
+    // шлёт это событие — перерисовываем локальные цифры в профиле (счётчики
+    // в шапке обновляет app.js по тому же событию).
+    window.addEventListener('progress:updated', (e) => updateLocalStats(e.detail));
 
     refreshAuthState();
     loadCaptcha();
