@@ -61,7 +61,7 @@ include __DIR__ . '/includes/header.php';
 
 <section class="section">
     <div class="card-eyebrow">С чего начать</div>
-    <h2>Путь новичка: от тишины до эфира за 4 шага</h2>
+    <h2>Путь новичка: от тишины до эфира за 5 шагов</h2>
     <p class="muted">Не обязательно идти строго по порядку, но именно в такой
         последовательности азбуку Морзе учат быстрее всего.</p>
 
@@ -113,6 +113,28 @@ include __DIR__ . '/includes/header.php';
                     <a href="callsigns.php" class="btn btn-sm">Позывные →</a>
                     <a href="groups.php" class="btn btn-sm">Сокращения →</a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Пятым шагом — связка с родственным проектом Morse Walker (r9o.ru).
+             Сознательно внутри «пути новичка», а не отдельной секцией ниже:
+             это логичное продолжение маршрута (приём отдельных знаков → работа
+             в эфире), и так «Задание дня» не уезжает вниз страницы. -->
+        <div class="onboarding-step">
+            <div class="step-num">5</div>
+            <div class="step-content">
+                <div class="step-icon">📻</div>
+                <h3>Выходи в эфир — Morse Walker</h3>
+                <p>Когда уверенно принимаешь позывные и сокращения, тренажёр своё дело сделал:
+                    дальше нужен не приём отдельных знаков, а работа в эфире. Morse Walker —
+                    симулятор радиосвязи с pile-up: станции отвечают на твой CQ, их надо
+                    разобрать и провести QSO. Есть режимы контестов и POTA, скорость и
+                    интервалы Фарнсворта настраиваются, помехи и замирания — по вкусу.</p>
+                <p class="muted" style="font-size:12px;">Автор проекта —
+                    <a href="https://github.com/sc0tfree/morsewalker" target="_blank" rel="noopener">W6NYC</a>,
+                    доработка и русификация —
+                    <a href="https://github.com/loloka/morsewalker" target="_blank" rel="noopener">R9OGL</a>, автор MorseWave.</p>
+                <a href="https://morse.r9o.ru" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Открыть Morse Walker →</a>
             </div>
         </div>
     </div>

@@ -24,6 +24,7 @@ const Progress = (() => {
             examsPassed: 0,
             abbrCompleted: 0,
             abbrBestStreak: 0,
+            wordsCompleted: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,

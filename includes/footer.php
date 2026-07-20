@@ -13,6 +13,7 @@
 </footer>
 <script src="<?= asset_v('assets/js/morse-data.js') ?>"></script>
 <script src="<?= asset_v('assets/js/abbreviations.js') ?>"></script>
+<script src="<?= asset_v('assets/js/words.js') ?>"></script>
 <script src="<?= asset_v('assets/js/audio-settings.js') ?>"></script>
 <script src="<?= asset_v('assets/js/display-settings.js') ?>"></script>
 <script src="<?= asset_v('assets/js/audio.js') ?>"></script>

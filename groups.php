@@ -12,6 +12,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="mode-switch">
     <div class="chip active" data-mode="groups">🔢 Группы символов</div>
+    <div class="chip" data-mode="words">📝 Реальные слова</div>
     <div class="chip" data-mode="abbrev">📻 Сокращения</div>
 </div>
 
@@ -127,6 +128,90 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <button class="btn btn-primary mt-2" id="restart-btn">Новая сессия</button>
+</div>
+
+</div>
+
+<!-- ======================= РЕЖИМ: РЕАЛЬНЫЕ СЛОВА ======================= -->
+<div id="words-mode" style="display:none;">
+
+<div class="card mt-2" id="words-setup">
+    <p class="mt-0">Случайные группы тренируют каждый знак по отдельности, но в эфире
+        летят слова. Опытный оператор узнаёт частое слово одним звуковым образом, не
+        складывая его из букв — именно это здесь и тренируется.</p>
+
+    <div class="mt-2">
+        <div class="muted" style="font-size:13px;margin-bottom:6px;">Что принимаем</div>
+        <div class="chip-row" id="words-set-chips">
+            <div class="chip active" data-wset="words">Частые слова</div>
+            <div class="chip" data-wset="phrases">Радиообменные фразы</div>
+            <div class="chip" data-wset="mixed">Вперемешку</div>
+        </div>
+        <div class="muted mt-1" style="font-size:12px;" id="words-set-hint">
+            Короткие и самые частые английские слова — с них начинают набирать скорость.
+        </div>
+    </div>
+
+    <div class="flex-wrap gap-2 mt-3" style="align-items:center;">
+        <div class="speed-control">
+            Скорость
+            <input type="range" id="words-wpm" min="5" max="60" step="1" value="12">
+            <span class="speed-value" id="words-wpm-value">12</span> wpm
+        </div>
+
+        <label class="chip" style="gap:8px;">
+            <input type="checkbox" id="words-farnsworth-enabled" checked> Фарнсворт
+        </label>
+        <div class="speed-control" id="words-farnsworth-wrap">
+            <input type="range" id="words-farnsworth" min="5" max="30" step="1" value="9">
+            <span class="speed-value" id="words-farnsworth-value">9</span> wpm
+        </div>
+
+        <label class="chip">Слов в сессии:
+            <select id="words-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
+                <option value="10" selected>10</option><option value="20">20</option>
+                <option value="30">30</option><option value="50">50</option>
+            </select>
+        </label>
+    </div>
+    <p class="muted mt-1" style="font-size:12px;">
+        Фарнсворт здесь включён по умолчанию: сами знаки звучат быстро (так слово
+        и слышится единым образом), а паузы между ними растянуты — есть время
+        сообразить. Это как раз тот случай, ради которого метод и придуман.
+    </p>
+
+    <div class="btn-row mt-2">
+        <button class="btn btn-primary" id="words-start-btn">▶ Начать сессию</button>
+    </div>
+</div>
+
+<div class="card mt-3" id="words-session" style="display:none;">
+    <div class="flex-between">
+        <div class="muted mono"><span id="words-index">1</span> / <span id="words-total">10</span></div>
+        <div class="lamp-row">
+            <div class="morse-lamp" id="words-lamp"></div>
+            <button class="btn btn-sm" id="words-signal-toggle"></button>
+            <button class="btn btn-sm" id="words-replay-btn">🔁 Повторить</button>
+        </div>
+    </div>
+    <div class="signal-line mt-2" id="words-signal"></div>
+    <input type="text" id="words-answer" class="answer-input mt-2" placeholder="Введи, что услышал…" autocomplete="off">
+    <div class="btn-row mt-2">
+        <button class="btn btn-primary" id="words-submit-btn">Проверить →</button>
+        <button class="btn" id="words-stop-btn">⏹ Завершить</button>
+    </div>
+    <div class="feedback mt-2" id="words-feedback"></div>
+</div>
+
+<div class="card mt-3" id="words-result" style="display:none;">
+    <h3>Результат сессии</h3>
+    <div class="grid grid-3 mt-1">
+        <div class="stat"><span class="value" id="words-result-accuracy">0%</span><span class="label">Точность</span></div>
+        <div class="stat"><span class="value" id="words-result-correct">0</span><span class="label">Принято целиком</span></div>
+        <div class="stat"><span class="value" id="words-result-xp">0</span><span class="label">Получено XP</span></div>
+    </div>
+    <div class="mt-2" id="words-mistakes" style="display:none;"></div>
+    <button class="btn btn-primary mt-2" id="words-restart-btn">Новая сессия</button>
 </div>
 
 </div>

@@ -1,5 +1,6 @@
 (function () {
     const groupsModeEl = document.getElementById('groups-mode');
+    const wordsModeEl = document.getElementById('words-mode');
     const abbrevModeEl = document.getElementById('abbrev-mode');
     let abbrevModeActive = false;
 
@@ -9,9 +10,17 @@
             chip.classList.add('active');
             const mode = chip.dataset.mode;
             groupsModeEl.style.display = mode === 'groups' ? 'block' : 'none';
+            wordsModeEl.style.display = mode === 'words' ? 'block' : 'none';
             abbrevModeEl.style.display = mode === 'abbrev' ? 'block' : 'none';
             abbrevModeActive = mode === 'abbrev';
             if (abbrevModeActive) initAbbrevGrid();
+            // Уход со вкладки не должен оставлять звук играть в фоне
+            if (mode !== 'abbrev') {
+                haltAbbrev();
+                abbrevStartBtn.style.display = 'inline-flex';
+                abbrevStopBtn.style.display = 'none';
+            }
+            if (mode !== 'words') haltWords();
         });
     });
 
@@ -684,5 +693,245 @@
             }).join('');
             referenceBox.innerHTML = '<div class="grid grid-2">' + cards + '</div>';
         }
+    });
+
+    /* ======================= РЕЖИМ: РЕАЛЬНЫЕ СЛОВА =======================
+       Приём слов и радиообменных фраз (банк — assets/js/words.js). Отличия
+       от «Групп символов» намеренные:
+       - текст берётся из фиксированного банка, а не генерируется случайно;
+       - в фразах есть пробелы, поэтому сверка идёт по нормализованной
+         строке (схлопнутые пробелы, верхний регистр);
+       - XP не начисляется, если слово принято хуже чем на 60 % — иначе
+         режим фармился бы вслепую: банк невелик и предсказуем, можно было
+         бы вбивать одно и то же частое слово и собирать частичные
+         совпадения. В «Группах» такой защиты нет и не нужно — там текст
+         случайный, угадывать нечего. */
+    const wordsSetup = document.getElementById('words-setup');
+    const wordsSessionPanel = document.getElementById('words-session');
+    const wordsResultPanel = document.getElementById('words-result');
+    const wordsIndexEl = document.getElementById('words-index');
+    const wordsTotalEl = document.getElementById('words-total');
+    const wordsAnswerInput = document.getElementById('words-answer');
+    const wordsFeedback = document.getElementById('words-feedback');
+    const wordsWpmSlider = document.getElementById('words-wpm');
+    const wordsWpmValue = document.getElementById('words-wpm-value');
+    const wordsFwEnabled = document.getElementById('words-farnsworth-enabled');
+    const wordsFwWrap = document.getElementById('words-farnsworth-wrap');
+    const wordsFwSlider = document.getElementById('words-farnsworth');
+    const wordsFwValue = document.getElementById('words-farnsworth-value');
+    const wordsReplayBtn = document.getElementById('words-replay-btn');
+    const wordsSetHint = document.getElementById('words-set-hint');
+    const wordsLamp = new MorseLamp(document.getElementById('words-lamp'));
+    const wordsSignalLine = new SignalLine(document.getElementById('words-signal'));
+    wireSignalVisibilityToggle(document.getElementById('words-signal-toggle'), document.getElementById('words-signal'));
+
+    const WORDS_SET_HINTS = {
+        words: 'Короткие и самые частые английские слова — с них начинают набирать скорость.',
+        phrases: 'Реальные куски радиообмена: вызов, рапорт, QTH, служебные коды. Есть цифры и пробелы — заметно сложнее, и XP за них выше.',
+        mixed: 'Слова и фразы вперемешку — ближе всего к реальному эфиру.',
+    };
+
+    // Ставка XP за верно принятый символ. Ниже, чем в «Группах» (там 2.0
+    // при полном наборе): осмысленный текст предсказуем — недослышанную
+    // букву часто можно восстановить по смыслу, значит и стоит он меньше.
+    // Фразы дороже слов: длиннее, вперемешку с цифрами и позывными.
+    const WORDS_XP_RATE = 1.2;
+    const PHRASES_XP_RATE = 1.5;
+    const WORDS_MIN_ACCURACY = 0.6;
+
+    let wordsSet = 'words';
+    let wordsSession = null;
+    let wordsAudio = null;
+    let wordsPlaying = false;
+    let wordsSessionId = 0;
+
+    document.querySelectorAll('#words-set-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#words-set-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            wordsSet = chip.dataset.wset;
+            wordsSetHint.textContent = WORDS_SET_HINTS[wordsSet] || '';
+        });
+    });
+
+    wordsWpmSlider.addEventListener('input', () => { wordsWpmValue.textContent = wordsWpmSlider.value; });
+    wordsFwSlider.addEventListener('input', () => { wordsFwValue.textContent = wordsFwSlider.value; });
+    wordsFwEnabled.addEventListener('change', () => {
+        wordsFwWrap.style.display = wordsFwEnabled.checked ? 'inline-flex' : 'none';
+    });
+
+    function wordsPool() {
+        if (wordsSet === 'phrases') return RADIO_PHRASES;
+        if (wordsSet === 'mixed') return COMMON_WORDS.concat(RADIO_PHRASES);
+        return COMMON_WORDS;
+    }
+
+    // Пробелы схлопываем: на слух пауза между словами одна, и требовать
+    // от человека угадать точное число пробелов бессмысленно.
+    function normalizeText(s) {
+        return String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
+    }
+
+    function isPhrase(text) {
+        return text.includes(' ');
+    }
+
+    /** Полная остановка режима — тот же шаблон, что в haltAbbrev(). */
+    function haltWords() {
+        wordsSessionId++;
+        wordsPlaying = false;
+        if (wordsAudio) { wordsAudio.stop(); wordsAudio = null; }
+        wordsSignalLine.clear();
+        wordsLamp.off();
+    }
+
+    async function playCurrentWord() {
+        if (!wordsSession || wordsPlaying) return; // защита от спама «Повторить»
+        const mySession = wordsSessionId;
+        wordsPlaying = true;
+        wordsReplayBtn.disabled = true;
+        wordsSignalLine.clear();
+        wordsAnswerInput.focus();
+        try {
+            wordsAudio = new MorseAudio({
+                wpm: wordsSession.wpm,
+                farnsworthWpm: wordsSession.farnsworth || null,
+            });
+            await wordsAudio.play(wordsSession.items[wordsSession.index], {
+                onSymbol: ({ symbol, durationMs }) => {
+                    if (mySession !== wordsSessionId) return;
+                    wordsSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    wordsLamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения слова:', e);
+        } finally {
+            if (mySession === wordsSessionId) {
+                wordsPlaying = false;
+                wordsReplayBtn.disabled = false;
+            }
+        }
+    }
+
+    function startWordsSession() {
+        const pool = wordsPool();
+        const count = parseInt(document.getElementById('words-count').value, 10);
+        const wpm = parseInt(wordsWpmSlider.value, 10);
+        const farnsworth = wordsFwEnabled.checked ? parseInt(wordsFwSlider.value, 10) : null;
+
+        haltWords();
+        wordsSession = {
+            items: Array.from({ length: count }, () => pool[Math.floor(Math.random() * pool.length)]),
+            index: 0, wpm, farnsworth,
+            correctChars: 0, totalChars: 0, fullyCorrect: 0, xpEarned: 0,
+            missed: [],
+        };
+
+        wordsSetup.style.display = 'none';
+        wordsResultPanel.style.display = 'none';
+        wordsSessionPanel.style.display = 'block';
+        wordsTotalEl.textContent = count;
+        wordsIndexEl.textContent = '1';
+        wordsAnswerInput.value = '';
+        wordsFeedback.className = 'feedback';
+        playCurrentWord();
+    }
+
+    function submitWordAnswer() {
+        if (!wordsSession) return;
+        const expected = normalizeText(wordsSession.items[wordsSession.index]);
+        const typed = normalizeText(wordsAnswerInput.value);
+
+        // Пробелы в счёт не идут: они не звучат отдельным знаком, и давать
+        // за них XP — это дарить опыт за длину фразы. Позиции при этом
+        // сохраняем (сравниваем по индексу), поэтому пропуск пробела
+        // сдвигает остаток и честно ломает совпадение.
+        let correct = 0;
+        let scorable = 0;
+        for (let i = 0; i < expected.length; i++) {
+            if (expected[i] === ' ') continue;
+            scorable++;
+            if (typed[i] === expected[i]) correct++;
+        }
+        const accuracy = scorable ? correct / scorable : 0;
+
+        wordsSession.correctChars += correct;
+        wordsSession.totalChars += scorable;
+
+        // XP — сразу за каждое слово, чтобы не терялось при досрочном
+        // выходе, но только если слово принято не хуже порога.
+        const rate = isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE;
+        const xpGain = accuracy >= WORDS_MIN_ACCURACY ? Math.round(correct * rate) : 0;
+        wordsSession.xpEarned += xpGain;
+        if (xpGain > 0) Progress.addXp(xpGain);
+        Progress.incrementStat('wordsCompleted', 1);
+
+        if (correct === scorable && typed.length === expected.length) {
+            wordsSession.fullyCorrect++;
+            wordsFeedback.textContent = `Верно: ${expected}${xpGain ? ` (+${xpGain} XP)` : ''}`;
+            wordsFeedback.className = 'feedback show ok';
+        } else {
+            wordsSession.missed.push({ expected, typed: typed || '(пусто)' });
+            wordsFeedback.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`
+                + (xpGain ? ` (+${xpGain} XP)` : ' (XP не начислен — принято меньше 60 %)');
+            wordsFeedback.className = 'feedback show bad';
+        }
+
+        wordsSession.index++;
+        wordsAnswerInput.value = '';
+        if (wordsSession.index >= wordsSession.items.length) {
+            setTimeout(finishWordsSession, 700);
+        } else {
+            wordsIndexEl.textContent = wordsSession.index + 1;
+            setTimeout(playCurrentWord, 700);
+        }
+    }
+
+    function finishWordsSession() {
+        haltWords();
+        if (!wordsSession) return;
+
+        const accuracy = wordsSession.totalChars
+            ? Math.round((wordsSession.correctChars / wordsSession.totalChars) * 100)
+            : 0;
+        document.getElementById('words-result-accuracy').textContent = `${accuracy}%`;
+        document.getElementById('words-result-correct').textContent =
+            `${wordsSession.fullyCorrect} / ${wordsSession.index}`;
+        document.getElementById('words-result-xp').textContent = wordsSession.xpEarned;
+
+        const mistakesBox = document.getElementById('words-mistakes');
+        if (wordsSession.missed.length) {
+            mistakesBox.style.display = 'block';
+            mistakesBox.innerHTML = '<div class="muted" style="font-size:13px;margin-bottom:6px;">Что не поймалось:</div>'
+                + wordsSession.missed.map(function (m) {
+                    return '<div class="mono" style="font-size:13px;">' + m.expected +
+                        ' <span class="muted">← ' + m.typed + '</span></div>';
+                }).join('');
+        } else {
+            mistakesBox.style.display = 'none';
+        }
+
+        // Серия дней — только за реально доигранную сессию, как в группах.
+        if (wordsSession.index >= wordsSession.items.length) {
+            Progress.markDailyActivity();
+            Progress.incrementStat('sessionsCompleted', 1);
+        }
+
+        wordsSessionPanel.style.display = 'none';
+        wordsResultPanel.style.display = 'block';
+        wordsSession = null;
+    }
+
+    document.getElementById('words-start-btn').addEventListener('click', startWordsSession);
+    document.getElementById('words-submit-btn').addEventListener('click', submitWordAnswer);
+    wordsReplayBtn.addEventListener('click', playCurrentWord);
+    document.getElementById('words-stop-btn').addEventListener('click', finishWordsSession);
+    document.getElementById('words-restart-btn').addEventListener('click', () => {
+        wordsResultPanel.style.display = 'none';
+        wordsSetup.style.display = 'block';
+    });
+    wordsAnswerInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); submitWordAnswer(); }
     });
 })();
