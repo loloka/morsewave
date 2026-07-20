@@ -34,6 +34,7 @@ class MorseAudio {
         this.ctx = null;
         this._timer = null;
         this._stopped = false;
+        this._activeNodes = null; // осциллятор, звучащий прямо сейчас — чтобы stop() мог его оборвать
     }
 
     _ensureCtx() {
@@ -67,7 +68,11 @@ class MorseAudio {
             osc.connect(gain).connect(this.ctx.destination);
             osc.start(now);
             osc.stop(now + dur);
-            osc.onended = resolve;
+            this._activeNodes = { osc, gain };
+            osc.onended = () => {
+                if (this._activeNodes && this._activeNodes.osc === osc) this._activeNodes = null;
+                resolve();
+            };
         });
     }
 
@@ -153,8 +158,28 @@ class MorseAudio {
         callbacks.onDone?.();
     }
 
+    /**
+     * Обрывает воспроизведение немедленно: снимает отложенные паузы и гасит
+     * тон, который звучит прямо сейчас (иначе после «Остановить» ещё до
+     * 3 единиц продолжало пищать тире). Осциллятор глушится коротким
+     * рампом, чтобы не было щелчка; его onended отпустит await в play().
+     */
     stop() {
         this._stopped = true;
         clearTimeout(this._timer);
+        if (this._activeNodes && this.ctx) {
+            const osc = this._activeNodes.osc;
+            const gain = this._activeNodes.gain;
+            this._activeNodes = null;
+            try {
+                const now = this.ctx.currentTime;
+                gain.gain.cancelScheduledValues(now);
+                gain.gain.setValueAtTime(gain.gain.value, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.01);
+                osc.stop(now + 0.02);
+            } catch (e) {
+                // осциллятор мог уже закончиться сам — это нормально
+            }
+        }
     }
 }

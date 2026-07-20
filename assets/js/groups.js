@@ -541,6 +541,9 @@
     let abbrevStreak = 0;
     let abbrevCorrect = 0;
     let abbrevTotal = 0;
+    let abbrevAudio = null;      // проигрыватель текущей группы — чтобы его можно было оборвать
+    let abbrevNextTimer = null;  // отложенный запуск следующей группы
+    let abbrevSessionId = 0;     // токен запуска: старая await-цепочка узнаёт, что она уже не актуальна
 
     function initAbbrevGrid() {
         if (abbrevGridBuilt) return;
@@ -556,19 +559,45 @@
         });
     }
 
+    /**
+     * Полная остановка потока: гасит звук, снимает отложенный запуск и
+     * инвалидирует уже идущую await-цепочку через abbrevSessionId. Иначе
+     * спам «Остановить»/«Начать» плодил параллельные playAbbrevTarget()
+     * и звук накладывался сам на себя.
+     */
+    function haltAbbrev() {
+        abbrevSessionId++;
+        abbrevRunning = false;
+        abbrevBusy = false;
+        abbrevTarget = null;
+        clearTimeout(abbrevNextTimer);
+        abbrevNextTimer = null;
+        if (abbrevAudio) { abbrevAudio.stop(); abbrevAudio = null; }
+        abbrevSignalLine.clear();
+        abbrevLamp.off();
+    }
+
     async function playAbbrevTarget() {
+        if (!abbrevRunning) return;
+        const mySession = abbrevSessionId;
         abbrevTarget = ABBREVIATIONS[Math.floor(Math.random() * ABBREVIATIONS.length)];
         abbrevBusy = true;
         abbrevFeedback.className = 'feedback';
         abbrevSignalLine.clear();
-        const audio = new MorseAudio({ wpm: parseInt(abbrevWpmSlider.value, 10) });
-        await audio.play(abbrevTarget.code, {
-            onSymbol: ({ symbol, durationMs }) => {
-                abbrevSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
-                abbrevLamp.flash(durationMs);
-            },
-        });
-        abbrevBusy = false;
+        try {
+            abbrevAudio = new MorseAudio({ wpm: parseInt(abbrevWpmSlider.value, 10) });
+            await abbrevAudio.play(abbrevTarget.code, {
+                onSymbol: ({ symbol, durationMs }) => {
+                    if (mySession !== abbrevSessionId) return;
+                    abbrevSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    abbrevLamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения, пропускаем группу:', e);
+        } finally {
+            if (mySession === abbrevSessionId) abbrevBusy = false;
+        }
     }
 
     function handleAbbrevAnswer(item, tile) {
@@ -596,12 +625,18 @@
         abbrevCorrectEl.textContent = abbrevCorrect;
         abbrevTotalEl.textContent = abbrevTotal;
 
-        if (abbrevRunning) setTimeout(playAbbrevTarget, 900);
+        if (abbrevRunning) {
+            clearTimeout(abbrevNextTimer);
+            abbrevNextTimer = setTimeout(playAbbrevTarget, 900);
+        }
     }
 
     abbrevWpmSlider.addEventListener('input', () => { abbrevWpmValue.textContent = abbrevWpmSlider.value; });
     abbrevStartBtn.addEventListener('click', () => {
+        if (abbrevRunning) return;
+        haltAbbrev(); // добить хвосты предыдущего запуска, если они ещё живы
         abbrevRunning = true;
+        abbrevFeedback.className = 'feedback';
         abbrevStreak = 0;
         abbrevCorrect = 0;
         abbrevTotal = 0;
@@ -613,7 +648,9 @@
         playAbbrevTarget();
     });
     abbrevStopBtn.addEventListener('click', () => {
-        abbrevRunning = false;
+        haltAbbrev();
+        abbrevFeedback.textContent = 'Остановлено. Нажмите «Начать тренировку», чтобы продолжить.';
+        abbrevFeedback.className = 'feedback show';
         abbrevStartBtn.style.display = 'inline-flex';
         abbrevStopBtn.style.display = 'none';
     });

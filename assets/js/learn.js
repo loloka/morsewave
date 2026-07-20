@@ -17,6 +17,11 @@
             if (recognizeModeActive) {
                 initRecognizeGrid();
                 startRecognizeSession();
+            } else {
+                // уход со вкладки не должен оставлять звук играть в фоне
+                haltRecognize();
+                recStartBtn.style.display = 'inline-flex';
+                recStopBtn.style.display = 'none';
             }
         });
     });
@@ -235,6 +240,9 @@
     let recRunning = false;
     let recGridBuilt = false;
     let recCharsetKey = 'all';
+    let recAudio = null;         // проигрыватель текущего символа — чтобы его можно было оборвать
+    let recNextTimer = null;     // отложенный запуск следующего символа
+    let recSessionId = 0;        // токен запуска: старая await-цепочка узнаёт, что она уже не актуальна
 
     document.querySelectorAll('#rec-charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -268,7 +276,7 @@
         recStreak = 0;
         recSessionCorrect = 0;
         recSessionTotal = 0;
-        recRunning = false;
+        haltRecognize();
         recBest = state.stats.recognizeBestStreak || 0;
         renderRecStats(state.stats.recognizedCount || 0);
         recStartBtn.style.display = 'inline-flex';
@@ -301,16 +309,37 @@
         }
     }
 
+    /**
+     * Останавливает поток символов начисто: гасит звук, снимает отложенный
+     * запуск следующего символа и инвалидирует уже запущенную await-цепочку
+     * через recSessionId. Без этого спам «Остановить»/«Начать» плодил
+     * параллельные playRecognizeTarget(), и звук накладывался сам на себя.
+     */
+    function haltRecognize() {
+        recSessionId++;
+        recRunning = false;
+        recBusy = false;
+        recTarget = null;
+        clearTimeout(recNextTimer);
+        recNextTimer = null;
+        if (recAudio) { recAudio.stop(); recAudio = null; }
+        recSignalLine.clear();
+        recLamp.off();
+    }
+
     async function playRecognizeTarget() {
+        if (!recRunning) return;
+        const mySession = recSessionId;
         const pool = recognizePool();
         recTarget = pool[Math.floor(Math.random() * pool.length)];
         recBusy = true;
         recFeedback.className = 'feedback';
         recSignalLine.clear();
         try {
-            const audio = new MorseAudio({ wpm: parseInt(recWpmSlider.value, 10) });
-            await audio.play(recTarget, {
+            recAudio = new MorseAudio({ wpm: parseInt(recWpmSlider.value, 10) });
+            await recAudio.play(recTarget, {
                 onSymbol: ({ symbol, durationMs }) => {
+                    if (mySession !== recSessionId) return;
                     recSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     recLamp.flash(durationMs);
                 },
@@ -318,7 +347,9 @@
         } catch (e) {
             console.error('Ошибка воспроизведения, пропускаем символ:', e);
         } finally {
-            recBusy = false;
+            // Флаги трогаем, только если это всё ещё актуальный запуск —
+            // иначе оборванная цепочка сбросит recBusy у новой.
+            if (mySession === recSessionId) recBusy = false;
         }
     }
 
@@ -358,7 +389,10 @@
         }
 
         renderRecStats(Progress.load().stats.recognizedCount || 0);
-        if (recRunning) setTimeout(playRecognizeTarget, 700);
+        if (recRunning) {
+            clearTimeout(recNextTimer);
+            recNextTimer = setTimeout(playRecognizeTarget, 700);
+        }
     }
 
     // Ввод с физической клавиатуры — так же, как тап по плитке
@@ -374,13 +408,18 @@
 
     recWpmSlider.addEventListener('input', () => { recWpmValue.textContent = recWpmSlider.value; });
     recStartBtn.addEventListener('click', () => {
+        if (recRunning) return;
+        haltRecognize(); // добить хвосты предыдущего запуска, если они ещё живы
         recRunning = true;
+        recFeedback.className = 'feedback';
         recStartBtn.style.display = 'none';
         recStopBtn.style.display = 'inline-flex';
         playRecognizeTarget();
     });
     recStopBtn.addEventListener('click', () => {
-        recRunning = false;
+        haltRecognize();
+        recFeedback.textContent = 'Остановлено. Нажмите «Начать тренировку», чтобы продолжить.';
+        recFeedback.className = 'feedback show';
         recStartBtn.style.display = 'inline-flex';
         recStopBtn.style.display = 'none';
     });
