@@ -104,6 +104,7 @@ include __DIR__ . '/includes/header.php';
         </div>
         <p class="muted mt-1" style="font-size:12px;">При выходе прогресс тренировок убирается из этого браузера —
             он сохранён в аккаунте и вернётся, как только войдёшь снова (удобно на общем компьютере).</p>
+        <div class="muted mt-1" id="sync-indicator" style="font-size:12px;"></div>
         <div class="mt-2" id="verify-status"></div>
     </div>
 
@@ -185,6 +186,26 @@ include __DIR__ . '/includes/header.php';
         600 Гц синусоида — классический тон CW-радиостанций, ближе всего к
         реальному эфиру. Прямоугольная/пилообразная звучат резче и жужжащее —
         кому-то удобнее различать точки/тире на слух именно с ними.
+    </p>
+</div>
+
+<h1 class="mt-3">Резервная копия прогресса</h1>
+<p>Весь прогресс хранится в этом браузере. Если чистишь историю, меняешь
+    компьютер или просто хочешь подстраховаться — сохрани файл и держи его
+    рядом. Аккаунт для этого не нужен.</p>
+
+<div class="card mt-2">
+    <div class="btn-row">
+        <button class="btn btn-primary" id="backup-export-btn">⬇ Скачать бэкап</button>
+        <button class="btn" id="backup-import-btn">⬆ Загрузить бэкап</button>
+    </div>
+    <input type="file" id="backup-file-input" accept="application/json,.json" style="display:none;">
+    <div class="feedback mt-2" id="backup-feedback"></div>
+    <p class="muted mt-2" style="font-size:12px;">
+        Загрузка бэкапа ничего не стирает: данные из файла и текущие
+        складываются по принципу «что больше, то и остаётся». Выученные буквы
+        и достижения объединяются. Так что загрузить старый файл поверх
+        нового прогресса — безопасно.
     </p>
 </div>
 

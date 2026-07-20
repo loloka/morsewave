@@ -116,6 +116,46 @@
         if (streakEl) streakEl.textContent = state.streak.count;
     }
 
+    /* ---------- Индикатор синхронизации ----------
+       Push прогресса на сервер идёт тихо в фоне, и человеку неоткуда было
+       узнать, сработал ли он вообще. Показываем момент последнего успешного
+       push'а (Progress.lastSyncAt) человеческим языком. */
+    function pluralRu(n, one, few, many) {
+        const n10 = n % 10;
+        const n100 = n % 100;
+        if (n10 === 1 && n100 !== 11) return one;
+        if (n10 >= 2 && n10 <= 4 && (n100 < 12 || n100 > 14)) return few;
+        return many;
+    }
+
+    function humanAgo(date) {
+        const sec = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
+        if (sec < 15) return 'только что';
+        if (sec < 60) return 'меньше минуты назад';
+        const min = Math.floor(sec / 60);
+        if (min < 60) return `${min} ${pluralRu(min, 'минуту', 'минуты', 'минут')} назад`;
+        const hours = Math.floor(min / 60);
+        if (hours < 24) return `${hours} ${pluralRu(hours, 'час', 'часа', 'часов')} назад`;
+        const days = Math.floor(hours / 24);
+        if (days < 30) return `${days} ${pluralRu(days, 'день', 'дня', 'дней')} назад`;
+        return date.toLocaleDateString('ru-RU');
+    }
+
+    function renderSyncIndicator() {
+        const el = document.getElementById('sync-indicator');
+        if (!el) return;
+        const at = Progress.lastSyncAt();
+        el.textContent = at
+            ? `☁ Синхронизировано: ${humanAgo(at)}`
+            : '☁ Ещё не синхронизировано — прогресс уйдёт на сервер сам, при ближайшем начислении XP';
+    }
+
+    // Перерисовываем и по событию (успешный push), и по таймеру — иначе
+    // «только что» так и висело бы «только что» через полчаса на открытой
+    // вкладке.
+    window.addEventListener('progress:synced', renderSyncIndicator);
+    setInterval(renderSyncIndicator, 30000);
+
     function showProfile(user) {
         guestBlock.style.display = 'none';
         profileBlock.style.display = 'block';
@@ -124,6 +164,7 @@
         renderAdminLink(user);
         renderVerifyStatus(user);
         updateLocalStats();
+        renderSyncIndicator();
     }
 
     function showGuest() {
@@ -444,6 +485,58 @@
 
     refreshAuthState();
     loadCaptcha();
+})();
+
+/* ======================= Бэкап прогресса файлом =======================
+   Страховка для тех, кто тренируется без аккаунта (и просто перед чисткой
+   браузера). Сознательно всего две кнопки, без настроек и без диалогов
+   подтверждения: импорт идёт через Progress.importBackup() → merge «только
+   вверх», потерять данные им физически нельзя. */
+(function () {
+    const exportBtn = document.getElementById('backup-export-btn');
+    const importBtn = document.getElementById('backup-import-btn');
+    const fileInput = document.getElementById('backup-file-input');
+    const feedback = document.getElementById('backup-feedback');
+    if (!exportBtn || !importBtn || !fileInput) return;
+
+    function say(text, ok) {
+        feedback.textContent = text;
+        feedback.className = ok ? 'feedback show ok' : 'feedback show bad';
+    }
+
+    exportBtn.addEventListener('click', () => {
+        try {
+            const data = Progress.exportBackup();
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `morsewave-backup-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            // Отзываем ссылку не сразу — Safari успевает начать скачивание
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            say(`Файл сохранён. Внутри: ${data.xp} XP, выученных символов — ${data.learnedLetters.length}.`, true);
+        } catch (e) {
+            console.error(e);
+            say('Не получилось собрать файл бэкапа', false);
+        }
+    });
+
+    importBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        try {
+            const merged = Progress.importBackup(JSON.parse(await file.text()));
+            say(`Готово! Теперь ${merged.xp} XP, выученных символов — ${merged.learnedLetters.length}.`, true);
+        } catch (e) {
+            say(e instanceof SyntaxError ? 'Файл повреждён или это не JSON' : e.message, false);
+        }
+        fileInput.value = ''; // иначе повторный выбор того же файла не даст change
+    });
 })();
 
 /* ======================= Настройки звука и отображения =======================

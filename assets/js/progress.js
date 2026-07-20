@@ -5,6 +5,10 @@
  */
 const Progress = (() => {
     const KEY = 'morsewave_progress_v1';
+    // Момент последнего УСПЕШНОГО push'а на сервер. Нужен только для
+    // индикатора в профиле — сам по себе на прогресс не влияет, поэтому
+    // лежит отдельным ключом и не попадает в бэкап.
+    const SYNC_KEY = 'morsewave_last_sync';
 
     const defaults = () => ({
         xp: 0,
@@ -103,12 +107,38 @@ const Progress = (() => {
         pushTimer = setTimeout(pushNow, 1500);
     }
 
-    function pushNow() {
-        return fetch('api/push_progress.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(load()),
-        }).catch(() => {});
+    /**
+     * Отметка «синхронизировано только что». Ставится ТОЛЬКО когда сервер
+     * реально ответил ok — без логина push отвечает not_logged_in, и это
+     * не синхронизация, метку ставить нельзя (иначе гость видел бы бодрое
+     * «синхронизировано», хотя на сервере ничего нет).
+     */
+    function markSynced() {
+        const at = new Date().toISOString();
+        localStorage.setItem(SYNC_KEY, at);
+        window.dispatchEvent(new CustomEvent('progress:synced', { detail: { at } }));
+    }
+
+    function lastSyncAt() {
+        const raw = localStorage.getItem(SYNC_KEY);
+        if (!raw) return null;
+        const d = new Date(raw);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    async function pushNow() {
+        try {
+            const res = await fetch('api/push_progress.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(load()),
+            });
+            const data = await res.json();
+            if (data && data.ok) markSynced();
+            return data;
+        } catch {
+            return null; // сеть отвалилась — метку не двигаем, индикатор покажет старое время
+        }
     }
 
     /**
@@ -294,12 +324,55 @@ const Progress = (() => {
 
     function resetAll() {
         localStorage.removeItem(KEY);
+        localStorage.removeItem(SYNC_KEY);
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: defaults() }));
+        window.dispatchEvent(new CustomEvent('progress:synced', { detail: { at: null } }));
+    }
+
+    /**
+     * Бэкап файлом — страховка для тех, кто тренируется без аккаунта.
+     * Служебные поля с подчёркиванием нужны только человеку/проверке при
+     * импорте: mergeFromServer их игнорирует (он копирует не все ключи
+     * подряд, а перечисленные поля прогресса).
+     */
+    function exportBackup() {
+        return {
+            _app: 'MorseWave',
+            _backupVersion: 1,
+            _exportedAt: new Date().toISOString(),
+            ...load(),
+        };
+    }
+
+    /**
+     * Импорт бэкапа — намеренно через тот же mergeFromServer, что и
+     * слияние при логине: «только вверх» (max/union). Поэтому загрузка
+     * старого файла НЕ может ничего испортить или откатить, и спрашивать
+     * подтверждение не нужно. Бросает Error, если файл не похож на бэкап.
+     */
+    function importBackup(obj) {
+        if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
+            throw new Error('Это не похоже на файл бэкапа MorseWave');
+        }
+        const looksLikeProgress = typeof obj.xp === 'number'
+            || Array.isArray(obj.learnedLetters)
+            || (obj.stats && typeof obj.stats === 'object');
+        if (!looksLikeProgress) {
+            throw new Error('В файле нет данных прогресса');
+        }
+        const merged = mergeFromServer(obj);
+        save(merged);
+        window.dispatchEvent(new CustomEvent('progress:updated', { detail: merged }));
+        checkAchievements();
+        refreshPublishedStats(merged);
+        pushFullProgress();
+        return merged;
     }
 
     return {
         load, save, addXp, markLetterLearned, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, mergeFromServer, syncWithServer, pushNow,
+        lastSyncAt, exportBackup, importBackup,
     };
 })();
