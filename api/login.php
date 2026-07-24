@@ -16,7 +16,7 @@ $email = strtolower(trim($input['email'] ?? ''));
 $password = (string) ($input['password'] ?? '');
 
 $stmt = $pdo->prepare('
-    SELECT id, name, email, password_hash, email_verified_at, failed_login_attempts, locked_until
+    SELECT id, name, email, password_hash, email_verified_at, is_admin, failed_login_attempts, locked_until
     FROM users WHERE email = :email LIMIT 1
 ');
 $stmt->execute(['email' => $email]);

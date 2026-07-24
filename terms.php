@@ -67,6 +67,7 @@ include __DIR__ . '/includes/header.php';
     после изменений, ты принимаешь новую редакцию.</p>
 
 <p class="mt-3">Как мы обращаемся с твоими данными — в
-    <a href="privacy.php">Политике конфиденциальности</a>.</p>
+    <a href="privacy.php">Политике конфиденциальности</a>. По любым вопросам —
+    <a href="mailto:morse@r9o.ru">morse@r9o.ru</a>.</p>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

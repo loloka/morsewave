@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash          VARCHAR(255) NOT NULL,
     email_verified_at      DATETIME DEFAULT NULL,
     verification_token     VARCHAR(64) DEFAULT NULL,
+    is_admin               TINYINT(1) NOT NULL DEFAULT 0,
     failed_login_attempts  INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until           DATETIME DEFAULT NULL,
     reset_token            VARCHAR(64) DEFAULT NULL,

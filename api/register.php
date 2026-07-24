@@ -62,9 +62,14 @@ if ($check->fetch()) {
     exit;
 }
 
+// Первый аккаунт на пустой базе автоматически становится админом — иначе на
+// свежей установке некому раздать права (флаг is_admin в БД, жёстко зашитого
+// e-mail-админа больше нет).
+$isFirstUser = ((int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn() === 0);
+
 $hash = password_hash($password, PASSWORD_DEFAULT);
-$stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash) VALUES (:name, :email, :hash)');
-$stmt->execute(['name' => $name, 'email' => $email, 'hash' => $hash]);
+$stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, is_admin) VALUES (:name, :email, :hash, :admin)');
+$stmt->execute(['name' => $name, 'email' => $email, 'hash' => $hash, 'admin' => $isFirstUser ? 1 : 0]);
 $userId = (int) $pdo->lastInsertId();
 
 $pdo->prepare('INSERT INTO user_stats (user_id, xp, streak_count) VALUES (:id, 0, 0)')

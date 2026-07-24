@@ -62,7 +62,7 @@ function current_user_id() {
 function current_user($pdo) {
     $id = current_user_id();
     if (!$id) return null;
-    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at FROM users WHERE id = :id');
+    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin FROM users WHERE id = :id');
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch();
     return $user ?: null;
@@ -77,12 +77,13 @@ function require_login_json() {
     }
 }
 
-// Единственный админ определён по e-mail — для одного человека этого
-// достаточно, не городить отдельную роль/таблицу ради одного аккаунта.
-const ADMIN_EMAIL = 'admin@r9o.ru';
-
+// Админ определяется флагом is_admin в таблице users (раньше был жёстко
+// зашит e-mail — но так нельзя было передать права другому аккаунту и снять
+// со старого). Права выдаются/снимаются из админки (api/admin_set_admin.php),
+// а на пустой базе первый зарегистрированный аккаунт становится админом
+// автоматически (api/register.php) — чтобы было кому раздать права.
 function is_admin_user($user) {
-    return $user && strtolower($user['email']) === ADMIN_EMAIL;
+    return $user && !empty($user['is_admin']);
 }
 
 function require_admin_json($pdo) {

@@ -2,6 +2,29 @@
     const guestBlock = document.getElementById('guest-block');
     const profileBlock = document.getElementById('profile-block');
     const CLAIM_KEY = 'morsewave_claimed_by';
+    const TAB_KEY = 'morsewave_account_tab';
+
+    /* ---------- Вкладки профиля ----------
+       Звук/Отображение/Бэкап доступны и без аккаунта, поэтому вкладки — общий
+       переключатель поверх всего. Выбранную вкладку запоминаем, чтобы возврат
+       на страницу открывал её же (например, часто ходишь в «Звук»). */
+    (function initAccountTabs() {
+        const tabs = [...document.querySelectorAll('#account-tabs .chip')];
+        const panels = [...document.querySelectorAll('.account-tab-panel')];
+        if (!tabs.length) return;
+
+        function show(tab) {
+            tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+            panels.forEach(p => { p.style.display = p.dataset.tabPanel === tab ? 'block' : 'none'; });
+            try { localStorage.setItem(TAB_KEY, tab); } catch { /* приватный режим — не критично */ }
+        }
+
+        tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
+
+        let saved = null;
+        try { saved = localStorage.getItem(TAB_KEY); } catch { /* ignore */ }
+        show(tabs.some(t => t.dataset.tab === saved) ? saved : 'profile');
+    })();
 
     /* ---------- Капча (код Морзе) ----------
        Виджет обобщён: одна и та же капча используется на регистрации и на
@@ -288,6 +311,65 @@
         localStorage.removeItem(CLAIM_KEY); // и метка "кто публиковался с этого браузера"
         showGuest();
     });
+
+    /* ---------- Удаление аккаунта ---------- */
+    const delReveal = document.getElementById('delete-account-reveal-btn');
+    const delConfirmWrap = document.getElementById('delete-account-confirm');
+    const delCancel = document.getElementById('delete-account-cancel-btn');
+    const delConfirm = document.getElementById('delete-account-confirm-btn');
+    const delPass = document.getElementById('delete-account-pass');
+    const delFeedback = document.getElementById('delete-account-feedback');
+
+    if (delReveal) {
+        delReveal.addEventListener('click', () => {
+            delConfirmWrap.style.display = 'block';
+            delReveal.style.display = 'none';
+            delPass.focus();
+        });
+        delCancel.addEventListener('click', () => {
+            delConfirmWrap.style.display = 'none';
+            delReveal.style.display = 'inline-flex';
+            delPass.value = '';
+            delFeedback.className = 'feedback';
+        });
+        delConfirm.addEventListener('click', async () => {
+            const password = delPass.value;
+            if (!password) {
+                delFeedback.textContent = 'Введи пароль для подтверждения';
+                delFeedback.className = 'feedback show bad';
+                return;
+            }
+            delConfirm.disabled = true;
+            try {
+                const res = await fetch('api/delete_account.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password }),
+                });
+                const data = await res.json();
+                if (res.ok && data.ok) {
+                    // Аккаунт снесён на сервере — чистим и локальную копию, как при выходе.
+                    Progress.resetAll();
+                    localStorage.removeItem(CLAIM_KEY);
+                    delConfirmWrap.style.display = 'none';
+                    showGuest();
+                    const gf = document.getElementById('login-feedback');
+                    if (gf) {
+                        gf.textContent = 'Аккаунт удалён. Локальный прогресс в этом браузере тоже очищен.';
+                        gf.className = 'feedback show ok';
+                    }
+                } else {
+                    delFeedback.textContent = data.error || 'Не получилось удалить аккаунт';
+                    delFeedback.className = 'feedback show bad';
+                }
+            } catch {
+                delFeedback.textContent = 'Не удалось связаться с сервером';
+                delFeedback.className = 'feedback show bad';
+            } finally {
+                delConfirm.disabled = false;
+            }
+        });
+    }
 
     async function doSync() {
         const state = Progress.load();

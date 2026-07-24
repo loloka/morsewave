@@ -586,6 +586,33 @@ input[type="range"] {
     color: var(--text-muted);
     line-height: 1.5;
 }
+/* ---------- Вкладки профиля ---------- */
+.account-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+}
+.account-tabs .chip {
+    font-weight: 600;
+    font-family: inherit; /* <button> иначе берёт системный шрифт, а не Manrope */
+    font-size: 13px;
+    line-height: 1.4;
+}
+/* На узких экранах — горизонтальная прокрутка вместо переноса, чтобы вкладки
+   не громоздились в два ряда и палец легко доставал до любой. */
+@media (max-width: 480px) {
+    .account-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+    }
+    .account-tabs::-webkit-scrollbar { display: none; }
+    .account-tabs .chip { flex: 0 0 auto; }
+}
+
 /* ---------- Daily challenge ---------- */
 .daily-card {
     background: linear-gradient(135deg, var(--surface), #1f1a10 150%);
