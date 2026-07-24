@@ -7,15 +7,50 @@
  */
 
 if (session_status() === PHP_SESSION_NONE) {
+    // 30 дней — и для куки, и для срока жизни серверного файла сессии.
+    $sessionLifetime = 60 * 60 * 24 * 30;
     $isHttps = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+
+    // Раньше кука была lifetime => 0 (жила до закрытия браузера), а серверные
+    // файлы сессий чистил сборщик мусора PHP по gc_maxlifetime. На хостинге
+    // он часто короткий и ОБЩИЙ с чужими сайтами (сессии лежат в одном
+    // системном каталоге), поэтому активного пользователя выкидывало «через
+    // несколько часов», хотя localStorage-прогресс оставался — и на том же
+    // браузере легко было залогиниться в другой аккаунт и подмержить чужой
+    // прогресс. Лечим двумя вещами: (1) своя папка сессий, чтобы чужой GC до
+    // них не дотягивался, (2) длинная кука + длинный gc_maxlifetime.
+    $sessionDir = __DIR__ . '/../storage/sessions';
+    if (!is_dir($sessionDir)) {
+        @mkdir($sessionDir, 0700, true);
+    }
+    if (is_dir($sessionDir) && is_writable($sessionDir)) {
+        ini_set('session.save_path', $sessionDir);
+    }
+    // Держим протухание нашими руками (в своей папке это безопасно). Даже если
+    // папку создать не удалось — просим систему хранить сессии дольше.
+    ini_set('session.gc_maxlifetime', (string) $sessionLifetime);
+
     session_set_cookie_params([
-        'lifetime' => 0,
+        'lifetime' => $sessionLifetime, // кука живёт 30 дней, а не до закрытия браузера
         'path' => '/',
         'secure' => $isHttps,   // кука уходит только по HTTPS, если сайт на HTTPS
         'httponly' => true,     // недоступна из JS — базовая защита от XSS-кражи сессии
         'samesite' => 'Lax',    // базовая защита от CSRF
     ]);
     session_start();
+
+    // «Скользящее» продление: у залогиненного пользователя на каждом заходе
+    // сдвигаем срок куки вперёд, чтобы активный человек не разлогинивался
+    // ровно через 30 дней от момента входа, а только после 30 дней БЕЗ визитов.
+    if (!empty($_SESSION['user_id'])) {
+        setcookie(session_name(), session_id(), [
+            'expires' => time() + $sessionLifetime,
+            'path' => '/',
+            'secure' => $isHttps,
+            'httponly' => true,
+            'samesite' => 'Lax',
+        ]);
+    }
 }
 
 require_once __DIR__ . '/../config/database.php';
