@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/leaderboard_guard.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
@@ -35,6 +36,9 @@ $streakLastDate = $input['streakLastDate'] ?? null;
 if ($streakLastDate !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $streakLastDate)) {
     $streakLastDate = null;
 }
+
+// Санитарный потолок против накрутки перед публикацией в лидерборд.
+[$xp, $streakCount] = leaderboard_clamp($pdo, $userId, $xp, $streakCount);
 
 $stmt = $pdo->prepare('
     INSERT INTO user_stats (user_id, xp, streak_count, streak_last_date)
