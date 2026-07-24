@@ -13,7 +13,13 @@ const Progress = (() => {
     const defaults = () => ({
         xp: 0,
         learnedLetters: [],
-        kochLevel: 2, // сколько символов Koch-порядка уже открыто
+        kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
+        // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
+        // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
+        // kochLevel (набор для тренировки), но НЕ этот счётчик. Ачивки за
+        // метод Коха считаются по нему — иначе «открыть все символы» можно
+        // было получить, просто дотащив бегунок до конца (было багом).
+        kochLevelEarned: 2,
         streak: { count: 0, lastDate: null },
         stats: {
             groupsCompleted: 0,
@@ -34,10 +40,18 @@ const Progress = (() => {
         try {
             const raw = localStorage.getItem(KEY);
             if (!raw) return defaults();
-            const state = { ...defaults(), ...JSON.parse(raw) };
+            const parsed = JSON.parse(raw);
+            const state = { ...defaults(), ...parsed };
             // Лечим уже испорченные значения от старого бага с плавающей точкой
             // (592.5000000000002 и т.п.) — округляем до целого при каждой загрузке.
             state.xp = Math.round(state.xp) || 0;
+            // Бэкфилл для старых профилей без kochLevelEarned: считаем весь
+            // уже открытый уровень честно заработанным (не наказываем тех, кто
+            // прогрессировал до появления счётчика). Новые начисления пойдут
+            // только через пройденные сессии.
+            if (parsed.kochLevelEarned === undefined) {
+                state.kochLevelEarned = state.kochLevel;
+            }
             return state;
         } catch {
             return defaults();
@@ -156,6 +170,12 @@ const Progress = (() => {
 
         merged.xp = Math.max(Math.round(local.xp) || 0, Math.round(server.xp) || 0);
         merged.kochLevel = Math.max(local.kochLevel || 2, server.kochLevel || 2);
+        // Заработанный уровень Коха — тоже «только вверх». Fallback на kochLevel
+        // на случай серверного/локального состояния, ещё не знающего о поле.
+        merged.kochLevelEarned = Math.max(
+            local.kochLevelEarned || local.kochLevel || 2,
+            server.kochLevelEarned || server.kochLevel || 2,
+        );
 
         // Множества — объединение
         merged.learnedLetters = [...new Set([
@@ -250,6 +270,46 @@ const Progress = (() => {
         return state;
     }
 
+    /**
+     * Зафиксировать честно заработанный уровень Коха. Вызывается ТОЛЬКО из
+     * пройденной сессии (точность ≥ порога) с размером набора, который
+     * человек реально принял на слух. Двигаем «водяной знак» вверх и
+     * проверяем ачивки. Бегунок «Перейти к уровню» сюда не ходит — поэтому
+     * протащить бегунок до конца и получить ачивку больше нельзя.
+     */
+    function markKochLevelEarned(level) {
+        const state = load();
+        const base = state.kochLevelEarned || state.kochLevel || 2;
+        const v = Math.max(base, level || 0);
+        if (v !== state.kochLevelEarned) {
+            state.kochLevelEarned = v;
+            save(state);
+            pushFullProgress();
+        }
+        checkAchievements();
+        return state;
+    }
+
+    /**
+     * Атомарно засчитать бонус задания дня: +50 XP и пометка сегодняшней
+     * даты в одном load→save. Раньше это делалось «руками» в groups.js через
+     * Progress.addXp(50) + Progress.save(старый_state) — и второй save,
+     * загруженный ДО addXp, откатывал те самые +50 (баг: показывало 74,
+     * начисляло 24). Возвращает true, если бонус реально начислен сейчас.
+     */
+    function completeDailyChallenge() {
+        const state = load();
+        if (state.dailyChallengeDate === today()) return false; // уже сегодня
+        state.xp = Math.round(state.xp + 50);
+        state.dailyChallengeDate = today();
+        save(state);
+        window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
+        checkAchievements();
+        refreshPublishedStats(state);
+        pushFullProgress();
+        return true;
+    }
+
     function incrementStat(field, by = 1) {
         const state = load();
         state.stats[field] = (state.stats[field] || 0) + by;
@@ -297,7 +357,7 @@ const Progress = (() => {
                 case 'letters_learned_count': return state.learnedLetters.length;
                 case 'xp_total': return state.xp;
                 case 'streak_days': return state.streak.count;
-                case 'koch_level': return state.kochLevel;
+                case 'koch_level': return state.kochLevelEarned;
                 case 'groups_completed': return state.stats.groupsCompleted;
                 case 'callsigns_completed': return state.stats.callsignsCompleted;
                 case 'recognized_count': return state.stats.recognizedCount;
@@ -373,7 +433,8 @@ const Progress = (() => {
     return {
         load, save, addXp, markLetterLearned, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
-        resetAll, markDailyActivity, mergeFromServer, syncWithServer, pushNow,
+        resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
+        mergeFromServer, syncWithServer, pushNow,
         lastSyncAt, exportBackup, importBackup,
     };
 })();

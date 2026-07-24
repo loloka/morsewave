@@ -138,10 +138,13 @@
      * маленьким набором нельзя — для этого пришлось бы сидеть на низком
      * уровне, а он и так даёт мало.
      */
-    function xpRateForSession(charsetSize, len) {
+    function xpRateForSession(charsetSize, len, wpm) {
         const charsetFactor = Math.min(1, Math.max(0.15, Math.sqrt(charsetSize / 26)));
         const lengthFactor = len / 3;
-        return 2 * charsetFactor * lengthFactor;
+        // Множитель за скорость (speedXpFactor из morse-data.js): на 12 wpm
+        // и ниже = 1.0, т.е. базовый баланс 2.0/символ для полного алфавита
+        // сохраняется; выше — надбавка за сложность быстрого приёма.
+        return 2 * charsetFactor * lengthFactor * speedXpFactor(wpm);
     }
 
     async function playCurrentGroup() {
@@ -188,7 +191,7 @@
             groups: Array.from({ length: count }, () => randomGroup(charset, groupLen)),
             index: 0, wpm, farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
-            xpRate: xpRateForSession(charset.length, groupLen),
+            xpRate: xpRateForSession(charset.length, groupLen, wpm),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [],
         };
@@ -349,6 +352,10 @@
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
 
+        // Убираем заметки, дописанные прошлой сессией (задание дня / экзамен) —
+        // иначе они копятся в панели результатов от сессии к сессии.
+        resultPanel.querySelectorAll('.js-result-note').forEach(n => n.remove());
+
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
         let xpEarned = session.xpEarned;
 
@@ -371,12 +378,11 @@
             } else if (!accuracyOk) {
                 dailyBonusMsg = ` (для бонуса нужна точность не ниже ${Math.round(DAILY_MIN_ACCURACY * 100)}%, у тебя ${Math.round(accuracy * 100)}% — бонус не начислен, но обычный опыт за верные символы остаётся; попробуй ещё раз!)`;
             } else {
-                const state = Progress.load();
-                if (state.dailyChallengeDate !== today()) {
+                // Атомарно: +50 XP и метка даты в одном load→save. Никакого
+                // ручного Progress.save(state) после addXp — именно он раньше
+                // откатывал бонус (показывало 74, начисляло 24).
+                if (Progress.completeDailyChallenge()) {
                     xpEarned += 50;
-                    Progress.addXp(50);
-                    state.dailyChallengeDate = today();
-                    Progress.save(state);
                     dailyBonusMsg = ' + бонус 50 XP за задание дня!';
                 } else {
                     dailyBonusMsg = ' (задание дня на сегодня уже выполнено, бонус не начисляется повторно)';
@@ -395,7 +401,7 @@
         if (dailyBonusMsg) {
             const note = document.createElement('div');
             const isFail = dailyBonusMsg.includes('не совпадает') || dailyBonusMsg.includes('бонус не начислен');
-            note.className = isFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2';
+            note.className = (isFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2') + ' js-result-note';
             note.textContent = isFail ? ('Задание дня' + dailyBonusMsg) : ('Задание дня пройдено' + dailyBonusMsg);
             document.getElementById('result-panel').appendChild(note);
         }
@@ -412,6 +418,7 @@
                 note.className = 'feedback show bad mt-2';
                 note.textContent = `Экзамен пройден целиком, но ошибок многовато (${session.examWrongGroupCount} из ${session.groups.length} групп) для категории — для нужной точности их должно быть не больше 3. Продолжай тренироваться!`;
             }
+            note.classList.add('js-result-note');
             document.getElementById('result-panel').appendChild(note);
         }
 
@@ -861,7 +868,7 @@
 
         // XP — сразу за каждое слово, чтобы не терялось при досрочном
         // выходе, но только если слово принято не хуже порога.
-        const rate = isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE;
+        const rate = (isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE) * speedXpFactor(wordsSession.wpm);
         const xpGain = accuracy >= WORDS_MIN_ACCURACY ? Math.round(correct * rate) : 0;
         wordsSession.xpEarned += xpGain;
         if (xpGain > 0) Progress.addXp(xpGain);

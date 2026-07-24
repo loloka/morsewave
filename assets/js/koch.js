@@ -17,10 +17,13 @@
      * groups.js, тут физически невозможна, а ужесточение только срезало
      * бы мотивацию на средних уровнях метода.
      */
-    function xpRateForSession(charsetSize, len) {
+    function xpRateForSession(charsetSize, len, wpm) {
         const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
         const lengthFactor = len / 3;
-        return 2 * charsetFactor * lengthFactor;
+        // Надбавка за скорость (общая с остальными режимами, morse-data.js):
+        // ≤12 wpm → 1.0 (баланс уровней Коха на низких скоростях не тронут),
+        // выше — доплата за сложность быстрого приёма.
+        return 2 * charsetFactor * lengthFactor * speedXpFactor(wpm);
     }
 
     const kochLevelEl = document.getElementById('koch-level');
@@ -174,7 +177,7 @@
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
-            xpRate: xpRateForSession(charset.length, GROUP_LEN),
+            xpRate: xpRateForSession(charset.length, GROUP_LEN, wpm),
         };
 
         setupPanel.style.display = 'none';
@@ -262,6 +265,13 @@
 
         const msg = document.getElementById('result-message');
         const state = Progress.load();
+        if (accuracy >= PASS_THRESHOLD) {
+            // Человек реально принял набор из state.kochLevel символов на ≥90% —
+            // это и есть честно заработанный уровень (ачивки считаются по нему).
+            // Бегунок «Перейти к уровню» сюда не попадает, поэтому протащить
+            // его до конца и получить ачивку «все символы» больше нельзя.
+            Progress.markKochLevelEarned(state.kochLevel);
+        }
         if (accuracy >= PASS_THRESHOLD && state.kochLevel < KOCH_ORDER.length) {
             Progress.setKochLevel(state.kochLevel + 1);
             msg.textContent = `Отличная точность! Открыт новый символ: «${KOCH_ORDER[state.kochLevel]}»`;

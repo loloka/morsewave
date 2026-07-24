@@ -59,7 +59,21 @@
         link.href = `groups.php?daily=1&len=${len}&count=${count}&wpm=${wpm}`;
 
         if (state.dailyChallengeDate === dateStr) {
-            link.textContent = '✓ Уже пройдено сегодня (можно повторить без бонуса)';
+            // Явная отметка «пройдено» — заметная плашка на карточке, а не
+            // только текст ссылки (его легко не заметить).
+            const card = document.getElementById('daily-card');
+            card.classList.add('daily-card-done');
+
+            const badge = document.createElement('div');
+            badge.className = 'daily-done-badge';
+            badge.textContent = '✓ Задание дня пройдено';
+            card.querySelector('.card-eyebrow').after(badge);
+
+            document.getElementById('daily-desc').textContent =
+                'Бонус +50 XP за сегодня уже получен. Можно повторить для тренировки — опыт за верные символы начисляется как обычно.';
+            link.textContent = 'Повторить без бонуса';
+            link.classList.remove('btn-primary');
+            link.classList.add('btn');
         }
     })();
 
