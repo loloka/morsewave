@@ -20,6 +20,7 @@
 <script src="<?= asset_v('assets/js/input.js') ?>"></script>
 <script src="<?= asset_v('assets/js/signal.js') ?>"></script>
 <script src="<?= asset_v('assets/js/progress.js') ?>"></script>
+<script src="<?= asset_v('assets/js/daily.js') ?>"></script>
 <script src="<?= asset_v('assets/js/app.js') ?>"></script>
 <?php if (!empty($pageScript)): ?>
 <script src="<?= asset_v('assets/js/' . $pageScript) ?>"></script>

@@ -191,6 +191,7 @@
                 feedbackEl.className = 'feedback show ok';
                 renderTiles();
                 [...grid.children].find(t => t.dataset.ch === current)?.classList.add('selected');
+                tickDaily('learn'); // засчитываем новую букву в задание дня, если оно активно
             }
         } else {
             correctStreak = 0;
@@ -382,6 +383,7 @@
                 Progress.checkAchievements();
                 recFeedback.textContent += ' — новый личный рекорд серии! 🏆';
             }
+            tickDaily('recognize'); // засчитываем верный приём в задание дня, если оно активно
         } else {
             recStreak = 0;
             recFeedback.textContent = `Было «${recTarget}», нажата «${ch}»`;
@@ -423,4 +425,72 @@
         recStartBtn.style.display = 'inline-flex';
         recStopBtn.style.display = 'none';
     });
+
+    /* ===================== ЗАДАНИЕ ДНЯ =====================
+       На этапе новичка задание дня — «изучи N новых букв» (режим отправки),
+       на следующем — «прими N символов на слух» (режим приёма). Тип задания
+       определяет daily.js по прогрессу; сюда приходим по ссылке с главной
+       (learn.php?daily=1[&mode=recognize]). Прогресс считаем за текущий заход,
+       бонус +50 XP выдаём через общий Progress.completeDailyChallenge(). */
+    let dailyTask = null;   // задание, если оно активно и относится к открытой вкладке
+    let dailyCount = 0;     // сделано за этот заход
+    let dailyBannerEl = null;
+
+    function makeDailyBanner(container) {
+        const b = document.createElement('div');
+        b.className = 'feedback show ok mt-2';
+        container.insertBefore(b, container.firstChild);
+        return b;
+    }
+
+    function renderDailyBanner() {
+        if (!dailyBannerEl || !dailyTask) return;
+        dailyBannerEl.textContent =
+            `🎯 Задание дня: ${dailyCount}/${dailyTask.target} — ${dailyTask.title}. За выполнение +50 XP.`;
+    }
+
+    // Вызывается из обоих режимов; тикает только если активное задание того же типа.
+    function tickDaily(type) {
+        if (!dailyTask || dailyTask.type !== type) return;
+        dailyCount++;
+        if (dailyCount >= dailyTask.target) {
+            const granted = Progress.completeDailyChallenge();
+            dailyBannerEl.textContent = granted
+                ? '🎯 Задание дня выполнено — бонус +50 XP начислен!'
+                : '🎯 Задание дня на сегодня уже было выполнено (бонус повторно не начисляется).';
+            dailyBannerEl.className = 'feedback show ok mt-2';
+            dailyTask = null; // больше не тикаем в этом заходе
+        } else {
+            renderDailyBanner();
+        }
+    }
+
+    (function applyLearnDaily() {
+        const params = new URLSearchParams(location.search);
+        if (params.get('daily') !== '1') return;
+        const task = DailyChallenge.forToday();
+        const wantRecognize = params.get('mode') === 'recognize';
+
+        // Активируем только если сегодняшнее задание совпадает с открытой
+        // вкладкой — иначе это просто обычная тренировка без бонуса.
+        if (task.type === 'learn' && !wantRecognize) {
+            dailyTask = task;
+            dailyBannerEl = makeDailyBanner(sendModeEl);
+        } else if (task.type === 'recognize' && wantRecognize) {
+            dailyTask = task;
+            const chip = document.querySelector('.mode-switch .chip[data-mode="recognize"]');
+            if (chip) chip.click(); // переключаемся на приём на слух
+            dailyBannerEl = makeDailyBanner(recognizeModeEl);
+        } else {
+            return;
+        }
+
+        if (DailyChallenge.isDoneToday()) {
+            dailyBannerEl.textContent =
+                '🎯 Задание дня на сегодня уже выполнено — можно тренироваться дальше без бонуса.';
+            dailyTask = null;
+        } else {
+            renderDailyBanner();
+        }
+    })();
 })();

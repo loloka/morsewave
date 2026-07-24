@@ -138,13 +138,17 @@
      * маленьким набором нельзя — для этого пришлось бы сидеть на низком
      * уровне, а он и так даёт мало.
      */
-    function xpRateForSession(charsetSize, len, wpm) {
+    function xpRateForSession(charsetSize, len, opts = {}) {
         const charsetFactor = Math.min(1, Math.max(0.15, Math.sqrt(charsetSize / 26)));
         const lengthFactor = len / 3;
-        // Множитель за скорость (speedXpFactor из morse-data.js): на 12 wpm
-        // и ниже = 1.0, т.е. базовый баланс 2.0/символ для полного алфавита
-        // сохраняется; выше — надбавка за сложность быстрого приёма.
-        return 2 * charsetFactor * lengthFactor * speedXpFactor(wpm);
+        // Надбавка за скорость (speedXpFactor из morse-data.js) — ТОЛЬКО для
+        // задания дня. В обычных сессиях баланс не трогаем: полный алфавит на
+        // любой скорости даёт прежние 2.0/символ. Смысл — задание дня иногда
+        // выпадает на неподъёмных для новичка 24 wpm, и без доплаты за скорость
+        // высокий wpm там просто наказание. В остальных режимах человек сам
+        // выбирает скорость, доплачивать не за что.
+        const speed = opts.daily ? speedXpFactor(opts.wpm) : 1;
+        return 2 * charsetFactor * lengthFactor * speed;
     }
 
     async function playCurrentGroup() {
@@ -191,7 +195,7 @@
             groups: Array.from({ length: count }, () => randomGroup(charset, groupLen)),
             index: 0, wpm, farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
-            xpRate: xpRateForSession(charset.length, groupLen, wpm),
+            xpRate: xpRateForSession(charset.length, groupLen, { daily: isDailyChallenge, wpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [],
         };
@@ -510,7 +514,11 @@
     (function applyDailyParams() {
         const params = new URLSearchParams(location.search);
         if (params.get('daily') !== '1') return;
-        isDailyChallenge = true;
+        // Бонус за задание дня начисляется только если СЕГОДНЯШНЕЕ задание для
+        // этого игрока — действительно приём групп (на другом этапе оно другого
+        // типа и выполняется в другом режиме). Иначе параметры из URL применим,
+        // но как к обычной тренировке, без бонуса.
+        isDailyChallenge = DailyChallenge.forToday().type === 'groups';
 
         const len = parseInt(params.get('len'), 10);
         const count = parseInt(params.get('count'), 10);
@@ -544,10 +552,12 @@
             wpmValue.textContent = String(wpm);
         }
 
-        const banner = document.createElement('div');
-        banner.className = 'feedback show ok mt-2';
-        banner.textContent = '🎯 Это задание дня — за его прохождение полагается бонус +50 XP (один раз в день).';
-        setupPanel.appendChild(banner);
+        if (isDailyChallenge) {
+            const banner = document.createElement('div');
+            banner.className = 'feedback show ok mt-2';
+            banner.textContent = '🎯 Это задание дня — за его прохождение полагается бонус +50 XP (один раз в день).';
+            setupPanel.appendChild(banner);
+        }
     })();
 
     /* ======================= РЕЖИМ: СОКРАЩЕНИЯ ======================= */
@@ -868,7 +878,7 @@
 
         // XP — сразу за каждое слово, чтобы не терялось при досрочном
         // выходе, но только если слово принято не хуже порога.
-        const rate = (isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE) * speedXpFactor(wordsSession.wpm);
+        const rate = isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE;
         const xpGain = accuracy >= WORDS_MIN_ACCURACY ? Math.round(correct * rate) : 0;
         wordsSession.xpEarned += xpGain;
         if (xpGain > 0) Progress.addXp(xpGain);

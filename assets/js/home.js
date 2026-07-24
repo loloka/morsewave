@@ -33,30 +33,18 @@
     const state = Progress.load();
     document.getElementById('home-learned-count').textContent = state.learnedLetters.length;
 
-    // Задание дня: детерминированный набор параметров на основе сегодняшней даты,
-    // одинаковый для всех — создаёт ощущение общего "вызова дня".
+    // Задание дня: целевое под этап игрока (новичку — изучить буквы, дальше —
+    // приём на слух, знающему алфавит — группы). Единый расчёт в daily.js,
+    // чтобы главная и режим-исполнитель не разошлись.
     (function renderDailyChallenge() {
-        const dateStr = new Date().toISOString().slice(0, 10);
-        let seed = 0;
-        for (const ch of dateStr) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
-        const pick = (arr) => arr[seed % arr.length];
+        const dateStr = DailyChallenge.todayStr();
+        const task = DailyChallenge.forToday(state);
 
-        const lens = [2, 3, 4, 5];
-        const counts = [10, 20, 30];
-        const wpms = [12, 15, 18, 20, 24];
-        const len = pick(lens);
-        seed = (seed * 7 + 3) >>> 0;
-        const count = counts[seed % counts.length];
-        seed = (seed * 7 + 3) >>> 0;
-        const wpm = wpms[seed % wpms.length];
-
-        document.getElementById('daily-title').textContent =
-            `${count} групп по ${len} символа(ов) на ${wpm} wpm`;
-        document.getElementById('daily-desc').textContent =
-            'Одинаковое задание для всех сегодня. Бонус +50 XP начисляется один раз в день.';
+        document.getElementById('daily-title').textContent = task.title;
+        document.getElementById('daily-desc').textContent = task.desc;
 
         const link = document.getElementById('daily-link');
-        link.href = `groups.php?daily=1&len=${len}&count=${count}&wpm=${wpm}`;
+        link.href = task.href;
 
         if (state.dailyChallengeDate === dateStr) {
             // Явная отметка «пройдено» — заметная плашка на карточке, а не

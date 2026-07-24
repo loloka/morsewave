@@ -17,13 +17,10 @@
      * groups.js, тут физически невозможна, а ужесточение только срезало
      * бы мотивацию на средних уровнях метода.
      */
-    function xpRateForSession(charsetSize, len, wpm) {
+    function xpRateForSession(charsetSize, len) {
         const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
         const lengthFactor = len / 3;
-        // Надбавка за скорость (общая с остальными режимами, morse-data.js):
-        // ≤12 wpm → 1.0 (баланс уровней Коха на низких скоростях не тронут),
-        // выше — доплата за сложность быстрого приёма.
-        return 2 * charsetFactor * lengthFactor * speedXpFactor(wpm);
+        return 2 * charsetFactor * lengthFactor;
     }
 
     const kochLevelEl = document.getElementById('koch-level');
@@ -177,7 +174,7 @@
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
-            xpRate: xpRateForSession(charset.length, GROUP_LEN, wpm),
+            xpRate: xpRateForSession(charset.length, GROUP_LEN),
         };
 
         setupPanel.style.display = 'none';
