@@ -9,6 +9,10 @@
         <span>Автор R9OGL</span>
         <span class="dot">·</span>
         <a href="https://github.com/loloka/morsewave" target="_blank" rel="noopener">Исходный код и история изменений</a>
+        <span class="dot">·</span>
+        <a href="terms.php">Правила</a>
+        <span class="dot">·</span>
+        <a href="privacy.php">Конфиденциальность</a>
     </div>
 </footer>
 <script src="<?= asset_v('assets/js/morse-data.js') ?>"></script>

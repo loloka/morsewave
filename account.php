@@ -82,6 +82,13 @@ include __DIR__ . '/includes/header.php';
             <input type="text" id="captcha-answer" class="answer-input mt-1" placeholder="Что здесь зашифровано?" autocomplete="off">
         </div>
 
+        <label for="register-agree" class="mt-2" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;">
+            <input type="checkbox" id="register-agree" style="margin-top:3px;flex:0 0 auto;">
+            <span>Принимаю <a href="terms.php" target="_blank" rel="noopener">пользовательское соглашение</a>
+                и <a href="privacy.php" target="_blank" rel="noopener">политику конфиденциальности</a>,
+                согласен на обработку персональных данных.</span>
+        </label>
+
         <button class="btn btn-primary mt-2" id="register-btn">Создать аккаунт</button>
         <div class="feedback mt-2" id="register-feedback"></div>
     </div>

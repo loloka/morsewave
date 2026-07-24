@@ -16,6 +16,15 @@ $email = strtolower(trim($input['email'] ?? ''));
 $password = (string) ($input['password'] ?? '');
 $passwordConfirm = (string) ($input['passwordConfirm'] ?? '');
 $captchaAnswer = $input['captcha'] ?? '';
+$agree = !empty($input['agree']);
+
+// Согласие с соглашением и политикой обязательно — фиксируем факт согласия
+// и на сервере, а не только галочкой в браузере (её легко обойти).
+if (!$agree) {
+    http_response_code(422);
+    echo json_encode(['error' => 'Нужно принять пользовательское соглашение и политику конфиденциальности']);
+    exit;
+}
 
 if (!captcha_verify($captchaAnswer)) {
     http_response_code(422);

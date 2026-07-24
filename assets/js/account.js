@@ -228,6 +228,7 @@
         const password = document.getElementById('register-password').value;
         const passwordConfirm = document.getElementById('register-password-confirm').value;
         const captcha = document.getElementById('captcha-answer').value.trim();
+        const agree = document.getElementById('register-agree').checked;
         const feedback = document.getElementById('register-feedback');
 
         if (password !== passwordConfirm) {
@@ -236,11 +237,17 @@
             return;
         }
 
+        if (!agree) {
+            feedback.textContent = 'Чтобы создать аккаунт, нужно принять пользовательское соглашение и политику конфиденциальности';
+            feedback.className = 'feedback show bad';
+            return;
+        }
+
         try {
             const res = await fetch('api/register.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, password, passwordConfirm, captcha }),
+                body: JSON.stringify({ name, email, password, passwordConfirm, captcha, agree }),
             });
             const data = await res.json();
             if (res.ok) {
