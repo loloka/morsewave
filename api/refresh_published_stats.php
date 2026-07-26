@@ -21,6 +21,9 @@ if (!$userId) {
     echo json_encode(['ok' => false, 'reason' => 'not_logged_in']);
     exit;
 }
+// Как и push_progress.php — дёргается в фоне на каждое изменение
+// прогресса, $_SESSION дальше не нужен, закрываем блокировку сразу.
+session_write_close();
 
 $check = $pdo->prepare('SELECT email_verified_at FROM users WHERE id = :id');
 $check->execute(['id' => $userId]);

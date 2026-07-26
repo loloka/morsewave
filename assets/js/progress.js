@@ -141,18 +141,46 @@ const Progress = (() => {
         return isNaN(d.getTime()) ? null : d;
     }
 
+    /**
+     * Один POST-запрос push'а. Вынесен отдельно, чтобы pushNow() мог
+     * повторить попытку без дублирования кода.
+     */
+    async function pushOnce() {
+        const res = await fetch('api/push_progress.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(load()),
+        });
+        return res.json();
+    }
+
+    /**
+     * Реальный инцидент: во время временных 504 на сервере push тихо
+     * проваливался (catch ниже) и просто не повторялся — следующая попытка
+     * была только при СЛЕДУЮЩЕМ начислении XP. Если человек как раз в этот
+     * момент активно тренировался на телефоне, а потом ушёл в другую
+     * вкладку/закрыл её, сервер так и оставался со старыми цифрами, и
+     * последующий логин-мёрж с другого устройства подтягивал именно их
+     * (mergeFromServer сам по себе всегда берёт максимум и не откатывает —
+     * проблема была именно в том, что новые локальные цифры на сервер
+     * вообще не доехали). Одна быстрая повторная попытка через 4 секунды
+     * заметно снижает шанс, что временный сбой сети/сервера так и останется
+     * неотправленным.
+     */
     async function pushNow() {
         try {
-            const res = await fetch('api/push_progress.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(load()),
-            });
-            const data = await res.json();
+            const data = await pushOnce();
             if (data && data.ok) markSynced();
             return data;
         } catch {
-            return null; // сеть отвалилась — метку не двигаем, индикатор покажет старое время
+            try {
+                await new Promise((r) => setTimeout(r, 4000));
+                const data = await pushOnce();
+                if (data && data.ok) markSynced();
+                return data;
+            } catch {
+                return null; // сеть/сервер всё ещё недоступны — метку не двигаем
+            }
         }
     }
 

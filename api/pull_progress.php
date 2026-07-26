@@ -7,9 +7,11 @@ require __DIR__ . '/../includes/auth.php';
 // сливается с localStorage через Progress.mergeFromServer() на клиенте.
 
 require_login_json();
+$userId = current_user_id();
+session_write_close(); // дальше только чтение из БД — сессия больше не нужна
 
 $stmt = $pdo->prepare('SELECT progress_json, updated_at FROM user_progress WHERE user_id = :id');
-$stmt->execute(['id' => current_user_id()]);
+$stmt->execute(['id' => $userId]);
 $row = $stmt->fetch();
 
 if (!$row) {

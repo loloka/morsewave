@@ -528,6 +528,36 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .answer-input.correct { border-color: var(--success); }
 .answer-input.wrong { border-color: var(--danger); }
 
+/* ---------- Экранная клавиатура (см. koch.js) ---------- */
+.vkb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.vkb-key {
+    flex: 1 1 32px;
+    min-width: 32px;
+    max-width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: transform .05s, border-color .1s;
+}
+.vkb-key:active { transform: scale(0.92); border-color: var(--signal); }
+.vkb-key.vkb-wide { flex: 1 1 68px; max-width: none; color: var(--text-muted); }
+
 /* ---------- Badges (achievements) ---------- */
 .badge {
     display: flex;
@@ -563,6 +593,12 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .feedback.show { display: block; }
 .feedback.ok { background: rgba(111, 207, 122, 0.12); color: var(--success); }
 .feedback.bad { background: rgba(226, 88, 79, 0.12); color: var(--danger); }
+
+/* История ответов в "Сокращениях" — стопка .feedback вместо одной строки
+   (см. groups.js pushAbbrevHistory). Самая свежая сверху, чуть ярче. */
+#abbrev-history { display: flex; flex-direction: column; gap: 6px; }
+.abbrev-history-item { font-size: 13px; }
+.abbrev-history-item:not(:first-child) { opacity: 0.55; }
 
 /* ---------- Morse lamp (визуальная альтернатива звуку) ---------- */
 .morse-lamp {

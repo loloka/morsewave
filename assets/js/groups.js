@@ -570,6 +570,8 @@
     const abbrevSignalLine = new SignalLine(document.getElementById('abbrev-signal'));
     wireSignalVisibilityToggle(document.getElementById('abbrev-signal-toggle'), document.getElementById('abbrev-signal'));
     const abbrevFeedback = document.getElementById('abbrev-feedback');
+    const abbrevHistory = document.getElementById('abbrev-history');
+    const ABBREV_HISTORY_MAX = 6; // больше — уже скорее простыня, чем подсказка
     const abbrevStreakEl = document.getElementById('abbrev-streak');
     const abbrevCorrectEl = document.getElementById('abbrev-correct');
     const abbrevTotalEl = document.getElementById('abbrev-total');
@@ -642,6 +644,24 @@
         }
     }
 
+    /**
+     * Добавляет запись в историю ответов (последняя — сверху). Раньше был
+     * один div с расшифровкой, который playAbbrevTarget() гасил через
+     * ~0.9с при старте следующего сокращения — на телефоне прочитать
+     * разбор ошибки часто не успевал никто. Теперь ответы копятся списком
+     * и остаются на экране, пока их не вытеснят более новые (лимит —
+     * ABBREV_HISTORY_MAX, старые просто уходят из DOM).
+     */
+    function pushAbbrevHistory(isCorrect, text) {
+        const entry = document.createElement('div');
+        entry.className = 'feedback show ' + (isCorrect ? 'ok' : 'bad') + ' abbrev-history-item';
+        entry.textContent = text;
+        abbrevHistory.insertBefore(entry, abbrevHistory.firstChild);
+        while (abbrevHistory.children.length > ABBREV_HISTORY_MAX) {
+            abbrevHistory.removeChild(abbrevHistory.lastChild);
+        }
+    }
+
     function handleAbbrevAnswer(item, tile) {
         if (abbrevBusy || !abbrevTarget || !abbrevRunning) return;
         const isCorrect = item.code === abbrevTarget.code;
@@ -655,12 +675,10 @@
             Progress.addXp(5);
             Progress.incrementStat('groupsCompleted', 1);
             postStat('total_groups', 1);
-            abbrevFeedback.textContent = `Верно: ${abbrevTarget.code} — ${abbrevTarget.meaning} (+5 XP)`;
-            abbrevFeedback.className = 'feedback show ok';
+            pushAbbrevHistory(true, `Верно: ${abbrevTarget.code} — ${abbrevTarget.meaning} (+5 XP)`);
         } else {
             abbrevStreak = 0;
-            abbrevFeedback.textContent = `Было «${abbrevTarget.code}» (${abbrevTarget.meaning}), а нажато «${item.code}»`;
-            abbrevFeedback.className = 'feedback show bad';
+            pushAbbrevHistory(false, `Было «${abbrevTarget.code}» (${abbrevTarget.meaning}), а нажато «${item.code}»`);
         }
 
         abbrevStreakEl.textContent = abbrevStreak;
@@ -679,6 +697,7 @@
         haltAbbrev(); // добить хвосты предыдущего запуска, если они ещё живы
         abbrevRunning = true;
         abbrevFeedback.className = 'feedback';
+        abbrevHistory.innerHTML = '';
         abbrevStreak = 0;
         abbrevCorrect = 0;
         abbrevTotal = 0;

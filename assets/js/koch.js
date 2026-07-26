@@ -61,6 +61,54 @@
 
     const kochCharsetFeedback = document.getElementById('koch-charset-feedback');
 
+    /**
+     * Экранная клавиатура — только для тач-устройств (см. koch.php). На
+     * Кохе набор символов смешивает буквы/цифры/знаки (. и ?), а у
+     * нативной клавиатуры телефона они на разных "страницах" — переключение
+     * туда-обратно на каждую группу утомляет. Наша клавиатура показывает
+     * весь текущий набор сразу, и inputmode="none" на поле ввода не даёт
+     * системной клавиатуре всплывать поверх неё. На компьютере (курсор,
+     * а не палец) ничего не меняем — ввод остаётся обычным, с клавиатуры.
+     */
+    const isTouch = window.matchMedia('(pointer: coarse)').matches;
+    const vkbEl = document.getElementById('koch-vkb');
+    if (isTouch) {
+        answerInput.setAttribute('inputmode', 'none');
+        vkbEl.style.display = 'flex';
+    }
+
+    // Клавиатурная раскладка удобнее педагогического порядка Коха: буквы по
+    // алфавиту, потом цифры по порядку, знаки — последними.
+    function sortForKeyboard(charset) {
+        const letters = charset.filter(ch => /[A-Z]/.test(ch)).sort();
+        const digits = charset.filter(ch => /[0-9]/.test(ch)).sort();
+        const rest = charset.filter(ch => !/[A-Z0-9]/.test(ch));
+        return [...letters, ...digits, ...rest];
+    }
+
+    function renderVkb(charset) {
+        if (!isTouch) return;
+        vkbEl.innerHTML = '';
+        sortForKeyboard(charset).forEach((ch) => {
+            const key = document.createElement('div');
+            key.className = 'vkb-key';
+            key.textContent = ch;
+            key.addEventListener('click', () => {
+                answerInput.value += ch;
+                answerInput.focus();
+            });
+            vkbEl.appendChild(key);
+        });
+        const back = document.createElement('div');
+        back.className = 'vkb-key vkb-wide';
+        back.textContent = '⌫';
+        back.addEventListener('click', () => {
+            answerInput.value = answerInput.value.slice(0, -1);
+            answerInput.focus();
+        });
+        vkbEl.appendChild(back);
+    }
+
     function renderHeader() {
         const state = Progress.load();
         const charset = currentCharset();
@@ -78,6 +126,7 @@
             chip.addEventListener('click', () => playCharsetLetter(ch, chip));
             kochCharsetEl.appendChild(chip);
         });
+        renderVkb(charset);
     }
 
     async function playCharsetLetter(ch, chip) {

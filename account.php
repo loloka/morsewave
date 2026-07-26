@@ -4,6 +4,11 @@ $pageTitle = 'Профиль и настройки';
 $activePage = 'account';
 $pageScript = 'account.js';
 $loggedInUser = current_user($pdo);
+// Дальше — только рендер статичной разметки, $_SESSION не трогаем.
+// Закрываем блокировку сессии пораньше: эта страница на телефоне
+// параллельно грузит ещё api/me.php, api/captcha.php, api/achievements.php
+// с тем же cookie — без этого они выстраиваются в очередь друг за другом.
+session_write_close();
 include __DIR__ . '/includes/header.php';
 ?>
 

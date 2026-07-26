@@ -33,6 +33,12 @@ function showAchievementToast(achievement) {
 window.addEventListener('DOMContentLoaded', () => {
     renderNavStats();
     Progress.checkAchievements();
+    // Самовосстановление после сбоя push'а (см. Progress.pushNow): если
+    // залогинен, каждая открытая страница лишний раз досылает ТЕКУЩИЙ
+    // локальный прогресс на сервер. Это не мёрж — просто "сервер = то, что
+    // сейчас в браузере", поэтому дублирующий вызов безопасен. Без логина
+    // эндпоинт тихо отвечает not_logged_in.
+    Progress.pushNow();
 });
 window.addEventListener('progress:updated', renderNavStats);
 window.addEventListener('achievements:unlocked', (e) => {

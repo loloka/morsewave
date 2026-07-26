@@ -77,6 +77,16 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="signal-line mt-2" id="koch-signal"></div>
     <input type="text" id="koch-answer" class="answer-input mt-2" placeholder="Введи символы…" autocomplete="off">
+
+    <!-- Экранная клавиатура — только на телефонах/планшетах (см. koch.js).
+         На Кохе набор символов часто смешивает буквы, цифры и знаки
+         (. и ?), а у стандартной клавиатуры телефона они на разных
+         "страницах" — переключение туда-обратно между каждой группой
+         утомляет и съедает время. Своя клавиатура показывает сразу все
+         символы текущего уровня на одном экране; на компьютере её нет,
+         ввод остаётся обычным, с физической клавиатуры. -->
+    <div class="vkb mt-2" id="koch-vkb" style="display:none;"></div>
+
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="submit-answer">Проверить →</button>
     </div>
