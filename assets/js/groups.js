@@ -595,7 +595,7 @@
             const tile = document.createElement('div');
             tile.className = 'letter-tile';
             tile.dataset.code = item.code;
-            tile.innerHTML = `<div class="ch" style="font-size:13px; white-space:nowrap;">${item.code}</div>`;
+            tile.innerHTML = `<div class="ch abbrev-code">${item.code}</div>`;
             tile.addEventListener('click', () => handleAbbrevAnswer(item, tile));
             abbrevGrid.appendChild(tile);
         });
@@ -687,6 +687,11 @@
         abbrevTotalEl.textContent = '0';
         abbrevStartBtn.style.display = 'none';
         abbrevStopBtn.style.display = 'inline-flex';
+        // На телефоне кнопка "Начать тренировку" стоит ниже настроек — без
+        // скролла счётчик серии/точности оставался за кадром, и первый
+        // ответ было не с чем сверить на глаз. scroll-margin-top на
+        // #abbrev-stats (см. CSS) учитывает высоту фиксированной шапки.
+        document.getElementById('abbrev-stats').scrollIntoView({ behavior: 'smooth', block: 'start' });
         playAbbrevTarget();
     });
     abbrevStopBtn.addEventListener('click', () => {

@@ -239,12 +239,15 @@ include __DIR__ . '/includes/header.php';
 
         <div class="signal-line mt-2" id="abbrev-signal"></div>
 
-        <div class="flex-between mt-2">
+        <div class="flex-between mt-2" id="abbrev-stats">
             <div class="muted mono">Серия: <b id="abbrev-streak">0</b> · Верно: <b id="abbrev-correct">0</b> из <b id="abbrev-total">0</b></div>
         </div>
 
-        <div class="tile-grid mt-2" id="abbrev-grid" style="grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));"></div>
+        <!-- Подсказка "верно/неверно" раньше стояла ПОСЛЕ сетки карточек —
+             на телефоне это самый низ экрана, легко не заметить сразу после
+             ответа. Подняли её к счётчику серии, куда и так смотришь. -->
         <div class="feedback mt-2" id="abbrev-feedback"></div>
+        <div class="tile-grid mt-2" id="abbrev-grid"></div>
 
         <button class="btn btn-sm mt-3" id="abbrev-reference-toggle">📖 Показать все сокращения со значениями</button>
         <div id="abbrev-reference" class="mt-2" style="display:none;"></div>

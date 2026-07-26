@@ -424,6 +424,26 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     .tile-grid { grid-template-columns: repeat(6, 1fr); }
 }
 
+/* Сетка "Сокращений" — короткие коды (2-4 символа), плитки могут быть
+   заметно компактнее обычных букв, чтобы на телефоне на экране умещалось
+   больше и не приходилось долго скроллить вниз. auto-fill сам считает
+   число колонок под ширину экрана — горизонтального скролла быть не
+   должно ни при каких размерах. */
+#abbrev-grid {
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 6px;
+}
+#abbrev-grid .letter-tile { aspect-ratio: auto; padding: 10px 2px; }
+#abbrev-grid .abbrev-code { font-size: 13px; white-space: nowrap; }
+@media (max-width: 480px) {
+    #abbrev-grid { grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 5px; }
+    #abbrev-grid .abbrev-code { font-size: 12px; }
+}
+
+/* Якорь для скролла при старте тренировки (см. groups.js) — учитывает
+   высоту фиксированной шапки, чтобы счётчик серии не прятался под ней. */
+#abbrev-stats { scroll-margin-top: calc(var(--nav-h) + 12px); }
+
 /* ---------- Telegraph key (tap button) ---------- */
 .key-wrap { display: flex; justify-content: center; padding: 20px 0; }
 .telegraph-key {
@@ -560,7 +580,11 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     border-color: var(--accent);
     box-shadow: 0 0 22px var(--accent), 0 0 46px var(--accent-dim);
 }
-.lamp-row { display: flex; align-items: center; gap: 16px; }
+/* flex-wrap: на узких экранах лампа + кнопки (сигнал/старт/стоп) в одну
+   строку не помещались и вылезали за край экрана — приходилось скроллить
+   по горизонтали, чтобы дотянуться до "Начать тренировку" (было багом,
+   тот же класс проблемы, что и с .mode-switch). */
+.lamp-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 
 /* ---------- Range sliders ---------- */
 input[type="range"] {
