@@ -97,7 +97,7 @@
         if (!isTouch) return;
         vkbEl.innerHTML = '';
 
-        QWERTY_ROWS.forEach((row, i) => {
+        QWERTY_ROWS.forEach((row) => {
             const rowEl = document.createElement('div');
             rowEl.className = 'vkb-row';
             row.forEach((ch) => {
@@ -110,21 +110,24 @@
                 });
                 rowEl.appendChild(key);
             });
-            // Стереть — на последнем ряду, справа, как на обычной
-            // клавиатуре телефона: крупнее обычной клавиши и подписана
-            // словом, а не только значком, чтобы не путать с чем-то ещё.
-            if (i === QWERTY_ROWS.length - 1) {
-                const back = document.createElement('div');
-                back.className = 'vkb-key vkb-backspace';
-                back.innerHTML = '⌫ Стереть';
-                back.addEventListener('click', () => {
-                    answerInput.value = answerInput.value.slice(0, -1);
-                    answerInput.focus();
-                });
-                rowEl.appendChild(back);
-            }
             vkbEl.appendChild(rowEl);
         });
+
+        // "Стереть" — отдельным ПОЛНОШИРИННЫМ рядом снизу, а не втиснута в
+        // ряд с буквами: там ей не хватало места и подпись переносилась и
+        // вылезала за рамку. Отдельный ряд — места достаточно, ошибиться
+        // с чем это кнопка уже нельзя.
+        const backRow = document.createElement('div');
+        backRow.className = 'vkb-row';
+        const back = document.createElement('div');
+        back.className = 'vkb-key vkb-backspace';
+        back.innerHTML = '⌫ Стереть';
+        back.addEventListener('click', () => {
+            answerInput.value = answerInput.value.slice(0, -1);
+            answerInput.focus();
+        });
+        backRow.appendChild(back);
+        vkbEl.appendChild(backRow);
     }
 
     function renderHeader() {

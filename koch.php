@@ -67,8 +67,8 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">
-    <div class="flex-between">
-        <div class="muted mono">Группа <span id="group-index">1</span> / <span id="group-total">20</span></div>
+    <div class="flex-between flex-wrap gap-1">
+        <div class="muted mono" style="white-space:nowrap;">Группа <span id="group-index">1</span> / <span id="group-total">20</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="koch-lamp"></div>
             <button class="btn btn-sm" id="koch-signal-toggle"></button>
