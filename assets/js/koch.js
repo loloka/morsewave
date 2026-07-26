@@ -105,8 +105,13 @@
                 key.className = 'vkb-key';
                 key.textContent = ch;
                 key.addEventListener('click', () => {
-                    answerInput.value += ch;
+                    const start = answerInput.selectionStart ?? answerInput.value.length;
+                    const end = answerInput.selectionEnd ?? answerInput.value.length;
+                    const val = answerInput.value;
+                    answerInput.value = val.slice(0, start) + ch + val.slice(end);
                     answerInput.focus();
+                    const pos = start + ch.length;
+                    answerInput.setSelectionRange(pos, pos);
                 });
                 rowEl.appendChild(key);
             });
@@ -123,8 +128,21 @@
         back.className = 'vkb-key vkb-backspace';
         back.innerHTML = '⌫ Стереть';
         back.addEventListener('click', () => {
-            answerInput.value = answerInput.value.slice(0, -1);
-            answerInput.focus();
+            const start = answerInput.selectionStart ?? answerInput.value.length;
+            const end = answerInput.selectionEnd ?? answerInput.value.length;
+            const val = answerInput.value;
+            if (start !== end) {
+                // Есть выделение — стираем его целиком, как обычный backspace.
+                answerInput.value = val.slice(0, start) + val.slice(end);
+                answerInput.focus();
+                answerInput.setSelectionRange(start, start);
+            } else if (start > 0) {
+                answerInput.value = val.slice(0, start - 1) + val.slice(start);
+                answerInput.focus();
+                answerInput.setSelectionRange(start - 1, start - 1);
+            } else {
+                answerInput.focus();
+            }
         });
         backRow.appendChild(back);
         vkbEl.appendChild(backRow);
