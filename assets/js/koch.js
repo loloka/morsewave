@@ -77,42 +77,54 @@
         vkbEl.style.display = 'flex';
     }
 
-    // Клавиатурная раскладка удобнее педагогического порядка Коха: буквы по
-    // алфавиту, потом цифры по порядку, знаки — последними.
-    function sortForKeyboard(charset) {
-        const letters = charset.filter(ch => /[A-Z]/.test(ch)).sort();
-        const digits = charset.filter(ch => /[0-9]/.test(ch)).sort();
-        const rest = charset.filter(ch => !/[A-Z0-9]/.test(ch));
-        return [...letters, ...digits, ...rest];
-    }
+    // Раскладка QWERTY — привычнее произвольной сортировки, палец сам
+    // помнит, где буква, без разглядывания клавиатуры. Ровно 38 символов —
+    // все буквы, все цифры, "." и "?" — весь набор метода Коха целиком.
+    const QWERTY_ROWS = [
+        ['1','2','3','4','5','6','7','8','9','0'],
+        ['Q','W','E','R','T','Y','U','I','O','P'],
+        ['A','S','D','F','G','H','J','K','L'],
+        ['Z','X','C','V','B','N','M','.','?'],
+    ];
 
-    // ВАЖНО: клавиатура всегда показывает ПОЛНЫЙ набор символов метода Коха
-    // (весь KOCH_ORDER), а не только те, что уже открыты на текущем уровне.
-    // Если показывать лишь открытые — это подсказка: услышав сигнал, можно
-    // угадать букву просто по тому, что на клавиатуре доступно всего 2-3
-    // варианта, даже не разобрав его на слух. Полный набор кнопок не выдаёт
-    // ничего лишнего, ровно как обычная физическая клавиатура на компьютере.
+    // ВАЖНО: клавиатура всегда показывает ПОЛНЫЙ набор символов метода Коха,
+    // а не только те, что уже открыты на текущем уровне. Если показывать
+    // лишь открытые — это подсказка: услышав сигнал, можно угадать букву
+    // просто по тому, что вариантов на клавиатуре всего 2-3, даже не
+    // разобрав его на слух. Полный набор кнопок не выдаёт ничего лишнего,
+    // ровно как обычная физическая клавиатура на компьютере.
     function renderVkb() {
         if (!isTouch) return;
         vkbEl.innerHTML = '';
-        sortForKeyboard(KOCH_ORDER).forEach((ch) => {
-            const key = document.createElement('div');
-            key.className = 'vkb-key';
-            key.textContent = ch;
-            key.addEventListener('click', () => {
-                answerInput.value += ch;
-                answerInput.focus();
+
+        QWERTY_ROWS.forEach((row, i) => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'vkb-row';
+            row.forEach((ch) => {
+                const key = document.createElement('div');
+                key.className = 'vkb-key';
+                key.textContent = ch;
+                key.addEventListener('click', () => {
+                    answerInput.value += ch;
+                    answerInput.focus();
+                });
+                rowEl.appendChild(key);
             });
-            vkbEl.appendChild(key);
+            // Стереть — на последнем ряду, справа, как на обычной
+            // клавиатуре телефона: крупнее обычной клавиши и подписана
+            // словом, а не только значком, чтобы не путать с чем-то ещё.
+            if (i === QWERTY_ROWS.length - 1) {
+                const back = document.createElement('div');
+                back.className = 'vkb-key vkb-backspace';
+                back.innerHTML = '⌫ Стереть';
+                back.addEventListener('click', () => {
+                    answerInput.value = answerInput.value.slice(0, -1);
+                    answerInput.focus();
+                });
+                rowEl.appendChild(back);
+            }
+            vkbEl.appendChild(rowEl);
         });
-        const back = document.createElement('div');
-        back.className = 'vkb-key vkb-wide';
-        back.textContent = '⌫';
-        back.addEventListener('click', () => {
-            answerInput.value = answerInput.value.slice(0, -1);
-            answerInput.focus();
-        });
-        vkbEl.appendChild(back);
     }
 
     function renderHeader() {

@@ -529,16 +529,21 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .answer-input.wrong { border-color: var(--danger); }
 
 /* ---------- Экранная клавиатура (см. koch.js) ---------- */
+/* Ряды QWERTY, как на обычной клавиатуре — палец помнит расположение сам,
+   не нужно её разглядывать в поисках буквы. */
 .vkb {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 6px;
 }
+.vkb-row {
+    display: flex;
+    gap: 5px;
+}
 .vkb-key {
-    flex: 1 1 32px;
-    min-width: 32px;
-    max-width: 44px;
-    height: 44px;
+    flex: 1 1 0;
+    min-width: 0;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -546,7 +551,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     font-family: var(--font-mono);
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--text);
     cursor: pointer;
@@ -556,7 +561,20 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     transition: transform .05s, border-color .1s;
 }
 .vkb-key:active { transform: scale(0.92); border-color: var(--signal); }
-.vkb-key.vkb-wide { flex: 1 1 68px; max-width: none; color: var(--text-muted); }
+/* "Стереть" — заметно другого вида (не просто ещё одна клавиша с иероглифом)
+   и крупнее остальных, чтобы с первого взгляда было понятно, что это
+   удаление, а не очередной символ. Подписана словом, не только значком. */
+.vkb-key.vkb-backspace {
+    flex: 1.8 1 0;
+    background: var(--surface);
+    border-color: var(--danger);
+    color: var(--danger);
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 700;
+    gap: 4px;
+}
+.vkb-key.vkb-backspace:active { background: rgba(226, 88, 79, 0.12); }
 
 /* ---------- Badges (achievements) ---------- */
 .badge {
