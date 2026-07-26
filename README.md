@@ -10,6 +10,8 @@
 ![JS](https://img.shields.io/badge/JavaScript-Vanilla-f7df1e)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+🌐 **[morse.r9old.ru](https://morse.r9old.ru)** — живая версия
+
 </div>
 
 ---
@@ -242,6 +244,15 @@ morse-trainer/
 
 Уже сделано: восстановление пароля по почте, экспорт/импорт прогресса файлом,
 целевые задания дня, самостоятельное удаление аккаунта, защита лидерборда.
+
+## Смежный проект
+
+Освоил приём отдельных знаков и позывных — дальше по маршруту (см. «Путь
+новичка» на главной) идёт **[Morse Walker](https://morse.r9o.ru)**:
+симулятор радиосвязи с pile-up, режимы контестов и POTA, генератор
+российских позывных. Это отдельный проект, не часть MorseWave — исходный
+автор [W6NYC](https://github.com/sc0tfree/morsewalker), доработка и
+русификация — тоже R9OGL: [github.com/loloka/morsewalker](https://github.com/loloka/morsewalker).
 
 ## Лицензия
 
