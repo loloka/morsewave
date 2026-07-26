@@ -567,6 +567,32 @@
 
     document.getElementById('sync-btn').addEventListener('click', syncNow);
 
+    // Ручная приватная синхронизация (НЕ публикация в лидерборд — это выше,
+    // sync-btn/syncNow). Раньше пул+мёрж с сервером срабатывал только один
+    // раз, сразу после логина — если человек оставался залогинен на
+    // устройстве днями, оно никогда больше не подтягивало то, что за это
+    // время наиграли на других устройствах, и это было легко принять за
+    // баг ("нажимаю синхронизировать, а он не подтягивает с базы"). Кнопка
+    // просто дёргает тот же Progress.syncWithServer(), что и логин: тянет
+    // с сервера, мержит по максимуму, сохраняет и пушит результат.
+    document.getElementById('manual-sync-btn').addEventListener('click', async () => {
+        const btn = document.getElementById('manual-sync-btn');
+        const feedback = document.getElementById('manual-sync-feedback');
+        btn.disabled = true;
+        const before = Progress.load().xp;
+        const merged = await Progress.syncWithServer();
+        btn.disabled = false;
+        if (!merged) {
+            feedback.textContent = 'Не удалось связаться с сервером — попробуй ещё раз чуть позже.';
+            feedback.className = 'feedback show bad';
+            return;
+        }
+        feedback.textContent = merged.xp > before
+            ? `Готово! Подтянут более свежий прогресс с другого устройства (${before} → ${merged.xp} XP).`
+            : 'Готово! Это устройство и так было в актуальном состоянии.';
+        feedback.className = 'feedback show ok';
+    });
+
     // Слияние прогресса с сервером после логина завершается асинхронно и
     // шлёт это событие — перерисовываем локальные цифры в профиле (счётчики
     // в шапке обновляет app.js по тому же событию).

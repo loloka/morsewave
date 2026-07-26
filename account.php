@@ -124,7 +124,11 @@ include __DIR__ . '/includes/header.php';
             </div>
             <p class="muted mt-1" style="font-size:12px;">При выходе прогресс тренировок убирается из этого браузера —
                 он сохранён в аккаунте и вернётся, как только войдёшь снова (удобно на общем компьютере).</p>
-            <div class="muted mt-1" id="sync-indicator" style="font-size:12px;"></div>
+            <div class="flex-between flex-wrap gap-2 mt-1" style="align-items:center;">
+                <div class="muted" id="sync-indicator" style="font-size:12px;"></div>
+                <button class="btn btn-sm" id="manual-sync-btn" title="Подтянуть и слить прогресс с другими устройствами прямо сейчас">🔄 Синхронизировать с другими устройствами</button>
+            </div>
+            <div class="feedback mt-1" id="manual-sync-feedback"></div>
             <div class="mt-2" id="verify-status"></div>
         </div>
 

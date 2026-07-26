@@ -86,10 +86,16 @@
         return [...letters, ...digits, ...rest];
     }
 
-    function renderVkb(charset) {
+    // ВАЖНО: клавиатура всегда показывает ПОЛНЫЙ набор символов метода Коха
+    // (весь KOCH_ORDER), а не только те, что уже открыты на текущем уровне.
+    // Если показывать лишь открытые — это подсказка: услышав сигнал, можно
+    // угадать букву просто по тому, что на клавиатуре доступно всего 2-3
+    // варианта, даже не разобрав его на слух. Полный набор кнопок не выдаёт
+    // ничего лишнего, ровно как обычная физическая клавиатура на компьютере.
+    function renderVkb() {
         if (!isTouch) return;
         vkbEl.innerHTML = '';
-        sortForKeyboard(charset).forEach((ch) => {
+        sortForKeyboard(KOCH_ORDER).forEach((ch) => {
             const key = document.createElement('div');
             key.className = 'vkb-key';
             key.textContent = ch;
@@ -126,7 +132,7 @@
             chip.addEventListener('click', () => playCharsetLetter(ch, chip));
             kochCharsetEl.appendChild(chip);
         });
-        renderVkb(charset);
+        renderVkb();
     }
 
     async function playCharsetLetter(ch, chip) {
