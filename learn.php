@@ -97,10 +97,10 @@ include __DIR__ . '/includes/header.php';
         <div class="signal-line mt-2" id="rec-signal"></div>
 
         <div class="grid grid-4 mt-2">
-            <div class="stat"><span class="value" id="rec-streak">0</span><span class="label">🔥 Серия</span></div>
-            <div class="stat"><span class="value" id="rec-best">0</span><span class="label">🏆 Рекорд серии</span></div>
-            <div class="stat"><span class="value" id="rec-accuracy">—</span><span class="label">🎯 Точность сессии</span></div>
-            <div class="stat"><span class="value" id="rec-total">0</span><span class="label">✅ Верно всего</span></div>
+            <div class="stat"><span class="value" id="rec-streak">0</span><span class="label"><?= mw_icon('flame', 12) ?> Серия</span></div>
+            <div class="stat"><span class="value" id="rec-best">0</span><span class="label"><?= mw_icon('trophy', 12) ?> Рекорд серии</span></div>
+            <div class="stat"><span class="value" id="rec-accuracy">—</span><span class="label"><?= mw_icon('target', 12) ?> Точность сессии</span></div>
+            <div class="stat"><span class="value" id="rec-total">0</span><span class="label"><?= mw_icon('check', 12) ?> Верно всего</span></div>
         </div>
 
         <div class="tile-grid mt-2" id="recognize-grid"></div>

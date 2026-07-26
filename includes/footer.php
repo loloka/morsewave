@@ -15,6 +15,7 @@
         <a href="privacy.php">Конфиденциальность</a>
     </div>
 </footer>
+<script src="<?= asset_v('assets/js/icons.js') ?>"></script>
 <script src="<?= asset_v('assets/js/morse-data.js') ?>"></script>
 <script src="<?= asset_v('assets/js/abbreviations.js') ?>"></script>
 <script src="<?= asset_v('assets/js/words.js') ?>"></script>

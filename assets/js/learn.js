@@ -70,9 +70,11 @@
         grid.innerHTML = '';
         orderedLetters().forEach((ch) => {
             const tile = document.createElement('div');
-            tile.className = 'letter-tile' + (state.learnedLetters.includes(ch) ? ' learned' : '');
+            const isLearned = state.learnedLetters.includes(ch);
+            tile.className = 'letter-tile' + (isLearned ? ' learned' : '');
             tile.dataset.ch = ch;
-            tile.innerHTML = `<div class="ch">${ch}</div><div class="code">${MORSE_CODE[ch]}</div>`;
+            tile.innerHTML = `<div class="ch">${ch}</div><div class="code">${MORSE_CODE[ch]}</div>`
+                + (isLearned ? `<span class="check">${MWIcon('check', 12)}</span>` : '');
             tile.addEventListener('click', () => selectLetter(ch));
             grid.appendChild(tile);
         });

@@ -51,6 +51,18 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
+
+/* Ссылка внутри обычного текста (не кнопка, не пункт навигации) — иначе
+   глобальный сброс выше делает её неотличимой от текста. Было багом в
+   чекбоксе согласия на регистрации: "пользовательское соглашение" и
+   "политику конфиденциальности" были кликабельны, но выглядели как
+   обычные слова. Тот же стиль, что и в подвале сайта. */
+.link {
+    color: var(--text-muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+.link:hover { color: var(--signal); }
 h1, h2, h3, h4 { font-weight: 700; letter-spacing: -0.01em; margin: 0 0 8px; }
 p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
@@ -265,6 +277,23 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .btn-sm { padding: 8px 14px; font-size: 13px; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* Второстепенное действие рядом с первичным CTA (например, герой на
+   главной) — без рамки и заливки, просто текстовая ссылка потише, чтобы
+   не спорить по весу с btn-primary (см. аудит: "оранжевый — только для
+   первичного CTA"). Обычные .btn/.btn-ghost оставлены как есть — это
+   для второстепенных, но всё же самостоятельных действий на странице. */
+.btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 4px;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 15px;
+    transition: color .15s;
+}
+.btn-quiet:hover { color: var(--text); }
+
 .chip {
     display: inline-flex;
     align-items: center;
@@ -357,6 +386,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
 /* ---------- Letter grid (learn page) ---------- */
 .letter-tile {
+    position: relative;
     aspect-ratio: 1;
     display: flex;
     flex-direction: column;
@@ -370,11 +400,20 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     gap: 4px;
 }
 .letter-tile:hover { border-color: var(--signal); }
-.letter-tile.learned { border-color: var(--accent-dim); background: linear-gradient(160deg, var(--surface), #1f1a10); }
+/* Выучено = состояние успеха/прогресса, поэтому бирюзовый (--signal), а не
+   акцентный оранжевый — тот зарезервирован под CTA и активную навигацию
+   (см. аудит дизайна). Явная галочка в углу, а не только цвет рамки. */
+.letter-tile.learned { border-color: var(--signal-dim); background: linear-gradient(160deg, var(--surface), #10201d); }
 .letter-tile.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
 .letter-tile .ch { font-size: 22px; font-weight: 700; font-family: var(--font-mono); }
 .letter-tile .code { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
-.letter-tile .check { position: absolute; }
+.letter-tile .check {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: var(--signal);
+    display: flex;
+}
 
 .tile-grid {
     display: grid;
@@ -447,6 +486,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     text-transform: uppercase;
     letter-spacing: 0.06em;
 }
+.stat .label svg { vertical-align: -2px; margin-right: 1px; }
 
 /* ---------- Text input for decoding answers ---------- */
 .answer-input {
@@ -480,7 +520,10 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     opacity: 0.4;
     filter: grayscale(1);
 }
-.badge.unlocked { opacity: 1; filter: none; border-color: var(--accent-dim); }
+/* Открытая ачивка = состояние успеха/прогресса → бирюзовый (--signal),
+   не акцентный оранжевый (тот только для CTA/активной навигации). Иконку
+   пробовали заменить на SVG — не понравилось, вернули эмодзи как было. */
+.badge.unlocked { opacity: 1; filter: none; border-color: var(--signal-dim); }
 .badge .icon { font-size: 28px; flex-shrink: 0; }
 .badge-text { min-width: 0; }
 .badge .title { font-weight: 700; font-size: 14px; }
@@ -539,7 +582,11 @@ input[type="range"] {
 }
 
 /* ---------- Mode switch (learn page) ---------- */
-.mode-switch { display: flex; gap: 8px; margin-bottom: 8px; }
+/* flex-wrap обязателен: на "Группах" тут три чипа ("Группы символов" /
+   "Реальные слова" / "Сокращения"), и на узких экранах они не помещаются
+   в одну строку — без переноса ряд вылезал за экран и приходилось
+   неудобно скроллить, чтобы дотянуться до "Сокращения" (было багом). */
+.mode-switch { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
 
 /* ---------- Recognize mode keyboard tiles ---------- */
 .recognize-tile {
@@ -647,6 +694,10 @@ input[type="range"] {
 .gap-2 { gap: 16px; }
 .center { text-align: center; }
 .section { margin-top: 48px; }
+/* Герой уже даёт 40px снизу (.hero padding-bottom) — следующая секция
+   плюс её собственные 48px margin-top превращались в ~88px пустоты
+   между кнопками героя и карточками статистики на главной. */
+.hero + .section { margin-top: 16px; }
 
 /* ---------- Site footer ---------- */
 .site-footer {

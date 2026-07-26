@@ -92,8 +92,8 @@ include __DIR__ . '/includes/header.php';
 
             <label for="register-agree" class="mt-2" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;cursor:pointer;">
                 <input type="checkbox" id="register-agree" style="margin-top:3px;flex:0 0 auto;">
-                <span>Принимаю <a href="terms.php" target="_blank" rel="noopener">пользовательское соглашение</a>
-                    и <a href="privacy.php" target="_blank" rel="noopener">политику конфиденциальности</a>,
+                <span>Принимаю <a href="terms.php" target="_blank" rel="noopener" class="link">пользовательское соглашение</a>
+                    и <a href="privacy.php" target="_blank" rel="noopener" class="link">политику конфиденциальности</a>,
                     согласен на обработку персональных данных.</span>
             </label>
 

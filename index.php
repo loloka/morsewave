@@ -14,13 +14,16 @@ include __DIR__ . '/includes/header.php';
 
     <div id="hero-signal" class="signal-line" style="margin: 20px 0;"></div>
 
-    <div class="btn-row">
+    <div class="btn-row" style="align-items:center;">
         <a href="learn.php" class="btn btn-primary">Начать с букв</a>
-        <a href="koch.php" class="btn">Метод Коха</a>
+        <a href="koch.php" class="btn-quiet">Метод Коха →</a>
     </div>
 </section>
 
 <section class="section">
+    <!-- Пробовали "тихую" строку без карточек — стало сложнее считывать
+         на глаз, что вообще происходит на странице (владелец: "хоть и
+         шумно, но раньше было понятно"). Вернули крупные карточки. -->
     <div class="grid grid-4">
         <div class="card stat">
             <span class="label">Опыт (XP)</span>
@@ -43,7 +46,7 @@ include __DIR__ . '/includes/header.php';
 
 <section class="section" id="leaderboard-section">
     <div class="flex-between flex-wrap gap-2">
-        <h2 class="mt-0">🏆 Таблица лидеров</h2>
+        <h2 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('trophy', 20) ?> Таблица лидеров</h2>
         <a href="account.php" class="btn btn-sm">Присоединиться</a>
     </div>
     <p class="muted mt-0" style="font-size:13px;">Публикуют свои цифры те, кто завёл аккаунт и сам нажал
@@ -51,8 +54,8 @@ include __DIR__ . '/includes/header.php';
 
     <div class="card mt-2">
         <div class="chip-row">
-            <div class="chip active" data-board="xp">⭐ По опыту</div>
-            <div class="chip" data-board="streak">🔥 По серии дней</div>
+            <div class="chip active" data-board="xp">По опыту</div>
+            <div class="chip" data-board="streak">По серии дней</div>
         </div>
         <div class="mt-2" id="leaderboard-xp"><p class="muted">Загрузка…</p></div>
         <div class="mt-2" id="leaderboard-streak" style="display:none;"><p class="muted">Загрузка…</p></div>
@@ -69,7 +72,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">1</div>
             <div class="step-content">
-                <div class="step-icon">📖</div>
+                <div class="step-icon"><?= mw_icon('book', 22) ?></div>
                 <h3>Выучи первые символы</h3>
                 <p>Начни со страницы «Буквы» — выстукивай каждый символ ключом (тап по экрану
                     или удержание пробела) и слушай, как он звучит. Не старайся выучить всё
@@ -81,7 +84,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-icon">🎯</div>
+                <div class="step-icon"><?= mw_icon('target', 22) ?></div>
                 <h3>Переходи на метод Коха</h3>
                 <p>Как только выучишь первые пару символов — время для метода Коха: символы сразу
                     звучат на боевой скорости, никакого «сначала медленно, потом быстрее». Новый
@@ -141,7 +144,7 @@ include __DIR__ . '/includes/header.php';
 </section>
 
 <section class="section card daily-card" id="daily-card">
-    <div class="card-eyebrow">🎯 Задание дня</div>
+    <div class="card-eyebrow flex gap-1" style="align-items:center;"><?= mw_icon('target', 14) ?> Задание дня</div>
     <h3 id="daily-title">Загрузка…</h3>
     <p id="daily-desc" class="mt-0"></p>
     <a href="#" id="daily-link" class="btn btn-primary">Пройти задание (+50 XP)</a>
