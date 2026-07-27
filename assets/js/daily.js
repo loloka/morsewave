@@ -51,8 +51,8 @@ const DailyChallenge = (() => {
         if (st === 'novice') {
             return {
                 type: 'learn', stage: st, date, target: 3,
-                title: 'Изучи 3 новые буквы ключом',
-                desc: 'Открой 3 любых новых символа в режиме «Обучение → Отправка ключом». Бонус +50 XP один раз в день.',
+                title: t('js.daily.learn_title'),
+                desc: t('js.daily.learn_desc'),
                 href: 'learn.php?daily=1',
             };
         }
@@ -60,8 +60,8 @@ const DailyChallenge = (() => {
         if (st === 'learning') {
             return {
                 type: 'recognize', stage: st, date, target: 20,
-                title: 'Прими 20 символов на слух',
-                desc: 'Верно распознай 20 символов в режиме «Обучение → Приём на слух». Бонус +50 XP один раз в день.',
+                title: t('js.daily.recognize_title'),
+                desc: t('js.daily.recognize_desc'),
                 href: 'learn.php?daily=1&mode=recognize',
             };
         }
@@ -81,8 +81,8 @@ const DailyChallenge = (() => {
 
         return {
             type: 'groups', stage: st, date, len, count, wpm,
-            title: `${count} групп по ${len} символа(ов) на ${wpm} wpm`,
-            desc: 'Прими группы в режиме «Группы символов». Бонус +50 XP один раз в день.',
+            title: t('js.daily.groups_title', { '{count}': count, '{len}': len, '{wpm}': wpm }),
+            desc: t('js.daily.groups_desc'),
             href: `groups.php?daily=1&len=${len}&count=${count}&wpm=${wpm}`,
         };
     }

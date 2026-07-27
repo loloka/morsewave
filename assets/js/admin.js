@@ -10,24 +10,24 @@
     }
 
     async function loadUsers() {
-        listEl.innerHTML = '<p class="muted">Загрузка…</p>';
+        listEl.innerHTML = '<p class="muted">' + t('admin.loading') + '</p>';
         try {
             const res = await fetch('api/admin_users.php');
             const data = await res.json();
             if (!res.ok) {
-                listEl.innerHTML = `<p class="feedback show bad" style="display:block;">${escapeHtml(data.error || 'Ошибка загрузки')}</p>`;
+                listEl.innerHTML = `<p class="feedback show bad" style="display:block;">${escapeHtml(data.error || t('js.admin.load_error_default'))}</p>`;
                 return;
             }
             renderUsers(data.users || []);
         } catch {
-            listEl.innerHTML = '<p class="feedback show bad" style="display:block;">Не удалось связаться с сервером</p>';
+            listEl.innerHTML = '<p class="feedback show bad" style="display:block;">' + t('js.admin.network_error') + '</p>';
         }
     }
 
     function renderUsers(users) {
         countEl.textContent = users.length;
         if (!users.length) {
-            listEl.innerHTML = '<p class="muted">Пока никто не зарегистрировался.</p>';
+            listEl.innerHTML = '<p class="muted">' + t('js.admin.no_users_yet') + '</p>';
             return;
         }
         listEl.innerHTML = users.map(u => `
@@ -36,20 +36,20 @@
                     <div>
                         <div style="font-weight:700; font-size:15px;">
                             ${escapeHtml(u.name)}
-                            ${u.email_verified_at ? '<span title="E-mail подтверждён">✅</span>' : '<span title="E-mail не подтверждён" style="opacity:.5;">✉️</span>'}
-                            ${Number(u.is_admin) ? '<span title="Администратор" style="color:var(--accent);">🛠 админ</span>' : ''}
+                            ${u.email_verified_at ? `<span title="${t('js.admin.email_verified_title')}">✅</span>` : `<span title="${t('js.admin.email_not_verified_title')}" style="opacity:.5;">✉️</span>`}
+                            ${Number(u.is_admin) ? `<span title="${t('js.admin.admin_title')}" style="color:var(--accent);">🛠 ${t('js.admin.admin_label')}</span>` : ''}
                         </div>
-                        <div class="muted" style="font-size:12px;">${escapeHtml(u.email)} · зарегистрирован ${escapeHtml((u.created_at || '').slice(0, 10))}</div>
+                        <div class="muted" style="font-size:12px;">${escapeHtml(u.email)} · ${t('js.admin.registered_on')} ${escapeHtml((u.created_at || '').slice(0, 10))}</div>
                         <div class="mono muted" style="font-size:12px; margin-top:4px;">
-                            XP: ${u.xp ?? '—'} · серия: ${u.streak_count ?? '—'}
+                            XP: ${u.xp ?? '—'} · ${t('js.admin.streak_label')}: ${u.streak_count ?? '—'}
                         </div>
                     </div>
                     <div class="btn-row">
                         ${Number(u.is_admin)
-                            ? '<button class="btn btn-sm admin-toggle-btn" data-make="0">Снять админа</button>'
-                            : '<button class="btn btn-sm admin-toggle-btn" data-make="1" style="border-color:var(--accent); color:var(--accent);">Сделать админом</button>'}
-                        <button class="btn btn-sm rename-btn">✏️ Переименовать</button>
-                        <button class="btn btn-sm delete-btn" style="border-color:var(--danger); color:var(--danger);">🗑 Удалить</button>
+                            ? `<button class="btn btn-sm admin-toggle-btn" data-make="0">${t('js.admin.remove_admin_btn')}</button>`
+                            : `<button class="btn btn-sm admin-toggle-btn" data-make="1" style="border-color:var(--accent); color:var(--accent);">${t('js.admin.make_admin_btn')}</button>`}
+                        <button class="btn btn-sm rename-btn">${t('js.admin.rename_btn')}</button>
+                        <button class="btn btn-sm delete-btn" style="border-color:var(--danger); color:var(--danger);">${t('js.admin.delete_btn')}</button>
                     </div>
                 </div>
             </div>
@@ -69,8 +69,8 @@
     async function setAdmin(card, makeAdmin) {
         const id = card.dataset.userId;
         const sure = confirm(makeAdmin
-            ? 'Выдать этому пользователю права администратора?'
-            : 'Снять права администратора с этого пользователя?');
+            ? t('js.admin.confirm_make_admin')
+            : t('js.admin.confirm_remove_admin'));
         if (!sure) return;
 
         try {
@@ -83,17 +83,17 @@
             if (res.ok) {
                 loadUsers();
             } else {
-                alert(data.error || 'Не получилось изменить права');
+                alert(data.error || t('js.admin.change_rights_failed'));
             }
         } catch {
-            alert('Не удалось связаться с сервером');
+            alert(t('js.admin.network_error'));
         }
     }
 
     async function renameUser(card) {
         const id = card.dataset.userId;
         const currentName = card.querySelector('div[style*="font-weight:700"]').textContent.trim().replace(/[✅✉️]/g, '').trim();
-        const newName = prompt('Новое имя:', currentName);
+        const newName = prompt(t('js.admin.rename_prompt'), currentName);
         if (!newName || newName.trim() === currentName) return;
 
         try {
@@ -106,16 +106,16 @@
             if (res.ok) {
                 loadUsers();
             } else {
-                alert(data.error || 'Не получилось переименовать');
+                alert(data.error || t('js.admin.rename_failed'));
             }
         } catch {
-            alert('Не удалось связаться с сервером');
+            alert(t('js.admin.network_error'));
         }
     }
 
     async function deleteUser(card) {
         const id = card.dataset.userId;
-        const sure = confirm('Точно удалить этого пользователя? Он пропадёт из лидерборда и не сможет войти в свой аккаунт. Действие необратимо.');
+        const sure = confirm(t('js.admin.confirm_delete_user'));
         if (!sure) return;
 
         try {
@@ -128,10 +128,10 @@
             if (res.ok) {
                 loadUsers();
             } else {
-                alert(data.error || 'Не получилось удалить');
+                alert(data.error || t('js.admin.delete_failed'));
             }
         } catch {
-            alert('Не удалось связаться с сервером');
+            alert(t('js.admin.network_error'));
         }
     }
 

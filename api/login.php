@@ -1,13 +1,14 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -24,12 +25,12 @@ $user = $stmt->fetch();
 
 // Одинаковое сообщение для "нет такого юзера" и "неверный пароль" —
 // чтобы нельзя было перебором email узнать, какие аккаунты существуют.
-$genericError = 'Неверный e-mail или пароль';
+$genericError = t('api.login.generic_error');
 
 if ($user && $user['locked_until'] && strtotime($user['locked_until']) > time()) {
     $minutesLeft = (int) ceil((strtotime($user['locked_until']) - time()) / 60);
     http_response_code(429);
-    echo json_encode(['error' => "Слишком много неудачных попыток. Попробуй снова через {$minutesLeft} мин."]);
+    echo json_encode(['error' => t('api.login.locked', ['{min}' => $minutesLeft])]);
     exit;
 }
 

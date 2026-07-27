@@ -1,5 +1,6 @@
 <?php
-$pageTitle = 'Главная';
+require_once __DIR__ . '/includes/i18n.php';
+$pageTitle = t('nav.home');
 $activePage = 'index';
 $pageScript = 'home.js';
 include __DIR__ . '/includes/header.php';
@@ -7,16 +8,14 @@ include __DIR__ . '/includes/header.php';
 
 <section class="hero">
     <div class="card-eyebrow">· − · · · − &nbsp;· · − &nbsp;· −</div>
-    <h1>Слушай сигнал. Расшифровывай телеграфный код. Говори на языке эфира.</h1>
-    <p class="lead">MorseWave — тренажёр азбуки Морзе с методом Коха, тренировкой групп символов
-        и позывных. Занимайся с телефона или компьютера, набирай опыт и выполняй тренировки
-        несколько дней подряд.</p>
+    <h1><?= t('index.hero_title') ?></h1>
+    <p class="lead"><?= t('index.hero_lead') ?></p>
 
     <div id="hero-signal" class="signal-line" style="margin: 20px 0;"></div>
 
     <div class="btn-row" style="align-items:center;">
-        <a href="learn.php" class="btn btn-primary">Начать с букв</a>
-        <a href="koch.php" class="btn-quiet">Метод Коха →</a>
+        <a href="learn.php" class="btn btn-primary"><?= t('index.start_letters') ?></a>
+        <a href="koch.php" class="btn-quiet"><?= t('index.koch_method') ?></a>
     </div>
 </section>
 
@@ -26,19 +25,19 @@ include __DIR__ . '/includes/header.php';
          шумно, но раньше было понятно"). Вернули крупные карточки. -->
     <div class="grid grid-4">
         <div class="card stat">
-            <span class="label">Опыт (XP)</span>
+            <span class="label"><?= t('index.stat_xp') ?></span>
             <span class="value" data-nav-xp>0</span>
         </div>
         <div class="card stat">
-            <span class="label">Уровень</span>
+            <span class="label"><?= t('index.stat_level') ?></span>
             <span class="value" data-nav-level>1</span>
         </div>
         <div class="card stat">
-            <span class="label">Серия дней</span>
+            <span class="label"><?= t('index.stat_streak') ?></span>
             <span class="value">🔥 <span data-nav-streak>0</span></span>
         </div>
         <div class="card stat">
-            <span class="label">Символов выучено</span>
+            <span class="label"><?= t('index.stat_learned') ?></span>
             <span class="value" id="home-learned-count">0</span>
         </div>
     </div>
@@ -46,38 +45,34 @@ include __DIR__ . '/includes/header.php';
 
 <section class="section" id="leaderboard-section">
     <div class="flex-between flex-wrap gap-2">
-        <h2 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('trophy', 20) ?> Таблица лидеров</h2>
-        <a href="account.php" class="btn btn-sm">Присоединиться</a>
+        <h2 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('trophy', 20) ?> <?= t('index.leaderboard_title') ?></h2>
+        <a href="account.php" class="btn btn-sm"><?= t('index.leaderboard_join') ?></a>
     </div>
-    <p class="muted mt-0" style="font-size:13px;">Публикуют свои цифры те, кто завёл аккаунт и сам нажал
-        «Опубликовать» — это не обязательно, весь прогресс и без аккаунта прекрасно живёт у тебя в браузере.</p>
+    <p class="muted mt-0" style="font-size:13px;"><?= t('index.leaderboard_intro') ?></p>
 
     <div class="card mt-2">
         <div class="chip-row">
-            <div class="chip active" data-board="xp">По опыту</div>
-            <div class="chip" data-board="streak">По серии дней</div>
+            <div class="chip active" data-board="xp"><?= t('index.board_by_xp') ?></div>
+            <div class="chip" data-board="streak"><?= t('index.board_by_streak') ?></div>
         </div>
-        <div class="mt-2" id="leaderboard-xp"><p class="muted">Загрузка…</p></div>
-        <div class="mt-2" id="leaderboard-streak" style="display:none;"><p class="muted">Загрузка…</p></div>
+        <div class="mt-2" id="leaderboard-xp"><p class="muted"><?= t('index.loading') ?></p></div>
+        <div class="mt-2" id="leaderboard-streak" style="display:none;"><p class="muted"><?= t('index.loading') ?></p></div>
     </div>
 </section>
 
 <section class="section">
-    <div class="card-eyebrow">С чего начать</div>
-    <h2>Путь новичка: от тишины до эфира за 5 шагов</h2>
-    <p class="muted">Не обязательно идти строго по порядку, но именно в такой
-        последовательности азбуку Морзе учат быстрее всего.</p>
+    <div class="card-eyebrow"><?= t('index.start_eyebrow') ?></div>
+    <h2><?= t('index.start_h2') ?></h2>
+    <p class="muted"><?= t('index.start_intro') ?></p>
 
     <div class="onboarding-steps mt-3">
         <div class="onboarding-step">
             <div class="step-num">1</div>
             <div class="step-content">
                 <div class="step-icon"><?= mw_icon('book', 22) ?></div>
-                <h3>Выучи первые символы</h3>
-                <p>Начни со страницы «Буквы» — выстукивай каждый символ ключом (тап по экрану
-                    или удержание пробела) и слушай, как он звучит. Не старайся выучить всё
-                    сразу — для старта достаточно 5–10 символов.</p>
-                <a href="learn.php" class="btn btn-primary btn-sm">Начать с букв →</a>
+                <h3><?= t('index.step1_title') ?></h3>
+                <p><?= t('index.step1_text') ?></p>
+                <a href="learn.php" class="btn btn-primary btn-sm"><?= t('index.step1_btn') ?></a>
             </div>
         </div>
 
@@ -85,11 +80,9 @@ include __DIR__ . '/includes/header.php';
             <div class="step-num">2</div>
             <div class="step-content">
                 <div class="step-icon"><?= mw_icon('target', 22) ?></div>
-                <h3>Переходи на метод Коха</h3>
-                <p>Как только выучишь первые пару символов — время для метода Коха: символы сразу
-                    звучат на боевой скорости, никакого «сначала медленно, потом быстрее». Новый
-                    символ открывается автоматически, когда точность стабильно высокая.</p>
-                <a href="koch.php" class="btn btn-sm">Метод Коха →</a>
+                <h3><?= t('index.step2_title') ?></h3>
+                <p><?= t('index.step2_text') ?></p>
+                <a href="koch.php" class="btn btn-sm"><?= t('index.step2_btn') ?></a>
             </div>
         </div>
 
@@ -97,11 +90,9 @@ include __DIR__ . '/includes/header.php';
             <div class="step-num">3</div>
             <div class="step-content">
                 <div class="step-icon">🔢</div>
-                <h3>Набирай скорость на группах</h3>
-                <p>Когда в Кохе открыто хотя бы 10 символов — переходи к группам: тренируй приём
-                    случайных сочетаний по 2–5 символов на слух. Здесь оттачивается именно скорость
-                    и уверенность приёма, а не заучивание.</p>
-                <a href="groups.php" class="btn btn-sm">Группы символов →</a>
+                <h3><?= t('index.step3_title') ?></h3>
+                <p><?= t('index.step3_text') ?></p>
+                <a href="groups.php" class="btn btn-sm"><?= t('index.step3_btn') ?></a>
             </div>
         </div>
 
@@ -109,12 +100,11 @@ include __DIR__ . '/includes/header.php';
             <div class="step-num">4</div>
             <div class="step-content">
                 <div class="step-icon">📡</div>
-                <h3>Погружайся в настоящий эфир</h3>
-                <p>Финальный этап — позывные радиолюбителей и служебные сокращения (CQ, QTH, 73…).
-                    Это уже максимально близко к тому, что реально звучит в эфире.</p>
+                <h3><?= t('index.step4_title') ?></h3>
+                <p><?= t('index.step4_text') ?></p>
                 <div class="btn-row">
-                    <a href="callsigns.php" class="btn btn-sm">Позывные →</a>
-                    <a href="groups.php" class="btn btn-sm">Сокращения →</a>
+                    <a href="callsigns.php" class="btn btn-sm"><?= t('index.step4_btn_callsigns') ?></a>
+                    <a href="groups.php" class="btn btn-sm"><?= t('index.step4_btn_abbrev') ?></a>
                 </div>
             </div>
         </div>
@@ -127,34 +117,31 @@ include __DIR__ . '/includes/header.php';
             <div class="step-num">5</div>
             <div class="step-content">
                 <div class="step-icon">📻</div>
-                <h3>Выходи в эфир — Morse Walker</h3>
-                <p>Когда уверенно принимаешь позывные и сокращения, тренажёр своё дело сделал:
-                    дальше нужен не приём отдельных знаков, а работа в эфире. Morse Walker —
-                    симулятор радиосвязи с pile-up: станции отвечают на твой CQ, их надо
-                    разобрать и провести QSO. Есть режимы контестов и POTA, скорость и
-                    интервалы Фарнсворта настраиваются, помехи и замирания — по вкусу.</p>
-                <p class="muted" style="font-size:12px;">Автор проекта —
-                    <a href="https://github.com/sc0tfree/morsewalker" target="_blank" rel="noopener">W6NYC</a>,
-                    доработка и русификация —
-                    <a href="https://github.com/loloka/morsewalker" target="_blank" rel="noopener">R9OGL</a>, автор MorseWave.</p>
-                <a href="https://morse.r9o.ru" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Открыть Morse Walker →</a>
+                <h3><?= t('index.step5_title') ?></h3>
+                <p><?= t('index.step5_text') ?></p>
+                <p class="muted" style="font-size:12px;"><?= strtr(t('index.step5_credit'), [
+                    '{author}' => '<a href="https://github.com/sc0tfree/morsewalker" target="_blank" rel="noopener">W6NYC</a>',
+                    '{adapter}' => '<a href="https://github.com/loloka/morsewalker" target="_blank" rel="noopener">R9OGL</a>',
+                ]) ?></p>
+                <a href="https://morse.r9o.ru" class="btn btn-primary btn-sm" target="_blank" rel="noopener"><?= t('index.step5_btn') ?></a>
             </div>
         </div>
     </div>
 </section>
 
 <section class="section card daily-card" id="daily-card">
-    <div class="card-eyebrow flex gap-1" style="align-items:center;"><?= mw_icon('target', 14) ?> Задание дня</div>
-    <h3 id="daily-title">Загрузка…</h3>
+    <div class="card-eyebrow flex gap-1" style="align-items:center;"><?= mw_icon('target', 14) ?> <?= t('index.daily_eyebrow') ?></div>
+    <h3 id="daily-title"><?= t('index.loading') ?></h3>
     <p id="daily-desc" class="mt-0"></p>
-    <a href="#" id="daily-link" class="btn btn-primary">Пройти задание (+50 XP)</a>
+    <a href="#" id="daily-link" class="btn btn-primary"><?= t('index.daily_btn') ?></a>
 </section>
 
 <section class="section card" id="community-stats">
-    <div class="card-eyebrow">Сообщество</div>
-    <p class="mt-0">Вместе с другими радистами MorseWave: расшифровано
-        <b class="mono" id="stat-groups">…</b> групп символов и
-        <b class="mono" id="stat-callsigns">…</b> позывных.</p>
+    <div class="card-eyebrow"><?= t('index.community_eyebrow') ?></div>
+    <p class="mt-0"><?= strtr(t('index.community_text'), [
+        '{groups}' => '<b class="mono" id="stat-groups">…</b>',
+        '{callsigns}' => '<b class="mono" id="stat-callsigns">…</b>',
+    ]) ?></p>
 </section>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

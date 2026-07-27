@@ -3,10 +3,11 @@ header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
 require __DIR__ . '/../includes/mailer.php';
 require __DIR__ . '/../includes/captcha.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -22,35 +23,35 @@ $agree = !empty($input['agree']);
 // и на сервере, а не только галочкой в браузере (её легко обойти).
 if (!$agree) {
     http_response_code(422);
-    echo json_encode(['error' => 'Нужно принять пользовательское соглашение и политику конфиденциальности']);
+    echo json_encode(['error' => t('api.register.must_agree')]);
     exit;
 }
 
 if (!captcha_verify($captchaAnswer)) {
     http_response_code(422);
-    echo json_encode(['error' => 'Неверный ответ капчи — попробуй ещё раз', 'code' => 'captcha']);
+    echo json_encode(['error' => t('api.register.captcha_wrong'), 'code' => 'captcha']);
     exit;
 }
 
 if ($password !== $passwordConfirm) {
     http_response_code(422);
-    echo json_encode(['error' => 'Пароли не совпадают']);
+    echo json_encode(['error' => t('api.register.passwords_mismatch')]);
     exit;
 }
 
 if (mb_strlen($name) < 2 || mb_strlen($name) > 40) {
     http_response_code(422);
-    echo json_encode(['error' => 'Имя должно быть от 2 до 40 символов']);
+    echo json_encode(['error' => t('api.register.name_length')]);
     exit;
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(422);
-    echo json_encode(['error' => 'Некорректный e-mail']);
+    echo json_encode(['error' => t('api.register.invalid_email')]);
     exit;
 }
 if (mb_strlen($password) < 6) {
     http_response_code(422);
-    echo json_encode(['error' => 'Пароль должен быть минимум 6 символов']);
+    echo json_encode(['error' => t('api.register.password_length')]);
     exit;
 }
 
@@ -58,7 +59,7 @@ $check = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
 $check->execute(['email' => $email]);
 if ($check->fetch()) {
     http_response_code(409);
-    echo json_encode(['error' => 'Такой e-mail уже зарегистрирован']);
+    echo json_encode(['error' => t('api.register.email_taken')]);
     exit;
 }
 

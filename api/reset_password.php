@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 // Установка нового пароля по одноразовому токену из письма
 // (request_password_reset.php). Токен живёт 1 час и сгорает после
@@ -9,7 +10,7 @@ require __DIR__ . '/../includes/auth.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -20,17 +21,17 @@ $passwordConfirm = (string) ($input['passwordConfirm'] ?? '');
 
 if ($password !== $passwordConfirm) {
     http_response_code(422);
-    echo json_encode(['error' => 'Пароли не совпадают']);
+    echo json_encode(['error' => t('api.reset_password.passwords_mismatch')]);
     exit;
 }
 if (mb_strlen($password) < 6) {
     http_response_code(422);
-    echo json_encode(['error' => 'Пароль должен быть минимум 6 символов']);
+    echo json_encode(['error' => t('api.reset_password.password_length')]);
     exit;
 }
 if (!preg_match('/^[0-9a-f]{64}$/', $token)) {
     http_response_code(422);
-    echo json_encode(['error' => 'Ссылка недействительна']);
+    echo json_encode(['error' => t('api.reset_password.invalid_link')]);
     exit;
 }
 
@@ -44,7 +45,7 @@ $user = $stmt->fetch();
 
 if (!$user) {
     http_response_code(410);
-    echo json_encode(['error' => 'Ссылка недействительна или устарела (действует 1 час) — запроси сброс ещё раз']);
+    echo json_encode(['error' => t('api.reset_password.expired_link')]);
     exit;
 }
 
@@ -59,4 +60,4 @@ $pdo->prepare('
     WHERE id = :id
 ')->execute(['hash' => $hash, 'id' => $user['id']]);
 
-echo json_encode(['ok' => true, 'message' => 'Пароль изменён! Теперь можно войти с новым паролем.']);
+echo json_encode(['ok' => true, 'message' => t('api.reset_password.success')]);

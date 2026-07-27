@@ -149,6 +149,19 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .nav-links a:hover { color: var(--text); background: var(--surface-2); }
 .nav-links a.active { color: var(--bg); background: var(--accent); font-weight: 600; }
 
+.nav-lang {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border: 1px solid var(--surface-2);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    margin-right: 10px;
+    letter-spacing: .04em;
+}
+.nav-lang:hover { color: var(--text); background: var(--surface-2); }
+
 .nav-stats {
     display: flex;
     gap: 14px;

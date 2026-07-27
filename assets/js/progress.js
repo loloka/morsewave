@@ -67,15 +67,15 @@ const Progress = (() => {
     }
 
     function touchStreak(state) {
-        const t = today();
-        if (state.streak.lastDate === t) return; // уже отмечено сегодня
+        const todayStr = today();
+        if (state.streak.lastDate === todayStr) return; // уже отмечено сегодня
         const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
         if (state.streak.lastDate === yesterday) {
             state.streak.count += 1;
         } else {
             state.streak.count = 1;
         }
-        state.streak.lastDate = t;
+        state.streak.lastDate = todayStr;
     }
 
     function levelFromXp(xp) {
@@ -441,13 +441,13 @@ const Progress = (() => {
      */
     function importBackup(obj) {
         if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {
-            throw new Error('Это не похоже на файл бэкапа MorseWave');
+            throw new Error(t('js.progress.not_a_backup'));
         }
         const looksLikeProgress = typeof obj.xp === 'number'
             || Array.isArray(obj.learnedLetters)
             || (obj.stats && typeof obj.stats === 'object');
         if (!looksLikeProgress) {
-            throw new Error('В файле нет данных прогресса');
+            throw new Error(t('js.progress.no_progress_data'));
         }
         const merged = mergeFromServer(obj);
         save(merged);

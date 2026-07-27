@@ -1,10 +1,11 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -23,7 +24,7 @@ if ($country !== null) {
 if (!preg_match('/^[A-Z0-9]{1,3}[0-9][A-Z]{1,4}$/', $callsign)) {
     http_response_code(422);
     echo json_encode([
-        'error' => 'Не похоже на позывной. Формат: буквы/цифры, обязательно цифра, затем буквы — например R7AB, UA3XYZ, W1AW.',
+        'error' => t('api.callsign.bad_format'),
     ]);
     exit;
 }
@@ -32,7 +33,7 @@ $check = $pdo->prepare('SELECT id FROM callsigns WHERE callsign = :callsign LIMI
 $check->execute(['callsign' => $callsign]);
 if ($check->fetch()) {
     http_response_code(409);
-    echo json_encode(['error' => "Позывной {$callsign} уже есть в базе."]);
+    echo json_encode(['error' => t('api.callsign.exists', ['{callsign}' => $callsign])]);
     exit;
 }
 

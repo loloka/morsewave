@@ -85,12 +85,12 @@
         patternEl.innerHTML = code.split('').map(s => `<span class="sym">${s === '.' ? '•' : '−'}</span>`).join(' ');
 
         const titaEl = document.getElementById('practice-tita');
-        titaEl.innerHTML = code.split('').map(s => `<span class="unit">${s === '.' ? 'ти' : 'та'}</span>`).join('-');
+        titaEl.innerHTML = code.split('').map(s => `<span class="unit">${s === '.' ? t('js.common.dit') : t('js.common.dah')}</span>`).join('-');
 
         const napevEl = document.getElementById('practice-napev');
         const mnemonic = MORSE_MNEMONICS[ch];
         napevEl.innerHTML = mnemonic
-            ? 'напев: ' + mnemonic.map(syl => `<span class="syl">${syl}</span>`).join('-')
+            ? t('js.learn.napev_prefix') + mnemonic.map(syl => `<span class="syl">${syl}</span>`).join('-')
             : '';
     }
 
@@ -176,20 +176,20 @@
             });
 
             if (currentWasLearnedAtStart) {
-                feedbackEl.textContent = `Верно! Это «${decoded}» — символ уже освоен, тренируемся без XP`;
+                feedbackEl.textContent = t('js.learn.correct_known', { '{ch}': decoded });
                 feedbackEl.className = 'feedback show ok';
             } else if (correctStreak < REQUIRED_STREAK) {
                 // XP пока не начисляем — награда даётся один раз, целиком,
                 // только за реально пройденную серию, чтобы нельзя было
                 // фармить попытками (успех-успех-успех-...-ошибка-заново).
-                feedbackEl.textContent = `Верно! Это «${decoded}» (${correctStreak}/${REQUIRED_STREAK}, XP будет за всю серию)`;
+                feedbackEl.textContent = t('js.learn.correct_streak', { '{ch}': decoded, '{streak}': correctStreak, '{req}': REQUIRED_STREAK });
                 feedbackEl.className = 'feedback show ok';
             } else {
                 Progress.markLetterLearned(current);
                 Progress.addXp(25);
                 Progress.markDailyActivity();
                 currentWasLearnedAtStart = true; // чтобы дальше не начислять XP при повторах
-                feedbackEl.textContent = `Символ «${current}» выучен! +25 XP`;
+                feedbackEl.textContent = t('js.learn.learned_symbol', { '{ch}': current });
                 feedbackEl.className = 'feedback show ok';
                 renderTiles();
                 [...grid.children].find(t => t.dataset.ch === current)?.classList.add('selected');
@@ -197,7 +197,7 @@
             }
         } else {
             correctStreak = 0;
-            feedbackEl.textContent = `Получилось «${decoded}», а нужно «${current}». Попробуй ещё раз.`;
+            feedbackEl.textContent = t('js.learn.wrong', { '{got}': decoded, '{want}': current });
             feedbackEl.className = 'feedback show bad';
         }
         updateStreakUI();
@@ -372,7 +372,7 @@
             recBusy = true;
             recStreak++;
             recSessionCorrect++;
-            recFeedback.textContent = `Верно: «${recTarget}» (+1 XP)`;
+            recFeedback.textContent = t('js.learn.rec_correct', { '{ch}': recTarget });
             recFeedback.className = 'feedback show ok';
             Progress.addXp(1);
             Progress.incrementStat('recognizedCount', 1);
@@ -383,12 +383,12 @@
                 state.stats.recognizeBestStreak = recBest;
                 Progress.save(state);
                 Progress.checkAchievements();
-                recFeedback.textContent += ' — новый личный рекорд серии! 🏆';
+                recFeedback.textContent += t('js.learn.rec_new_record');
             }
             tickDaily('recognize'); // засчитываем верный приём в задание дня, если оно активно
         } else {
             recStreak = 0;
-            recFeedback.textContent = `Было «${recTarget}», нажата «${ch}»`;
+            recFeedback.textContent = t('js.learn.rec_wrong', { '{target}': recTarget, '{ch}': ch });
             recFeedback.className = 'feedback show bad';
         }
 
@@ -422,7 +422,7 @@
     });
     recStopBtn.addEventListener('click', () => {
         haltRecognize();
-        recFeedback.textContent = 'Остановлено. Нажмите «Начать тренировку», чтобы продолжить.';
+        recFeedback.textContent = t('js.learn.stopped');
         recFeedback.className = 'feedback show';
         recStartBtn.style.display = 'inline-flex';
         recStopBtn.style.display = 'none';
@@ -448,7 +448,7 @@
     function renderDailyBanner() {
         if (!dailyBannerEl || !dailyTask) return;
         dailyBannerEl.textContent =
-            `🎯 Задание дня: ${dailyCount}/${dailyTask.target} — ${dailyTask.title}. За выполнение +50 XP.`;
+            t('js.learn.daily_banner', { '{count}': dailyCount, '{target}': dailyTask.target, '{title}': dailyTask.title });
     }
 
     // Вызывается из обоих режимов; тикает только если активное задание того же типа.
@@ -458,8 +458,8 @@
         if (dailyCount >= dailyTask.target) {
             const granted = Progress.completeDailyChallenge();
             dailyBannerEl.textContent = granted
-                ? '🎯 Задание дня выполнено — бонус +50 XP начислен!'
-                : '🎯 Задание дня на сегодня уже было выполнено (бонус повторно не начисляется).';
+                ? t('js.learn.daily_done_bonus')
+                : t('js.learn.daily_done_norebonus');
             dailyBannerEl.className = 'feedback show ok mt-2';
             dailyTask = null; // больше не тикаем в этом заходе
         } else {
@@ -488,8 +488,7 @@
         }
 
         if (DailyChallenge.isDoneToday()) {
-            dailyBannerEl.textContent =
-                '🎯 Задание дня на сегодня уже выполнено — можно тренироваться дальше без бонуса.';
+            dailyBannerEl.textContent = t('js.learn.daily_already_done');
             dailyTask = null;
         } else {
             renderDailyBanner();

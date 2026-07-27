@@ -45,7 +45,7 @@
                 ).join(' &nbsp; ');
                 document.getElementById(answerId).value = '';
             } catch {
-                document.getElementById(patternId).textContent = 'Не удалось загрузить капчу — обнови страницу';
+                document.getElementById(patternId).textContent = t('js.account.captcha_load_error');
             }
         }
 
@@ -81,25 +81,24 @@
     function renderVerifyStatus(user) {
         const box = document.getElementById('verify-status');
         if (user.email_verified_at) {
-            box.innerHTML = '<span class="feedback show ok" style="display:inline-block;">✅ E-mail подтверждён</span>';
+            box.innerHTML = '<span class="feedback show ok" style="display:inline-block;">' + t('js.account.email_verified') + '</span>';
             return;
         }
         box.innerHTML = `
             <span class="feedback show bad" style="display:inline-block;">
-                ✉️ E-mail не подтверждён — проверь почту (в т.ч. папку «Спам»).
-                Без подтверждения прогресс не попадёт в таблицу лидеров.
+                ${t('js.account.email_not_verified_text')}
             </span>
-            <button class="btn btn-sm mt-1" id="resend-verify-btn">Отправить письмо ещё раз</button>
+            <button class="btn btn-sm mt-1" id="resend-verify-btn">${t('js.account.resend_email_btn')}</button>
         `;
         document.getElementById('resend-verify-btn').addEventListener('click', async (e) => {
             e.target.disabled = true;
-            e.target.textContent = 'Отправляю…';
+            e.target.textContent = t('js.account.resend_sending');
             try {
                 const res = await fetch('api/resend_verification.php', { method: 'POST' });
                 const data = await res.json();
-                e.target.textContent = data.mail_sent ? 'Письмо отправлено ✓' : 'Не получилось отправить — попробуй позже';
+                e.target.textContent = data.mail_sent ? t('js.account.resend_sent') : t('js.account.resend_failed');
             } catch {
-                e.target.textContent = 'Ошибка сети — попробуй позже';
+                e.target.textContent = t('js.account.network_error_short');
             }
         });
     }
@@ -118,7 +117,7 @@
                 link.id = 'admin-link';
                 link.href = 'admin.php';
                 link.className = 'btn btn-sm';
-                link.textContent = '🛠 Админка';
+                link.textContent = t('acc.admin_link');
                 actions.insertBefore(link, actions.firstChild);
             }
         } else if (link) {
@@ -143,6 +142,8 @@
        Push прогресса на сервер идёт тихо в фоне, и человеку неоткуда было
        узнать, сработал ли он вообще. Показываем момент последнего успешного
        push'а (Progress.lastSyncAt) человеческим языком. */
+    // Русское склонение (минуту/минуты/минут) — актуально только для ru;
+    // для en используется простое единственное/множественное число ниже.
     function pluralRu(n, one, few, many) {
         const n10 = n % 10;
         const n100 = n % 100;
@@ -151,17 +152,24 @@
         return many;
     }
 
+    function unitWord(n, kind) {
+        if (window.MW_LANG === 'ru') {
+            return pluralRu(n, t(`js.account.unit_${kind}_one`), t(`js.account.unit_${kind}_few`), t(`js.account.unit_${kind}_many`));
+        }
+        return n === 1 ? t(`js.account.unit_${kind}_one`) : t(`js.account.unit_${kind}_few`);
+    }
+
     function humanAgo(date) {
         const sec = Math.max(0, Math.round((Date.now() - date.getTime()) / 1000));
-        if (sec < 15) return 'только что';
-        if (sec < 60) return 'меньше минуты назад';
+        if (sec < 15) return t('js.account.time_just_now');
+        if (sec < 60) return t('js.account.time_less_minute');
         const min = Math.floor(sec / 60);
-        if (min < 60) return `${min} ${pluralRu(min, 'минуту', 'минуты', 'минут')} назад`;
+        if (min < 60) return t('js.account.time_ago', { '{n}': min, '{unit}': unitWord(min, 'minute') });
         const hours = Math.floor(min / 60);
-        if (hours < 24) return `${hours} ${pluralRu(hours, 'час', 'часа', 'часов')} назад`;
+        if (hours < 24) return t('js.account.time_ago', { '{n}': hours, '{unit}': unitWord(hours, 'hour') });
         const days = Math.floor(hours / 24);
-        if (days < 30) return `${days} ${pluralRu(days, 'день', 'дня', 'дней')} назад`;
-        return date.toLocaleDateString('ru-RU');
+        if (days < 30) return t('js.account.time_ago', { '{n}': days, '{unit}': unitWord(days, 'day') });
+        return date.toLocaleDateString(window.MW_LANG === 'en' ? 'en-US' : 'ru-RU');
     }
 
     function renderSyncIndicator() {
@@ -169,8 +177,8 @@
         if (!el) return;
         const at = Progress.lastSyncAt();
         el.textContent = at
-            ? `☁ Синхронизировано: ${humanAgo(at)}`
-            : '☁ Ещё не синхронизировано — прогресс уйдёт на сервер сам, при ближайшем начислении XP';
+            ? t('js.account.sync_indicator_synced', { '{ago}': humanAgo(at) })
+            : t('js.account.sync_indicator_never');
     }
 
     // Перерисовываем и по событию (успешный push), и по таймеру — иначе
@@ -213,8 +221,8 @@
         const banner = document.createElement('div');
         banner.className = verify === 'ok' ? 'feedback show ok mt-2' : 'feedback show bad mt-2';
         banner.textContent = verify === 'ok'
-            ? '✅ Почта подтверждена! Теперь можно опубликовать прогресс в лидерборде.'
-            : 'Ссылка недействительна или уже использована.';
+            ? t('js.account.verify_redirect_ok')
+            : t('js.account.verify_redirect_bad');
         document.querySelector('h1').insertAdjacentElement('afterend', banner);
         history.replaceState({}, '', location.pathname); // убираем ?verify= из адресной строки
     })();
@@ -236,11 +244,11 @@
                 // теряется, поэтому без диалогов подтверждения).
                 Progress.syncWithServer();
             } else {
-                feedback.textContent = data.error || 'Не получилось войти';
+                feedback.textContent = data.error || t('js.account.login_failed_default');
                 feedback.className = 'feedback show bad';
             }
         } catch {
-            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.textContent = t('js.account.network_error');
             feedback.className = 'feedback show bad';
         }
     });
@@ -255,13 +263,13 @@
         const feedback = document.getElementById('register-feedback');
 
         if (password !== passwordConfirm) {
-            feedback.textContent = 'Пароли не совпадают';
+            feedback.textContent = t('api.register.passwords_mismatch');
             feedback.className = 'feedback show bad';
             return;
         }
 
         if (!agree) {
-            feedback.textContent = 'Чтобы создать аккаунт, нужно принять пользовательское соглашение и политику конфиденциальности';
+            feedback.textContent = t('js.account.must_agree_client');
             feedback.className = 'feedback show bad';
             return;
         }
@@ -279,16 +287,16 @@
                 // изменит, но сразу запушится текущий локальный прогресс.
                 Progress.syncWithServer();
                 feedback.textContent = data.mail_sent
-                    ? 'Аккаунт создан! Проверь почту, чтобы подтвердить e-mail.'
-                    : 'Аккаунт создан, но письмо отправить не получилось — попробуй кнопку "Отправить ещё раз" ниже.';
+                    ? t('js.account.account_created_check_email')
+                    : t('js.account.account_created_mail_failed');
                 feedback.className = 'feedback show ok';
             } else {
-                feedback.textContent = data.error || 'Не получилось зарегистрироваться';
+                feedback.textContent = data.error || t('js.account.register_failed_default');
                 feedback.className = 'feedback show bad';
                 if (data.code === 'captcha') loadCaptcha(); // новый код взамен неверно разгаданного
             }
         } catch {
-            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.textContent = t('js.account.network_error');
             feedback.className = 'feedback show bad';
         }
     });
@@ -335,7 +343,7 @@
         delConfirm.addEventListener('click', async () => {
             const password = delPass.value;
             if (!password) {
-                delFeedback.textContent = 'Введи пароль для подтверждения';
+                delFeedback.textContent = t('js.account.delete_need_password');
                 delFeedback.className = 'feedback show bad';
                 return;
             }
@@ -355,15 +363,15 @@
                     showGuest();
                     const gf = document.getElementById('login-feedback');
                     if (gf) {
-                        gf.textContent = 'Аккаунт удалён. Локальный прогресс в этом браузере тоже очищен.';
+                        gf.textContent = t('js.account.delete_success');
                         gf.className = 'feedback show ok';
                     }
                 } else {
-                    delFeedback.textContent = data.error || 'Не получилось удалить аккаунт';
+                    delFeedback.textContent = data.error || t('js.account.delete_failed_default');
                     delFeedback.className = 'feedback show bad';
                 }
             } catch {
-                delFeedback.textContent = 'Не удалось связаться с сервером';
+                delFeedback.textContent = t('js.account.network_error');
                 delFeedback.className = 'feedback show bad';
             } finally {
                 delConfirm.disabled = false;
@@ -386,17 +394,17 @@
             });
             const data = await res.json();
             if (data.ok) {
-                feedback.textContent = 'Готово! Цифры обновлены в лидерборде.';
+                feedback.textContent = t('js.account.sync_success');
                 feedback.className = 'feedback show ok';
             } else if (data.reason === 'email_not_verified') {
-                feedback.textContent = 'Сначала подтверди e-mail (ссылка выше) — тогда прогресс появится в лидерборде.';
+                feedback.textContent = t('js.account.sync_need_verify');
                 feedback.className = 'feedback show bad';
             } else {
-                feedback.textContent = 'Не получилось опубликовать прогресс.';
+                feedback.textContent = t('js.account.sync_failed_default');
                 feedback.className = 'feedback show bad';
             }
         } catch {
-            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.textContent = t('js.account.network_error');
             feedback.className = 'feedback show bad';
         }
     }
@@ -413,11 +421,7 @@
 
             const claim = JSON.parse(localStorage.getItem(CLAIM_KEY) || 'null');
             if (claim && claim.userId !== data.user.id) {
-                const proceed = confirm(
-                    `Этот прогресс в браузере уже публиковался от имени «${claim.name}».\n` +
-                    `Опубликовать те же цифры ещё и от аккаунта «${data.user.name}»?\n` +
-                    `Тогда в таблице лидеров появятся две одинаковые записи.`
-                );
+                const proceed = confirm(t('js.account.claim_confirm', { '{claimName}': claim.name, '{userName}': data.user.name }));
                 if (!proceed) return;
             }
 
@@ -458,12 +462,12 @@
                 feedback.textContent = data.message;
                 feedback.className = 'feedback show ok';
             } else {
-                feedback.textContent = data.error || 'Не получилось отправить';
+                feedback.textContent = data.error || t('js.account.reset_request_failed_default');
                 feedback.className = 'feedback show bad';
                 if (data.code === 'captcha') resetCaptcha.load();
             }
         } catch {
-            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.textContent = t('js.account.network_error');
             feedback.className = 'feedback show bad';
         }
         btn.disabled = false;
@@ -490,7 +494,7 @@
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    feedback.textContent = data.message + ' Открываю форму входа…';
+                    feedback.textContent = data.message + t('js.account.reset_password_opening');
                     feedback.className = 'feedback show ok';
                     history.replaceState({}, '', location.pathname); // убираем токен из адресной строки
                     setTimeout(() => {
@@ -498,11 +502,11 @@
                         document.getElementById('login-form').style.display = 'block';
                     }, 1500);
                 } else {
-                    feedback.textContent = data.error || 'Не получилось сменить пароль';
+                    feedback.textContent = data.error || t('js.account.reset_password_failed_default');
                     feedback.className = 'feedback show bad';
                 }
             } catch {
-                feedback.textContent = 'Не удалось связаться с сервером';
+                feedback.textContent = t('js.account.network_error');
                 feedback.className = 'feedback show bad';
             }
         });
@@ -519,11 +523,11 @@
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
-            feedback.textContent = res.ok ? data.message : (data.error || 'Не получилось');
+            feedback.textContent = res.ok ? data.message : (data.error || t('js.account.update_failed_default'));
             feedback.className = res.ok ? 'feedback show ok' : 'feedback show bad';
             return res.ok ? data : null;
         } catch {
-            feedback.textContent = 'Не удалось связаться с сервером';
+            feedback.textContent = t('js.account.network_error');
             feedback.className = 'feedback show bad';
             return null;
         }
@@ -583,13 +587,13 @@
         const merged = await Progress.syncWithServer();
         btn.disabled = false;
         if (!merged) {
-            feedback.textContent = 'Не удалось связаться с сервером — попробуй ещё раз чуть позже.';
+            feedback.textContent = t('js.account.manual_sync_failed');
             feedback.className = 'feedback show bad';
             return;
         }
         feedback.textContent = merged.xp > before
-            ? `Готово! Подтянут более свежий прогресс с другого устройства (${before} → ${merged.xp} XP).`
-            : 'Готово! Это устройство и так было в актуальном состоянии.';
+            ? t('js.account.manual_sync_pulled', { '{before}': before, '{after}': merged.xp })
+            : t('js.account.manual_sync_uptodate');
         feedback.className = 'feedback show ok';
     });
 
@@ -632,10 +636,10 @@
             a.remove();
             // Отзываем ссылку не сразу — Safari успевает начать скачивание
             setTimeout(() => URL.revokeObjectURL(url), 1000);
-            say(`Файл сохранён. Внутри: ${data.xp} XP, выученных символов — ${data.learnedLetters.length}.`, true);
+            say(t('js.account.backup_saved', { '{xp}': data.xp, '{count}': data.learnedLetters.length }), true);
         } catch (e) {
             console.error(e);
-            say('Не получилось собрать файл бэкапа', false);
+            say(t('js.account.backup_build_failed'), false);
         }
     });
 
@@ -646,9 +650,9 @@
         if (!file) return;
         try {
             const merged = Progress.importBackup(JSON.parse(await file.text()));
-            say(`Готово! Теперь ${merged.xp} XP, выученных символов — ${merged.learnedLetters.length}.`, true);
+            say(t('js.account.backup_loaded', { '{xp}': merged.xp, '{count}': merged.learnedLetters.length }), true);
         } catch (e) {
-            say(e instanceof SyntaxError ? 'Файл повреждён или это не JSON' : e.message, false);
+            say(e instanceof SyntaxError ? t('js.account.backup_corrupt') : e.message, false);
         }
         fileInput.value = ''; // иначе повторный выбор того же файла не даст change
     });

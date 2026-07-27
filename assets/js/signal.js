@@ -63,8 +63,8 @@ class MorseLamp {
 function wireSignalVisibilityToggle(buttonEl, containerEl) {
     function apply(visible) {
         containerEl.style.display = visible ? 'flex' : 'none';
-        buttonEl.textContent = visible ? '🙈 Скрыть' : '👁 Показать';
-        buttonEl.title = 'Показать/скрыть точки-тире на экране во время приёма';
+        buttonEl.textContent = visible ? t('js.signal.hide') : t('js.signal.show');
+        buttonEl.title = t('js.signal.toggle_title');
         buttonEl.setAttribute('aria-pressed', String(!visible));
     }
     const initialVisible = DisplaySettings.load().showSignalLine !== false;

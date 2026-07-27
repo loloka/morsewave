@@ -21,7 +21,7 @@ function showAchievementToast(achievement) {
     toast.innerHTML = `
         <div style="font-size:28px">${achievement.icon}</div>
         <div>
-            <div style="font-weight:700;font-size:13px;color:var(--accent)">Достижение открыто!</div>
+            <div style="font-weight:700;font-size:13px;color:var(--accent)">${t('js.app.achievement_unlocked')}</div>
             <div style="font-weight:600">${achievement.title}</div>
             <div class="muted" style="font-size:12px">${achievement.description}</div>
         </div>

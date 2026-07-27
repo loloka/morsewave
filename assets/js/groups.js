@@ -206,10 +206,10 @@
         groupTotalEl.textContent = count;
         groupIndexEl.textContent = 1;
         if (learnedTooFew) {
-            feedbackEl.textContent = `Для фильтра «Только выученные» нужно знать хотя бы ${MIN_LEARNED_FOR_FILTER} символов (иначе группу можно угадать не слушая) — сейчас используется полный алфавит.`;
+            feedbackEl.textContent = t('js.groups.filter_learned_too_few', { '{min}': MIN_LEARNED_FOR_FILTER });
             feedbackEl.className = 'feedback show bad';
         } else if (customTooFew) {
-            feedbackEl.textContent = `В «Своих символах» нужно указать хотя бы ${MIN_LEARNED_FOR_FILTER} допустимых латинских символов (A-Z, 0-9) — сейчас используется полный алфавит.`;
+            feedbackEl.textContent = t('js.groups.filter_custom_too_few', { '{min}': MIN_LEARNED_FOR_FILTER });
             feedbackEl.className = 'feedback show bad';
         } else {
             feedbackEl.className = 'feedback';
@@ -222,7 +222,7 @@
             examSubmitRow.style.display = 'flex';
             examAnswerEl.value = '';
             examSubmitBtn.disabled = false;
-            examSubmitBtn.textContent = '⏹ Остановить и проверить';
+            examSubmitBtn.textContent = t('js.groups.exam_stop_check');
             replayBtn.style.display = 'none';
             examAnswerEl.focus();
             runExamPlayback();
@@ -250,7 +250,7 @@
                 if (session.examStopped) return;
             }
         }
-        examSubmitBtn.textContent = 'Проверить →';
+        examSubmitBtn.textContent = t('groups.check');
     }
 
     function finishExamSession() {
@@ -329,11 +329,11 @@
         postStat('total_groups', 1);
 
         if (correct === expected.length) {
-            feedbackEl.textContent = `Верно: ${expected}`;
+            feedbackEl.textContent = t('js.groups.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
         } else {
             session.wrongGroups.push(expected);
-            feedbackEl.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`;
+            feedbackEl.textContent = t('js.groups.wrong', { '{expected}': expected, '{typed}': typed || t('js.groups.empty_placeholder') });
             feedbackEl.className = 'feedback show bad';
         }
 
@@ -364,6 +364,7 @@
         let xpEarned = session.xpEarned;
 
         let dailyBonusMsg = '';
+        let dailyBonusFail = false;
         if (isDailyChallenge && !session.skipDailyCheck) {
             const matchesRequirement = dailyRequired
                 && session.groups.length === dailyRequired.count
@@ -378,18 +379,27 @@
             const accuracyOk = accuracy >= DAILY_MIN_ACCURACY;
 
             if (!matchesRequirement) {
-                dailyBonusMsg = ` (это не совпадает с заданием дня — нужно было ${dailyRequired ? dailyRequired.count : '?'} групп по ${dailyRequired ? dailyRequired.len : '?'} символов на ${dailyRequired ? dailyRequired.wpm : '?'} wpm, бонус не начислен, но обычный опыт за тренировку остаётся)`;
+                dailyBonusFail = true;
+                dailyBonusMsg = t('js.groups.daily_mismatch', {
+                    '{count}': dailyRequired ? dailyRequired.count : '?',
+                    '{len}': dailyRequired ? dailyRequired.len : '?',
+                    '{wpm}': dailyRequired ? dailyRequired.wpm : '?',
+                });
             } else if (!accuracyOk) {
-                dailyBonusMsg = ` (для бонуса нужна точность не ниже ${Math.round(DAILY_MIN_ACCURACY * 100)}%, у тебя ${Math.round(accuracy * 100)}% — бонус не начислен, но обычный опыт за верные символы остаётся; попробуй ещё раз!)`;
+                dailyBonusFail = true;
+                dailyBonusMsg = t('js.groups.daily_low_accuracy', {
+                    '{min}': Math.round(DAILY_MIN_ACCURACY * 100),
+                    '{acc}': Math.round(accuracy * 100),
+                });
             } else {
                 // Атомарно: +50 XP и метка даты в одном load→save. Никакого
                 // ручного Progress.save(state) после addXp — именно он раньше
                 // откатывал бонус (показывало 74, начисляло 24).
                 if (Progress.completeDailyChallenge()) {
                     xpEarned += 50;
-                    dailyBonusMsg = ' + бонус 50 XP за задание дня!';
+                    dailyBonusMsg = t('js.groups.daily_bonus');
                 } else {
-                    dailyBonusMsg = ' (задание дня на сегодня уже выполнено, бонус не начисляется повторно)';
+                    dailyBonusMsg = t('js.groups.daily_already');
                 }
             }
         }
@@ -404,9 +414,8 @@
 
         if (dailyBonusMsg) {
             const note = document.createElement('div');
-            const isFail = dailyBonusMsg.includes('не совпадает') || dailyBonusMsg.includes('бонус не начислен');
-            note.className = (isFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2') + ' js-result-note';
-            note.textContent = isFail ? ('Задание дня' + dailyBonusMsg) : ('Задание дня пройдено' + dailyBonusMsg);
+            note.className = (dailyBonusFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2') + ' js-result-note';
+            note.textContent = (dailyBonusFail ? t('js.groups.daily_note_fail_prefix') : t('js.groups.daily_note_ok_prefix')) + dailyBonusMsg;
             document.getElementById('result-panel').appendChild(note);
         }
 
@@ -414,13 +423,13 @@
             const note = document.createElement('div');
             if (!session.examFullyCompleted) {
                 note.className = 'feedback show bad mt-2';
-                note.textContent = `Экзамен остановлен досрочно (сыграно ${session.playedCount}/${session.groups.length} групп) — XP за экзамен не начисляется, но результат честно учтён в общем счётчике групп.`;
+                note.textContent = t('js.groups.exam_stopped_early', { '{played}': session.playedCount, '{total}': session.groups.length });
             } else if (session.examWrongGroupCount <= 3) {
                 note.className = 'feedback show ok mt-2';
-                note.textContent = `Экзамен пройден: ошибок в ${session.examWrongGroupCount} из ${session.groups.length} групп — это уровень «Первая категория радиолюбителя»! 🎖️`;
+                note.textContent = t('js.groups.exam_passed_category', { '{wrong}': session.examWrongGroupCount, '{total}': session.groups.length });
             } else {
                 note.className = 'feedback show bad mt-2';
-                note.textContent = `Экзамен пройден целиком, но ошибок многовато (${session.examWrongGroupCount} из ${session.groups.length} групп) для категории — для нужной точности их должно быть не больше 3. Продолжай тренироваться!`;
+                note.textContent = t('js.groups.exam_passed_toomany', { '{wrong}': session.examWrongGroupCount, '{total}': session.groups.length });
             }
             note.classList.add('js-result-note');
             document.getElementById('result-panel').appendChild(note);
@@ -457,7 +466,7 @@
         groupTotalEl.textContent = session.groups.length;
         groupIndexEl.textContent = 1;
         answerInput.value = '';
-        feedbackEl.textContent = `Разбираем ${session.groups.length} групп(ы), в которых были ошибки — не спеша.`;
+        feedbackEl.textContent = t('js.groups.retrain_intro', { '{count}': session.groups.length });
         feedbackEl.className = 'feedback show ok';
         answerInput.focus();
         playCurrentGroup();
@@ -494,7 +503,7 @@
         audioSettings.freq = 850;
         AudioSettings.save(audioSettings);
 
-        feedbackEl.textContent = 'Режим экзамена настроен: 50 групп по 5 символов, 250 знаков, 12 wpm (60 зн/мин), тон 850 Гц, группы идут одна за другой без ожидания ответа. Жми «Начать сессию».';
+        feedbackEl.textContent = t('js.groups.exam_configured');
         feedbackEl.className = 'feedback show ok';
     });
 
@@ -555,7 +564,7 @@
         if (isDailyChallenge) {
             const banner = document.createElement('div');
             banner.className = 'feedback show ok mt-2';
-            banner.textContent = '🎯 Это задание дня — за его прохождение полагается бонус +50 XP (один раз в день).';
+            banner.textContent = t('js.groups.daily_banner');
             setupPanel.appendChild(banner);
         }
     })();
@@ -675,10 +684,10 @@
             Progress.addXp(5);
             Progress.incrementStat('groupsCompleted', 1);
             postStat('total_groups', 1);
-            pushAbbrevHistory(true, `Верно: ${abbrevTarget.code} — ${abbrevTarget.meaning} (+5 XP)`);
+            pushAbbrevHistory(true, t('js.groups.abbrev_correct', { '{code}': abbrevTarget.code, '{meaning}': abbrevTarget.meaning }));
         } else {
             abbrevStreak = 0;
-            pushAbbrevHistory(false, `Было «${abbrevTarget.code}» (${abbrevTarget.meaning}), а нажато «${item.code}»`);
+            pushAbbrevHistory(false, t('js.groups.abbrev_wrong', { '{code}': abbrevTarget.code, '{meaning}': abbrevTarget.meaning, '{got}': item.code }));
         }
 
         abbrevStreakEl.textContent = abbrevStreak;
@@ -715,7 +724,7 @@
     });
     abbrevStopBtn.addEventListener('click', () => {
         haltAbbrev();
-        abbrevFeedback.textContent = 'Остановлено. Нажмите «Начать тренировку», чтобы продолжить.';
+        abbrevFeedback.textContent = t('js.groups.stopped');
         abbrevFeedback.className = 'feedback show';
         abbrevStartBtn.style.display = 'inline-flex';
         abbrevStopBtn.style.display = 'none';
@@ -728,7 +737,7 @@
             referenceBox.dataset.built = '1';
             const cards = ABBREVIATIONS.map(function (item) {
                 const code = item && item.code ? item.code : '?';
-                const meaning = item && item.meaning ? item.meaning : 'без описания';
+                const meaning = item && item.meaning ? item.meaning : t('js.groups.no_description');
                 return '<div class="card" style="padding:12px;"><b class="mono">' + code +
                     '</b> — <span class="muted">' + meaning + '</span></div>';
             }).join('');
@@ -767,9 +776,9 @@
     wireSignalVisibilityToggle(document.getElementById('words-signal-toggle'), document.getElementById('words-signal'));
 
     const WORDS_SET_HINTS = {
-        words: 'Короткие и самые частые английские слова — с них начинают набирать скорость.',
-        phrases: 'Реальные куски радиообмена: вызов, рапорт, QTH, служебные коды. Есть цифры и пробелы — заметно сложнее, и XP за них выше.',
-        mixed: 'Слова и фразы вперемешку — ближе всего к реальному эфиру.',
+        words: t('groups.wset_hint_words'),
+        phrases: t('js.groups.words_hint_phrases'),
+        mixed: t('js.groups.words_hint_mixed'),
     };
 
     // Ставка XP за верно принятый символ. Ниже, чем в «Группах» (там 2.0
@@ -910,12 +919,12 @@
 
         if (correct === scorable && typed.length === expected.length) {
             wordsSession.fullyCorrect++;
-            wordsFeedback.textContent = `Верно: ${expected}${xpGain ? ` (+${xpGain} XP)` : ''}`;
+            wordsFeedback.textContent = t('js.groups.correct', { '{expected}': expected }) + (xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : '');
             wordsFeedback.className = 'feedback show ok';
         } else {
-            wordsSession.missed.push({ expected, typed: typed || '(пусто)' });
-            wordsFeedback.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`
-                + (xpGain ? ` (+${xpGain} XP)` : ' (XP не начислен — принято меньше 60 %)');
+            wordsSession.missed.push({ expected, typed: typed || t('js.groups.empty_placeholder') });
+            wordsFeedback.textContent = t('js.groups.wrong', { '{expected}': expected, '{typed}': typed || t('js.groups.empty_placeholder') })
+                + (xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : t('js.groups.words_xp_none'));
             wordsFeedback.className = 'feedback show bad';
         }
 
@@ -944,7 +953,7 @@
         const mistakesBox = document.getElementById('words-mistakes');
         if (wordsSession.missed.length) {
             mistakesBox.style.display = 'block';
-            mistakesBox.innerHTML = '<div class="muted" style="font-size:13px;margin-bottom:6px;">Что не поймалось:</div>'
+            mistakesBox.innerHTML = '<div class="muted" style="font-size:13px;margin-bottom:6px;">' + t('js.groups.words_missed_label') + '</div>'
                 + wordsSession.missed.map(function (m) {
                     return '<div class="mono" style="font-size:13px;">' + m.expected +
                         ' <span class="muted">← ' + m.typed + '</span></div>';

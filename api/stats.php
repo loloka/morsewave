@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 $allowedFields = ['total_sessions', 'total_groups', 'total_letters_events', 'total_callsigns'];
 
@@ -17,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!in_array($field, $allowedFields, true)) {
         http_response_code(400);
-        echo json_encode(['error' => 'Неизвестное поле статистики']);
+        echo json_encode(['error' => t('api.stats.unknown_field')]);
         exit;
     }
 
@@ -28,4 +29,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 http_response_code(405);
-echo json_encode(['error' => 'Метод не поддерживается']);
+echo json_encode(['error' => t('api.method_not_allowed')]);

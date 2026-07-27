@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 // Самостоятельное удаление СВОЕГО аккаунта пользователем. Требует текущий
 // пароль — иначе любой, кто сел за оставленную открытой сессию (общий
@@ -18,7 +19,7 @@ const LOCKOUT_MINUTES = 15;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -33,7 +34,7 @@ $stmt->execute(['id' => $userId]);
 $user = $stmt->fetch();
 if (!$user) {
     http_response_code(401);
-    echo json_encode(['error' => 'Нужно войти в аккаунт']);
+    echo json_encode(['error' => t('api.account.need_login')]);
     exit;
 }
 
@@ -44,7 +45,7 @@ $password = (string) ($input['password'] ?? '');
 if ($user['locked_until'] && strtotime($user['locked_until']) > time()) {
     $minutesLeft = (int) ceil((strtotime($user['locked_until']) - time()) / 60);
     http_response_code(429);
-    echo json_encode(['error' => "Слишком много неудачных попыток. Попробуй снова через {$minutesLeft} мин."]);
+    echo json_encode(['error' => t('api.account.locked', ['{min}' => $minutesLeft])]);
     exit;
 }
 
@@ -58,7 +59,7 @@ if (!password_verify($password, $user['password_hash'])) {
     $pdo->prepare('UPDATE users SET failed_login_attempts = :a, locked_until = :l WHERE id = :id')
         ->execute(['a' => $attempts, 'l' => $lockedUntil, 'id' => $user['id']]);
     http_response_code(401);
-    echo json_encode(['error' => 'Неверный пароль']);
+    echo json_encode(['error' => t('api.account.wrong_password')]);
     exit;
 }
 
@@ -79,4 +80,4 @@ if (ini_get('session.use_cookies')) {
 }
 session_destroy();
 
-echo json_encode(['ok' => true, 'message' => 'Аккаунт удалён']);
+echo json_encode(['ok' => true, 'message' => t('api.account.deleted')]);

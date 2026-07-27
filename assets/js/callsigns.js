@@ -58,7 +58,7 @@
             items = await fetchCallsigns(count);
             if (!items.length) throw new Error('empty');
         } catch {
-            setupError.textContent = 'Не удалось получить позывные из базы данных. Проверь, что MySQL запущена и таблица callsigns заполнена (см. database/schema.sql).';
+            setupError.textContent = t('js.cs.fetch_error');
             setupError.className = 'feedback show bad';
             return;
         }
@@ -83,7 +83,7 @@
 
         if (isCorrect) {
             session.correct++;
-            feedbackEl.textContent = `Верно: ${expected} (+20 XP)`;
+            feedbackEl.textContent = t('js.cs.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
             // Начисляем сразу — не нужно дожидаться конца сессии,
             // чтобы засчитанный позывной действительно засчитался.
@@ -91,7 +91,7 @@
             Progress.incrementStat('callsignsCompleted', 1);
             postStat('total_callsigns', 1);
         } else {
-            feedbackEl.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`;
+            feedbackEl.textContent = t('js.cs.wrong', { '{expected}': expected, '{typed}': typed || t('js.cs.empty_placeholder') });
             feedbackEl.className = 'feedback show bad';
         }
 
@@ -163,16 +163,16 @@
             });
             const data = await res.json();
             if (res.ok) {
-                addCallsignFeedback.textContent = `Готово! Позывной ${data.callsign} добавлен в общую базу. Спасибо!`;
+                addCallsignFeedback.textContent = t('js.cs.add_success', { '{callsign}': data.callsign });
                 addCallsignFeedback.className = 'feedback show ok';
                 newCallsignInput.value = '';
                 newCallsignCountry.value = '';
             } else {
-                addCallsignFeedback.textContent = data.error || 'Не получилось добавить позывной.';
+                addCallsignFeedback.textContent = data.error || t('js.cs.add_failed');
                 addCallsignFeedback.className = 'feedback show bad';
             }
         } catch {
-            addCallsignFeedback.textContent = 'Не удалось связаться с сервером. Попробуй ещё раз.';
+            addCallsignFeedback.textContent = t('js.cs.add_network_error');
             addCallsignFeedback.className = 'feedback show bad';
         } finally {
             addCallsignBtn.disabled = false;

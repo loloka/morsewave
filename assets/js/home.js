@@ -54,12 +54,11 @@
 
             const badge = document.createElement('div');
             badge.className = 'daily-done-badge';
-            badge.textContent = '✓ Задание дня пройдено';
+            badge.textContent = t('js.home.daily_done_badge');
             card.querySelector('.card-eyebrow').after(badge);
 
-            document.getElementById('daily-desc').textContent =
-                'Бонус +50 XP за сегодня уже получен. Можно повторить для тренировки — опыт за верные символы начисляется как обычно.';
-            link.textContent = 'Повторить без бонуса';
+            document.getElementById('daily-desc').textContent = t('js.home.daily_done_desc');
+            link.textContent = t('js.home.daily_repeat_no_bonus');
             link.classList.remove('btn-primary');
             link.classList.add('btn');
         }
@@ -79,7 +78,7 @@
     // Таблица лидеров
     function renderLeaderboard(el, rows, valueKey, medalless = false) {
         if (!rows.length) {
-            el.innerHTML = '<p class="muted" style="font-size:13px;">Пока никто не опубликовал свои цифры — будь первым!</p>';
+            el.innerHTML = '<p class="muted" style="font-size:13px;">' + t('js.home.leaderboard_empty') + '</p>';
             return;
         }
         const medals = ['🥇', '🥈', '🥉'];
@@ -104,8 +103,8 @@
         renderLeaderboard(document.getElementById('leaderboard-xp'), data.byXp || [], 'xp');
         renderLeaderboard(document.getElementById('leaderboard-streak'), data.byStreak || [], 'streak_count');
     } catch {
-        document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">Не удалось загрузить</p>';
-        document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">Не удалось загрузить</p>';
+        document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';
+        document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';
     }
 
     document.querySelectorAll('#leaderboard-section .chip[data-board]').forEach(chip => {

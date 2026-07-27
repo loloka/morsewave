@@ -2,6 +2,7 @@
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
 require __DIR__ . '/../includes/mailer.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 // Настройки аккаунта: смена имени / пароля / e-mail. Один эндпоинт с
 // параметром action — операции мелкие и родственные, плодить три файла
@@ -18,7 +19,7 @@ const LOCKOUT_MINUTES = 15;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -33,7 +34,7 @@ $stmt->execute(['id' => $userId]);
 $user = $stmt->fetch();
 if (!$user) {
     http_response_code(401);
-    echo json_encode(['error' => 'Нужно войти в аккаунт']);
+    echo json_encode(['error' => t('api.account.need_login')]);
     exit;
 }
 
@@ -45,7 +46,7 @@ function verify_current_password($pdo, $user, $password) {
     if ($user['locked_until'] && strtotime($user['locked_until']) > time()) {
         $minutesLeft = (int) ceil((strtotime($user['locked_until']) - time()) / 60);
         http_response_code(429);
-        echo json_encode(['error' => "Слишком много неудачных попыток. Попробуй снова через {$minutesLeft} мин."]);
+        echo json_encode(['error' => t('api.account.locked', ['{min}' => $minutesLeft])]);
         exit;
     }
     if (!password_verify($password, $user['password_hash'])) {
@@ -58,7 +59,7 @@ function verify_current_password($pdo, $user, $password) {
         $pdo->prepare('UPDATE users SET failed_login_attempts = :a, locked_until = :l WHERE id = :id')
             ->execute(['a' => $attempts, 'l' => $lockedUntil, 'id' => $user['id']]);
         http_response_code(401);
-        echo json_encode(['error' => 'Неверный текущий пароль']);
+        echo json_encode(['error' => t('api.account.wrong_current_password')]);
         exit;
     }
     $pdo->prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = :id')
@@ -71,12 +72,12 @@ switch ($action) {
         $name = trim($input['name'] ?? '');
         if (mb_strlen($name) < 2 || mb_strlen($name) > 40) {
             http_response_code(422);
-            echo json_encode(['error' => 'Имя должно быть от 2 до 40 символов']);
+            echo json_encode(['error' => t('api.account.name_length')]);
             exit;
         }
         $pdo->prepare('UPDATE users SET name = :name WHERE id = :id')
             ->execute(['name' => $name, 'id' => $userId]);
-        echo json_encode(['ok' => true, 'name' => $name, 'message' => 'Имя изменено']);
+        echo json_encode(['ok' => true, 'name' => $name, 'message' => t('api.account.name_changed')]);
         break;
 
     case 'password':
@@ -85,17 +86,17 @@ switch ($action) {
         $confirm = (string) ($input['newPasswordConfirm'] ?? '');
         if ($new !== $confirm) {
             http_response_code(422);
-            echo json_encode(['error' => 'Новые пароли не совпадают']);
+            echo json_encode(['error' => t('api.account.new_passwords_mismatch')]);
             exit;
         }
         if (mb_strlen($new) < 6) {
             http_response_code(422);
-            echo json_encode(['error' => 'Пароль должен быть минимум 6 символов']);
+            echo json_encode(['error' => t('api.account.password_length')]);
             exit;
         }
         $pdo->prepare('UPDATE users SET password_hash = :hash WHERE id = :id')
             ->execute(['hash' => password_hash($new, PASSWORD_DEFAULT), 'id' => $userId]);
-        echo json_encode(['ok' => true, 'message' => 'Пароль изменён']);
+        echo json_encode(['ok' => true, 'message' => t('api.account.password_changed')]);
         break;
 
     case 'email':
@@ -103,19 +104,19 @@ switch ($action) {
         $newEmail = strtolower(trim($input['newEmail'] ?? ''));
         if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
             http_response_code(422);
-            echo json_encode(['error' => 'Некорректный e-mail']);
+            echo json_encode(['error' => t('api.account.invalid_email')]);
             exit;
         }
         if ($newEmail === strtolower($user['email'])) {
             http_response_code(422);
-            echo json_encode(['error' => 'Это и так твой текущий e-mail']);
+            echo json_encode(['error' => t('api.account.same_email')]);
             exit;
         }
         $check = $pdo->prepare('SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1');
         $check->execute(['email' => $newEmail, 'id' => $userId]);
         if ($check->fetch()) {
             http_response_code(409);
-            echo json_encode(['error' => 'Такой e-mail уже занят другим аккаунтом']);
+            echo json_encode(['error' => t('api.account.email_taken')]);
             exit;
         }
         // Новая почта не подтверждена — до подтверждения публикация в
@@ -129,12 +130,12 @@ switch ($action) {
             'email' => $newEmail,
             'mail_sent' => $mailSent,
             'message' => $mailSent
-                ? 'E-mail изменён — проверь новую почту и подтверди её по ссылке из письма.'
-                : 'E-mail изменён, но письмо отправить не получилось — используй кнопку «Отправить ещё раз».',
+                ? t('api.account.email_changed_check_inbox')
+                : t('api.account.email_changed_mail_failed'),
         ]);
         break;
 
     default:
         http_response_code(422);
-        echo json_encode(['error' => 'Неизвестное действие']);
+        echo json_encode(['error' => t('api.account.unknown_action')]);
 }

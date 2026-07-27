@@ -126,7 +126,7 @@
         backRow.className = 'vkb-row';
         const back = document.createElement('div');
         back.className = 'vkb-key vkb-backspace';
-        back.innerHTML = '⌫ Стереть';
+        back.innerHTML = t('js.koch.erase');
         back.addEventListener('click', () => {
             const start = answerInput.selectionStart ?? answerInput.value.length;
             const end = answerInput.selectionEnd ?? answerInput.value.length;
@@ -161,7 +161,7 @@
             const chip = document.createElement('div');
             chip.className = 'chip mono';
             chip.textContent = ch;
-            chip.title = 'Тапни, чтобы услышать';
+            chip.title = t('js.koch.tap_to_hear');
             chip.addEventListener('click', () => playCharsetLetter(ch, chip));
             kochCharsetEl.appendChild(chip);
         });
@@ -173,11 +173,11 @@
         const audio = new MorseAudio({ wpm });
         chip.classList.add('active');
         const mnemonic = MORSE_MNEMONICS[ch];
-        const tita = MORSE_CODE[ch].split('').map(s => s === '.' ? 'ти' : 'та').join('-');
+        const tita = MORSE_CODE[ch].split('').map(s => s === '.' ? t('js.common.dit') : t('js.common.dah')).join('-');
         kochCharsetFeedback.className = 'feedback show ok';
         kochCharsetFeedback.textContent = mnemonic
-            ? `«${ch}»: ${tita} (напев: ${mnemonic.join('-')})`
-            : `«${ch}»: ${tita}`;
+            ? t('js.koch.charset_feedback_with_mnemonic', { '{ch}': ch, '{tita}': tita, '{mnemonic}': mnemonic.join('-') })
+            : t('js.koch.charset_feedback', { '{ch}': ch, '{tita}': tita });
         await audio.play(ch, {});
         chip.classList.remove('active');
     }
@@ -189,16 +189,13 @@
         if (level === state.kochLevel) return;
 
         if (level < state.kochLevel) {
-            const ok = confirm(
-                `Уменьшить число открытых символов с ${state.kochLevel} до ${level}?\n` +
-                `Прогресс метода Коха откатится назад.`
-            );
+            const ok = confirm(t('js.koch.confirm_decrease', { '{from}': state.kochLevel, '{to}': level }));
             if (!ok) return;
         }
 
         Progress.setKochLevel(level);
         renderHeader();
-        feedbackEl.textContent = `Теперь открыто ${level} символов метода Коха.`;
+        feedbackEl.textContent = t('js.koch.now_open', { '{level}': level });
         feedbackEl.className = 'feedback show ok';
         setTimeout(() => { feedbackEl.className = 'feedback'; }, 2500);
     });
@@ -306,10 +303,10 @@
         postStat('total_groups', 1);
 
         if (correct === expected.length) {
-            feedbackEl.textContent = `Верно: ${expected}`;
+            feedbackEl.textContent = t('js.koch.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
         } else {
-            feedbackEl.textContent = `Было: ${expected} — введено: ${typed || '(пусто)'}`;
+            feedbackEl.textContent = t('js.koch.wrong', { '{expected}': expected, '{typed}': typed || t('js.koch.empty_placeholder') });
             feedbackEl.className = 'feedback show bad';
         }
 
@@ -359,13 +356,13 @@
         }
         if (accuracy >= PASS_THRESHOLD && state.kochLevel < KOCH_ORDER.length) {
             Progress.setKochLevel(state.kochLevel + 1);
-            msg.textContent = `Отличная точность! Открыт новый символ: «${KOCH_ORDER[state.kochLevel]}»`;
+            msg.textContent = t('js.koch.new_symbol_unlocked', { '{ch}': KOCH_ORDER[state.kochLevel] });
             msg.className = 'feedback show ok';
         } else if (accuracy >= PASS_THRESHOLD) {
-            msg.textContent = 'Точность отличная — все символы метода Коха уже открыты!';
+            msg.textContent = t('js.koch.all_unlocked');
             msg.className = 'feedback show ok';
         } else {
-            msg.textContent = `Точность ${Math.round(accuracy * 100)}% ниже порога 90% — потренируйся ещё на этом наборе символов.`;
+            msg.textContent = t('js.koch.below_threshold', { '{pct}': Math.round(accuracy * 100) });
             msg.className = 'feedback show bad';
         }
         renderHeader();

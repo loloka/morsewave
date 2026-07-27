@@ -3,6 +3,7 @@ header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
 require __DIR__ . '/../includes/mailer.php';
 require __DIR__ . '/../includes/captcha.php';
+require_once __DIR__ . '/../includes/i18n.php';
 
 // Запрос восстановления пароля. Защита от злоупотреблений:
 // 1) Капча (та же морзе-капча, что на регистрации) — от скриптов.
@@ -17,7 +18,7 @@ const RESET_THROTTLE_MINUTES = 5;
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 
@@ -27,19 +28,18 @@ $captchaAnswer = $input['captcha'] ?? '';
 
 if (!captcha_verify($captchaAnswer)) {
     http_response_code(422);
-    echo json_encode(['error' => 'Неверный ответ капчи — попробуй ещё раз', 'code' => 'captcha']);
+    echo json_encode(['error' => t('api.reset_request.captcha_wrong'), 'code' => 'captcha']);
     exit;
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     http_response_code(422);
-    echo json_encode(['error' => 'Некорректный e-mail']);
+    echo json_encode(['error' => t('api.reset_request.invalid_email')]);
     exit;
 }
 
 // Один и тот же нейтральный ответ для всех исходов ниже
-$genericResponse = ['ok' => true, 'message' =>
-    'Если такой e-mail зарегистрирован — письмо со ссылкой уже в пути. Проверь почту (и папку «Спам»).'];
+$genericResponse = ['ok' => true, 'message' => t('api.reset_request.generic_message')];
 
 $stmt = $pdo->prepare('SELECT id, name, email, last_reset_request_at FROM users WHERE email = :email LIMIT 1');
 $stmt->execute(['email' => $email]);

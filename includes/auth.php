@@ -70,9 +70,10 @@ function current_user($pdo) {
 
 function require_login_json() {
     if (!current_user_id()) {
+        require_once __DIR__ . '/i18n.php';
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Нужно войти в аккаунт']);
+        echo json_encode(['error' => t('api.account.need_login')]);
         exit;
     }
 }
@@ -89,9 +90,10 @@ function is_admin_user($user) {
 function require_admin_json($pdo) {
     $user = current_user($pdo);
     if (!is_admin_user($user)) {
+        require_once __DIR__ . '/i18n.php';
         http_response_code(403);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Доступ только для администратора']);
+        echo json_encode(['error' => t('auth.admin_only')]);
         exit;
     }
     return $user;

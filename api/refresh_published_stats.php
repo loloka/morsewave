@@ -1,6 +1,7 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/i18n.php';
 require_once __DIR__ . '/../includes/leaderboard_guard.php';
 
 // Отличие от sync_progress.php: этот эндпоинт НИКОГДА не создаёт новую
@@ -12,7 +13,7 @@ require_once __DIR__ . '/../includes/leaderboard_guard.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    echo json_encode(['error' => 'Метод не поддерживается']);
+    echo json_encode(['error' => t('api.method_not_allowed')]);
     exit;
 }
 

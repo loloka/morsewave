@@ -12,7 +12,7 @@
     } catch { /* пусто */ }
 
     if (!defs.length) {
-        grid.innerHTML = '<p>Не получилось загрузить достижения. Попробуй обновить страницу чуть позже.</p>';
+        grid.innerHTML = '<p>' + t('js.ach.load_failed') + '</p>';
         return;
     }
 
@@ -27,12 +27,7 @@
     `).join('');
 
     document.getElementById('reset-progress-btn').addEventListener('click', async () => {
-        const sure = confirm(
-            'Точно сбросить весь прогресс?\n\n' +
-            'XP, уровень, серия дней, выученные символы, уровень метода Коха ' +
-            'и все достижения будут обнулены. Если ты публиковал результаты в ' +
-            'таблице лидеров — они тоже уберутся оттуда. Это действие нельзя отменить.'
-        );
+        const sure = confirm(t('js.ach.reset_confirm'));
         if (!sure) return;
         try { await fetch('api/unpublish_stats.php', { method: 'POST' }); } catch { /* не критично */ }
         // Серверную копию полного прогресса тоже удаляем — иначе следующий

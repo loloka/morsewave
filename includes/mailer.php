@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/resend_mailer.php';
+require_once __DIR__ . '/i18n.php';
 
 /**
  * Отправка письма с подтверждением e-mail через Resend (config/mail.php).
@@ -39,14 +40,21 @@ function load_mail_config() {
 function render_verification_email_html($name, $link) {
     $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeLink = htmlspecialchars($link, ENT_QUOTES, 'UTF-8');
+    $lang = mw_current_lang();
+    $greeting = htmlspecialchars(t('email.verify_greeting', ['{name}' => $name]), ENT_QUOTES, 'UTF-8');
+    $pageTitle = htmlspecialchars(t('email.verify_page_title'), ENT_QUOTES, 'UTF-8');
+    $intro = t('email.verify_intro');
+    $button = t('email.verify_button');
+    $linkFallback = t('email.link_fallback');
+    $footer = t('email.verify_footer');
 
     return <<<HTML
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{$lang}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Подтверди e-mail — MorseWave</title>
+<title>{$pageTitle}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#0d0f11;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0d0f11; padding:32px 16px;">
@@ -65,10 +73,9 @@ function render_verification_email_html($name, $link) {
 
         <tr>
           <td style="padding:24px 32px 8px 32px; font-family:Arial,Helvetica,sans-serif; color:#eae6df;">
-            <h1 style="font-size:20px; margin:0 0 12px 0; color:#eae6df;">Привет, {$safeName}!</h1>
+            <h1 style="font-size:20px; margin:0 0 12px 0; color:#eae6df;">{$greeting}</h1>
             <p style="font-size:15px; line-height:1.6; color:#8b9198; margin:0 0 24px 0;">
-              Подтверди e-mail, чтобы твой прогресс — опыт и серия дней —
-              появился в таблице лидеров MorseWave.
+              {$intro}
             </p>
           </td>
         </tr>
@@ -77,7 +84,7 @@ function render_verification_email_html($name, $link) {
           <td style="padding:0 32px 28px 32px;" align="center">
             <a href="{$safeLink}" target="_blank" rel="noopener"
                style="display:inline-block; background-color:#e8a33d; color:#1a1200; font-family:Arial,Helvetica,sans-serif; font-weight:700; font-size:15px; text-decoration:none; padding:13px 28px; border-radius:8px;">
-              Подтвердить e-mail
+              {$button}
             </a>
           </td>
         </tr>
@@ -85,7 +92,7 @@ function render_verification_email_html($name, $link) {
         <tr>
           <td style="padding:0 32px 28px 32px; font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:12px; line-height:1.5; color:#565c62; margin:0;">
-              Если кнопка не работает, скопируй ссылку в браузер:<br>
+              {$linkFallback}<br>
               <a href="{$safeLink}" style="color:#4fd8c4; word-break:break-all;">{$safeLink}</a>
             </p>
           </td>
@@ -94,7 +101,7 @@ function render_verification_email_html($name, $link) {
         <tr>
           <td style="padding:16px 32px; background-color:#0d0f11; border-top:1px solid #262b30; font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:12px; line-height:1.5; color:#565c62; margin:0;">
-              Если ты не регистрировался на MorseWave — просто проигнорируй это письмо.<br>
+              {$footer}<br>
               — MorseWave · <a href="https://morse.r9old.ru" style="color:#8b9198;">morse.r9old.ru</a>
             </p>
           </td>
@@ -115,16 +122,22 @@ HTML;
  * письма подтверждения (никакого flexbox/grid — почтовые клиенты не поймут).
  */
 function render_reset_email_html($name, $link) {
-    $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
     $safeLink = htmlspecialchars($link, ENT_QUOTES, 'UTF-8');
+    $lang = mw_current_lang();
+    $greeting = htmlspecialchars(t('email.verify_greeting', ['{name}' => $name]), ENT_QUOTES, 'UTF-8');
+    $pageTitle = htmlspecialchars(t('email.reset_page_title'), ENT_QUOTES, 'UTF-8');
+    $intro = t('email.reset_intro');
+    $button = t('email.reset_button');
+    $linkFallback = t('email.link_fallback');
+    $footer = t('email.reset_footer');
 
     return <<<HTML
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{$lang}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Сброс пароля — MorseWave</title>
+<title>{$pageTitle}</title>
 </head>
 <body style="margin:0; padding:0; background-color:#0d0f11;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0d0f11; padding:32px 16px;">
@@ -143,10 +156,9 @@ function render_reset_email_html($name, $link) {
 
         <tr>
           <td style="padding:24px 32px 8px 32px; font-family:Arial,Helvetica,sans-serif; color:#eae6df;">
-            <h1 style="font-size:20px; margin:0 0 12px 0; color:#eae6df;">Привет, {$safeName}!</h1>
+            <h1 style="font-size:20px; margin:0 0 12px 0; color:#eae6df;">{$greeting}</h1>
             <p style="font-size:15px; line-height:1.6; color:#8b9198; margin:0 0 24px 0;">
-              Кто-то (надеемся, что ты) запросил сброс пароля для этого
-              аккаунта MorseWave. Ссылка действует 1 час.
+              {$intro}
             </p>
           </td>
         </tr>
@@ -155,7 +167,7 @@ function render_reset_email_html($name, $link) {
           <td style="padding:0 32px 28px 32px;" align="center">
             <a href="{$safeLink}" target="_blank" rel="noopener"
                style="display:inline-block; background-color:#e8a33d; color:#1a1200; font-family:Arial,Helvetica,sans-serif; font-weight:700; font-size:15px; text-decoration:none; padding:13px 28px; border-radius:8px;">
-              Задать новый пароль
+              {$button}
             </a>
           </td>
         </tr>
@@ -163,7 +175,7 @@ function render_reset_email_html($name, $link) {
         <tr>
           <td style="padding:0 32px 28px 32px; font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:12px; line-height:1.5; color:#565c62; margin:0;">
-              Если кнопка не работает, скопируй ссылку в браузер:<br>
+              {$linkFallback}<br>
               <a href="{$safeLink}" style="color:#4fd8c4; word-break:break-all;">{$safeLink}</a>
             </p>
           </td>
@@ -172,8 +184,7 @@ function render_reset_email_html($name, $link) {
         <tr>
           <td style="padding:16px 32px; background-color:#0d0f11; border-top:1px solid #262b30; font-family:Arial,Helvetica,sans-serif;">
             <p style="font-size:12px; line-height:1.5; color:#565c62; margin:0;">
-              Если ты не запрашивал сброс пароля — просто проигнорируй это
-              письмо, пароль останется прежним.<br>
+              {$footer}<br>
               — MorseWave · <a href="https://morse.r9old.ru" style="color:#8b9198;">morse.r9old.ru</a>
             </p>
           </td>
@@ -191,13 +202,8 @@ HTML;
 function send_password_reset_email($email, $name, $token) {
     $link = base_url() . '/account.php?reset_token=' . urlencode($token);
 
-    $subject = 'Сброс пароля — MorseWave';
-    $textBody = "Привет, {$name}!\n\n"
-        . "Кто-то (надеемся, что ты) запросил сброс пароля для аккаунта MorseWave.\n"
-        . "Задай новый пароль по ссылке (действует 1 час):\n"
-        . "{$link}\n\n"
-        . "Если ты не запрашивал сброс — просто проигнорируй это письмо, пароль останется прежним.\n\n"
-        . "— MorseWave (morse.r9old.ru)";
+    $subject = t('email.reset_subject');
+    $textBody = t('email.reset_text', ['{name}' => $name, '{link}' => $link]);
     $htmlBody = render_reset_email_html($name, $link);
 
     $config = load_mail_config();
@@ -216,12 +222,8 @@ function send_password_reset_email($email, $name, $token) {
 function send_verification_email($email, $name, $token) {
     $link = base_url() . '/api/verify_email.php?token=' . urlencode($token);
 
-    $subject = 'Подтверди e-mail — MorseWave';
-    $textBody = "Привет, {$name}!\n\n"
-        . "Подтверди свой e-mail для аккаунта MorseWave, перейдя по ссылке:\n"
-        . "{$link}\n\n"
-        . "Если ты не регистрировался на MorseWave — просто проигнорируй это письмо.\n\n"
-        . "— MorseWave (morse.r9old.ru)";
+    $subject = t('email.verify_subject');
+    $textBody = t('email.verify_text', ['{name}' => $name, '{link}' => $link]);
     $htmlBody = render_verification_email_html($name, $link);
 
     $config = load_mail_config();
