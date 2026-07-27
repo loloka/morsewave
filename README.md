@@ -42,7 +42,7 @@ header next to the profile, see "How it works internally" below for details.
 
 | Section | What's inside |
 |---|---|
-| 📖 **Letters** | Learn each character on its own: keying (tap/spacebar, with live sidetone) and copying by ear (a character plays → tap it on the on-screen keyboard) |
+| 📖 **Letters** | Learn each character on its own: keying (tap/spacebar, with live sidetone) and copying by ear (a character plays → tap it on the on-screen keyboard). Three sets for keying — Latin + digits, Koch order, Cyrillic (33 letters, own code table, own syllabic mnemonics); a separate "Cyrillic characters" set for copying by ear |
 | 🎯 **Koch method** | Characters right away at full target speed; a new character unlocks at ≥90% accuracy; you can manually set any number of unlocked characters (in either direction) |
 | 🔢 **Character groups** | Copy 2–5 character groups by ear: letters / digits / mixed / learned-only / custom set, with speed and Farnsworth spacing as sliders; an exam mode matching ham radio license requirements |
 | 📝 **Real words** | Copying common English words and Q&A radio phrases (`CQ CQ DE R9OGL K`, `UR RST 599 599`): trains recognizing a word as a single sound shape rather than assembling it letter by letter. Third tab under "Groups" |
@@ -136,8 +136,8 @@ All XP is rounded to whole numbers. Level grows as `1 + √(XP / 80)`
 
 | Mode | Amount | Conditions and farming protection |
 |---|---|---|
-| **Letters → keying** | **+25 XP** per character | Once per character — the first time you land 5 correct reps in a row. Repeating a streak on an already-learned character grants no XP. |
-| **Letters → copying by ear** | **+1 XP** per correct answer | Spamming the correct tile during the pause between rounds is blocked. |
+| **Letters → keying** | **+25 XP** per character | Once per character — the first time you land 5 correct reps in a row. Repeating a streak on an already-learned character grants no XP. Same flat rate for Latin and Cyrillic — no difficulty bonus here (a deliberate simplification, v2.51.1). |
+| **Letters → copying by ear** | **+1 XP** per correct answer (**+2 XP** for Cyrillic) | Spamming the correct tile during the pause between rounds is blocked. Cyrillic gets a small bonus "for variety" (owner's call, v2.51.1) — not a difficulty formula, just a flat multiplier. |
 | **Koch method** | `2 × (unlocked_chars / 15, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The more characters unlocked and the longer the groups, the higher the rate (max 2 XP/character with the full set). At the start, with 2 characters, the rate is minimal — farming easy sessions doesn't pay off. |
 | **Koch method — bonus** | **+10/+20/+30 XP** (equal to the number of groups in the session) | Only if the session is completed in full with ≥90% accuracy. Achievements for this mode are checked against the honestly earned level (`kochLevelEarned`) — you can't drag the slider to the end and unlock the achievement. |
 | **Character groups** | `2 × √(set_size / 26, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The rate depends on the size of the chosen set and the group length. Awarded immediately for each answered group. |
@@ -219,9 +219,21 @@ site isn't enough.
   a global `t()` function) in JS via `window.MW_I18N`, which
   `includes/header.php` embeds in `<head>`. Fallback for a missing
   translation: current language → Russian → the key itself. The syllabic
-  letter mnemonics (`MORSE_MNEMONICS` in `morse-data.js`) are a phonetic
-  memory aid tied to Russian sounds, so they're deliberately disabled in the
-  English interface rather than translated word-for-word.
+  letter mnemonics (`MORSE_MNEMONICS` and `CYRILLIC_MNEMONICS` in
+  `morse-data.js`) are a phonetic memory aid tied to Russian sounds, so
+  they're deliberately disabled in the English interface rather than
+  translated word-for-word.
+- **Cyrillic Morse alphabet** (`learn.php`, v2.51) — a separate 33-letter
+  table (`CYRILLIC_CODE`/`CYRILLIC_TO_CHAR` in `morse-data.js`), deliberately
+  *not* merged with the Latin `MORSE_CODE`/`MORSE_TO_CHAR`: several Cyrillic
+  letters share the exact same dot/dash code as a "similar-sounding" Latin
+  letter (by design of the historical alphabet), so a merged reverse lookup
+  would make keyed decoding ambiguous. `TelegraphKey` (`input.js`) takes the
+  decode table as an option/`setTable()` call instead of a hardcoded global.
+  Progress for Cyrillic letters is stored with an `RU_` prefix
+  (`learnedLetters`), so Latin `A` and Cyrillic `А` never collide — and the
+  "full alphabet" achievement counts strictly against the Latin+digit set
+  (`progress.js`), unaffected by Cyrillic progress living in the same array.
 
 ## Changelog
 
@@ -242,17 +254,18 @@ Full history is in [CHANGELOG.md](CHANGELOG.md) (newest entries first).
   IP's PTR doesn't point at the domain, Gmail silently dropped mail).
 - The Morse-code CAPTCHA (`includes/captcha.php`) is basic protection
   against primitive scripts, not against a targeted bypass.
-- Only the international (Latin) Morse alphabet — no Cyrillic yet.
 - `TelegraphKey` calibrates dots/dashes relative to the selected `wpm`,
   rather than adapting to the user's actual pace.
+- Cyrillic is only in "Letters" (keying + copying by ear) — "Koch method"
+  and "Character groups" stay Latin-only. This is deliberate, not an
+  oversight: Koch has a fixed classical character order that's Latin by
+  definition, and Groups/the exam mode target the ham radio license
+  syllabus (Latin+digits), so a Cyrillic set there wouldn't map to anything.
 
 ## Roadmap / ideas for the future
 
 Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
 
-- [ ] **Cyrillic Morse alphabet** — Cyrillic as a third set for keying, plus
-  a separate set for copying by ear (carefully, without breaking existing
-  progress: Latin and Cyrillic letters are different characters)
 - [ ] **Mini-game** — a platformer/runner where obstacles are cleared by
   picking the right character by ear and/or matching the key's rhythm
 - [ ] **Key rhythm scoring** — a third sub-mode under "Letters": showing
@@ -264,7 +277,8 @@ Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
 
 Already done: password recovery by email, progress export/import as a file,
 targeted daily challenges, self-service account deletion, leaderboard
-protection, a bilingual interface (Russian/English).
+protection, a bilingual interface (Russian/English), the Cyrillic Morse
+alphabet in "Letters" (v2.51).
 
 ## Related project
 
