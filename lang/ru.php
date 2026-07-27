@@ -95,7 +95,7 @@ return [
     'learn.rec_set_cyrillic' => 'Кириллические символы',
     'learn.rec_set_custom' => 'Свои символы',
     'learn.rec_custom_placeholder' => 'Например: A E I O U',
-    'learn.rec_custom_hint' => 'Минимум 5 символов, через пробел',
+    'learn.rec_custom_hint' => 'Минимум 5 символов, через пробел — латиница и кириллица, можно вперемешку',
     'learn.rec_start' => '▶ Начать тренировку',
     'learn.rec_stop' => '⏹ Остановить',
     'learn.stat_streak' => 'Серия',

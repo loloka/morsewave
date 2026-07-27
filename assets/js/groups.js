@@ -86,6 +86,16 @@
 
     const MIN_LEARNED_FOR_FILTER = 5;
 
+    // parseCustomCharset() и так молча отфильтровывает всё, кроме A-Z0-9
+    // (кириллица там просто не проходит regex-класс [^A-Z0-9]), но само
+    // поле ввода это не показывало — можно было напечатать русские буквы
+    // и не понять, почему они не учитываются. Чистим прямо по вводу, чтобы
+    // недопустимые символы вообще не появлялись в поле.
+    customInput.addEventListener('input', () => {
+        const cleaned = customInput.value.replace(/[^A-Za-z0-9 ]/g, '');
+        if (cleaned !== customInput.value) customInput.value = cleaned;
+    });
+
     function parseCustomCharset() {
         const raw = customInput.value.toUpperCase();
         const chars = [...new Set(raw.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split('')))];

@@ -92,7 +92,7 @@ return [
     'learn.rec_set_cyrillic' => 'Cyrillic characters',
     'learn.rec_set_custom' => 'Custom characters',
     'learn.rec_custom_placeholder' => 'e.g. A E I O U',
-    'learn.rec_custom_hint' => 'At least 5 characters, space-separated',
+    'learn.rec_custom_hint' => 'At least 5 characters, space-separated — Latin or Cyrillic, mixing is fine',
     'learn.rec_start' => '▶ Start training',
     'learn.rec_stop' => '⏹ Stop',
     'learn.stat_streak' => 'Streak',

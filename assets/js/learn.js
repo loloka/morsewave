@@ -1,13 +1,15 @@
 (function () {
     const REQUIRED_STREAK = 5; // сколько верных повторов подряд нужно для "выучено"
 
-    // Решение владельца после тестирования v2.51 (2026-07-27): за отправку
-    // ключом кириллица XP не повышаем — тот же плоский LEARN_XP, что и для
-    // латиницы, не усложняем. А вот в приёме на слух кириллица даёт немного
-    // больше "для разнообразия" — сознательный выбор, не баг.
+    // Решение владельца после тестирования v2.51/v2.51.1 (2026-07-27): за
+    // отправку ключом кириллица XP не повышает — тот же плоский LEARN_XP,
+    // что и для латиницы. В приёме на слух сперва пробовали дать кириллице
+    // небольшой бонус (+2 против +1), но это оказалось только запутывающим —
+    // одинаково выглядящие латинская и кириллическая «M» давали разный XP.
+    // Убрали разницу (v2.51.7): один и тот же символ по звучанию — одна и та
+    // же ставка, без исключений.
     const LEARN_XP = 25;
-    const CYRILLIC_RECOGNIZE_XP = 2;
-    const LATIN_RECOGNIZE_XP = 1;
+    const REC_XP = 1;
 
     /* ===================== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ===================== */
     const sendModeEl = document.getElementById('send-mode');
@@ -288,10 +290,39 @@
     let recRunning = false;
     let recGridBuilt = false;
     let recCharsetKey = 'all';
-    let recGridMode = 'latin'; // 'latin' | 'cyrillic' — какой набор тайлов сейчас отрисован в recGrid
+    let recGridLetters = ALL_LEARNABLE; // какие символы сейчас реально отрисованы тайлами в recGrid
     let recAudio = null;         // проигрыватель текущего символа — чтобы его можно было оборвать
     let recNextTimer = null;     // отложенный запуск следующего символа
     let recSessionId = 0;        // токен запуска: старая await-цепочка узнаёт, что она уже не актуальна
+
+    const recCustomInput = document.getElementById('rec-custom-input');
+    const MIN_REC_CUSTOM = 5; // тот же анти-фарм порог, что и в groups.js (MIN_LEARNED_FOR_FILTER)
+
+    // "Свои символы" здесь может содержать и кириллицу — логично, раз в
+    // приёме на слух уже есть отдельный кириллический набор (в отличие от
+    // групп/метода Коха, которые остаются латинскими, см. CLAUDE.md). Regex
+    // допускает и A-Z0-9, и А-ЯЁ; фильтр по MORSE_CODE/CYRILLIC_CODE в конце
+    // на всякий случай отсекает то, чему всё равно нет кода.
+    function parseRecCustomCharset() {
+        const raw = recCustomInput.value.toUpperCase();
+        const chars = [...new Set(raw.replace(/[^A-ZА-ЯЁ0-9]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split('')))];
+        return chars.filter((ch) => MORSE_CODE[ch] || CYRILLIC_CODE[ch]);
+    }
+
+    // Какими символами заполнить сетку тайлов-ответов под выбранный набор.
+    // Для "letters"/"digits"/"learned"/"all" тайлы остаются полным латинским
+    // алфавитом (как и раньше — ограничивается только пул случайных целей,
+    // см. recognizePool()), а вот "cyrillic" и "custom" могут состоять из
+    // символов, которых в латинском алфавите просто нет — для них тайлы
+    // строим по фактическому набору, иначе ответить будет нечем.
+    function recGridLettersFor(key) {
+        if (key === 'cyrillic') return CYRILLIC_LEARNABLE;
+        if (key === 'custom') {
+            const chars = parseRecCustomCharset();
+            return chars.length >= MIN_REC_CUSTOM ? chars : ALL_LEARNABLE;
+        }
+        return ALL_LEARNABLE;
+    }
 
     document.querySelectorAll('#rec-charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -299,20 +330,25 @@
             chip.classList.add('active');
             recCharsetKey = chip.dataset.set;
             const recIsCustom = recCharsetKey === 'custom';
-            document.getElementById('rec-custom-input').style.display = recIsCustom ? 'block' : 'none';
+            recCustomInput.style.display = recIsCustom ? 'block' : 'none';
             document.getElementById('rec-custom-hint').style.display = recIsCustom ? 'block' : 'none';
-            // Тайлы ответа тоже должны быть кириллическими, когда выбран набор
-            // "Кириллические символы" — иначе отвечать было бы просто нечем.
-            const wantGridMode = recCharsetKey === 'cyrillic' ? 'cyrillic' : 'latin';
-            if (wantGridMode !== recGridMode) buildRecGrid(wantGridMode);
+            buildRecGrid(recGridLettersFor(recCharsetKey));
         });
     });
 
-    function buildRecGrid(mode) {
+    // Живой фильтр по вводу — то же самое, что завели в group.js для «Своих
+    // символов» групп, но с допуском кириллицы. Пока набор печатается, тайлы
+    // (и цель для распознавания) пересобираются под текущий ввод.
+    recCustomInput.addEventListener('input', () => {
+        const cleaned = recCustomInput.value.replace(/[^A-Za-zА-Яа-яЁё0-9 ]/g, '');
+        if (cleaned !== recCustomInput.value) recCustomInput.value = cleaned;
+        if (recCharsetKey === 'custom') buildRecGrid(recGridLettersFor('custom'));
+    });
+
+    function buildRecGrid(letters) {
         recGridBuilt = true;
-        recGridMode = mode;
+        recGridLetters = letters;
         recGrid.innerHTML = '';
-        const letters = mode === 'cyrillic' ? CYRILLIC_LEARNABLE : ALL_LEARNABLE;
         letters.forEach((ch) => {
             const tile = document.createElement('div');
             tile.className = 'letter-tile';
@@ -325,7 +361,7 @@
 
     function initRecognizeGrid() {
         if (recGridBuilt) return;
-        buildRecGrid('latin');
+        buildRecGrid(ALL_LEARNABLE);
     }
 
     /**
@@ -383,12 +419,10 @@
                 return learnedLatin.length >= 5 ? learnedLatin : ALL_LEARNABLE;
             }
             case 'cyrillic': return CYRILLIC_LEARNABLE;
-            case 'custom': {
-                const raw = document.getElementById('rec-custom-input').value.toUpperCase();
-                const chars = [...new Set(raw.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split(''))
-                    .filter(ch => MORSE_CODE[ch]))];
-                return chars.length >= 5 ? chars : ALL_LEARNABLE;
-            }
+            // "Свои символы" теперь может включать и кириллицу — цель тянется
+            // из того же набора, что уже отрисован тайлами (см. recGridLettersFor()),
+            // так что ответить всегда есть чем.
+            case 'custom': return recGridLettersFor('custom');
             default: return ALL_LEARNABLE;
         }
     }
@@ -453,9 +487,8 @@
             recBusy = true;
             recStreak++;
             recSessionCorrect++;
-            const xpGained = recGridMode === 'cyrillic' ? CYRILLIC_RECOGNIZE_XP : LATIN_RECOGNIZE_XP;
-            let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': xpGained });
-            Progress.addXp(xpGained);
+            let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': REC_XP });
+            Progress.addXp(REC_XP);
             Progress.incrementStat('recognizedCount', 1);
 
             if (recStreak > recBest) {
@@ -486,8 +519,10 @@
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
         const ch = e.key.toUpperCase();
-        const validPool = recGridMode === 'cyrillic' ? CYRILLIC_LEARNABLE : ALL_LEARNABLE;
-        if (!validPool.includes(ch)) return;
+        // Проверяем против фактически отрисованных тайлов, а не жёстко
+        // латиницы/кириллицы целиком — так работает и для смешанного набора
+        // "Свои символы".
+        if (!recGridLetters.includes(ch)) return;
         const tile = recGrid.querySelector(`[data-ch="${ch}"]`);
         if (tile) { e.preventDefault(); handleRecognizeAnswer(ch, tile); }
     });
