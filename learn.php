@@ -20,6 +20,7 @@ include __DIR__ . '/includes/header.php';
     <div class="chip-row mt-2" id="order-chips">
         <div class="chip active" data-order="alphabet"><?= t('learn.order_alphabet') ?></div>
         <div class="chip" data-order="koch"><?= t('learn.order_koch') ?></div>
+        <div class="chip" data-order="cyrillic"><?= t('learn.order_cyrillic') ?></div>
     </div>
     <div class="tile-grid mt-2" id="letter-grid"></div>
 
@@ -70,6 +71,7 @@ include __DIR__ . '/includes/header.php';
             <div class="chip" data-set="letters"><?= t('learn.rec_set_letters') ?></div>
             <div class="chip" data-set="digits"><?= t('learn.rec_set_digits') ?></div>
             <div class="chip" data-set="learned"><?= t('learn.rec_set_learned') ?></div>
+            <div class="chip" data-set="cyrillic"><?= t('learn.rec_set_cyrillic') ?></div>
             <div class="chip" data-set="custom"><?= t('learn.rec_set_custom') ?></div>
         </div>
         <input type="text" id="rec-custom-input" class="answer-input mt-1"

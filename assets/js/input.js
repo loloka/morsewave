@@ -4,7 +4,7 @@
  * длительности нажатия и пауз (как настоящий телеграфный ключ).
  */
 class TelegraphKey {
-    constructor(el, { wpm = 12, onSymbol, onLetter, onWord, onPress, sidetone = true, freq, waveform } = {}) {
+    constructor(el, { wpm = 12, onSymbol, onLetter, onWord, onPress, sidetone = true, freq, waveform, table } = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { freq: 600, waveform: 'sine' };
         this.el = el;
         this.wpm = wpm;
@@ -13,6 +13,12 @@ class TelegraphKey {
         this.onWord = onWord;
         this.onPress = onPress;
         this.sidetone = sidetone;
+        // Таблица код→буква для декодирования. По умолчанию — латинская
+        // MORSE_TO_CHAR (существующее поведение везде не меняется). Режимы,
+        // которым нужна кириллица (learn.js), передают свою таблицу или
+        // переключают её на лету через setTable() — отдельно от общей,
+        // чтобы не трогать реверс-декодирование латиницы (см. morse-data.js).
+        this.table = table || MORSE_TO_CHAR;
         this.freq = freq ?? settings.freq;
         this.waveform = waveform ?? settings.waveform;
 
@@ -63,6 +69,10 @@ class TelegraphKey {
 
     setWpm(wpm) {
         this.wpm = wpm;
+    }
+
+    setTable(table) {
+        this.table = table || MORSE_TO_CHAR;
     }
 
     _bind() {
@@ -138,7 +148,7 @@ class TelegraphKey {
 
     _finalizeLetter() {
         if (!this.buffer) return;
-        const ch = MORSE_TO_CHAR[this.buffer] || '?';
+        const ch = this.table[this.buffer] || '?';
         this.onLetter?.(ch, this.buffer);
         this.buffer = '';
     }

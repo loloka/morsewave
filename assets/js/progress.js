@@ -382,7 +382,17 @@ const Progress = (() => {
 
         const statValue = (type) => {
             switch (type) {
-                case 'letters_learned_count': return state.learnedLetters.length;
+                // ВАЖНО: считаем только латиницу+цифры (ALL_LEARNABLE), а не
+                // всё learnedLetters целиком. С появлением кириллицы (хранится
+                // с префиксом 'RU_', см. morse-data.js) в learnedLetters могут
+                // лежать и кириллические буквы — без этого фильтра ачивка
+                // "Полный алфавит" (36) могла бы сработать раньше времени от
+                // суммы латиницы+кириллицы, не пройдя реально весь латинский
+                // алфавит и цифры (см. CLAUDE.md, бэклог п.1, "КРИТИЧНО").
+                case 'letters_learned_count':
+                    return state.learnedLetters.filter((ch) => ALL_LEARNABLE.includes(ch)).length;
+                case 'cyrillic_learned_count':
+                    return state.learnedLetters.filter((ch) => ch.startsWith(CYRILLIC_PREFIX)).length;
                 case 'xp_total': return state.xp;
                 case 'streak_days': return state.streak.count;
                 case 'koch_level': return state.kochLevelEarned;

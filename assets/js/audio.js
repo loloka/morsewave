@@ -106,7 +106,11 @@ class MorseAudio {
                 continue;
             }
 
-            const code = MORSE_CODE[ch];
+            // Кириллица не подмешана в MORSE_CODE (см. morse-data.js) — при
+            // отсутствии буквы в латинской таблице пробуем отдельную
+            // кириллическую. Это только доигрывание звука, декодирование
+            // ключом остаётся полностью раздельным (input.js).
+            const code = MORSE_CODE[ch] || (typeof CYRILLIC_CODE !== 'undefined' ? CYRILLIC_CODE[ch] : undefined);
             if (!code) continue;
 
             callbacks.onCharStart?.({ char: ch, index: i });

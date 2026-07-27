@@ -1,6 +1,14 @@
 (function () {
     const REQUIRED_STREAK = 5; // сколько верных повторов подряд нужно для "выучено"
 
+    // Решение владельца после тестирования v2.51 (2026-07-27): за отправку
+    // ключом кириллица XP не повышаем — тот же плоский LEARN_XP, что и для
+    // латиницы, не усложняем. А вот в приёме на слух кириллица даёт немного
+    // больше "для разнообразия" — сознательный выбор, не баг.
+    const LEARN_XP = 25;
+    const CYRILLIC_RECOGNIZE_XP = 2;
+    const LATIN_RECOGNIZE_XP = 1;
+
     /* ===================== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ===================== */
     const sendModeEl = document.getElementById('send-mode');
     const recognizeModeEl = document.getElementById('recognize-mode');
@@ -49,9 +57,29 @@
     const lamp = new MorseLamp(lampEl);
     let letterOrder = 'alphabet';
 
+    // "Буквы → отправка ключом": кириллица — третий набор наравне с
+    // «Алфавит» и «Порядок Коха» (см. CLAUDE.md, бэклог п.1).
+    function isCyrillicOrder() {
+        return letterOrder === 'cyrillic';
+    }
+
+    // Кириллица хранится в Progress.learnedLetters с префиксом — латинская A
+    // и кириллическая А обязаны быть разными записями, иначе разблокировка
+    // "Полный алфавит" и прогресс между наборами перепутались бы.
+    function progressKeyFor(ch) {
+        return isCyrillicOrder() ? CYRILLIC_PREFIX + ch : ch;
+    }
+
+    function codeFor(ch) {
+        return isCyrillicOrder() ? CYRILLIC_CODE[ch] : MORSE_CODE[ch];
+    }
+
     function orderedLetters() {
         if (letterOrder === 'koch') {
             return KOCH_ORDER.filter(ch => ALL_LEARNABLE.includes(ch));
+        }
+        if (letterOrder === 'cyrillic') {
+            return CYRILLIC_LEARNABLE;
         }
         return ALL_LEARNABLE;
     }
@@ -61,6 +89,11 @@
             document.querySelectorAll('#order-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             letterOrder = chip.dataset.order;
+            // Прежде выбранный символ мог принадлежать другому набору (нет
+            // смысла держать открытой панель практики латинской буквы, когда
+            // сетка тайлов уже кириллическая) — прячем панель до нового выбора.
+            current = null;
+            panel.style.display = 'none';
             renderTiles();
         });
     });
@@ -70,10 +103,10 @@
         grid.innerHTML = '';
         orderedLetters().forEach((ch) => {
             const tile = document.createElement('div');
-            const isLearned = state.learnedLetters.includes(ch);
+            const isLearned = state.learnedLetters.includes(progressKeyFor(ch));
             tile.className = 'letter-tile' + (isLearned ? ' learned' : '');
             tile.dataset.ch = ch;
-            tile.innerHTML = `<div class="ch">${ch}</div><div class="code">${MORSE_CODE[ch]}</div>`
+            tile.innerHTML = `<div class="ch">${ch}</div><div class="code">${codeFor(ch)}</div>`
                 + (isLearned ? `<span class="check">${MWIcon('check', 12)}</span>` : '');
             tile.addEventListener('click', () => selectLetter(ch));
             grid.appendChild(tile);
@@ -81,13 +114,15 @@
     }
 
     function renderPattern(ch) {
-        const code = MORSE_CODE[ch];
+        const code = codeFor(ch);
         patternEl.innerHTML = code.split('').map(s => `<span class="sym">${s === '.' ? '•' : '−'}</span>`).join(' ');
 
         const titaEl = document.getElementById('practice-tita');
         titaEl.innerHTML = code.split('').map(s => `<span class="unit">${s === '.' ? t('js.common.dit') : t('js.common.dah')}</span>`).join('-');
 
         const napevEl = document.getElementById('practice-napev');
+        // Слоговые мнемоники есть только для латиницы (см. morse-data.js) —
+        // для кириллицы mnemonic будет undefined, блок просто пустеет.
         const mnemonic = MORSE_MNEMONICS[ch];
         napevEl.innerHTML = mnemonic
             ? t('js.learn.napev_prefix') + mnemonic.map(syl => `<span class="syl">${syl}</span>`).join('-')
@@ -96,7 +131,7 @@
 
     function selectLetter(ch) {
         current = ch;
-        currentWasLearnedAtStart = Progress.load().learnedLetters.includes(ch);
+        currentWasLearnedAtStart = Progress.load().learnedLetters.includes(progressKeyFor(ch));
         correctStreak = 0;
         updateStreakUI();
         [...grid.children].forEach(t => t.classList.toggle('selected', t.dataset.ch === ch));
@@ -105,6 +140,10 @@
         panel.style.display = 'block';
         feedbackEl.className = 'feedback';
         signalLine.clear();
+        // Декодирование ключом — раздельные таблицы для латиницы и кириллицы
+        // (совпадающие коды дали бы непредсказуемый результат при смешении,
+        // см. morse-data.js), поэтому подсовываем нужную таблицу под текущий набор.
+        key.setTable(isCyrillicOrder() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
@@ -153,8 +192,12 @@
 
     function handleDecodedLetter(decoded) {
         if (!current) return;
+        const cyr = isCyrillicOrder();
+        // Е и Ё физически неразличимы по коду (см. morse-data.js) — при
+        // тренировке кириллицы принимаем оба варианта как верный ответ.
+        const isMatch = cyr ? isCyrillicMatch(decoded, current) : decoded === current;
 
-        if (decoded === current) {
+        if (isMatch) {
             correctStreak++;
             // Звучит сам символ в подтверждение — приятная обратная связь
             const audio = new MorseAudio({ wpm: currentWpm() });
@@ -185,11 +228,11 @@
                 feedbackEl.textContent = t('js.learn.correct_streak', { '{ch}': decoded, '{streak}': correctStreak, '{req}': REQUIRED_STREAK });
                 feedbackEl.className = 'feedback show ok';
             } else {
-                Progress.markLetterLearned(current);
-                Progress.addXp(25);
+                Progress.markLetterLearned(progressKeyFor(current));
+                Progress.addXp(LEARN_XP);
                 Progress.markDailyActivity();
                 currentWasLearnedAtStart = true; // чтобы дальше не начислять XP при повторах
-                feedbackEl.textContent = t('js.learn.learned_symbol', { '{ch}': current });
+                feedbackEl.textContent = t('js.learn.learned_symbol', { '{ch}': current, '{xp}': LEARN_XP });
                 feedbackEl.className = 'feedback show ok';
                 renderTiles();
                 [...grid.children].find(t => t.dataset.ch === current)?.classList.add('selected');
@@ -243,6 +286,7 @@
     let recRunning = false;
     let recGridBuilt = false;
     let recCharsetKey = 'all';
+    let recGridMode = 'latin'; // 'latin' | 'cyrillic' — какой набор тайлов сейчас отрисован в recGrid
     let recAudio = null;         // проигрыватель текущего символа — чтобы его можно было оборвать
     let recNextTimer = null;     // отложенный запуск следующего символа
     let recSessionId = 0;        // токен запуска: старая await-цепочка узнаёт, что она уже не актуальна
@@ -255,14 +299,19 @@
             const recIsCustom = recCharsetKey === 'custom';
             document.getElementById('rec-custom-input').style.display = recIsCustom ? 'block' : 'none';
             document.getElementById('rec-custom-hint').style.display = recIsCustom ? 'block' : 'none';
+            // Тайлы ответа тоже должны быть кириллическими, когда выбран набор
+            // "Кириллические символы" — иначе отвечать было бы просто нечем.
+            const wantGridMode = recCharsetKey === 'cyrillic' ? 'cyrillic' : 'latin';
+            if (wantGridMode !== recGridMode) buildRecGrid(wantGridMode);
         });
     });
 
-    function initRecognizeGrid() {
-        if (recGridBuilt) return;
+    function buildRecGrid(mode) {
         recGridBuilt = true;
+        recGridMode = mode;
         recGrid.innerHTML = '';
-        ALL_LEARNABLE.forEach((ch) => {
+        const letters = mode === 'cyrillic' ? CYRILLIC_LEARNABLE : ALL_LEARNABLE;
+        letters.forEach((ch) => {
             const tile = document.createElement('div');
             tile.className = 'letter-tile';
             tile.dataset.ch = ch;
@@ -270,6 +319,11 @@
             tile.addEventListener('click', () => handleRecognizeAnswer(ch, tile));
             recGrid.appendChild(tile);
         });
+    }
+
+    function initRecognizeGrid() {
+        if (recGridBuilt) return;
+        buildRecGrid('latin');
     }
 
     // Вызывается при каждом заходе на вкладку "Приём на слух" —
@@ -300,8 +354,15 @@
         switch (recCharsetKey) {
             case 'letters': return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             case 'digits': return '0123456789'.split('');
-            case 'learned':
-                return state.learnedLetters.length >= 5 ? state.learnedLetters : ALL_LEARNABLE;
+            case 'learned': {
+                // Тайлы для этого набора — латинские (см. buildRecGrid), поэтому
+                // отфильтровываем кириллические ключи ('RU_...' — см.
+                // morse-data.js), иначе целью мог бы стать символ, ответить на
+                // который тайлом просто нечем.
+                const learnedLatin = state.learnedLetters.filter((ch) => ALL_LEARNABLE.includes(ch));
+                return learnedLatin.length >= 5 ? learnedLatin : ALL_LEARNABLE;
+            }
+            case 'cyrillic': return CYRILLIC_LEARNABLE;
             case 'custom': {
                 const raw = document.getElementById('rec-custom-input').value.toUpperCase();
                 const chars = [...new Set(raw.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split(''))
@@ -372,9 +433,10 @@
             recBusy = true;
             recStreak++;
             recSessionCorrect++;
-            recFeedback.textContent = t('js.learn.rec_correct', { '{ch}': recTarget });
+            const xpGained = recGridMode === 'cyrillic' ? CYRILLIC_RECOGNIZE_XP : LATIN_RECOGNIZE_XP;
+            recFeedback.textContent = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': xpGained });
             recFeedback.className = 'feedback show ok';
-            Progress.addXp(1);
+            Progress.addXp(xpGained);
             Progress.incrementStat('recognizedCount', 1);
 
             if (recStreak > recBest) {
@@ -405,7 +467,8 @@
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
         const ch = e.key.toUpperCase();
-        if (!ALL_LEARNABLE.includes(ch)) return;
+        const validPool = recGridMode === 'cyrillic' ? CYRILLIC_LEARNABLE : ALL_LEARNABLE;
+        if (!validPool.includes(ch)) return;
         const tile = recGrid.querySelector(`[data-ch="${ch}"]`);
         if (tile) { e.preventDefault(); handleRecognizeAnswer(ch, tile); }
     });
