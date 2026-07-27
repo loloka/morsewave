@@ -76,7 +76,7 @@ return [
     'learn.intro' => 'Two modes: <b>sending</b> — you tap out the symbol yourself with the key, and <b>ear training</b> — you listen and tap the letter you heard on the on-screen keyboard. The second mode works great once you already know the letters individually.',
     'learn.mode_send' => '📡 Sending with key',
     'learn.mode_recognize' => '👂 Ear training',
-    'learn.order_alphabet' => 'Alphabet',
+    'learn.order_alphabet' => 'Latin + digits',
     'learn.order_koch' => 'Koch order',
     'learn.order_cyrillic' => 'Cyrillic',
     'learn.practicing_symbol' => 'Practicing symbol',

@@ -121,9 +121,9 @@
         titaEl.innerHTML = code.split('').map(s => `<span class="unit">${s === '.' ? t('js.common.dit') : t('js.common.dah')}</span>`).join('-');
 
         const napevEl = document.getElementById('practice-napev');
-        // Слоговые мнемоники есть только для латиницы (см. morse-data.js) —
-        // для кириллицы mnemonic будет undefined, блок просто пустеет.
-        const mnemonic = MORSE_MNEMONICS[ch];
+        // У кириллицы свой словарь напевов (CYRILLIC_MNEMONICS) — свои слоги
+        // под свои буквы, путать с латинским MORSE_MNEMONICS нельзя.
+        const mnemonic = isCyrillicOrder() ? CYRILLIC_MNEMONICS[ch] : MORSE_MNEMONICS[ch];
         napevEl.innerHTML = mnemonic
             ? t('js.learn.napev_prefix') + mnemonic.map(syl => `<span class="syl">${syl}</span>`).join('-')
             : '';
