@@ -633,6 +633,11 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .abbrev-history-item { font-size: 13px; }
 .abbrev-history-item:not(:first-child) { opacity: 0.55; }
 
+/* Тот же приём в "Приёме на слух" (learn.js pushRecHistory) */
+#rec-history { display: flex; flex-direction: column; gap: 6px; }
+.rec-history-item { font-size: 13px; }
+.rec-history-item:not(:first-child) { opacity: 0.55; }
+
 /* ---------- Morse lamp (визуальная альтернатива звуку) ---------- */
 .morse-lamp {
     width: 56px;

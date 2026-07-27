@@ -272,6 +272,8 @@
     const recSignalLine = new SignalLine(document.getElementById('rec-signal'));
     wireSignalVisibilityToggle(document.getElementById('rec-signal-toggle'), document.getElementById('rec-signal'));
     const recFeedback = document.getElementById('rec-feedback');
+    const recHistory = document.getElementById('rec-history');
+    const REC_HISTORY_MAX = 6; // больше — уже скорее простыня, чем подсказка (см. groups.js ABBREV_HISTORY_MAX)
     const recStreakEl = document.getElementById('rec-streak');
     const recBestEl = document.getElementById('rec-best');
     const recAccuracyEl = document.getElementById('rec-accuracy');
@@ -324,6 +326,24 @@
     function initRecognizeGrid() {
         if (recGridBuilt) return;
         buildRecGrid('latin');
+    }
+
+    /**
+     * Добавляет запись в историю ответов (последняя — сверху). Раньше разбор
+     * "верно/неверно" был одной строкой в recFeedback, которую следующий
+     * символ гасил меньше чем через секунду — на слух прочитать не успевали.
+     * Тот же приём, что и в "Сокращениях" (см. groups.js pushAbbrevHistory):
+     * ответы копятся списком и остаются на экране, пока их не вытеснят более
+     * новые (лимит — REC_HISTORY_MAX, старые просто уходят из DOM).
+     */
+    function pushRecHistory(isCorrect, text) {
+        const entry = document.createElement('div');
+        entry.className = 'feedback show ' + (isCorrect ? 'ok' : 'bad') + ' rec-history-item';
+        entry.textContent = text;
+        recHistory.insertBefore(entry, recHistory.firstChild);
+        while (recHistory.children.length > REC_HISTORY_MAX) {
+            recHistory.removeChild(recHistory.lastChild);
+        }
     }
 
     // Вызывается при каждом заходе на вкладку "Приём на слух" —
@@ -434,8 +454,7 @@
             recStreak++;
             recSessionCorrect++;
             const xpGained = recGridMode === 'cyrillic' ? CYRILLIC_RECOGNIZE_XP : LATIN_RECOGNIZE_XP;
-            recFeedback.textContent = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': xpGained });
-            recFeedback.className = 'feedback show ok';
+            let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': xpGained });
             Progress.addXp(xpGained);
             Progress.incrementStat('recognizedCount', 1);
 
@@ -445,13 +464,13 @@
                 state.stats.recognizeBestStreak = recBest;
                 Progress.save(state);
                 Progress.checkAchievements();
-                recFeedback.textContent += t('js.learn.rec_new_record');
+                correctText += t('js.learn.rec_new_record');
             }
+            pushRecHistory(true, correctText);
             tickDaily('recognize'); // засчитываем верный приём в задание дня, если оно активно
         } else {
             recStreak = 0;
-            recFeedback.textContent = t('js.learn.rec_wrong', { '{target}': recTarget, '{ch}': ch });
-            recFeedback.className = 'feedback show bad';
+            pushRecHistory(false, t('js.learn.rec_wrong', { '{target}': recTarget, '{ch}': ch }));
         }
 
         renderRecStats(Progress.load().stats.recognizedCount || 0);
@@ -479,6 +498,7 @@
         haltRecognize(); // добить хвосты предыдущего запуска, если они ещё живы
         recRunning = true;
         recFeedback.className = 'feedback';
+        recHistory.innerHTML = '';
         recStartBtn.style.display = 'none';
         recStopBtn.style.display = 'inline-flex';
         playRecognizeTarget();
