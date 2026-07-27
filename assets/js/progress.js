@@ -13,6 +13,12 @@ const Progress = (() => {
     const defaults = () => ({
         xp: 0,
         learnedLetters: [],
+        // Уникальные символы, хоть раз ПРАВИЛЬНО опознанные на слух (режим
+        // "Приём на слух", любой набор чипов) — отдельно от learnedLetters,
+        // который про отправку ключом. Кириллические ключи с тем же
+        // префиксом RU_ (см. morse-data.js), латинская A и кириллическая А —
+        // разные записи и здесь тоже.
+        recognizedUniqueLetters: [],
         kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
         // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
         // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
@@ -214,6 +220,10 @@ const Progress = (() => {
             ...(Array.isArray(local.unlockedAchievements) ? local.unlockedAchievements : []),
             ...(Array.isArray(server.unlockedAchievements) ? server.unlockedAchievements : []),
         ])];
+        merged.recognizedUniqueLetters = [...new Set([
+            ...(Array.isArray(local.recognizedUniqueLetters) ? local.recognizedUniqueLetters : []),
+            ...(Array.isArray(server.recognizedUniqueLetters) ? server.recognizedUniqueLetters : []),
+        ])];
 
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
@@ -284,6 +294,24 @@ const Progress = (() => {
         if (!state.learnedLetters.includes(ch)) {
             state.learnedLetters.push(ch);
             save(state);
+            pushFullProgress();
+        }
+        return state;
+    }
+
+    /**
+     * Отмечает символ как хоть раз правильно опознанный на слух — отдельный
+     * счётчик от markLetterLearned() (тот про отправку ключом). Нужен для
+     * ачивок вида "опознайте на слух каждую букву набора хотя бы раз"
+     * (например, кириллический алфавит целиком).
+     */
+    function markRecognizedUnique(ch) {
+        const state = load();
+        if (!Array.isArray(state.recognizedUniqueLetters)) state.recognizedUniqueLetters = [];
+        if (!state.recognizedUniqueLetters.includes(ch)) {
+            state.recognizedUniqueLetters.push(ch);
+            save(state);
+            checkAchievements();
             pushFullProgress();
         }
         return state;
@@ -393,6 +421,8 @@ const Progress = (() => {
                     return state.learnedLetters.filter((ch) => ALL_LEARNABLE.includes(ch)).length;
                 case 'cyrillic_learned_count':
                     return state.learnedLetters.filter((ch) => ch.startsWith(CYRILLIC_PREFIX)).length;
+                case 'cyrillic_recognized_count':
+                    return (state.recognizedUniqueLetters || []).filter((ch) => ch.startsWith(CYRILLIC_PREFIX)).length;
                 case 'xp_total': return state.xp;
                 case 'streak_days': return state.streak.count;
                 case 'koch_level': return state.kochLevelEarned;
@@ -469,7 +499,7 @@ const Progress = (() => {
     }
 
     return {
-        load, save, addXp, markLetterLearned, setKochLevel, incrementStat,
+        load, save, addXp, markLetterLearned, markRecognizedUnique, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,

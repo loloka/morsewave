@@ -3,6 +3,37 @@
 Свежие записи сверху. Первое число версии — крупные вехи, второе — очередная
 порция фич/фиксов.
 
+## v2.51.8 — ачивка «Кириллица на слух» (2026-07-27)
+
+- Новое достижение `cyrillic_recognized` («Кириллица на слух» 🎧) —
+  опознать на слух каждую из 33 букв кириллической азбуки Морзе хотя бы
+  раз. Раньше у кириллицы была только одна ачивка (`cyrillic_alphabet`, за
+  отправку ключом) — не хватало пары для приёма на слух, аналогично тому,
+  как у латиницы есть отдельные ачивки на количество/серию в приёме
+  (`recognize_10`/`recognize_100`/`streak50`/`streak500`).
+- Новый счётчик `recognizedUniqueLetters` в `assets/js/progress.js` —
+  отдельно от `learnedLetters` (тот про отправку ключом): хранит символы,
+  хоть раз ПРАВИЛЬНО опознанные на слух, с тем же префиксом `RU_` для
+  кириллицы. Новая функция `Progress.markRecognizedUnique(ch)`, вызывается
+  из `learn.js` при каждом верном ответе в «Приёме на слух» через
+  `progressKeyForChar()` (новый общий хелпер в `morse-data.js` — определяет
+  кириллицу по самому символу, без привязки к выбранному чипу набора,
+  поэтому корректно работает и со смешанным «Своими символами»).
+  `mergeFromServer()` слит по тому же принципу union, что и `learnedLetters`.
+- Новый `condition_type = cyrillic_recognized_count` в БД (см. ALTER ниже).
+
+  **Для уже развёрнутой базы** выполнить вручную:
+  ```sql
+  ALTER TABLE achievements MODIFY condition_type ENUM(
+      'letters_learned_count','xp_total','streak_days','koch_level',
+      'groups_completed','callsigns_completed','recognized_count',
+      'recognize_best_streak','exam_passed_count','cyrillic_learned_count',
+      'cyrillic_recognized_count'
+  ) NOT NULL;
+  INSERT IGNORE INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order)
+  VALUES ('cyrillic_recognized', 'Кириллица на слух', 'Опознайте на слух каждую букву кириллической азбуки Морзе хотя бы раз', '🎧', 'cyrillic_recognized_count', 33, 22);
+  ```
+
 ## v2.51.7 — убран XP-бонус кириллицы в приёме на слух (2026-07-27)
 
 - Владелец обратил внимание: разница в XP между одинаково выглядящими

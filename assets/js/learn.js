@@ -490,6 +490,9 @@
             let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': REC_XP });
             Progress.addXp(REC_XP);
             Progress.incrementStat('recognizedCount', 1);
+            // Отдельно от XP — отмечаем сам символ как хоть раз опознанный на
+            // слух (для ачивок вида "весь кириллический набор на слух").
+            Progress.markRecognizedUnique(progressKeyForChar(recTarget));
 
             if (recStreak > recBest) {
                 recBest = recStreak;

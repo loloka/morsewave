@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS achievements (
         'recognized_count',
         'recognize_best_streak',
         'exam_passed_count',
-        'cyrillic_learned_count'
+        'cyrillic_learned_count',
+        'cyrillic_recognized_count'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -87,7 +88,8 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('streak50',      'Начинающий телеграфист', 'Наберите серию из 50 верных подряд в приёме на слух', '📗', 'recognize_best_streak', 50, 18),
 ('streak500',     'Телеграфист со стажем',  'Наберите серию из 500 верных подряд в приёме на слух', '📘', 'recognize_best_streak', 500, 19),
 ('exam_category1','Первая категория радиолюбителя', 'Пройдите экзамен (250 знаков) целиком не более чем с 3 ошибочными группами', '🎖️', 'exam_passed_count', 1, 20),
-('cyrillic_alphabet', 'Кириллический алфавит', 'Изучите все буквы кириллической азбуки Морзе', '🇷🇺', 'cyrillic_learned_count', 33, 21);
+('cyrillic_alphabet', 'Кириллический алфавит', 'Изучите все буквы кириллической азбуки Морзе', '🇷🇺', 'cyrillic_learned_count', 33, 21),
+('cyrillic_recognized', 'Кириллица на слух', 'Опознайте на слух каждую букву кириллической азбуки Морзе хотя бы раз', '🎧', 'cyrillic_recognized_count', 33, 22);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)

@@ -746,6 +746,8 @@ HTML,
     'ach_def.exam_category1.desc' => 'Pass the exam (250 characters) in full with no more than 3 groups with mistakes',
     'ach_def.cyrillic_alphabet.title' => 'Cyrillic alphabet',
     'ach_def.cyrillic_alphabet.desc' => 'Learn all letters of the Cyrillic Morse alphabet',
+    'ach_def.cyrillic_recognized.title' => 'Cyrillic by ear',
+    'ach_def.cyrillic_recognized.desc' => 'Correctly recognize every letter of the Cyrillic Morse alphabet by ear at least once',
 
     // --- assets/js/achievements.js ---
     'js.ach.load_failed' => 'Couldn\'t load achievements. Try refreshing the page in a bit.',
