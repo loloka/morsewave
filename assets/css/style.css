@@ -852,6 +852,45 @@ input[type="range"] {
     flex-shrink: 0;
 }
 
+/* Строка "моё место" — отдельно от десятки, но без нового цвета: тот же
+   бирюзовый сигнальный акцент, что и у прогресса/выученных символов, чтобы
+   не заводить в палитру ещё один смысловой цвет. */
+.leaderboard-row-me {
+    margin: 4px -12px 0;
+    padding: 9px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--signal-dim);
+    border-radius: var(--radius-sm);
+}
+.leaderboard-row-me:last-child { border-bottom: 1px solid var(--signal-dim); }
+.leaderboard-row-me .leaderboard-rank { color: var(--signal); }
+.leaderboard-you-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--signal);
+    border: 1px solid var(--signal-dim);
+    border-radius: 999px;
+    padding: 1px 7px;
+    margin-left: 6px;
+    white-space: nowrap;
+}
+.leaderboard-row-ellipsis {
+    padding: 2px 0;
+    justify-content: center;
+    border-bottom: none;
+}
+.leaderboard-row-ellipsis .leaderboard-rank {
+    width: auto;
+    color: var(--text-faint);
+    letter-spacing: 2px;
+}
+
+@media (max-width: 480px) {
+    .leaderboard-name { font-size: 14px; }
+    .leaderboard-you-badge { font-size: 10px; padding: 1px 5px; margin-left: 4px; }
+}
+
 /* ---------- Onboarding path (главная — путь новичка) ---------- */
 .onboarding-steps {
     display: flex;

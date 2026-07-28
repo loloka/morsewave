@@ -75,20 +75,39 @@
         document.getElementById('stat-callsigns').textContent = '—';
     }
 
-    // Таблица лидеров
-    function renderLeaderboard(el, rows, valueKey, medalless = false) {
-        if (!rows.length) {
+    // Таблица лидеров: топ-10 + (если пользователь опубликован, но не попал
+    // в десятку) отдельной строкой его настоящее место — "…" перед ней,
+    // только если между концом десятки и его местом есть разрыв (иначе на
+    // 11-м месте многоточие перед единственной пропущенной строкой смотрится
+    // странно — там и так ничего не пропущено).
+    function renderLeaderboard(el, rows, valueKey, rankKey, me) {
+        if (!rows.length && !(me && me[rankKey])) {
             el.innerHTML = '<p class="muted" style="font-size:13px;">' + t('js.home.leaderboard_empty') + '</p>';
             return;
         }
         const medals = ['🥇', '🥈', '🥉'];
-        el.innerHTML = rows.map((row, i) => `
+        let html = rows.map((row, i) => `
             <div class="leaderboard-row">
                 <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
                 <span class="leaderboard-name">${escapeHtml(row.name)}</span>
                 <span class="leaderboard-value">${row[valueKey]}</span>
             </div>
         `).join('');
+
+        if (me && me[rankKey] && me[rankKey] > rows.length) {
+            if (me[rankKey] > rows.length + 1) {
+                html += '<div class="leaderboard-row leaderboard-row-ellipsis"><span class="leaderboard-rank">⋯</span></div>';
+            }
+            html += `
+                <div class="leaderboard-row leaderboard-row-me">
+                    <span class="leaderboard-rank">${me[rankKey]}</span>
+                    <span class="leaderboard-name">${escapeHtml(me.name)} <span class="leaderboard-you-badge">${t('leaderboard.you_badge')}</span></span>
+                    <span class="leaderboard-value">${me[valueKey]}</span>
+                </div>
+            `;
+        }
+
+        el.innerHTML = html;
     }
 
     function escapeHtml(str) {
@@ -100,8 +119,8 @@
     try {
         const res = await fetch('api/leaderboard.php?limit=10');
         const data = await res.json();
-        renderLeaderboard(document.getElementById('leaderboard-xp'), data.byXp || [], 'xp');
-        renderLeaderboard(document.getElementById('leaderboard-streak'), data.byStreak || [], 'streak_count');
+        renderLeaderboard(document.getElementById('leaderboard-xp'), data.byXp || [], 'xp', 'xp_rank', data.me);
+        renderLeaderboard(document.getElementById('leaderboard-streak'), data.byStreak || [], 'streak_count', 'streak_rank', data.me);
     } catch {
         document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';
         document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';

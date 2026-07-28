@@ -41,6 +41,8 @@ return [
     'index.leaderboard_title' => 'Leaderboard',
     'index.leaderboard_join' => 'Join in',
     'index.leaderboard_intro' => 'The numbers here come from people who created an account and pressed "Publish" themselves — that\'s optional, all progress works great in your browser without an account too.',
+    'index.leaderboard_view_all' => 'View full leaderboard →',
+    'leaderboard.you_badge' => 'You',
     'index.board_by_xp' => 'By XP',
     'index.board_by_streak' => 'By streak',
     'index.loading' => 'Loading…',
@@ -781,6 +783,14 @@ HTML,
     'js.home.daily_repeat_no_bonus' => 'Repeat without bonus',
     'js.home.leaderboard_empty' => 'No one has published their numbers yet — be the first!',
     'js.home.leaderboard_load_failed' => 'Couldn\'t load',
+
+    // --- leaderboard.php / assets/js/leaderboard.js ---
+    'leaderboard.eyebrow' => 'Community',
+    'leaderboard.h1' => 'Full leaderboard',
+    'leaderboard.back_link' => '← Back to home',
+    'js.leaderboard.empty' => 'No one has published their numbers yet — be the first!',
+    'js.leaderboard.load_failed' => 'Couldn\'t load the leaderboard.',
+    'js.leaderboard.you_row_note' => 'Your place in the overall ranking',
 
     // --- assets/js/app.js ---
     'js.app.achievement_unlocked' => 'Achievement unlocked!',

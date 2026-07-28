@@ -44,6 +44,8 @@ return [
     'index.leaderboard_title' => 'Таблица лидеров',
     'index.leaderboard_join' => 'Присоединиться',
     'index.leaderboard_intro' => 'Публикуют свои цифры те, кто завёл аккаунт и сам нажал «Опубликовать» — это не обязательно, весь прогресс и без аккаунта прекрасно живёт у тебя в браузере.',
+    'index.leaderboard_view_all' => 'Смотреть всю таблицу →',
+    'leaderboard.you_badge' => 'Вы',
     'index.board_by_xp' => 'По опыту',
     'index.board_by_streak' => 'По серии дней',
     'index.loading' => 'Загрузка…',
@@ -777,6 +779,14 @@ HTML,
     'js.home.daily_repeat_no_bonus' => 'Повторить без бонуса',
     'js.home.leaderboard_empty' => 'Пока никто не опубликовал свои цифры — будь первым!',
     'js.home.leaderboard_load_failed' => 'Не удалось загрузить',
+
+    // --- leaderboard.php / assets/js/leaderboard.js ---
+    'leaderboard.eyebrow' => 'Сообщество',
+    'leaderboard.h1' => 'Вся таблица лидеров',
+    'leaderboard.back_link' => '← На главную',
+    'js.leaderboard.empty' => 'Пока никто не опубликовал свои цифры — будь первым!',
+    'js.leaderboard.load_failed' => 'Не удалось загрузить таблицу лидеров.',
+    'js.leaderboard.you_row_note' => 'Твоё место в общем зачёте',
 
     // --- assets/js/app.js ---
     'js.app.achievement_unlocked' => 'Достижение открыто!',

@@ -57,6 +57,9 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="mt-2" id="leaderboard-xp"><p class="muted"><?= t('index.loading') ?></p></div>
         <div class="mt-2" id="leaderboard-streak" style="display:none;"><p class="muted"><?= t('index.loading') ?></p></div>
+        <div class="mt-2" style="text-align:right;">
+            <a href="leaderboard.php" class="link" style="font-size:13px;"><?= t('index.leaderboard_view_all') ?></a>
+        </div>
     </div>
 </section>
 
