@@ -2,99 +2,99 @@
 
 # 📡 MorseWave
 
-English · 🌐 [Русский](README.ru.md)
+Русский · 🌐 [English](README.en.md)
 
-**A dark, minimalist Morse code trainer**
-Individual letters · Koch method · Character groups · Real words · Callsigns · XP and achievements
+**Тёмный минималистичный тренажёр азбуки Морзе**
+Буквы по отдельности · Метод Коха · Группы символов · Реальные слова · Позывные · XP и достижения
 
 ![PHP](https://img.shields.io/badge/PHP-8%2B-777bb4)
 ![MySQL](https://img.shields.io/badge/MySQL-PDO-4479A1)
 ![JS](https://img.shields.io/badge/JavaScript-Vanilla-f7df1e)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-🌐 **[morse.r9old.ru](https://morse.r9old.ru)** — live version
+🌐 **[morse.r9old.ru](https://morse.r9old.ru)** — живая версия
 
 </div>
 
 ---
 
-## What it is
+## Что это
 
-MorseWave is a web-based Morse code trainer that takes you from zero to
-copying real callsigns by ear and preparing for a ham radio exam (the
-"Groups" mode has an exam mode matching the Russian "First Category"
-license requirements). No frontend framework, no Bootstrap: plain JS
-(Web Audio API) plus a custom dark design system.
+MorseWave — веб-тренажёр азбуки Морзе, который проведёт от полного нуля до
+приёма на слух реальных позывных и подготовки к сдаче радиолюбительского
+экзамена (в «Группах» есть режим экзамена по нормативам «Первой категории»).
+Без фреймворков на фронтенде и без Bootstrap: чистый JS (Web Audio API) +
+собственная тёмная дизайн-система.
 
-Progress (XP, level, daily streak, learned characters) is stored locally in
-the browser — no registration required, you can start training right away.
-An account is an optional add-on that gives you three things: a spot on the
-home-page leaderboard (only via an explicit "Publish" button), progress sync
-across devices (start on your computer, continue on your phone), and
-password recovery by email. Under the hood, MySQL stores reference data
-(achievements, the callsign bank), anonymous community stats, accounts, and
-server-side progress copies.
+Прогресс (XP, уровень, серия дней, выученные символы) хранится локально
+в браузере — регистрация не обязательна, тренироваться можно сразу.
+Аккаунт — опциональная надстройка, которая даёт три вещи: место в таблице
+лидеров на главной (только по явной кнопке «Опубликовать»), синхронизацию
+всего прогресса между устройствами (начал на компьютере — продолжил с
+телефона) и восстановление доступа по почте. MySQL под капотом хранит
+справочные данные (достижения, банк позывных), анонимную статистику
+сообщества, аккаунты и серверные копии прогресса.
 
-The interface is bilingual (Russian / English) — a switcher lives in the
-header next to the profile, see "How it works internally" below for details.
+Интерфейс двуязычный (русский / английский) — переключатель в шапке рядом
+с профилем, подробности в разделе «Как это устроено внутри».
 
-## Features
+## Возможности
 
-| Section | What's inside |
+| Раздел | Что внутри |
 |---|---|
-| 📖 **Letters** | Learn each character on its own: keying (tap/spacebar, with live sidetone) and copying by ear (a character plays → tap it on the on-screen keyboard). Three sets for keying — Latin + digits, Koch order, Cyrillic (33 letters, own code table, own syllabic mnemonics); a separate "Cyrillic characters" set for copying by ear |
-| 🎯 **Koch method** | Characters right away at full target speed; a new character unlocks at ≥90% accuracy; you can manually set any number of unlocked characters (in either direction) |
-| 🔢 **Character groups** | Copy 2–5 character groups by ear: letters / digits / mixed / learned-only / custom set, with speed and Farnsworth spacing as sliders; an exam mode matching ham radio license requirements |
-| 📝 **Real words** | Copying common English words and Q&A radio phrases (`CQ CQ DE R9OGL K`, `UR RST 599 599`): trains recognizing a word as a single sound shape rather than assembling it letter by letter. Third tab under "Groups" |
-| 💬 **Abbreviations** | Q-codes and ham radio abbreviations (CQ, QTH, 73…) by ear, multiple choice |
-| 📡 **Callsigns** | Practice on real-format callsigns (including Russian formats), the bank grows via a generator script |
-| 🏆 **Achievements** | Achievement conditions live in the database (`achievements`) — new ones can be added without touching code |
-| 🎯 **Daily challenge** | A challenge tailored to the player's stage (beginner → "learn some letters", further along → "copy by ear", knows the alphabet → groups) plus a +50 XP bonus once a day |
-| 💡 **Signal lamp** | A visual analog of the sound — you can train with no sound at all |
-| 👤 **Account** | Optional: leaderboard (publish manually only), progress sync across devices with a "last synced" indicator, password recovery by email, self-service account deletion |
-| 💾 **Progress backup** | Download/upload progress as a file on the profile page — no account needed. Import merges "upward only", so loading an old file on top of newer progress is safe |
-| ⚠️ **Progress reset** | Button on the "Achievements" page — a full reset (localStorage and the server copy) with confirmation |
-| 🌐 **Russian / English** | A language switcher in the header; emails, legal pages, and API errors are translated too |
+| 📖 **Буквы** | Учи каждый символ отдельно: отправка ключом (тап/пробел, с живым сайдтоном) и приём на слух (играет символ → нажми на экранной клавиатуре). Три набора для отправки — «Латиница + цифры», порядок Коха, кириллица (33 буквы, своя таблица кодов, свои слоговые напевы); отдельный набор «Кириллические символы» для приёма на слух |
+| 🎯 **Метод Коха** | Символы сразу на целевой скорости; новый символ открывается при точности ≥90%; можно вручную установить любое число открытых символов (в обе стороны) |
+| 🔢 **Группы символов** | Приём на слух групп по 2–5 символов: буквы / цифры / микс / только выученные / свои, скорость и интервалы Фарнсворта — слайдерами; режим экзамена по нормативам радиолюбительской категории |
+| 📝 **Реальные слова** | Приём частых английских слов и радиообменных фраз (`CQ CQ DE R9OGL K`, `UR RST 599 599`): тренирует узнавание слова единым звуковым образом, а не сборку по буквам. Третий таб в «Группах» |
+| 💬 **Сокращения** | Q-коды и радиолюбительские сокращения (CQ, QTH, 73…) на слух с вариантами ответа |
+| 📡 **Позывные** | Тренировка на реальных по формату позывных (включая российские форматы), банк расширяется скриптом-генератором |
+| 🏆 **Достижения** | Ачивки, условия хранятся в БД (`achievements`) — можно добавлять новые без правки кода |
+| 🎯 **Задание дня** | Целевое задание под этап игрока (новичку — «изучи буквы», дальше — «прими на слух», знающему алфавит — группы) + бонус +50 XP раз в день |
+| 💡 **Сигнальная лампа** | Визуальный аналог звука — можно тренироваться совсем без звука |
+| 👤 **Аккаунт** | Опционально: таблица лидеров (публикация только вручную), синхронизация прогресса между устройствами с индикатором «когда синхронизировано», восстановление пароля по почте, самостоятельное удаление аккаунта |
+| 💾 **Бэкап прогресса** | Скачать/загрузить прогресс файлом на странице профиля — аккаунт не нужен. Импорт сливает данные «только вверх», поэтому старый файл поверх нового прогресса безопасен |
+| ⚠️ **Сброс прогресса** | Кнопка на странице «Достижения» — полный сброс (localStorage и серверной копии) с подтверждением |
+| 🌐 **Русский / English** | Переключатель языка в шапке; письма, юридические страницы и API-ошибки тоже переведены |
 
-## Stack
+## Стек
 
-- **PHP 8+** — no framework, simple file-based routing
-- **MySQL / MariaDB** — via PDO
-- **Vanilla JS** — Web Audio API for sound, no build step, no npm
-- **Custom CSS** — design system in `assets/css/style.css`, no Bootstrap
-- **Docker** — for local development (PHP+Apache, MySQL, phpMyAdmin)
+- **PHP 8+** — без фреймворка, простой роутинг по файлам
+- **MySQL / MariaDB** — через PDO
+- **Vanilla JS** — Web Audio API для звука, без сборки и npm
+- **Кастомный CSS** — дизайн-система в `assets/css/style.css`, без Bootstrap
+- **Docker** — для локальной разработки (PHP+Apache, MySQL, phpMyAdmin)
 
-## Running & deployment
+## Запуск и деплой
 
-Quick start locally, via Docker:
+Коротко — локально через Docker:
 
 ```bash
-git clone <REPO_URL> morse-trainer
+git clone <URL_РЕПО> morse-trainer
 cd morse-trainer
 docker compose up -d --build
 ```
 
-Site at **http://localhost:8080**, phpMyAdmin at **http://localhost:8081**.
+Сайт на **http://localhost:8080**, phpMyAdmin на **http://localhost:8081**.
 
-Full instructions — running without Docker, a command cheat sheet, VPS
-deployment, database migrations, mail setup, and **admin management (who
-becomes an admin and how to hand off rights)** — are in **[DEPLOY.md](DEPLOY.md)**.
+Полные инструкции — запуск без Docker, шпаргалка по командам, деплой на VPS,
+миграции базы, настройка почты и **администрирование (кто становится админом
+и как передать права)** — в **[DEPLOY.md](DEPLOY.md)**.
 
-## Project structure
+## Структура проекта
 
 ```
 morse-trainer/
-├── docker-compose.yml       # local run: PHP+Apache, MySQL, phpMyAdmin
-├── docker/                  # Dockerfile + Apache config (AllowOverride for .htaccess)
-├── README.md                 # this file — project overview in English
-├── README.ru.md               # project overview in Russian
-├── DEPLOY.md                  # running, deployment, migrations, admin management
-├── CLAUDE.md                 # context and rules for Claude Code
-├── CHANGELOG.md               # changelog (newest entries first)
+├── docker-compose.yml       # локальный запуск: PHP+Apache, MySQL, phpMyAdmin
+├── docker/                  # Dockerfile + конфиг Apache (AllowOverride для .htaccess)
+├── README.md                 # этот файл — обзор проекта на русском (основной, так видят GitHub-посетители по умолчанию)
+├── README.en.md               # обзор проекта на английском
+├── DEPLOY.md                  # запуск, деплой, миграции, администрирование
+├── CLAUDE.md                 # контекст и правила для Claude Code
+├── CHANGELOG.md               # история изменений (свежие записи сверху)
 ├── lang/
-│   ├── ru.php                # interface string dictionary — Russian
-│   └── en.php                 # interface string dictionary — English
-├── api/                     # JSON endpoints: achievements, callsigns, stats, register,
+│   ├── ru.php                # словарь строк интерфейса — русский
+│   └── en.php                 # словарь строк интерфейса — английский
+├── api/                     # JSON-эндпоинты: achievements, callsigns, stats, register,
 │                             #   login, logout, me, sync_progress, refresh_published_stats,
 │                             #   leaderboard, verify_email, resend_verification, captcha,
 │                             #   admin_users, admin_rename_user, admin_delete_user,
@@ -102,195 +102,193 @@ morse-trainer/
 │                             #   delete_progress, delete_account, request_password_reset,
 │                             #   reset_password, update_account, unpublish_stats
 ├── config/
-│   ├── database.example.php # DB config template (committed)
-│   ├── database.php         # real DB config with credentials (in .gitignore)
-│   ├── mail.example.php      # mail config template (committed)
-│   ├── mail.php               # real mail config with the API key (in .gitignore)
-│   └── .htaccess               # blocks web access to the folder
+│   ├── database.example.php # шаблон конфига БД (коммитится)
+│   ├── database.php         # реальный конфиг БД с кредами (в .gitignore)
+│   ├── mail.example.php      # шаблон конфига почты (коммитится)
+│   ├── mail.php               # реальный конфиг почты с ключом (в .gitignore)
+│   └── .htaccess               # запрет веб-доступа к папке
 ├── database/
-│   ├── schema.sql            # the ONLY source of truth for the DB schema
-│   ├── seed_callsigns.php    # callsign batch generator
-│   └── .htaccess              # blocks web access to the folder
+│   ├── schema.sql            # ЕДИНСТВЕННЫЙ источник истины по схеме БД
+│   ├── seed_callsigns.php    # генератор пачки позывных
+│   └── .htaccess              # запрет веб-доступа к папке
 ├── includes/                 # header / footer / nav + auth.php, mailer.php, i18n.php,
 │                             #   resend_mailer.php, captcha.php, leaderboard_guard.php
-├── storage/sessions/         # PHP session files (blocked by .htaccess, not in git)
+├── storage/sessions/         # файлы PHP-сессий (закрыты .htaccess, в git не хранятся)
 ├── assets/
-│   ├── css/style.css         # design system
-│   └── js/                   # morse-data, daily, audio, progress, signal, input, i18n + pages
-├── index.php                 # home page + daily challenge
-├── learn.php                 # letters: keying + copying by ear
-├── koch.php                  # Koch method
-├── groups.php                # 2–5 character groups (+ real words, abbreviations)
-├── callsigns.php              # callsign practice
-├── achievements.php           # achievements + progress reset
-├── account.php                 # profile (tabs: account / sound / display / backup)
-├── terms.php · privacy.php     # terms of service and privacy policy
-├── admin.php                    # admin panel: users, rename, delete, grant admin rights
-└── settings.php                # 301 redirect to account.php (settings moved to profile, v2.24)
+│   ├── css/style.css         # дизайн-система
+│   └── js/                   # morse-data, daily, audio, progress, signal, input, i18n + страницы
+├── index.php                 # главная + задание дня
+├── learn.php                 # буквы: отправка + приём на слух
+├── koch.php                  # метод Коха
+├── groups.php                # группы символов 2–5 (+ реальные слова, сокращения)
+├── callsigns.php              # тренировка позывных
+├── achievements.php           # достижения + сброс прогресса
+├── account.php                 # профиль (вкладки: аккаунт / звук / отображение / бэкап)
+├── terms.php · privacy.php     # пользовательское соглашение и политика конфиденциальности
+├── admin.php                    # админка: пользователи, переименование, удаление, выдача прав
+└── settings.php                # 301-редирект на account.php (настройки переехали в профиль, v2.24)
 ```
 
-## How XP is earned
+## За что даётся опыт (XP)
 
-All XP is rounded to whole numbers. Level grows as `1 + √(XP / 80)`
-(i.e. level 2 at 80 XP, level 3 at 320 XP, level 5 at 1280 XP, and so on).
+Все начисления округляются до целых. Уровень растёт как `1 + √(XP / 80)`
+(т.е. 2-й уровень — 80 XP, 3-й — 320 XP, 5-й — 1280 XP и так далее).
 
-| Mode | Amount | Conditions and farming protection |
+| Режим | Сколько | Условия и защита от фарма |
 |---|---|---|
-| **Letters → keying** | **+25 XP** per character | Once per character — the first time you land 5 correct reps in a row. Repeating a streak on an already-learned character grants no XP. Same flat rate for Latin and Cyrillic — no difficulty bonus here (a deliberate simplification, v2.51.1). |
-| **Letters → copying by ear** | **+1 XP** per correct answer | Spamming the correct tile during the pause between rounds is blocked. Same flat rate for Latin and Cyrillic (v2.51.1 briefly gave Cyrillic +2, but that was confusing — a same-looking Latin and Cyrillic "M" earned different XP; reverted in v2.51.7). |
-| **Koch method** | `2 × (unlocked_chars / 15, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The more characters unlocked and the longer the groups, the higher the rate (max 2 XP/character with the full set). At the start, with 2 characters, the rate is minimal — farming easy sessions doesn't pay off. |
-| **Koch method — bonus** | **+10/+20/+30 XP** (equal to the number of groups in the session) | Only if the session is completed in full with ≥90% accuracy. Achievements for this mode are checked against the honestly earned level (`kochLevelEarned`) — you can't drag the slider to the end and unlock the achievement. |
-| **Character groups** | `2 × √(set_size / 26, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The rate depends on the size of the chosen set and the group length. Awarded immediately for each answered group. |
-| **Groups — mistake review** | **1 XP** per correct character | Fixed rate: reviewing something you've already heard isn't a fresh challenge. |
-| **Groups — exam** | session rate × correct characters | Only if the exam is played through to the end — stopping early zeroes out the exam's XP (it still counts toward the group's overall stats). |
-| **Real words** | **1.2 XP** per character (words) / **1.5 XP** (phrases) | The rate is lower than in groups: coherent text is predictable, and a missed letter can be inferred from context. If a word is copied below 60% accuracy, it earns no XP at all (otherwise the word bank could be farmed blindly). Spaces in phrases don't count. |
-| **Abbreviations (Q-codes)** | **+5 XP** per correct answer | — |
-| **Callsigns** | **+20 XP** per correctly copied callsign | Awarded immediately, without waiting for the session to end. |
-| **Daily challenge** | **+50 XP** bonus | Once a day. The challenge is tailored to the player's stage (see `daily.js`): beginner → "learn 3 new letters", intermediate → "copy 20 characters by ear", knows the alphabet → group copying. For a group-based challenge, the session parameters must match the challenge **and accuracy must be at least 50%** (clicking through empty answers won't work, fixed in v2.26). |
-| **Speed bonus (daily challenge only)** | XP multiplier `speedXpFactor(wpm)`: ≤12 wpm → ×1.0, above that +4%/wpm, capped at ×1.6 (≈27 wpm) | Applies **only** to the daily group challenge, where speed is fixed by the challenge. Doesn't apply in regular sessions, "Real words", or Koch — there the person chooses their own speed. The point: don't force a beginner to chase 24 wpm for the same 50 XP, but genuinely reward a fast pace. No farming here — XP is still only for correct characters, and copying fast is simply harder. |
+| **Буквы → отправка ключом** | **+25 XP** за символ | Один раз за символ — когда впервые набрана серия из 5 верных повторов подряд. Повторные серии по выученному символу XP не дают. Ставка одинаковая для латиницы и кириллицы — без надбавки за сложность (осознанное упрощение, v2.51.1). |
+| **Буквы → приём на слух** | **+1 XP** за верный ответ | Спам верной плиткой в паузе между раундами заблокирован. Ставка одинаковая для латиницы и кириллицы (в v2.51.1 кириллица недолго давала +2, но это путало — одинаково выглядящие латинская и кириллическая «M» получали разный XP; откачено в v2.51.7). |
+| **Метод Коха** | `2 × (символов_открыто / 15, но не более 1 и не менее 0.15) × (длина_группы / 3)` XP за каждый верно принятый символ | Чем больше открыто символов и длиннее группы — тем выше ставка (максимум 2 XP/символ при полном наборе). На старте с 2 символами ставка минимальная — фармить лёгкие сессии невыгодно. |
+| **Метод Коха — бонус** | **+10/+20/+30 XP** (равен числу групп в сессии) | Только если сессия завершена целиком с точностью ≥ 90 %. Ачивки за метод считаются по честно заработанному уровню (`kochLevelEarned`) — протащить бегунок до конца и получить ачивку нельзя. |
+| **Группы символов** | `2 × √(размер_набора / 26, но не более 1 и не менее 0.15) × (длина_группы / 3)` XP за каждый верно принятый символ | Ставка зависит от размера выбранного набора и длины групп. Начисляется сразу за каждую отвеченную группу. |
+| **Группы — повтор ошибок** | **1 XP** за верный символ | Фиксированная ставка: отработка уже услышанного — не свежий вызов. |
+| **Группы — экзамен** | ставка сессии × верные символы | Только если экзамен доигран до конца — досрочная остановка обнуляет XP экзамена (в общие счётчики группы всё равно идут). |
+| **Реальные слова** | **1.2 XP** за символ (слова) / **1.5 XP** (фразы) | Ставка ниже, чем в группах: связный текст предсказуем, недослышанную букву можно восстановить по смыслу. Если слово принято хуже чем на 60 % — XP за него не начисляется вовсе (иначе банк слов фармился бы вслепую). Пробелы во фразах в счёт не идут. |
+| **Сокращения (Q-коды)** | **+5 XP** за верный ответ | — |
+| **Позывные** | **+20 XP** за верно принятый позывной | Начисляется сразу, не дожидаясь конца сессии. |
+| **Задание дня** | **+50 XP** бонусом | Один раз в день. Задание целевое под этап игрока (см. `daily.js`): новичку — «изучи 3 новые буквы», осваивающемуся — «прими 20 символов на слух», знающему алфавит — приём групп. Для группового задания параметры сессии должны совпадать с заданием **и точность быть не ниже 50 %** (прокликать пустые ответы не выйдет, фикс v2.26). |
+| **Бонус за скорость (только в задании дня)** | множитель XP `speedXpFactor(wpm)`: ≤12 wpm → ×1.0, выше — +4 %/wpm, потолок ×1.6 (≈27 wpm) | Применяется **только** к групповому заданию дня, где скорость навязана. В обычных сессиях, «Реальных словах» и Кохе не действует — там скорость выбирает сам человек. Смысл: не заставлять новичка гнаться за 24 wpm ради тех же 50 XP, но честно доплачивать за высокий темп. Фарма нет — XP по-прежнему только за верный символ, а быстро принять сложнее. |
 
-### Why the Koch and Groups formulas differ
+### Почему формулы в Кохе и Группах разные
 
-It looks like an oversight, but it's a deliberate decision (v2.33) — don't
-merge them into one.
+Выглядит как недосмотр, но это осознанное решение (v2.33) — не сводите их
+к одной.
 
-In **Groups**, the person chooses the character set themselves, so a small
-set must proportionally give less XP. The old divisor of 15 hit the cap too
-early: a custom set of the 15 easiest characters gave exactly the same rate
-as the full 36-character alphabet — a real, working loophole. A divisor of
-26 (the full Latin alphabet) closes it, and a square root instead of a
-linear ratio is needed so that honest in-between sets like "Digits" (10
-characters) aren't penalized too harshly. The numbers are chosen so the two
-main presets — "Letters" (26) and "Letters + digits" (36) — still give the
-original 2.0 XP/character: the balance of existing modes wasn't disturbed.
+В **Группах** набор символов выбирает сам человек, поэтому маленький набор
+обязан давать пропорционально меньше XP. Прежний делитель 15 упирался в
+потолок слишком рано: свой набор из 15 самых лёгких знаков давал ровно ту
+же ставку, что полный алфавит из 36, — это была работающая лазейка.
+Делитель 26 (полный латинский алфавит) её закрывает, а корень вместо
+линейной пропорции нужен, чтобы честные промежуточные наборы вроде «Цифры»
+(10 знаков) не штрафовались слишком жёстко. Числа подобраны так, что оба
+основных пресета — «Буквы» (26) и «Буквы + цифры» (36) — дают прежние
+2.0 XP/символ: баланс существующих режимов не поехал.
 
-In **Koch**, the set is determined by the level, not chosen by the person.
-Farming with a small set isn't really possible there in the first place: to
-do it you'd have to sit at a low level, which already gives the minimal
-rate. So the formula stayed as it was — tightening it wouldn't close any
-loophole, it would just cut motivation at the mid levels of the method.
+В **Кохе** набор задан уровнем, а не выбором человека. Пофармить маленьким
+набором там нельзя в принципе: для этого пришлось бы сидеть на низком
+уровне, который и так даёт минимальную ставку. Поэтому формула осталась
+старой — ужесточение не закрыло бы ни одной лазейки, зато срезало бы
+мотивацию на средних уровнях метода.
 
-The daily streak (🔥) only counts a real, completed training session (a
-Koch/groups/callsigns session or the daily challenge) — just visiting the
-site isn't enough.
+Серия дней (🔥 streak) засчитывается только за реальную завершённую
+тренировку (сессия Коха/групп/позывных или задание дня) — просто зайти на
+сайт недостаточно.
 
-## How it works internally
+## Как это устроено внутри
 
-- **`assets/js/audio.js`** — `MorseAudio` plays dots/dashes through a Web
-  Audio API oscillator, supports Farnsworth spacing (characters at one
-  speed, pauses at another, slower one). The `onSymbol` callback returns
-  `durationMs`, used to precisely sync the visualization.
-- **`assets/js/input.js`** — `TelegraphKey` turns holding down a key (a
-  screen tap or spacebar) into dots/dashes based on hold duration relative
-  to the current `wpm`, plus a live sidetone (real sound) while held.
-  Thresholds: `< 2×unit` → dot, otherwise dash; a `2.5×unit` pause is a
-  letter boundary, another `+4×unit` is a word boundary.
-- **`assets/js/daily.js`** — `DailyChallenge`: the single source of truth
-  for the "daily challenge" on the home page and in the training modes; the
-  challenge is derived from the pair "date + player's stage".
-- **`assets/js/signal.js`** — `SignalLine` (an oscilloscope-style dot/dash
-  trace) and `MorseLamp` (a visual lamp) — cross-cutting visual elements
-  that mirror both sound and input in sync across every training page.
-- **`assets/js/progress.js`** — all of the user's progress lives in one
-  `localStorage` key (`morsewave_progress_v1`): XP, level, daily streak,
-  learned characters, Koch level, stats, unlocked achievements.
-  `Progress.resetAll()` does a full reset.
-- **Sync and its indicator.** `Progress.pushNow()` sends the whole Progress
-  object to `api/push_progress.php`, and on `ok: true` it remembers the
-  moment in a separate `morsewave_last_sync` key and fires a
-  `progress:synced` event; `account.js` renders that as "☁ Synced: 5 minutes
-  ago". The mark is set **only** on a real success.
-- **File backup** — `Progress.exportBackup()` / `Progress.importBackup()`.
-  Import deliberately goes through the same `mergeFromServer()` used for the
-  login merge: "upward only" (max on numbers, union on sets). So loading an
-  old file on top of newer progress is safe.
-- **Achievements** are defined in MySQL (`achievements`, `condition_type` +
-  `condition_value` fields), and condition checks against stats happen
-  client-side in `Progress.checkAchievements()` — see the type mapping in
+- **`assets/js/audio.js`** — `MorseAudio` проигрывает точки/тире через
+  осциллятор Web Audio API, поддерживает интервалы Фарнсворта (символы на
+  одной скорости, паузы — на другой, более медленной). `onSymbol` колбэк
+  отдаёт `durationMs` — используется для точной синхронизации визуализации.
+- **`assets/js/input.js`** — `TelegraphKey` превращает удержание клавиши
+  (тап по экрану или пробел) в точки/тире по длительности нажатия
+  относительно текущего `wpm`, плюс живой сайдтон (реальный звук) во время
+  удержания. Пороги: `< 2×unit` → точка, иначе тире; пауза `2.5×unit` —
+  граница буквы, ещё `+4×unit` — граница слова.
+- **`assets/js/daily.js`** — `DailyChallenge`: единый источник «задания дня»
+  для главной и режимов-исполнителей, задание считается из пары
+  «дата + этап игрока».
+- **`assets/js/signal.js`** — `SignalLine` (осциллограф из точек/тире) и
+  `MorseLamp` (визуальная лампа) — сквозные визуальные элементы, синхронно
+  отражающие и звук, и ввод на всех страницах тренировки.
+- **`assets/js/progress.js`** — весь прогресс пользователя в одном ключе
+  `localStorage` (`morsewave_progress_v1`): XP, уровень, серия дней,
+  выученные символы, уровень Коха, статистика, разблокированные
+  достижения. `Progress.resetAll()` — полный сброс.
+- **Синхронизация и её индикатор.** `Progress.pushNow()` шлёт весь
+  Progress-объект в `api/push_progress.php` и при ответе `ok: true`
+  запоминает момент в отдельном ключе `morsewave_last_sync` + шлёт событие
+  `progress:synced`; `account.js` рисует по нему строку «☁ Синхронизировано:
+  5 минут назад». Метка ставится **только** при реальном успехе.
+- **Бэкап файлом** — `Progress.exportBackup()` / `Progress.importBackup()`.
+  Импорт намеренно идёт через тот же `mergeFromServer()`, что и слияние при
+  логине: «только вверх» (max по числам, union по множествам). Поэтому
+  загрузить старый файл поверх свежего прогресса безопасно.
+- **Достижения** определяются в MySQL (`achievements`, поле `condition_type`
+  + `condition_value`), а проверка условий против статистики происходит на
+  клиенте в `Progress.checkAchievements()` — сопоставление типов см. в
   `progress.js` (`statValue()`).
-- **Leaderboard protection** (`includes/leaderboard_guard.php`) — before
-  publishing to `user_stats`, values are clamped to a plausible ceiling
-  (tied to account age), cutting off crude inflation. Real progress isn't
-  touched — only the public row is clamped (details in CHANGELOG, v2.40).
-- **Internationalization** (`includes/i18n.php`, `lang/ru.php`, `lang/en.php`,
-  `assets/js/i18n.js`) — the language is resolved via `?lang=` → the
-  `mw_lang` cookie → the browser's `Accept-Language` header → Russian by
-  default. The `t('key')` helper is available both in PHP templates and (as
-  a global `t()` function) in JS via `window.MW_I18N`, which
-  `includes/header.php` embeds in `<head>`. Fallback for a missing
-  translation: current language → Russian → the key itself. The syllabic
-  letter mnemonics (`MORSE_MNEMONICS` and `CYRILLIC_MNEMONICS` in
-  `morse-data.js`) are a phonetic memory aid tied to Russian sounds, so
-  they're deliberately disabled in the English interface rather than
-  translated word-for-word.
-- **Cyrillic Morse alphabet** (`learn.php`, v2.51) — a separate 33-letter
-  table (`CYRILLIC_CODE`/`CYRILLIC_TO_CHAR` in `morse-data.js`), deliberately
-  *not* merged with the Latin `MORSE_CODE`/`MORSE_TO_CHAR`: several Cyrillic
-  letters share the exact same dot/dash code as a "similar-sounding" Latin
-  letter (by design of the historical alphabet), so a merged reverse lookup
-  would make keyed decoding ambiguous. `TelegraphKey` (`input.js`) takes the
-  decode table as an option/`setTable()` call instead of a hardcoded global.
-  Progress for Cyrillic letters is stored with an `RU_` prefix
-  (`learnedLetters`), so Latin `A` and Cyrillic `А` never collide — and the
-  "full alphabet" achievement counts strictly against the Latin+digit set
-  (`progress.js`), unaffected by Cyrillic progress living in the same array.
+- **Защита лидерборда** (`includes/leaderboard_guard.php`) — перед публикацией
+  в `user_stats` значения обрезаются по правдоподобному потолку (привязан к
+  возрасту аккаунта), отсекая грубую накрутку. Реальный прогресс не меняется —
+  режется только публичная строка (подробности в CHANGELOG, v2.40).
+- **Интернационализация** (`includes/i18n.php`, `lang/ru.php`, `lang/en.php`,
+  `assets/js/i18n.js`) — язык выбирается по `?lang=` → cookie `mw_lang` →
+  `Accept-Language` браузера → по умолчанию русский. Хелпер `t('ключ')`
+  доступен и в PHP-шаблонах, и (как глобальная функция `t()`) в JS через
+  `window.MW_I18N`, который `includes/header.php` кладёт в `<head>`.
+  Фолбэк при отсутствующем переводе: текущий язык → русский → сам ключ.
+  Слоговые мнемоники букв (`MORSE_MNEMONICS` и `CYRILLIC_MNEMONICS` в
+  `morse-data.js`) — фонетическая подсказка, завязанная на русское звучание,
+  поэтому в английском интерфейсе она осознанно отключена, а не переведена
+  дословно.
+- **Кириллическая азбука Морзе** (`learn.php`, v2.51) — отдельная таблица на
+  33 буквы (`CYRILLIC_CODE`/`CYRILLIC_TO_CHAR` в `morse-data.js`), намеренно
+  *не* смешанная с латинской `MORSE_CODE`/`MORSE_TO_CHAR`: часть кириллических
+  букв совпадает по коду с «похожей по звучанию» латинской (так исторически
+  устроена сама азбука), поэтому общий реверс-словарь сделал бы декодирование
+  ключом непредсказуемым. `TelegraphKey` (`input.js`) принимает таблицу
+  декодирования параметром/через `setTable()`, а не жёстко зашитым глобалом.
+  Прогресс по кириллице хранится с префиксом `RU_` (`learnedLetters`) —
+  латинская `A` и кириллическая `А` никогда не пересекаются, а ачивка
+  «Полный алфавит» считается строго по латинице+цифрам (`progress.js`),
+  несмотря на то что кириллические записи лежат в том же массиве.
 
-## Changelog
+## История изменений
 
-Full history is in [CHANGELOG.md](CHANGELOG.md) (newest entries first).
+Полная история — в [CHANGELOG.md](CHANGELOG.md) (свежие записи сверху).
 
-## Known limitations / open questions
+## Известные ограничения / открытые вопросы
 
-- Accounts are an optional add-on over localStorage (not required for
-  training). The client remains the source of truth for XP, so there's no
-  absolute protection against inflation; the public leaderboard is covered
-  by a server-side sanity ceiling (`leaderboard_guard.php`, v2.40) — it cuts
-  off crude values, but it's "a lock against honest people", not bulletproof
-  protection. The same progress from a single browser can technically be
-  published under multiple accounts — the barrier is email verification
-  plus a soft warning on republishing.
-- Emails are sent via the **Resend API** (see [DEPLOY.md](DEPLOY.md)) —
-  on shared hosting, SMTP turned out to be unreliable (no DKIM, the shared
-  IP's PTR doesn't point at the domain, Gmail silently dropped mail).
-- The Morse-code CAPTCHA (`includes/captcha.php`) is basic protection
-  against primitive scripts, not against a targeted bypass.
-- `TelegraphKey` calibrates dots/dashes relative to the selected `wpm`,
-  rather than adapting to the user's actual pace.
-- Cyrillic is only in "Letters" (keying + copying by ear) — "Koch method"
-  and "Character groups" stay Latin-only. This is deliberate, not an
-  oversight: Koch has a fixed classical character order that's Latin by
-  definition, and Groups/the exam mode target the ham radio license
-  syllabus (Latin+digits), so a Cyrillic set there wouldn't map to anything.
+- Аккаунты — опциональная надстройка над localStorage (не обязательны для
+  тренировки). Клиент остаётся источником истины по XP, поэтому абсолютной
+  защиты от накрутки нет; публичный лидерборд прикрыт серверным санитарным
+  потолком (`leaderboard_guard.php`, v2.40) — он отсекает грубые значения,
+  но это «замок от честных людей», а не пуленепробиваемая защита. Один и тот
+  же прогресс из одного браузера технически можно опубликовать от нескольких
+  аккаунтов — барьером служит email-подтверждение + мягкое предупреждение
+  при повторной публикации.
+- Письма шлются через **Resend API** (см. [DEPLOY.md](DEPLOY.md)) — на
+  shared-хостинге SMTP оказался ненадёжен (нет DKIM, PTR общего IP не
+  указывает на домен, Gmail тихо режет письма).
+- Капча на азбуке Морзе (`includes/captcha.php`) — базовая защита от
+  примитивных скриптов, не от целенаправленного обхода.
+- `TelegraphKey` калибрует точку/тире относительно выбранного `wpm`, а не
+  адаптируется к реальному темпу пользователя.
+- Кириллица есть только в «Буквах» (отправка + приём на слух) — «Метод Коха»
+  и «Группы символов» остаются латинскими. Это осознанно, не недосмотр:
+  у Коха фиксированный классический порядок символов, который по
+  определению латинский, а Группы/режим экзамена ориентированы на программу
+  радиолюбительского экзамена (латиница+цифры) — кириллический набор там
+  просто не на что было бы натянуть.
 
-## Roadmap / ideas for the future
+## Roadmap / идеи для развития
 
-Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
+Порядок примерно = приоритет (подробности и нюансы — в [CLAUDE.md](CLAUDE.md)):
 
-- [ ] **Mini-game** — a platformer/runner where obstacles are cleared by
-  picking the right character by ear and/or matching the key's rhythm
-- [ ] **Key rhythm scoring** — a third sub-mode under "Letters": showing
-  deviation from ideal timing (dot:dash:pause ratios)
-- [ ] **Adaptive key calibration** to the user's actual pace
-- [ ] _(long-term)_ A native Android app (not a PWA)
-- [ ] _(research)_ Support for a real telegraph key (Arduino adapter / Web
-  Serial / microphone input)
+- [ ] **Мини-игра** — платформер-раннер, препятствия проходятся выбором
+  символа на слух и/или ритмом ключа
+- [ ] **Оценка ритма ключа** — третий подрежим в «Буквах»: отклонение
+  длительностей от идеала (точка:тире:паузы)
+- [ ] **Адаптивная калибровка ключа** под реальный темп пользователя
+- [ ] _(дальний прицел)_ Нативное Android-приложение (не PWA)
+- [ ] _(исследование)_ Подключение реального телеграфного ключа (адаптер на
+  Arduino / Web Serial / микрофонный вход)
 
-Already done: password recovery by email, progress export/import as a file,
-targeted daily challenges, self-service account deletion, leaderboard
-protection, a bilingual interface (Russian/English), the Cyrillic Morse
-alphabet in "Letters" (v2.51).
+Уже сделано: восстановление пароля по почте, экспорт/импорт прогресса файлом,
+целевые задания дня, самостоятельное удаление аккаунта, защита лидерборда,
+двуязычный интерфейс (русский/английский), кириллическая азбука Морзе в
+«Буквах» (v2.51).
 
-## Related project
+## Смежный проект
 
-Once you've learned to copy individual characters and callsigns, the next
-step on the route (see "Beginner's path" on the home page) is
-**[Morse Walker](https://morse.r9o.ru)**: a radio contact simulator with
-pile-ups, contest and POTA modes, and a Russian callsign generator. It's a
-separate project, not part of MorseWave — original author
-[W6NYC](https://github.com/sc0tfree/morsewalker), with further development
-and localization also by R9OGL:
-[github.com/loloka/morsewalker](https://github.com/loloka/morsewalker).
+Освоил приём отдельных знаков и позывных — дальше по маршруту (см. «Путь
+новичка» на главной) идёт **[Morse Walker](https://morse.r9o.ru)**:
+симулятор радиосвязи с pile-up, режимы контестов и POTA, генератор
+российских позывных. Это отдельный проект, не часть MorseWave — исходный
+автор [W6NYC](https://github.com/sc0tfree/morsewalker), доработка и
+русификация — тоже R9OGL: [github.com/loloka/morsewalker](https://github.com/loloka/morsewalker).
 
-## License
+## Лицензия
 
-MIT — do whatever you want with it, see [LICENSE](LICENSE).
+MIT — делай с этим что хочешь, см. [LICENSE](LICENSE).
