@@ -368,6 +368,14 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .signal-bar.gap   { background: transparent; }
 .signal-bar.on    { background: var(--signal); box-shadow: 0 0 10px var(--signal); }
 
+/* Живая подсветка точности ритма ("Буквы" → "Ритм ключа") — цвет пульса
+   зависит от того, насколько нажатие попало в идеальную длительность, а не
+   от типа символа. Три класса-модификатора выигрывают у базового .on по
+   специфичности (три класса против двух), порядок в файле не важен. */
+.signal-bar.rhythm-good.on { background: var(--success); box-shadow: 0 0 10px var(--success); }
+.signal-bar.rhythm-warn.on { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+.signal-bar.rhythm-bad.on  { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+
 /* ---------- Morse pattern display ---------- */
 .morse-pattern {
     font-family: var(--font-mono);
@@ -417,6 +425,12 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
    акцентный оранжевый — тот зарезервирован под CTA и активную навигацию
    (см. аудит дизайна). Явная галочка в углу, а не только цвет рамки. */
 .letter-tile.learned { border-color: var(--signal-dim); background: linear-gradient(160deg, var(--surface), #10201d); }
+/* "Ритм ключа" — отдельный статус от .learned (см. renderRhythmTiles в
+   learn.js): та же плитка может быть одновременно "выучена" (отправка
+   ключом) и/или "ритм отточен" (этот режим), поэтому цвет и угол — другие,
+   чтобы бейджи не путались друг с другом. */
+.letter-tile.rhythm-mastered { border-color: var(--accent-dim); }
+.letter-tile.learned.rhythm-mastered { background: linear-gradient(160deg, var(--surface), #241a08 50%, #10201d); }
 .letter-tile.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
 .letter-tile .ch { font-size: 22px; font-weight: 700; font-family: var(--font-mono); }
 .letter-tile .code { font-size: 11px; color: var(--text-faint); font-family: var(--font-mono); }
@@ -426,6 +440,14 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     right: 4px;
     color: var(--signal);
     display: flex;
+}
+.letter-tile .rhythm-check {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    right: auto;
+    font-size: 11px;
+    line-height: 1;
 }
 
 .tile-grid {

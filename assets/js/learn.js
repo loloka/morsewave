@@ -11,9 +11,26 @@
     const LEARN_XP = 25;
     const REC_XP = 1;
 
+    // "Оценка ритма ключа" (CLAUDE.md, бэклог п.2) — анти-фарм по ТОЙ ЖЕ схеме,
+    // что и "Отправка ключом" (REQUIRED_STREAK выше): XP не капает за каждую
+    // попытку (иначе фармится спамом одного и того же лёгкого символа), а
+    // выдаётся один раз, целиком, когда набрано REQUIRED_RHYTHM_STREAK точных
+    // повторов подряд — см. комментарий у handleRhythmLetter.
+    const RHYTHM_ACCURATE_THRESHOLD = 0.8; // от этой точности попытка считается "точной"
+    const REQUIRED_RHYTHM_STREAK = 5;      // столько точных подряд нужно, чтобы "отточить" ритм буквы
+    const RHYTHM_MASTER_XP = 25;           // тот же порядок величины, что и LEARN_XP — сопоставимое усилие
+    // Классика телеграфной азбуки: пауза МЕЖДУ СИГНАЛАМИ ВНУТРИ одной буквы
+    // равна 1×unit (столько же, сколько точка) — это отдельная величина от
+    // паузы между буквами (3×unit) и паузы между словами (7×unit), с которыми
+    // её легко перепутать. Раньше в CLAUDE.md было записано 1.7 без
+    // объяснения — после сверки с владельцем (2026-07-29) заменили на честную
+    // теоретическую 1, никакого скрытого смысла в 1.7 не было.
+    const RHYTHM_IDEAL_PAUSE_UNITS = 1;
+
     /* ===================== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ ===================== */
     const sendModeEl = document.getElementById('send-mode');
     const recognizeModeEl = document.getElementById('recognize-mode');
+    const rhythmModeEl = document.getElementById('rhythm-mode');
     let recognizeModeActive = false;
 
     document.querySelectorAll('.mode-switch .chip').forEach(chip => {
@@ -23,6 +40,7 @@
             const mode = chip.dataset.mode;
             sendModeEl.style.display = mode === 'send' ? 'block' : 'none';
             recognizeModeEl.style.display = mode === 'recognize' ? 'block' : 'none';
+            rhythmModeEl.style.display = mode === 'rhythm' ? 'block' : 'none';
             recognizeModeActive = mode === 'recognize';
             if (recognizeModeActive) {
                 initRecognizeGrid();
@@ -32,6 +50,15 @@
                 haltRecognize();
                 recStartBtn.style.display = 'inline-flex';
                 recStopBtn.style.display = 'none';
+            }
+            if (mode === 'rhythm') {
+                renderRhythmTiles();
+                startRhythmSession();
+            } else {
+                // уход со вкладки не должен оставлять недоигранный символ,
+                // который потом "выстрелит" onLetter уже в другом режиме
+                rhythmKey.reset();
+                resetRhythmBuffers();
             }
         });
     });
@@ -547,6 +574,293 @@
         recFeedback.className = 'feedback show';
         recStartBtn.style.display = 'inline-flex';
         recStopBtn.style.display = 'none';
+    });
+
+    /* ===================== РЕЖИМ: РИТМ КЛЮЧА =====================
+       Третий подрежим "Буквы" (CLAUDE.md, бэклог п.2) — не про то, какую
+       букву ты нажал (это уже проверяют "Отправка"/"Приём"), а про то,
+       НАСКОЛЬКО РОВНО ты её выстучал: сравниваем реальные длительности
+       нажатий/пауз с идеальными соотношениями точка:тире:пауза = 1:3:1
+       относительно текущего wpm (см. unit() в input.js). Набор символов —
+       те же три чипа, что и в "Отправке" (алфавит/Кох/кириллица), но
+       выбор буквы и статистика — полностью отдельные от send-mode. */
+    const rhythmGrid = document.getElementById('rhythm-grid');
+    const rhythmPanel = document.getElementById('rhythm-panel');
+    const rhythmLetterEl = document.getElementById('rhythm-letter');
+    const rhythmPatternEl = document.getElementById('rhythm-pattern');
+    const rhythmWpmSlider = document.getElementById('rhythm-wpm');
+    const rhythmWpmValue = document.getElementById('rhythm-wpm-value');
+    const rhythmKeyEl = document.getElementById('rhythm-key');
+    const rhythmLampEl = new MorseLamp(document.getElementById('rhythm-lamp'));
+    const rhythmSignalLine = new SignalLine(document.getElementById('rhythm-signal'));
+    const rhythmFeedbackEl = document.getElementById('rhythm-feedback');
+    const rhythmStreakEl = document.getElementById('rhythm-streak');
+    const rhythmStreakBarEl = document.getElementById('rhythm-streak-bar');
+    const rhythmBestEl = document.getElementById('rhythm-best');
+    const rhythmAccuracyEl = document.getElementById('rhythm-accuracy');
+    const rhythmTotalEl = document.getElementById('rhythm-total');
+
+    let rhythmOrder = 'alphabet';
+    let rhythmCurrent = null;
+    let rhythmCurrentWasMasteredAtStart = false; // ритм ЭТОЙ буквы уже отточен раньше — тренируемся без XP
+    let rhythmSymbols = [];   // { symbol: '.'|'-', duration } за текущую попытку (одна буква)
+    let rhythmPauses = [];    // паузы между нажатиями внутри текущей буквы, мс
+    let rhythmLastUp = null;  // момент последнего отпускания ключа, для расчёта паузы
+    let rhythmStreak = 0;     // точных повторов подряд ДЛЯ ТЕКУЩЕЙ буквы (сбрасывается при её смене)
+    let rhythmBest = 0;       // лучшая попытка за всё время (%), из Progress.stats
+    let rhythmSessionTotal = 0; // верно опознанных попыток за этот заход на вкладку (любая точность)
+    let rhythmSessionSum = 0;   // сумма их точности (0..1) — для среднего по сессии
+
+    function isCyrillicOrderRhythm() {
+        return rhythmOrder === 'cyrillic';
+    }
+
+    function codeForRhythm(ch) {
+        return isCyrillicOrderRhythm() ? CYRILLIC_CODE[ch] : MORSE_CODE[ch];
+    }
+
+    function orderedRhythmLetters() {
+        if (rhythmOrder === 'koch') {
+            return KOCH_ORDER.filter(ch => ALL_LEARNABLE.includes(ch));
+        }
+        if (rhythmOrder === 'cyrillic') {
+            return CYRILLIC_LEARNABLE;
+        }
+        return ALL_LEARNABLE;
+    }
+
+    document.querySelectorAll('#rhythm-order-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#rhythm-order-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            rhythmOrder = chip.dataset.order;
+            rhythmCurrent = null;
+            rhythmPanel.style.display = 'none';
+            renderRhythmTiles();
+        });
+    });
+
+    function renderRhythmTiles() {
+        const state = Progress.load();
+        rhythmGrid.innerHTML = '';
+        orderedRhythmLetters().forEach((ch) => {
+            const tile = document.createElement('div');
+            const key = progressKeyForChar(ch);
+            // Два РАЗНЫХ статуса на одной плитке — не путать: "learned" (бирюзовая
+            // галочка в правом углу) про "Отправку ключом" вообще (сам факт, что
+            // символ освоен), "rhythm-mastered" (жёлтая нота в левом углу) — про
+            // ЭТОТ режим конкретно: ровный ритм именно этой буквы уже отточен.
+            // Плитка может быть в любой комбинации этих двух статусов сразу.
+            const isLearned = state.learnedLetters.includes(key);
+            const isMastered = Array.isArray(state.rhythmMasteredLetters) && state.rhythmMasteredLetters.includes(key);
+            tile.className = 'letter-tile'
+                + (isLearned ? ' learned' : '')
+                + (isMastered ? ' rhythm-mastered' : '');
+            tile.dataset.ch = ch;
+            tile.innerHTML = `<div class="ch">${ch}</div><div class="code">${codeForRhythm(ch)}</div>`
+                + (isLearned ? `<span class="check">${MWIcon('check', 12)}</span>` : '')
+                + (isMastered ? `<span class="check rhythm-check">🎵</span>` : '');
+            tile.addEventListener('click', () => selectRhythmLetter(ch));
+            rhythmGrid.appendChild(tile);
+        });
+    }
+
+    function renderRhythmPattern(ch) {
+        const code = codeForRhythm(ch);
+        rhythmPatternEl.innerHTML = code.split('').map(s => `<span class="sym">${s === '.' ? '•' : '−'}</span>`).join(' ');
+    }
+
+    function resetRhythmBuffers() {
+        rhythmSymbols = [];
+        rhythmPauses = [];
+        rhythmLastUp = null;
+    }
+
+    function selectRhythmLetter(ch) {
+        rhythmCurrent = ch;
+        // Серия "точных подряд" — свойство КОНКРЕТНОЙ буквы, а не сессии в
+        // целом (как и correctStreak в "Отправке" — см. selectLetter()), при
+        // смене буквы начинаем с нуля.
+        rhythmStreak = 0;
+        const state = Progress.load();
+        rhythmCurrentWasMasteredAtStart = Array.isArray(state.rhythmMasteredLetters)
+            && state.rhythmMasteredLetters.includes(progressKeyForChar(ch));
+        resetRhythmBuffers();
+        updateRhythmStreakUI();
+        [...rhythmGrid.children].forEach(t => t.classList.toggle('selected', t.dataset.ch === ch));
+        rhythmLetterEl.textContent = ch;
+        renderRhythmPattern(ch);
+        rhythmPanel.style.display = 'block';
+        rhythmFeedbackEl.className = 'feedback';
+        rhythmSignalLine.clear();
+        rhythmKey.setTable(isCyrillicOrderRhythm() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
+        rhythmPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function currentRhythmWpm() {
+        return parseInt(rhythmWpmSlider.value, 10);
+    }
+
+    // Точность одного замера: 0 при отклонении ≥100% от идеала (в 2 раза длиннее
+    // или короче), 1 при идеальном совпадении, линейно между ними. Простая и
+    // предсказуемая метрика — не нужна сложная статистика ради тренажёра.
+    function timingAccuracy(actualMs, idealMs) {
+        if (!idealMs) return 0;
+        return Math.max(0, 1 - Math.abs(1 - actualMs / idealMs));
+    }
+
+    function accuracyClass(acc) {
+        if (acc >= 0.85) return 'rhythm-good';
+        if (acc >= 0.6) return 'rhythm-warn';
+        return 'rhythm-bad';
+    }
+
+    // Серия "точных подряд" для текущей буквы — визуально та же полоса-прогресс,
+    // что и correctStreak в "Отправке" (updateStreakUI()).
+    function updateRhythmStreakUI() {
+        rhythmStreakEl.textContent = rhythmStreak;
+        rhythmStreakBarEl.style.width = `${Math.min(rhythmStreak / REQUIRED_RHYTHM_STREAK, 1) * 100}%`;
+    }
+
+    // Сессионная статистика (рекорд/средняя точность/всего попыток) — общая
+    // по вкладке, не привязана к конкретно выбранной букве (как в "Приёме").
+    function updateRhythmStatsUI() {
+        rhythmBestEl.textContent = `${rhythmBest}%`;
+        rhythmAccuracyEl.textContent = rhythmSessionTotal
+            ? `${Math.round((rhythmSessionSum / rhythmSessionTotal) * 100)}%`
+            : '—';
+        rhythmTotalEl.textContent = rhythmSessionTotal;
+    }
+
+    // Вызывается при каждом заходе на вкладку "Ритм ключа" — рекорд общий
+    // (из Progress.stats), сессионные счётчики (среднее/всего) — только
+    // за этот заход, как и в "Приёме на слух".
+    function startRhythmSession() {
+        rhythmSessionTotal = 0;
+        rhythmSessionSum = 0;
+        const state = Progress.load();
+        rhythmBest = state.stats.rhythmBestAccuracy || 0;
+        updateRhythmStatsUI();
+    }
+
+    /**
+     * Итог одной попытки (буква полностью выстучана и декодирована).
+     *
+     * Защита от фарма (см. CLAUDE.md — "при добавлении нового источника XP
+     * закладывай защиту") — та же схема, что уже проверена в "Отправке
+     * ключом" (REQUIRED_STREAK/markLetterLearned): XP НЕ капает за каждую
+     * отдельную попытку (иначе спам одного и того же простого символа типа
+     * "E" фармился бы бесконечно), а выдаётся один раз, целиком, когда
+     * человек впервые набирает REQUIRED_RHYTHM_STREAK (5) точных повторов
+     * ПОДРЯД для этой конкретной буквы. "Точный" = буква декодирована верно
+     * И общая точность ритма ≥ RHYTHM_ACCURATE_THRESHOLD (80%); любая осечка
+     * (неверная буква или ритм ниже порога) сбрасывает серию на ноль — так
+     * что 5 "почти подряд" не считаются. После первого отточенного ритма
+     * дальнейшие попытки по этой букве идут уже без XP (как currentWasLearnedAtStart
+     * в "Отправке").
+     */
+    function handleRhythmLetter(decoded) {
+        if (!rhythmCurrent) { resetRhythmBuffers(); return; }
+        const unit = rhythmKey.unit();
+        const cyr = isCyrillicOrderRhythm();
+        const isMatch = cyr ? isCyrillicMatch(decoded, rhythmCurrent) : decoded === rhythmCurrent;
+
+        if (!isMatch) {
+            rhythmStreak = 0;
+            rhythmFeedbackEl.textContent = t('js.learn.rhythm_wrong', { '{got}': decoded, '{want}': rhythmCurrent });
+            rhythmFeedbackEl.className = 'feedback show bad';
+            updateRhythmStreakUI();
+            resetRhythmBuffers();
+            return;
+        }
+
+        const symbolAccs = rhythmSymbols.map(s => timingAccuracy(s.duration, s.symbol === '.' ? unit : unit * 3));
+        const pauseAccs = rhythmPauses.map(p => timingAccuracy(p, unit * RHYTHM_IDEAL_PAUSE_UNITS));
+        const allAccs = [...symbolAccs, ...pauseAccs];
+        const overall = allAccs.length ? allAccs.reduce((a, b) => a + b, 0) / allAccs.length : 0;
+        const overallPct = Math.round(overall * 100);
+        const symPctStr = symbolAccs.length
+            ? `${Math.round((symbolAccs.reduce((a, b) => a + b, 0) / symbolAccs.length) * 100)}%`
+            : '—';
+        const pausePctStr = pauseAccs.length
+            ? `${Math.round((pauseAccs.reduce((a, b) => a + b, 0) / pauseAccs.length) * 100)}%`
+            : '—';
+
+        rhythmSessionTotal++;
+        rhythmSessionSum += overall;
+
+        if (overallPct > rhythmBest) {
+            rhythmBest = overallPct;
+            const state = Progress.load();
+            state.stats.rhythmBestAccuracy = rhythmBest;
+            Progress.save(state);
+            Progress.checkAchievements();
+        }
+
+        if (rhythmCurrentWasMasteredAtStart) {
+            // Ритм этой буквы уже отточен раньше — просто тренировка,
+            // без XP, независимо от текущей точности (как в "Отправке").
+            rhythmFeedbackEl.textContent = t('js.learn.rhythm_known', { '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr, '{acc}': overallPct });
+            rhythmFeedbackEl.className = 'feedback show ok';
+        } else if (overall >= RHYTHM_ACCURATE_THRESHOLD) {
+            rhythmStreak++;
+            if (rhythmStreak < REQUIRED_RHYTHM_STREAK) {
+                rhythmFeedbackEl.textContent = t('js.learn.rhythm_streak', {
+                    '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr,
+                    '{streak}': rhythmStreak, '{req}': REQUIRED_RHYTHM_STREAK,
+                });
+                rhythmFeedbackEl.className = 'feedback show ok';
+            } else {
+                Progress.markRhythmMastered(progressKeyForChar(rhythmCurrent));
+                Progress.addXp(RHYTHM_MASTER_XP);
+                Progress.markDailyActivity();
+                rhythmCurrentWasMasteredAtStart = true; // дальше — без повторного XP
+                rhythmFeedbackEl.textContent = t('js.learn.rhythm_mastered', { '{ch}': rhythmCurrent, '{xp}': RHYTHM_MASTER_XP });
+                rhythmFeedbackEl.className = 'feedback show ok';
+                renderRhythmTiles();
+                [...rhythmGrid.children].find(t => t.dataset.ch === rhythmCurrent)?.classList.add('selected');
+            }
+        } else {
+            // Буква опознана верно, но ритм неровный — серия сбрасывается,
+            // "почти точные" попытки в зачёт не идут.
+            rhythmStreak = 0;
+            rhythmFeedbackEl.textContent = t('js.learn.rhythm_imprecise', {
+                '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr, '{acc}': overallPct,
+                '{threshold}': Math.round(RHYTHM_ACCURATE_THRESHOLD * 100),
+            });
+            rhythmFeedbackEl.className = 'feedback show bad';
+        }
+
+        updateRhythmStreakUI();
+        updateRhythmStatsUI();
+        resetRhythmBuffers();
+    }
+
+    const rhythmKey = new TelegraphKey(rhythmKeyEl, {
+        wpm: 12,
+        onPress: (isDown) => {
+            if (isDown) {
+                if (rhythmLastUp !== null) {
+                    rhythmPauses.push(performance.now() - rhythmLastUp);
+                }
+                rhythmLampEl.on();
+            } else {
+                rhythmLastUp = performance.now();
+                rhythmLampEl.off();
+            }
+        },
+        onSymbol: (symbol, durationMs) => {
+            rhythmSymbols.push({ symbol, duration: durationMs });
+            const ideal = symbol === '.' ? rhythmKey.unit() : rhythmKey.unit() * 3;
+            const acc = timingAccuracy(durationMs, ideal);
+            rhythmSignalLine.pulse(`${symbol === '.' ? 'dot' : 'dash'} ${accuracyClass(acc)}`, durationMs);
+        },
+        onLetter: handleRhythmLetter,
+    });
+
+    rhythmWpmSlider.addEventListener('input', () => {
+        rhythmWpmValue.textContent = rhythmWpmSlider.value;
+        rhythmKey.setWpm(currentRhythmWpm());
     });
 
     /* ===================== ЗАДАНИЕ ДНЯ =====================

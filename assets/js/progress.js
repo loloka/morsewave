@@ -19,6 +19,10 @@ const Progress = (() => {
         // префиксом RU_ (см. morse-data.js), латинская A и кириллическая А —
         // разные записи и здесь тоже.
         recognizedUniqueLetters: [],
+        // Символы (с тем же префиксом RU_ у кириллицы), для которых ритм
+        // отправки ключом отточен — 5 точных повторов подряд в режиме
+        // "Ритм ключа". Отдельно от learnedLetters (см. markRhythmMastered).
+        rhythmMasteredLetters: [],
         kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
         // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
         // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
@@ -37,6 +41,11 @@ const Progress = (() => {
             abbrCompleted: 0,
             abbrBestStreak: 0,
             wordsCompleted: 0,
+            // Лучшая попытка (%) за всё время в режиме "Ритм ключа"
+            // (learn.js) — насколько точно длительности точка/тире/пауза
+            // совпали с идеалом 1:3:1.7. Как и recognizeBestStreak — личный
+            // рекорд, не сбрасывается между сессиями.
+            rhythmBestAccuracy: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -224,6 +233,10 @@ const Progress = (() => {
             ...(Array.isArray(local.recognizedUniqueLetters) ? local.recognizedUniqueLetters : []),
             ...(Array.isArray(server.recognizedUniqueLetters) ? server.recognizedUniqueLetters : []),
         ])];
+        merged.rhythmMasteredLetters = [...new Set([
+            ...(Array.isArray(local.rhythmMasteredLetters) ? local.rhythmMasteredLetters : []),
+            ...(Array.isArray(server.rhythmMasteredLetters) ? server.rhythmMasteredLetters : []),
+        ])];
 
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
@@ -293,6 +306,26 @@ const Progress = (() => {
         const state = load();
         if (!state.learnedLetters.includes(ch)) {
             state.learnedLetters.push(ch);
+            save(state);
+            pushFullProgress();
+        }
+        return state;
+    }
+
+    /**
+     * Отмечает символ как "ритм отточен" в режиме "Ритм ключа" (learn.js) —
+     * отдельный список от learnedLetters (та про отправку ключом вообще, эта
+     * конкретно про ровность точка/тире/пауза). Вызывается ОДИН раз, когда
+     * человек впервые набирает REQUIRED_RHYTHM_STREAK точных повторов подряд
+     * — так же, как markLetterLearned() вызывается один раз на 5-й верный
+     * повтор в "Отправке", а не на каждую попытку (иначе XP фармился бы
+     * бесконечно повторением одного и того же простого символа).
+     */
+    function markRhythmMastered(ch) {
+        const state = load();
+        if (!Array.isArray(state.rhythmMasteredLetters)) state.rhythmMasteredLetters = [];
+        if (!state.rhythmMasteredLetters.includes(ch)) {
+            state.rhythmMasteredLetters.push(ch);
             save(state);
             pushFullProgress();
         }
@@ -499,7 +532,7 @@ const Progress = (() => {
     }
 
     return {
-        load, save, addXp, markLetterLearned, markRecognizedUnique, setKochLevel, incrementStat,
+        load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,

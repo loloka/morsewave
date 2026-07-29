@@ -42,7 +42,7 @@ header next to the profile, see "How it works internally" below for details.
 
 | Section | What's inside |
 |---|---|
-| 📖 **Letters** | Learn each character on its own: keying (tap/spacebar, with live sidetone) and copying by ear (a character plays → tap it on the on-screen keyboard). Three sets for keying — Latin + digits, Koch order, Cyrillic (33 letters, own code table, own syllabic mnemonics); a separate "Cyrillic characters" set for copying by ear |
+| 📖 **Letters** | Three sub-modes: keying (tap/spacebar, with live sidetone), copying by ear (a character plays → tap it on the on-screen keyboard), and **key rhythm** (compares the real durations of dots/dashes/pauses against the ideal 1:3:1 ratio — speed is fully adjustable and the ideal recalculates for it; 5 accurate reps in a row masters a letter's rhythm and grants a one-off XP reward). Three sets for keying/rhythm — Latin + digits, Koch order, Cyrillic (33 letters, own code table, own syllabic mnemonics); a separate "Cyrillic characters" set for copying by ear |
 | 🎯 **Koch method** | Characters right away at full target speed; a new character unlocks at ≥90% accuracy; you can manually set any number of unlocked characters (in either direction) |
 | 🔢 **Character groups** | Copy 2–5 character groups by ear: letters / digits / mixed / learned-only / custom set, with speed and Farnsworth spacing as sliders; an exam mode matching ham radio license requirements |
 | 📝 **Real words** | Copying common English words and Q&A radio phrases (`CQ CQ DE R9OGL K`, `UR RST 599 599`): trains recognizing a word as a single sound shape rather than assembling it letter by letter. Third tab under "Groups" |
@@ -51,7 +51,8 @@ header next to the profile, see "How it works internally" below for details.
 | 🏆 **Achievements** | Achievement conditions live in the database (`achievements`) — new ones can be added without touching code |
 | 🎯 **Daily challenge** | A challenge tailored to the player's stage (beginner → "learn some letters", further along → "copy by ear", knows the alphabet → groups) plus a +50 XP bonus once a day |
 | 💡 **Signal lamp** | A visual analog of the sound — you can train with no sound at all |
-| 👤 **Account** | Optional: leaderboard (publish manually only), progress sync across devices with a "last synced" indicator, password recovery by email, self-service account deletion |
+| 🏆 **Leaderboard** | Top 10 on the home page by XP and by daily streak, plus a logged-in user's real rank shown separately if they're outside the top 10; a standalone page with the full table (`leaderboard.php`) — publishing is manual only, via the "Publish" button |
+| 👤 **Account** | Optional: progress sync across devices with a "last synced" indicator, password recovery by email, self-service account deletion |
 | 💾 **Progress backup** | Download/upload progress as a file on the profile page — no account needed. Import merges "upward only", so loading an old file on top of newer progress is safe |
 | ⚠️ **Progress reset** | Button on the "Achievements" page — a full reset (localStorage and the server copy) with confirmation |
 | 🌐 **Russian / English** | A language switcher in the header; emails, legal pages, and API errors are translated too |
@@ -118,7 +119,8 @@ morse-trainer/
 │   ├── css/style.css         # design system
 │   └── js/                   # morse-data, daily, audio, progress, signal, input, i18n + pages
 ├── index.php                 # home page + daily challenge
-├── learn.php                 # letters: keying + copying by ear
+├── leaderboard.php            # the full leaderboard table
+├── learn.php                 # letters: keying / copying by ear / key rhythm
 ├── koch.php                  # Koch method
 ├── groups.php                # 2–5 character groups (+ real words, abbreviations)
 ├── callsigns.php              # callsign practice
@@ -138,6 +140,7 @@ All XP is rounded to whole numbers. Level grows as `1 + √(XP / 80)`
 |---|---|---|
 | **Letters → keying** | **+25 XP** per character | Once per character — the first time you land 5 correct reps in a row. Repeating a streak on an already-learned character grants no XP. Same flat rate for Latin and Cyrillic — no difficulty bonus here (a deliberate simplification, v2.51.1). |
 | **Letters → copying by ear** | **+1 XP** per correct answer | Spamming the correct tile during the pause between rounds is blocked. Same flat rate for Latin and Cyrillic (v2.51.1 briefly gave Cyrillic +2, but that was confusing — a same-looking Latin and Cyrillic "M" earned different XP; reverted in v2.51.7). |
+| **Letters → key rhythm** | **+25 XP** once per letter | Same anti-farm scheme as keying: no XP for individual attempts, awarded once when 5 accurate reps in a row are reached (correct letter AND rhythm accuracy ≥ 80% of the ideal 1:3:1 ratio). Any slip resets the streak; practicing an already-mastered letter earns no further XP. |
 | **Koch method** | `2 × (unlocked_chars / 15, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The more characters unlocked and the longer the groups, the higher the rate (max 2 XP/character with the full set). At the start, with 2 characters, the rate is minimal — farming easy sessions doesn't pay off. |
 | **Koch method — bonus** | **+10/+20/+30 XP** (equal to the number of groups in the session) | Only if the session is completed in full with ≥90% accuracy. Achievements for this mode are checked against the honestly earned level (`kochLevelEarned`) — you can't drag the slider to the end and unlock the achievement. |
 | **Character groups** | `2 × √(set_size / 26, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The rate depends on the size of the chosen set and the group length. Awarded immediately for each answered group. |
@@ -268,8 +271,8 @@ Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
 
 - [ ] **Mini-game** — a platformer/runner where obstacles are cleared by
   picking the right character by ear and/or matching the key's rhythm
-- [ ] **Key rhythm scoring** — a third sub-mode under "Letters": showing
-  deviation from ideal timing (dot:dash:pause ratios)
+- [ ] **A custom adaptive ear-copy decoder** — adapts to the actual sending
+  speed from timestamps, instead of relying on a chosen wpm
 - [ ] **Adaptive key calibration** to the user's actual pace
 - [ ] _(long-term)_ A native Android app (not a PWA)
 - [ ] _(research)_ Support for a real telegraph key (Arduino adapter / Web
@@ -278,7 +281,8 @@ Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
 Already done: password recovery by email, progress export/import as a file,
 targeted daily challenges, self-service account deletion, leaderboard
 protection, a bilingual interface (Russian/English), the Cyrillic Morse
-alphabet in "Letters" (v2.51).
+alphabet in "Letters" (v2.51), the full leaderboard page plus a user's own
+rank on the home page (v2.52), key rhythm scoring in "Letters" (v2.53).
 
 ## Related project
 

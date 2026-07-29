@@ -13,6 +13,7 @@ include __DIR__ . '/includes/header.php';
 <div class="mode-switch">
     <div class="chip active" data-mode="send"><?= t('learn.mode_send') ?></div>
     <div class="chip" data-mode="recognize"><?= t('learn.mode_recognize') ?></div>
+    <div class="chip" data-mode="rhythm"><?= t('learn.mode_rhythm') ?></div>
 </div>
 
 <!-- ======================= РЕЖИМ: ОТПРАВКА ======================= -->
@@ -116,6 +117,58 @@ include __DIR__ . '/includes/header.php';
              вытеснят более новые. -->
         <div class="mt-2" id="rec-history"></div>
     </div>
+</div>
+
+<!-- ======================= РЕЖИМ: РИТМ КЛЮЧА ======================= -->
+<div id="rhythm-mode" style="display:none;">
+    <p class="mt-0"><?= t('learn.rhythm_intro') ?></p>
+
+    <div class="chip-row mt-1" id="rhythm-order-chips">
+        <div class="chip active" data-order="alphabet"><?= t('learn.order_alphabet') ?></div>
+        <div class="chip" data-order="koch"><?= t('learn.order_koch') ?></div>
+        <div class="chip" data-order="cyrillic"><?= t('learn.order_cyrillic') ?></div>
+    </div>
+    <div class="tile-grid mt-2" id="rhythm-grid"></div>
+
+    <section class="section card" id="rhythm-panel" style="display:none;">
+        <div class="flex-between flex-wrap gap-1">
+            <div>
+                <div class="card-eyebrow"><?= t('learn.practicing_symbol') ?></div>
+                <h2 id="rhythm-letter" style="font-family:var(--font-mono)">A</h2>
+            </div>
+            <div class="speed-control">
+                <?= t('learn.speed') ?>
+                <input type="range" id="rhythm-wpm" min="5" max="35" step="1" value="12">
+                <span class="speed-value" id="rhythm-wpm-value">12</span> wpm
+            </div>
+        </div>
+
+        <div class="morse-pattern mt-2" id="rhythm-pattern"></div>
+
+        <div class="flex-between mt-2 gap-2 flex-wrap">
+            <div class="muted" style="font-size:13px;"><?= t('learn.rhythm_streak_label') ?> <b class="mono" id="rhythm-streak">0</b> / 5</div>
+            <div class="progress-bar" style="width:120px;"><span id="rhythm-streak-bar" style="width:0%"></span></div>
+        </div>
+
+        <div class="grid grid-3 mt-2">
+            <div class="stat"><span class="value" id="rhythm-best">0%</span><span class="label"><?= mw_icon('trophy', 12) ?> <?= t('learn.rhythm_stat_best') ?></span></div>
+            <div class="stat"><span class="value" id="rhythm-accuracy">—</span><span class="label"><?= mw_icon('target', 12) ?> <?= t('learn.rhythm_stat_accuracy') ?></span></div>
+            <div class="stat"><span class="value" id="rhythm-total">0</span><span class="label"><?= mw_icon('check', 12) ?> <?= t('learn.rhythm_stat_total') ?></span></div>
+        </div>
+
+        <div class="feedback mt-2" id="rhythm-feedback"></div>
+
+        <div class="flex-between flex-wrap gap-2 mt-2">
+            <div class="key-wrap" style="flex:1;">
+                <div class="telegraph-key" id="rhythm-key" tabindex="0"><?= t('learn.tap_or_space') ?></div>
+            </div>
+            <div class="lamp-row">
+                <div class="morse-lamp" id="rhythm-lamp"></div>
+            </div>
+        </div>
+
+        <div class="signal-line mt-2" id="rhythm-signal"></div>
+    </section>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

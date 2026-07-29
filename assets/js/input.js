@@ -131,7 +131,10 @@ class TelegraphKey {
 
         const symbol = duration < this.unit() * 2 ? '.' : '-';
         this.buffer += symbol;
-        this.onSymbol?.(symbol);
+        // Второй параметр (реальная длительность нажатия, мс) добавлен для
+        // режима "Оценка ритма ключа" (learn.js) — старые подписчики,
+        // принимающие только symbol, его просто игнорируют.
+        this.onSymbol?.(symbol, duration);
         this._scheduleFinalize();
     }
 
