@@ -81,7 +81,7 @@ return [
     'learn.mode_rhythm' => '🎵 Key rhythm',
     'learn.rhythm_intro' => 'Pick a character and key it (tap or spacebar) — we compare the real durations of dots, dashes, and the pauses between them against the ideal ratio 1 : 3 : 1. <b>Speed (wpm) is fully adjustable</b> — the ideal timing is recalculated relative to it, so you can train a steady rhythm anywhere from 5 wpm to 30: the faster the speed, the stricter the timing requirements. 5 accurate reps in a row (rhythm accuracy of 80% or more) masters the letter\'s rhythm: +25 XP once, then you keep practicing without XP.',
     'learn.rhythm_streak_label' => 'Accurate reps in a row for this letter:',
-    'learn.rhythm_stat_best' => 'Best accuracy',
+    'learn.rhythm_stat_best' => "This letter's best",
     'learn.rhythm_stat_accuracy' => 'Session accuracy',
     'learn.rhythm_stat_total' => 'Correct attempts',
     'learn.order_alphabet' => 'Latin + digits',

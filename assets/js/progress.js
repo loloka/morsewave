@@ -23,6 +23,16 @@ const Progress = (() => {
         // отправки ключом отточен — 5 точных повторов подряд в режиме
         // "Ритм ключа". Отдельно от learnedLetters (см. markRhythmMastered).
         rhythmMasteredLetters: [],
+        // Личный рекорд точности (%) для КАЖДОЙ буквы отдельно в режиме
+        // "Ритм ключа" — раньше было одно общее число на все буквы
+        // (stats.rhythmBestAccuracy до v2.53.1), но с одним общим рекордом
+        // достаточно было один раз набрать 100% на простом символе (одна
+        // точка или тире — попасть в идеал такому проще всего), и дальше эта
+        // цифра переставала расти для ЛЮБЫХ других букв — тренировать другие
+        // символы становилось неинтересно, рекорд как будто "уже взят".
+        // Ключи — как и у learnedLetters/rhythmMasteredLetters (с префиксом
+        // RU_ у кириллицы).
+        rhythmBestByLetter: {},
         kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
         // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
         // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
@@ -41,11 +51,6 @@ const Progress = (() => {
             abbrCompleted: 0,
             abbrBestStreak: 0,
             wordsCompleted: 0,
-            // Лучшая попытка (%) за всё время в режиме "Ритм ключа"
-            // (learn.js) — насколько точно длительности точка/тире/пауза
-            // совпали с идеалом 1:3:1.7. Как и recognizeBestStreak — личный
-            // рекорд, не сбрасывается между сессиями.
-            rhythmBestAccuracy: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -238,6 +243,19 @@ const Progress = (() => {
             ...(Array.isArray(server.rhythmMasteredLetters) ? server.rhythmMasteredLetters : []),
         ])];
 
+        // Рекорд точности ритма — отдельное число НА КАЖДУЮ букву, поэтому
+        // обычный Math.max по stats тут не подходит (это не один счётчик, а
+        // словарь); сливаем по каждому ключу отдельно, тем же принципом
+        // "только вверх".
+        {
+            const localBest = (local.rhythmBestByLetter && typeof local.rhythmBestByLetter === 'object') ? local.rhythmBestByLetter : {};
+            const serverBest = (server.rhythmBestByLetter && typeof server.rhythmBestByLetter === 'object') ? server.rhythmBestByLetter : {};
+            merged.rhythmBestByLetter = {};
+            new Set([...Object.keys(localBest), ...Object.keys(serverBest)]).forEach((k) => {
+                merged.rhythmBestByLetter[k] = Math.max(Number(localBest[k]) || 0, Number(serverBest[k]) || 0);
+            });
+        }
+
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
         const localStats = local.stats || {};
@@ -330,6 +348,27 @@ const Progress = (() => {
             pushFullProgress();
         }
         return state;
+    }
+
+    /**
+     * Обновляет личный рекорд точности ритма ДЛЯ КОНКРЕТНОЙ буквы (см.
+     * комментарий у rhythmBestByLetter в defaults() — почему не один общий
+     * счётчик на все буквы). Возвращает актуальный рекорд (новый, если он
+     * обновился, иначе прежний) — удобно сразу присвоить в переменную UI.
+     */
+    function updateRhythmBest(ch, pct) {
+        const state = load();
+        if (!state.rhythmBestByLetter || typeof state.rhythmBestByLetter !== 'object') {
+            state.rhythmBestByLetter = {};
+        }
+        const prev = state.rhythmBestByLetter[ch] || 0;
+        if (pct > prev) {
+            state.rhythmBestByLetter[ch] = pct;
+            save(state);
+            pushFullProgress();
+            return pct;
+        }
+        return prev;
     }
 
     /**
@@ -532,7 +571,7 @@ const Progress = (() => {
     }
 
     return {
-        load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, setKochLevel, incrementStat,
+        load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, updateRhythmBest, setKochLevel, incrementStat,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,

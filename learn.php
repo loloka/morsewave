@@ -125,7 +125,6 @@ include __DIR__ . '/includes/header.php';
 
     <div class="chip-row mt-1" id="rhythm-order-chips">
         <div class="chip active" data-order="alphabet"><?= t('learn.order_alphabet') ?></div>
-        <div class="chip" data-order="koch"><?= t('learn.order_koch') ?></div>
         <div class="chip" data-order="cyrillic"><?= t('learn.order_cyrillic') ?></div>
     </div>
     <div class="tile-grid mt-2" id="rhythm-grid"></div>

@@ -582,8 +582,10 @@
        НАСКОЛЬКО РОВНО ты её выстучал: сравниваем реальные длительности
        нажатий/пауз с идеальными соотношениями точка:тире:пауза = 1:3:1
        относительно текущего wpm (см. unit() в input.js). Набор символов —
-       те же три чипа, что и в "Отправке" (алфавит/Кох/кириллица), но
-       выбор буквы и статистика — полностью отдельные от send-mode. */
+       только "Латиница + цифры" и "Кириллица" (без "Порядка Коха" — тот
+       про последовательность ИЗУЧЕНИЯ новых букв, здесь все буквы и так
+       открыты для выбора сразу, порядок изучения не при чём, см. v2.53.1).
+       Выбор буквы и статистика — полностью отдельные от send-mode. */
     const rhythmGrid = document.getElementById('rhythm-grid');
     const rhythmPanel = document.getElementById('rhythm-panel');
     const rhythmLetterEl = document.getElementById('rhythm-letter');
@@ -607,7 +609,7 @@
     let rhythmPauses = [];    // паузы между нажатиями внутри текущей буквы, мс
     let rhythmLastUp = null;  // момент последнего отпускания ключа, для расчёта паузы
     let rhythmStreak = 0;     // точных повторов подряд ДЛЯ ТЕКУЩЕЙ буквы (сбрасывается при её смене)
-    let rhythmBest = 0;       // лучшая попытка за всё время (%), из Progress.stats
+    let rhythmBest = 0;       // личный рекорд ТЕКУЩЕЙ буквы (%), из Progress.rhythmBestByLetter
     let rhythmSessionTotal = 0; // верно опознанных попыток за этот заход на вкладку (любая точность)
     let rhythmSessionSum = 0;   // сумма их точности (0..1) — для среднего по сессии
 
@@ -619,10 +621,10 @@
         return isCyrillicOrderRhythm() ? CYRILLIC_CODE[ch] : MORSE_CODE[ch];
     }
 
+    // Порядка Коха тут намеренно нет (в отличие от "Отправки ключом") — он
+    // задаёт последовательность ИЗУЧЕНИЯ новых символов, а в "Ритме" все
+    // буквы уже открыты для выбора сразу, порядок изучения тут ни при чём.
     function orderedRhythmLetters() {
-        if (rhythmOrder === 'koch') {
-            return KOCH_ORDER.filter(ch => ALL_LEARNABLE.includes(ch));
-        }
         if (rhythmOrder === 'cyrillic') {
             return CYRILLIC_LEARNABLE;
         }
@@ -683,10 +685,17 @@
         // смене буквы начинаем с нуля.
         rhythmStreak = 0;
         const state = Progress.load();
+        const key = progressKeyForChar(ch);
         rhythmCurrentWasMasteredAtStart = Array.isArray(state.rhythmMasteredLetters)
-            && state.rhythmMasteredLetters.includes(progressKeyForChar(ch));
+            && state.rhythmMasteredLetters.includes(key);
+        // Рекорд — личный, для ЭТОЙ буквы (см. Progress.rhythmBestByLetter):
+        // при выборе другой буквы подгружаем её собственный рекорд, а не
+        // общий по всем буквам сразу — иначе взятые 100% на лёгком символе
+        // "замораживали" цифру для всех остальных букв (см. CHANGELOG v2.53.1).
+        rhythmBest = (state.rhythmBestByLetter && state.rhythmBestByLetter[key]) || 0;
         resetRhythmBuffers();
         updateRhythmStreakUI();
+        updateRhythmStatsUI();
         [...rhythmGrid.children].forEach(t => t.classList.toggle('selected', t.dataset.ch === ch));
         rhythmLetterEl.textContent = ch;
         renderRhythmPattern(ch);
@@ -722,8 +731,9 @@
         rhythmStreakBarEl.style.width = `${Math.min(rhythmStreak / REQUIRED_RHYTHM_STREAK, 1) * 100}%`;
     }
 
-    // Сессионная статистика (рекорд/средняя точность/всего попыток) — общая
-    // по вкладке, не привязана к конкретно выбранной букве (как в "Приёме").
+    // rhythm-best — рекорд ВЫБРАННОЙ буквы (обновляется в selectRhythmLetter
+    // и в handleRhythmLetter), rhythm-accuracy/rhythm-total — сессионные,
+    // общие по вкладке, не привязаны к конкретной букве (как в "Приёме").
     function updateRhythmStatsUI() {
         rhythmBestEl.textContent = `${rhythmBest}%`;
         rhythmAccuracyEl.textContent = rhythmSessionTotal
@@ -732,14 +742,13 @@
         rhythmTotalEl.textContent = rhythmSessionTotal;
     }
 
-    // Вызывается при каждом заходе на вкладку "Ритм ключа" — рекорд общий
-    // (из Progress.stats), сессионные счётчики (среднее/всего) — только
-    // за этот заход, как и в "Приёме на слух".
+    // Вызывается при каждом заходе на вкладку "Ритм ключа" — сессионные
+    // счётчики (среднее/всего) обнуляются, как и в "Приёме на слух". Рекорд
+    // (rhythmBest) сюда не относится — он привязан к конкретной букве и
+    // подгружается в selectRhythmLetter().
     function startRhythmSession() {
         rhythmSessionTotal = 0;
         rhythmSessionSum = 0;
-        const state = Progress.load();
-        rhythmBest = state.stats.rhythmBestAccuracy || 0;
         updateRhythmStatsUI();
     }
 
@@ -789,13 +798,8 @@
         rhythmSessionTotal++;
         rhythmSessionSum += overall;
 
-        if (overallPct > rhythmBest) {
-            rhythmBest = overallPct;
-            const state = Progress.load();
-            state.stats.rhythmBestAccuracy = rhythmBest;
-            Progress.save(state);
-            Progress.checkAchievements();
-        }
+        // Рекорд — персонально для этой буквы (см. Progress.rhythmBestByLetter).
+        rhythmBest = Progress.updateRhythmBest(progressKeyForChar(rhythmCurrent), overallPct);
 
         if (rhythmCurrentWasMasteredAtStart) {
             // Ритм этой буквы уже отточен раньше — просто тренировка,
