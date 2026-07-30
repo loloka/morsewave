@@ -43,6 +43,7 @@ header next to the profile, see "How it works internally" below for details.
 | Section | What's inside |
 |---|---|
 | 📖 **Letters** | Three sub-modes: keying (tap/spacebar, with live sidetone; three sets — Latin + digits, Koch order, Cyrillic), copying by ear (a character plays → tap it on the on-screen keyboard; a separate "Cyrillic characters" set), and **key rhythm** (compares the real durations of dots/dashes/pauses against the ideal 1:3:1 ratio — speed is fully adjustable and the ideal recalculates for it; 5 accurate reps in a row masters a letter's rhythm and grants a one-off XP reward; sets are Latin + digits and Cyrillic — no Koch order, it's not relevant here) |
+| 👾 **Invasion** (BETA) | A tower-defense mini-game living next to "Letters": aliens fly toward your base carrying a letter played by ear, and you must recognize it and tap it on a custom QWERTY keyboard (or your computer's physical keyboard) before the enemy lands — a shovel flies out from the base on a hit. Enemy speed depends on how complex the letter's Morse code is, up to 5 concurrent targets as a 100-kill wave progresses, and a completed wave grants a bonus based on remaining base HP and reaction speed |
 | 🎯 **Koch method** | Characters right away at full target speed; a new character unlocks at ≥90% accuracy; you can manually set any number of unlocked characters (in either direction) |
 | 🔢 **Character groups** | Copy 2–5 character groups by ear: letters / digits / mixed / learned-only / custom set, with speed and Farnsworth spacing as sliders; an exam mode matching ham radio license requirements |
 | 📝 **Real words** | Copying common English words and Q&A radio phrases (`CQ CQ DE R9OGL K`, `UR RST 599 599`): trains recognizing a word as a single sound shape rather than assembling it letter by letter. Third tab under "Groups" |
@@ -141,6 +142,7 @@ All XP is rounded to whole numbers. Level grows as `1 + √(XP / 80)`
 | **Letters → keying** | **+25 XP** per character | Once per character — the first time you land 5 correct reps in a row. Repeating a streak on an already-learned character grants no XP. Same flat rate for Latin and Cyrillic — no difficulty bonus here (a deliberate simplification, v2.51.1). |
 | **Letters → copying by ear** | **+1 XP** per correct answer | Spamming the correct tile during the pause between rounds is blocked. Same flat rate for Latin and Cyrillic (v2.51.1 briefly gave Cyrillic +2, but that was confusing — a same-looking Latin and Cyrillic "M" earned different XP; reverted in v2.51.7). |
 | **Letters → key rhythm** | **+25 XP** once per letter | Same anti-farm scheme as keying: no XP for individual attempts, awarded once when 5 accurate reps in a row are reached (correct letter AND rhythm accuracy ≥ 80% of the ideal 1:3:1 ratio). Any slip resets the streak; practicing an already-mastered letter earns no further XP. |
+| **Invasion** (BETA) | **+1 XP** per destroyed alien, plus a one-off wave-clear bonus (10–130 XP) | A flat per-kill rate — no more farmable than regular copying by ear. The wave-clear bonus is only awarded for a fully completed wave (100 hits) and combines remaining base HP (1:1) with the average reaction speed across the whole wave (10–30 XP) — stalling until the last moment doesn't earn the same bonus as reacting fast. |
 | **Koch method** | `2 × (unlocked_chars / 15, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The more characters unlocked and the longer the groups, the higher the rate (max 2 XP/character with the full set). At the start, with 2 characters, the rate is minimal — farming easy sessions doesn't pay off. |
 | **Koch method — bonus** | **+10/+20/+30 XP** (equal to the number of groups in the session) | Only if the session is completed in full with ≥90% accuracy. Achievements for this mode are checked against the honestly earned level (`kochLevelEarned`) — you can't drag the slider to the end and unlock the achievement. |
 | **Character groups** | `2 × √(set_size / 26, capped at 1, floored at 0.15) × (group_length / 3)` XP per correctly copied character | The rate depends on the size of the chosen set and the group length. Awarded immediately for each answered group. |
@@ -269,8 +271,6 @@ Full history is in [CHANGELOG.md](CHANGELOG.md) (newest entries first).
 
 Roughly ordered by priority (details and nuance are in [CLAUDE.md](CLAUDE.md)):
 
-- [ ] **Mini-game** — a platformer/runner where obstacles are cleared by
-  picking the right character by ear and/or matching the key's rhythm
 - [ ] **A custom adaptive ear-copy decoder** — adapts to the actual sending
   speed from timestamps, instead of relying on a chosen wpm
 - [ ] **Adaptive key calibration** to the user's actual pace
@@ -282,7 +282,8 @@ Already done: password recovery by email, progress export/import as a file,
 targeted daily challenges, self-service account deletion, leaderboard
 protection, a bilingual interface (Russian/English), the Cyrillic Morse
 alphabet in "Letters" (v2.51), the full leaderboard page plus a user's own
-rank on the home page (v2.52), key rhythm scoring in "Letters" (v2.53).
+rank on the home page (v2.52), key rhythm scoring in "Letters" (v2.53), the
+"Invasion" tower-defense mini-game (v2.54, BETA status).
 
 ## Related project
 
