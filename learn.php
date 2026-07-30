@@ -14,6 +14,7 @@ include __DIR__ . '/includes/header.php';
     <div class="chip active" data-mode="send"><?= t('learn.mode_send') ?></div>
     <div class="chip" data-mode="recognize"><?= t('learn.mode_recognize') ?></div>
     <div class="chip" data-mode="rhythm"><?= t('learn.mode_rhythm') ?></div>
+    <div class="chip" data-mode="invasion"><?= t('learn.mode_invasion') ?> <span class="badge-beta">BETA</span></div>
 </div>
 
 <!-- ======================= РЕЖИМ: ОТПРАВКА ======================= -->
@@ -175,6 +176,62 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="rhythm-tempo-hint" id="rhythm-tempo-hint"></div>
     </section>
+</div>
+
+<!-- ======================= РЕЖИМ: ВТОРЖЕНИЕ (BETA) ======================= -->
+<div id="invasion-mode" style="display:none;">
+    <div class="card mt-2">
+        <p class="mt-0"><?= t('learn.invasion_intro') ?></p>
+
+        <div class="flex-between flex-wrap gap-2 mt-2">
+            <div class="speed-control">
+                <?= t('learn.speed') ?>
+                <input type="range" id="invasion-wpm" min="5" max="35" step="1" value="12">
+                <span class="speed-value" id="invasion-wpm-value">12</span> wpm
+            </div>
+            <div class="morse-lamp" id="invasion-lamp"></div>
+        </div>
+
+        <!-- "Поле боя" — HP базы + канвас — липкое (position: sticky) под
+             шапкой сайта. Реальная причина (владелец, 2026-08-01): свою
+             клавиатуру телефона браузер при фокусе скроллит в видимую
+             область НАД ней, а поле ввода стоит ниже канваса — экран боя
+             просто уезжал вверх за пределы видимости, играть "вслепую"
+             было неинтересно. Липкое поле боя остаётся на месте при любом
+             скролле экрана — хоть от клавиатуры, хоть от обычной прокрутки
+             вниз к клавиатуре ответов. Счётчики "уничтожено"/"комбо"
+             перенесены прямо на канвас (см. .invasion-hud) — то, что нужно
+             видеть КАЖДУЮ секунду боя, теперь тоже часть липкой области, а
+             не отдельная строка ниже. -->
+        <div class="invasion-battlefield mt-2">
+            <div class="flex-between" style="font-size:12px;">
+                <span class="muted"><?= t('learn.invasion_base_hp') ?></span>
+                <span class="mono" id="invasion-hp-label">100/100</span>
+            </div>
+            <div class="progress-bar invasion-hp-bar mt-1"><span id="invasion-hp-bar" style="width:100%"></span></div>
+
+            <div class="invasion-canvas-wrap mt-2">
+                <canvas id="invasion-canvas"></canvas>
+                <div class="invasion-hud invasion-hud-left"><?= mw_icon('check', 12) ?> <span id="invasion-kills">0</span></div>
+                <div class="invasion-hud invasion-hud-right"><?= mw_icon('flame', 12) ?> <span id="invasion-combo">0</span></div>
+                <div class="invasion-overlay" id="invasion-overlay"></div>
+            </div>
+        </div>
+
+        <!-- Кнопки "В бой"/"Остановить" — в одной строке с "лучшим комбо"
+             (уничтожено/комбо теперь в HUD на канвасе выше, см. .invasion-hud) —
+             компактнее отдельной строки над канвасом. -->
+        <div class="invasion-controls-row mt-2">
+            <div class="stat"><span class="value" id="invasion-best-combo">0</span><span class="label"><?= mw_icon('trophy', 12) ?> <?= t('learn.invasion_stat_best_combo') ?></span></div>
+            <button class="btn btn-primary btn-sm" id="invasion-start-btn"><?= t('learn.invasion_start') ?></button>
+            <button class="btn btn-sm" id="invasion-stop-btn" style="display:none;"><?= t('learn.invasion_stop') ?></button>
+        </div>
+
+        <div class="feedback mt-2" id="invasion-feedback"></div>
+
+        <div class="invasion-keyboard mt-2" id="invasion-grid"></div>
+        <p class="muted mt-1" style="font-size:11px;"><?= t('learn.invasion_kbd_hint') ?></p>
+    </div>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

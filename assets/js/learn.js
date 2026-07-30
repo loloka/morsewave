@@ -31,7 +31,9 @@
     const sendModeEl = document.getElementById('send-mode');
     const recognizeModeEl = document.getElementById('recognize-mode');
     const rhythmModeEl = document.getElementById('rhythm-mode');
+    const invasionModeEl = document.getElementById('invasion-mode');
     let recognizeModeActive = false;
+    let invasionModeActive = false;
 
     document.querySelectorAll('.mode-switch .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -41,6 +43,7 @@
             sendModeEl.style.display = mode === 'send' ? 'block' : 'none';
             recognizeModeEl.style.display = mode === 'recognize' ? 'block' : 'none';
             rhythmModeEl.style.display = mode === 'rhythm' ? 'block' : 'none';
+            invasionModeEl.style.display = mode === 'invasion' ? 'block' : 'none';
             recognizeModeActive = mode === 'recognize';
             if (recognizeModeActive) {
                 initRecognizeGrid();
@@ -59,6 +62,15 @@
                 // который потом "выстрелит" onLetter уже в другом режиме
                 rhythmKey.reset();
                 resetRhythmBuffers();
+            }
+            invasionModeActive = mode === 'invasion';
+            if (invasionModeActive) {
+                initInvasionGrid();
+                resizeInvasionCanvas();
+            } else {
+                // уход со вкладки во время волны — тихо останавливаем, без
+                // текста поражения (это не проигрыш, просто ушли с вкладки)
+                stopInvasion();
             }
         });
     });
@@ -905,6 +917,663 @@
         rhythmWpmValue.textContent = rhythmWpmSlider.value;
         rhythmKey.setWpm(currentRhythmWpm());
     });
+
+    /* ===================== РЕЖИМ: ВТОРЖЕНИЕ (BETA) =====================
+       Tower-defense мини-игра поверх уже готового цикла "услышал букву на
+       слух → выбрал её на клавиатуре" (та же механика, что и в "Приёме на
+       слух", просто в другой оболочке). Направление согласовано с владельцем
+       2026-07-31 (см. память проекта project_minigame_direction), полировка
+       (многодорожечные волны, лопата, QWERTY, скорость по сложности) —
+       правки того же дня по фидбеку после первой версии.
+
+       XP: 1 XP за каждое верное попадание (как REC_XP в приёме на слух) +
+       разовый бонус ТОЛЬКО при победе волны (100 попаданий) — см. CLAUDE.md
+       "Обязательные правила", анти-фарм: бонус нельзя нафармить повторением
+       одного лёгкого символа, потому что он не капает за каждое попадание. */
+    const INVASION_XP_PER_KILL = 1;
+    const INVASION_BASE_HP = 100;
+    const INVASION_WIN_KILLS = 100;
+    const INVASION_SPRITES = ['👽', '🦎'];
+    const INVASION_MAX_LANES = 5; // = потолок одновременных пришельцев (5-й уровень)
+    const INVASION_SHOVEL_MS = 220; // время полёта лопаты от базы до пришельца
+
+    const invasionWpmSlider = document.getElementById('invasion-wpm');
+    const invasionWpmValueEl = document.getElementById('invasion-wpm-value');
+    const invasionLampEl = new MorseLamp(document.getElementById('invasion-lamp'));
+    const invasionStartBtn = document.getElementById('invasion-start-btn');
+    const invasionStopBtn = document.getElementById('invasion-stop-btn');
+    const invasionHpBarEl = document.getElementById('invasion-hp-bar');
+    const invasionHpLabelEl = document.getElementById('invasion-hp-label');
+    const invasionCanvasWrapEl = document.querySelector('.invasion-canvas-wrap');
+    const invasionCanvasEl = document.getElementById('invasion-canvas');
+    const invasionCtx = invasionCanvasEl.getContext('2d');
+    const invasionOverlayEl = document.getElementById('invasion-overlay');
+    const invasionKillsEl = document.getElementById('invasion-kills');
+    const invasionComboEl = document.getElementById('invasion-combo');
+    const invasionBestComboEl = document.getElementById('invasion-best-combo');
+    const invasionFeedbackEl = document.getElementById('invasion-feedback');
+    const invasionGridEl = document.getElementById('invasion-grid');
+
+    // QWERTY, а не алфавитный порядок — специально (владелец 2026-07-31):
+    // "к ней сразу привыкать" — те же клавиши, что и на физической клавиатуре
+    // компа, плюс это естественно компактнее по вертикали (4 строки вместо
+    // 6 строк квадратных плиток — раньше на телефоне приходилось скроллить).
+    const INVASION_KBD_ROWS = [
+        '1234567890'.split(''),
+        'QWERTYUIOP'.split(''),
+        'ASDFGHJKL'.split(''),
+        'ZXCVBNM'.split(''),
+    ];
+
+    let invasionGridBuilt = false;
+    let invasionRunning = false;
+    let invasionHp = INVASION_BASE_HP;
+    let invasionKills = 0;
+    let invasionCombo = 0;
+    let invasionBestCombo = 0;
+    // Для бонуса "за скорость" при победе — среднее по всем попаданиям И
+    // промахам за волну (не только удачным): 1 = убил почти сразу после
+    // появления, 0 = убил в последний момент ИЛИ пришелец вообще прорвался.
+    let invasionSpeedScoreSum = 0;
+    let invasionSpeedScoreCount = 0;
+    let invasionEnemies = [];    // { id, ch, sprite, lane, state, startTime, duration, dieX, dieY, audio }
+    let invasionProjectiles = []; // лопаты в полёте: { x0,y0,x1,y1,start,duration,targetId,resolved }
+    let invasionParticles = [];
+    let invasionLanePool = [];
+    let invasionEnemySeq = 0;
+    let invasionAudioChain = Promise.resolve(); // сериализует звук — иначе 2-5 одновременных морзянок сливаются в кашу
+    let invasionRafId = null;
+    let invasionWaveStart = 0;
+
+    function initInvasionGrid() {
+        if (invasionGridBuilt) return;
+        invasionGridBuilt = true;
+        invasionGridEl.innerHTML = '';
+        INVASION_KBD_ROWS.forEach((row) => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'invasion-kbd-row';
+            row.forEach((ch) => {
+                const key = document.createElement('div');
+                key.className = 'invasion-key';
+                key.dataset.ch = ch;
+                key.textContent = ch;
+                key.addEventListener('click', () => handleInvasionAnswer(ch, key));
+                rowEl.appendChild(key);
+            });
+            invasionGridEl.appendChild(rowEl);
+        });
+    }
+
+    // ВАЖНО: сюда чуть не добавили подсветку клавиш, соответствующих текущим
+    // пришельцам (is-target) — но это прямая утечка ответа: с одним
+    // пришельцем (большая часть волны) она превращала игру в "нажми
+    // единственную подсвеченную клавишу", вообще не слушая сигнал. Убрано
+    // по фидбеку владельца 2026-07-31 (см. память проекта). Если понадобится
+    // подсказка "куда бить первой" при 2+ пришельцах — она должна кодировать
+    // только КОЛИЧЕСТВО активных целей, не их буквенную личность.
+    function syncInvasionKeyHighlights() {
+        // намеренно пусто — оставлено как точка вызова на будущее (см. выше)
+    }
+
+    // Canvas рисуется в CSS-пикселях с поправкой на devicePixelRatio (иначе
+    // на Retina/телефонах пришелец и база выглядят мыльными). Пересчитываем
+    // при входе на вкладку и при ресайзе окна во время активной волны.
+    function resizeInvasionCanvas() {
+        const rect = invasionCanvasWrapEl.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        invasionCanvasEl.width = Math.max(1, Math.round(rect.width * dpr));
+        invasionCanvasEl.height = Math.max(1, Math.round(rect.height * dpr));
+        invasionCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', () => { if (invasionRunning) resizeInvasionCanvas(); });
+
+    function updateInvasionHpUI() {
+        const hp = Math.max(0, invasionHp);
+        const pct = (hp / INVASION_BASE_HP) * 100;
+        invasionHpBarEl.style.width = `${pct}%`;
+        invasionHpBarEl.classList.remove('hp-warn', 'hp-bad');
+        if (pct <= 25) invasionHpBarEl.classList.add('hp-bad');
+        else if (pct <= 55) invasionHpBarEl.classList.add('hp-warn');
+        invasionHpLabelEl.textContent = `${hp}/${INVASION_BASE_HP}`;
+    }
+
+    function updateInvasionStatsUI() {
+        invasionKillsEl.textContent = invasionKills;
+        invasionComboEl.textContent = invasionCombo;
+        invasionBestComboEl.textContent = invasionBestCombo;
+    }
+
+    function invasionFeedback(text, kind) {
+        invasionFeedbackEl.textContent = text;
+        invasionFeedbackEl.className = `feedback show ${kind || ''}`.trim();
+    }
+
+    // Урон базе за пропущенного пришельца — по договорённости с владельцем
+    // 2026-07-31 (второй заход): было по длине кода буквы (1-4), стало
+    // плоское 1 HP за любого пришельца независимо от сложности символа —
+    // проще и предсказуемее ("сколько пришельцев пропустил — столько и
+    // потерял").
+    function invasionDamageFor() {
+        return 1;
+    }
+
+    // Сложность буквы для скорости пришельца (владелец 2026-07-31): простые
+    // короткие/однородные коды (E, T, S='...', O='---') — быстро; средние
+    // 3-символьные смешанные (R, W, U, K, G...) — средне; длинные смешанные
+    // (F, L, Q, P, J) и цифры (всегда 5 символов) — медленно, чтобы успевать
+    // расшифровать более длинный сигнал. "Однородный" код (все точки или все
+    // тире) на балл проще того же по длине смешанного — отсюда S/O при длине
+    // 3 всё равно попадают в "быстрый" уровень вместе с буквами длины 1-2.
+    function invasionComplexityScore(code) {
+        const uniform = code.split('').every((c) => c === code[0]);
+        return code.length - (uniform ? 1 : 0);
+    }
+
+    // v1 полировки (2026-07-31 вечер) множители 16/24/34 оказались СЛИШКОМ
+    // быстрыми на практике (реальный фидбек владельца после игры) — вернули
+    // порядок величины первой версии (там путь занимал 6000→2200мс), но
+    // сохранили саму идею вилки по сложности буквы.
+    function invasionTierDuration(ch, wpm) {
+        const code = MORSE_CODE[ch] || '.';
+        const score = invasionComplexityScore(code);
+        const unit = 1200 / wpm;
+        if (score <= 2) return unit * 32;  // E,T,I,A,N,M,S,O,...
+        if (score === 3) return unit * 45; // R,W,U,K,G,...
+        return unit * 60;                  // F,L,Q,P,J и все цифры
+    }
+
+    // Грубая (заведомо с запасом) оценка длины ОДНОЙ буквы в очереди звука —
+    // нужна только чтобы прибавить пришельцам, стоящим в очереди на озвучку,
+    // честный запас времени на дорогу (см. spawnOneInvasionEnemy).
+    function invasionAudioEstimate(wpm) {
+        return (1200 / wpm) * 10;
+    }
+
+    // Сколько пришельцев одновременно в волне — растёт с числом убийств:
+    // 0-19 — 1 (как раньше), 20-39 — 2, ... 80-99 — 5. Ровно те "уровни 2-5",
+    // о которых просил владелец, без отдельного экрана/меню уровней — просто
+    // встроено в существующую волну до 100 попаданий.
+    function invasionConcurrency() {
+        return Math.min(INVASION_MAX_LANES, 1 + Math.floor(invasionKills / 20));
+    }
+
+    function acquireInvasionLane() {
+        return invasionLanePool.length ? invasionLanePool.shift() : 0;
+    }
+    function releaseInvasionLane(lane) {
+        invasionLanePool.push(lane);
+        invasionLanePool.sort((a, b) => a - b);
+    }
+
+    // Позиция пришельца на канвасе. У "умирающего" (лопата уже летит в него)
+    // позиция заморожена в момент попадания — иначе он продолжил бы бежать к
+    // базе, пока лопата ещё в воздухе, и выглядело бы так, будто он и убит, и
+    // одновременно всё ещё атакует.
+    function invasionEnemyPosition(enemy, now, w, h) {
+        const laneY = ((enemy.lane + 1) / (INVASION_MAX_LANES + 1)) * h;
+        if (enemy.state !== 'active') return { x: enemy.dieX, y: enemy.dieY };
+        const elapsed = now - enemy.startTime;
+        const progress = Math.min(1, elapsed / enemy.duration);
+        const x = 28 + progress * (w - 60);
+        const bob = Math.sin((now + enemy.id * 137) / 180) * 5;
+        return { x, y: laneY + bob, progress };
+    }
+
+    // Лопата рисуется вручную на canvas, а не эмодзи (🪏 "shovel" — символ
+    // Unicode 15, 2022 год; на многих десктопных системах шрифт эмодзи его
+    // ещё не знает и рисует "тофу"-квадратик — так и было на скриншоте
+    // владельца на компьютере, хотя на телефоне современный шрифт эмодзи
+    // рисовал нормально). Простая рукописная фигура работает одинаково
+    // везде, без зависимости от версии системного шрифта эмодзи.
+    // v1 полировки рисовала "лезвие" эллипсом — на такой мелкой сцене эллипс
+    // не читался как лопата вообще (реальный фидбек владельца, 2026-07-31:
+    // "непонятно что там лопата"). Заменили на узнаваемый силуэт совка:
+    // заострённое книзу лезвие (пятиугольник) + прямая ручка + маленькая
+    // рукоятка-кружок сверху — так форма читается даже в 20 с небольшим
+    // пикселей. Цвета взяты контрастными к тёмному звёздному фону.
+    // v2 полировки (2026-08-01) — по образцу, который прислал владелец
+    // (эмодзи-лопата с красной D-рукояткой, деревянным черенком и серебристым
+    // совком): красная петля-рукоятка сверху, коричневый черенок, серый
+    // "воротник"-муфта, совок с бликом для объёма. Раньше форма читалась
+    // как лопата, но не была похожа именно на ЭТУ картинку — теперь ближе
+    // по цветам и силуэту, оставаясь при этом рисунком на canvas (не эмодзи
+    // — см. комментарий у самой функции в истории правок про тофу-квадратики
+    // на некоторых десктопах).
+    function drawInvasionShovel(ctx, x, y, angle) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle + Math.PI / 2);
+        ctx.lineCap = 'round';
+
+        // красная D-рукоятка (петля вверху)
+        ctx.strokeStyle = '#e0473b';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.ellipse(0, -19, 4, 6, 0, Math.PI * 0.12, Math.PI * 1.88);
+        ctx.stroke();
+
+        // деревянный черенок
+        ctx.strokeStyle = '#c98a3e';
+        ctx.lineWidth = 3.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -14);
+        ctx.lineTo(0, 6);
+        ctx.stroke();
+
+        // металлическая муфта между черенком и совком
+        ctx.fillStyle = '#9aa0a6';
+        ctx.fillRect(-3, 4, 6, 4);
+
+        // совок — слегка заострённая трапеция
+        ctx.beginPath();
+        ctx.moveTo(-7, 7);
+        ctx.lineTo(7, 7);
+        ctx.lineTo(5, 16);
+        ctx.lineTo(0, 20);
+        ctx.lineTo(-5, 16);
+        ctx.closePath();
+        ctx.fillStyle = '#d8dee3';
+        ctx.fill();
+        ctx.strokeStyle = '#6b7075';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // блик на совке — для объёма
+        ctx.strokeStyle = 'rgba(255,255,255,.6)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-3, 9);
+        ctx.lineTo(-1, 17);
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function spawnInvasionParticles(x, y, color) {
+        for (let i = 0; i < 10; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 40 + Math.random() * 70;
+            invasionParticles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 0,
+                maxLife: 400 + Math.random() * 200,
+                color,
+            });
+        }
+    }
+
+    async function playInvasionEnemyAudio(enemy) {
+        // Пока ждали своей очереди в invasionAudioChain, пришельца уже могли
+        // убить/пропустить — тогда озвучивать нечего, тихо выходим.
+        if (!invasionRunning || enemy.state !== 'active') return;
+        const wpm = parseInt(invasionWpmSlider.value, 10);
+        enemy.audio = new MorseAudio({ wpm });
+        const playPromise = enemy.audio.play(enemy.ch, {
+            onSymbol: ({ durationMs }) => {
+                if (enemy.state === 'active') invasionLampEl.flash(durationMs);
+            },
+        }).catch((e) => { console.error('Ошибка воспроизведения (вторжение):', e); });
+
+        // Сторож: реальный баг с телефона (владелец, 2026-07-31) — звук
+        // молча пропадал после нескольких нажатий. Вероятная причина —
+        // общий AudioContext "засыпает" на мобильном браузере (свёрнута
+        // вкладка, звонок и т.п.), а его внутренние часы (currentTime) не
+        // движутся, пока он suspended — запланированный osc.stop() внутри
+        // MorseAudio никогда не срабатывает, await play() виснет НАВСЕГДА,
+        // а вместе с ним и вся очередь звука для ВСЕХ следующих пришельцев
+        // (см. invasionAudioChain — это цепочка промисов, один зависший
+        // навсегда блокирует всех, кто за ним). Сторож гарантирует, что
+        // очередь всё равно продвинется дальше, даже если этот конкретный
+        // звук так и не доиграл.
+        await Promise.race([
+            playPromise,
+            new Promise((resolve) => setTimeout(resolve, enemy.duration + 2000)),
+        ]);
+
+        // Пауза ПОСЛЕ буквы, прежде чем очередь отпустит следующего пришельца
+        // на озвучку — реальный фидбек владельца (2026-07-31): без неё две
+        // подряд буквы звучали слитно, "будто накладываются друг на друга"
+        // (в реальности не одновременно, но без стандартного зазора между
+        // буквами на слух совершенно не разобрать, где кончилась одна и
+        // началась другая). Берём тот же зазор, что и MorseAudio.play() сам
+        // ставит МЕЖДУ буквами внутри одной строки (interCharGap = 3×unit) —
+        // ровно как в группах, где несколько символов звучат одной фразой.
+        if (invasionRunning) {
+            const unit = 1200 / wpm;
+            await new Promise((resolve) => setTimeout(resolve, unit * 3));
+        }
+    }
+
+    // Сериализуем звук через цепочку промисов — с 2-5 пришельцами их морзянки
+    // НЕ должны звучать одновременно (была бы каша, не разобрать ни одной
+    // буквы), поэтому каждая следующая буква ждёт своей очереди, даже если
+    // сам пришелец уже виден и летит к базе.
+    function queueInvasionAudio(enemy) {
+        invasionAudioChain = invasionAudioChain.then(() => playInvasionEnemyAudio(enemy)).catch(() => {});
+    }
+
+    function spawnOneInvasionEnemy() {
+        const activeChars = invasionEnemies.map((e) => e.ch);
+        const available = ALL_LEARNABLE.filter((ch) => !activeChars.includes(ch));
+        const pool = available.length ? available : ALL_LEARNABLE;
+        const ch = pool[Math.floor(Math.random() * pool.length)];
+        const sprite = INVASION_SPRITES[Math.floor(Math.random() * INVASION_SPRITES.length)];
+        const wpm = parseInt(invasionWpmSlider.value, 10);
+        // Запас времени на очередь озвучки — сколько пришельцев уже стоят
+        // впереди в очереди звука прямо сейчас (с запасом, см. комментарий у
+        // invasionAudioEstimate).
+        const queueAhead = invasionEnemies.length;
+        const duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(wpm);
+        const enemy = {
+            id: ++invasionEnemySeq,
+            ch, sprite, duration,
+            startTime: performance.now(),
+            lane: acquireInvasionLane(),
+            state: 'active', // active → dying (лопата летит) → удалён из массива
+            dieX: 0, dieY: 0,
+            audio: null,
+        };
+        invasionEnemies.push(enemy);
+        queueInvasionAudio(enemy);
+        syncInvasionKeyHighlights();
+    }
+
+    function topUpInvasionEnemies() {
+        if (!invasionRunning) return;
+        const target = invasionConcurrency();
+        while (invasionEnemies.length < target) {
+            spawnOneInvasionEnemy();
+        }
+    }
+
+    function invasionFrame(now) {
+        if (!invasionRunning) return;
+        const w = invasionCanvasWrapEl.clientWidth;
+        const h = invasionCanvasWrapEl.clientHeight;
+        invasionCtx.clearRect(0, 0, w, h);
+        invasionCtx.textAlign = 'center';
+        invasionCtx.textBaseline = 'middle';
+
+        const baseX = w - 28;
+        const baseY = h / 2;
+        invasionCtx.font = '34px serif';
+        invasionCtx.fillText('🛰️', baseX, baseY);
+
+        invasionEnemies.forEach((enemy) => {
+            const pos = invasionEnemyPosition(enemy, now, w, h);
+            invasionCtx.font = '30px serif';
+            invasionCtx.fillText(enemy.sprite, pos.x, pos.y);
+            if (enemy.state === 'active' && pos.progress >= 1) {
+                resolveInvasionMiss(enemy);
+            }
+        });
+
+        if (invasionProjectiles.length) {
+            invasionProjectiles = invasionProjectiles.filter((p) => now - p.start < p.duration + 30);
+            invasionProjectiles.forEach((p) => {
+                const frac = Math.min(1, (now - p.start) / p.duration);
+                const x = p.x0 + (p.x1 - p.x0) * frac;
+                const y = p.y0 + (p.y1 - p.y0) * frac;
+                drawInvasionShovel(invasionCtx, x, y, p.angle);
+                if (frac >= 1 && !p.resolved) {
+                    p.resolved = true;
+                    spawnInvasionParticles(p.x1, p.y1, '#6fcf7a');
+                    const enemy = invasionEnemies.find((e) => e.id === p.targetId);
+                    if (enemy) {
+                        releaseInvasionLane(enemy.lane);
+                        invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+                        syncInvasionKeyHighlights();
+                        topUpInvasionEnemies();
+                    }
+                }
+            });
+        }
+
+        if (invasionParticles.length) {
+            invasionParticles = invasionParticles.filter((p) => p.life < p.maxLife);
+            invasionParticles.forEach((p) => {
+                p.life += 16;
+                p.x += p.vx * 0.016;
+                p.y += p.vy * 0.016;
+                invasionCtx.globalAlpha = Math.max(0, 1 - p.life / p.maxLife);
+                invasionCtx.fillStyle = p.color;
+                invasionCtx.beginPath();
+                invasionCtx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                invasionCtx.fill();
+            });
+            invasionCtx.globalAlpha = 1;
+        }
+
+        invasionRafId = requestAnimationFrame(invasionFrame);
+    }
+
+    function findActiveInvasionEnemy(ch) {
+        return invasionEnemies.find((e) => e.ch === ch && e.state === 'active');
+    }
+
+    function handleInvasionAnswer(ch, key) {
+        if (!invasionRunning) return;
+        // Реальный баг с телефона (владелец, 2026-07-31): звук пропадал
+        // молча примерно после 5-го нажатия — похоже на типичную для
+        // мобильного Safari историю, когда общий AudioContext засыпает
+        // (например, экран притух/звонок/переключение приложений) и уже не
+        // просыпается сам собой из недр async-цепочки озвучки. Каждое
+        // нажатие клавиши — настоящий пользовательский жест, так что это
+        // самое надёжное место, чтобы попытаться его разбудить.
+        getSharedAudioContext();
+        const enemy = findActiveInvasionEnemy(ch);
+        if (!enemy) {
+            // Уже убит долю секунды назад, лопата ещё летит (state='dying') —
+            // повторное нажатие той же (правильной) буквы просто игнорируем,
+            // а не штрафуем за "неверно": человек не ошибся, просто чуть
+            // поторопился со следующим нажатием.
+            if (invasionEnemies.some((e) => e.ch === ch && e.state !== 'active')) return;
+            key.classList.add('wrong');
+            setTimeout(() => key.classList.remove('wrong'), 400);
+            invasionCombo = 0;
+            updateInvasionStatsUI();
+            invasionFeedback(t('js.learn.invasion_wrong', { '{got}': ch }), 'bad');
+            return;
+        }
+        key.classList.add('correct');
+        setTimeout(() => key.classList.remove('correct'), 400);
+        resolveInvasionKill(enemy);
+    }
+
+    // Убийство НЕ убирает пришельца немедленно — по просьбе владельца: "с
+    // базы вылетает лопата", которая должна долететь и попасть, прежде чем
+    // пришелец пропадёт и полетят частицы взрыва. Поэтому позиция замирает
+    // (state='dying'), а сам объект живёт до попадания лопаты (см.
+    // invasionFrame → invasionProjectiles).
+    function resolveInvasionKill(enemy) {
+        const w = invasionCanvasWrapEl.clientWidth;
+        const h = invasionCanvasWrapEl.clientHeight;
+        const pos = invasionEnemyPosition(enemy, performance.now(), w, h);
+        // Скорость реакции для бонуса победы — pos.progress ещё считается
+        // от 'active'-состояния прямо перед заморозкой ниже: 0 = убил сразу
+        // как появился, 1 = тянул до самого конца пути.
+        invasionSpeedScoreSum += 1 - (pos.progress ?? 0);
+        invasionSpeedScoreCount++;
+
+        enemy.state = 'dying';
+        enemy.dieX = pos.x;
+        enemy.dieY = pos.y;
+        if (enemy.audio) enemy.audio.stop();
+
+        const x0 = w - 28;
+        const y0 = h / 2;
+        invasionProjectiles.push({
+            x0, y0,
+            x1: pos.x, y1: pos.y,
+            angle: Math.atan2(pos.y - y0, pos.x - x0),
+            start: performance.now(),
+            duration: INVASION_SHOVEL_MS,
+            targetId: enemy.id,
+            resolved: false,
+        });
+
+        invasionKills++;
+        invasionCombo++;
+        if (invasionCombo > invasionBestCombo) invasionBestCombo = invasionCombo;
+
+        Progress.addXp(INVASION_XP_PER_KILL);
+        updateInvasionStatsUI();
+        syncInvasionKeyHighlights();
+        invasionFeedback(t('js.learn.invasion_kill', { '{ch}': enemy.ch }), 'ok');
+
+        if (invasionKills >= INVASION_WIN_KILLS) {
+            // Даём долететь последней лопате и доиграть взрыву, прежде чем
+            // показать экран победы — иначе финальный удар не видно.
+            setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
+        }
+    }
+
+    function resolveInvasionMiss(enemy) {
+        if (enemy.state !== 'active') return; // защита от повторного срабатывания в этом же кадре
+        enemy.state = 'hit';
+        const dmg = invasionDamageFor(enemy.ch);
+        invasionHp = Math.max(0, invasionHp - dmg);
+        invasionCombo = 0;
+        // Прорыв — худший возможный исход для бонуса скорости (см.
+        // resolveInvasionKill): 0 очков, а не просто "не считаем".
+        invasionSpeedScoreSum += 0;
+        invasionSpeedScoreCount++;
+        if (enemy.audio) enemy.audio.stop();
+        releaseInvasionLane(enemy.lane);
+        invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+
+        updateInvasionHpUI();
+        updateInvasionStatsUI();
+        syncInvasionKeyHighlights();
+        invasionFeedback(t('js.learn.invasion_hit', { '{ch}': enemy.ch, '{dmg}': dmg }), 'bad');
+
+        if (invasionHp <= 0) {
+            finishInvasion(false);
+            return;
+        }
+        topUpInvasionEnemies();
+    }
+
+    function finishInvasion(won) {
+        // Если волну уже остановили руками (stopInvasion) — отложенный вызов
+        // (см. setTimeout в resolveInvasionKill на 100-м попадании) не должен
+        // задним числом показать экран победы/поражения.
+        if (!invasionRunning) return;
+        invasionRunning = false;
+        cancelAnimationFrame(invasionRafId);
+        invasionRafId = null;
+        invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
+        invasionEnemies = [];
+        invasionStartBtn.style.display = 'inline-flex';
+        invasionStopBtn.style.display = 'none';
+
+        if (won) {
+            // Разовый бонус за волну целиком — НЕ за каждое попадание (см.
+            // комментарий выше про анти-фарм). По договорённости с
+            // владельцем 2026-07-31 (второй заход): бонус = сколько HP базы
+            // уцелело (1:1, т.е. осталось 90 HP — бонус 90) + бонус за
+            // скорость реакции 10-30 (среднее по ВСЕМ попаданиям и промахам
+            // за волну: убивал почти сразу как пришелец появлялся — ближе к
+            // 30, тянул до последнего момента или пропускал пришельцев —
+            // ближе к 10).
+            const hpBonus = Math.round(Math.max(0, invasionHp));
+            const avgSpeedScore = invasionSpeedScoreCount ? (invasionSpeedScoreSum / invasionSpeedScoreCount) : 0;
+            const speedBonus = Math.round(10 + avgSpeedScore * 20);
+            const bonusXp = hpBonus + speedBonus;
+            Progress.addXp(bonusXp);
+            Progress.incrementStat('invasionWavesCompleted', 1);
+            Progress.markDailyActivity();
+            invasionFeedback(t('js.learn.invasion_win', { '{xp}': bonusXp, '{hp}': hpBonus, '{speed}': speedBonus }), 'ok');
+            invasionOverlayEl.textContent = t('js.learn.invasion_win_overlay');
+            invasionOverlayEl.className = 'invasion-overlay show win';
+        } else {
+            invasionFeedback(t('js.learn.invasion_lose', { '{kills}': invasionKills }), 'bad');
+            invasionOverlayEl.textContent = t('js.learn.invasion_lose_overlay', { '{kills}': invasionKills });
+            invasionOverlayEl.className = 'invasion-overlay show lose';
+        }
+        setTimeout(() => { invasionOverlayEl.classList.remove('show'); }, 3500);
+    }
+
+    function stopInvasion() {
+        if (!invasionRunning && invasionRafId === null) return;
+        invasionRunning = false;
+        cancelAnimationFrame(invasionRafId);
+        invasionRafId = null;
+        invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
+        invasionEnemies = [];
+        invasionProjectiles = [];
+        invasionParticles = [];
+        invasionAudioChain = Promise.resolve();
+        invasionOverlayEl.classList.remove('show');
+        invasionStartBtn.style.display = 'inline-flex';
+        invasionStopBtn.style.display = 'none';
+        syncInvasionKeyHighlights();
+    }
+
+    function startInvasion() {
+        // Явный resume() прямо в обработчике клика по кнопке — подстраховка
+        // для мобильных браузеров (см. комментарий у handleInvasionAnswer
+        // про пропадающий звук): getSharedAudioContext() и так пытается
+        // возобновить контекст сам, но на iOS Safari надёжно это работает,
+        // только когда вызвано синхронно внутри настоящего пользовательского
+        // жеста — а не откуда-то из середины async-цепочки.
+        getSharedAudioContext();
+        initInvasionGrid();
+        resizeInvasionCanvas();
+        invasionRunning = true;
+        invasionHp = INVASION_BASE_HP;
+        invasionKills = 0;
+        invasionCombo = 0;
+        invasionBestCombo = 0;
+        invasionSpeedScoreSum = 0;
+        invasionSpeedScoreCount = 0;
+        invasionEnemies = [];
+        invasionProjectiles = [];
+        invasionParticles = [];
+        invasionLanePool = Array.from({ length: INVASION_MAX_LANES }, (_, i) => i);
+        invasionAudioChain = Promise.resolve();
+        invasionWaveStart = performance.now();
+        updateInvasionHpUI();
+        updateInvasionStatsUI();
+        invasionOverlayEl.classList.remove('show');
+        invasionStartBtn.style.display = 'none';
+        invasionStopBtn.style.display = 'inline-flex';
+        invasionFeedback(t('js.learn.invasion_go'), 'ok');
+        invasionRafId = requestAnimationFrame(invasionFrame);
+        topUpInvasionEnemies();
+    }
+
+    invasionStartBtn.addEventListener('click', startInvasion);
+    invasionStopBtn.addEventListener('click', stopInvasion);
+    invasionWpmSlider.addEventListener('input', () => {
+        invasionWpmValueEl.textContent = invasionWpmSlider.value;
+    });
+
+    // Ввод с физической клавиатуры — тот же приём, что и в "Приёме на слух"
+    // (см. window.addEventListener('keydown', ...) выше для recognizeModeActive).
+    window.addEventListener('keydown', (e) => {
+        if (!invasionModeActive || !invasionRunning) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        const ch = e.key.toUpperCase();
+        if (!ALL_LEARNABLE.includes(ch)) return;
+        const key = invasionGridEl.querySelector(`[data-ch="${ch}"]`);
+        if (key) { e.preventDefault(); handleInvasionAnswer(ch, key); }
+    });
+
+    // Своя (системная) клавиатура телефона как альтернативный способ ввода
+    // убрана целиком (2026-08-01) — несмотря на несколько попыток починить
+    // сброс фокуса на каждое нажатие (сначала отложенная очистка value через
+    // setTimeout, потом .select() вместо очистки), реальный фидбек владельца
+    // после теста был "не работает" — проблема оказалась глубже, чем можно
+    // диагностировать без реального устройства под рукой. Единственный
+    // способ ввода в игре снова — самодельная QWERTY-сетка ниже (клик/тап)
+    // и физическая клавиатура компа (см. window.keydown выше). Если тема
+    // будет подниматься снова — начинать не с патчей текущего подхода, а
+    // с альтернативной реализации (см. lessons в project_minigame_direction
+    // memory), а не повторять те же две попытки.
 
     /* ===================== ЗАДАНИЕ ДНЯ =====================
        На этапе новичка задание дня — «изучи N новых букв» (режим отправки),

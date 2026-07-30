@@ -448,6 +448,183 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .rhythm-tempo-hint.slowdown { color: var(--accent); }
 .rhythm-tempo-hint.good { color: var(--success); }
 
+/* ---------- "Вторжение" (BETA) — tower-defense мини-игра в "Буквах" ---------- */
+.badge-beta {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    vertical-align: middle;
+    margin-left: 2px;
+}
+
+/* HP-бар базы — цвет меняется по порогу (см. invasion.js updateHpUI):
+   зелёный/жёлтый/красный, тот же язык, что и у rhythm-good/warn/bad. */
+.invasion-hp-bar > span { background: linear-gradient(90deg, var(--success), var(--success)); transition: width .2s ease, background .2s; }
+.invasion-hp-bar > span.hp-warn { background: linear-gradient(90deg, var(--accent), var(--accent)); }
+.invasion-hp-bar > span.hp-bad  { background: linear-gradient(90deg, var(--danger), var(--danger)); }
+
+/* "Звёздное небо" — статичный CSS-фон (пятна radial-gradient), чтобы не
+   тратить кадры canvas на то, что всё равно не двигается. Canvas поверх
+   рисует только то, что реально анимируется — пришельца и базу. */
+.invasion-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 210px; /* до 5 дорожек одновременно (уровни 2-5) — нужно больше вертикали, чем для одного пришельца */
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    background:
+        radial-gradient(1px 1px at 10% 20%, #fff 40%, transparent 60%),
+        radial-gradient(1px 1px at 25% 65%, #fff 40%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 40% 30%, #fff 40%, transparent 60%),
+        radial-gradient(1px 1px at 60% 75%, #fff 40%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 78% 18%, #fff 40%, transparent 60%),
+        radial-gradient(1px 1px at 90% 55%, #fff 40%, transparent 60%),
+        radial-gradient(1px 1px at 52% 88%, #fff 40%, transparent 60%),
+        linear-gradient(180deg, #0a0e14, #0d1520 60%, #10181f);
+}
+@media (max-width: 480px) {
+    /* Меньше вертикали под канвас на телефоне — вместе с компактной
+       клавиатурой ниже (см. .invasion-keyboard) это и есть настоящий фикс
+       "всё равно приходится скроллить": сам канвас логике игры не важен по
+       конкретной высоте, а вот место на маленьком экране экономит. */
+    .invasion-canvas-wrap { height: 160px; }
+}
+.invasion-canvas-wrap canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+.invasion-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    padding: 12px;
+    opacity: 0;
+    transition: opacity .2s;
+}
+.invasion-overlay.show { opacity: 1; }
+.invasion-overlay.win  { color: var(--success); text-shadow: 0 0 12px var(--success); }
+.invasion-overlay.lose { color: var(--danger); text-shadow: 0 0 12px var(--danger); }
+
+/* Клавиатура "Вторжения" — QWERTY-раскладка вместо алфавитной сетки (см.
+   INVASION_KBD_ROWS в learn.js): 4 короткие строки вместо 6 строк квадратных
+   плиток — компактнее по вертикали и приучает к раскладке физической
+   клавиатуры. v1 полировки (aspect-ratio:1) оказалась двойным промахом
+   (реальный фидбек владельца, 2026-07-31): квадратные клавиши подгоняли
+   ВЫСОТУ под и так узкую на телефоне ширину — получались мелкие квадраты,
+   в которые не попадали пальцы, а на десктопе та же привязка ширины к
+   высоте местами не давала ряду ровно поместиться в контейнер ("кое-как
+   влазит"). Убрали aspect-ratio, дали клавише фиксированную высоту
+   отдельно от ширины (как у настоящей телефонной клавиатуры — там клавиши
+   тоже узкие, но высокие, а не квадратные) — так ширина ряда всегда точно
+   равна ширине контейнера (flex сам подгоняет), а высота — комфортный
+   тап-таргет независимо от того, сколько клавиш в ряду. */
+.invasion-keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 480px;
+    margin: 0 auto;
+}
+.invasion-kbd-row {
+    display: flex;
+    gap: 5px;
+}
+/* Классический "уступ" QWERTY-рядов — проценты, а не px, чтобы смещение
+   оставалось пропорциональным на любой ширине экрана. На узких экранах
+   (см. медиа-запрос ниже) убираем — там каждый лишний процент ширины важнее
+   визуального сходства с настоящей клавиатурой. */
+.invasion-kbd-row:nth-child(2) { padding-left: 2.5%; }
+.invasion-kbd-row:nth-child(3) { padding-left: 5%; }
+.invasion-kbd-row:nth-child(4) { padding-left: 10%; }
+.invasion-key {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(13px, 4.2vw, 17px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .1s, border-color .1s, transform .05s;
+}
+.invasion-key:hover { border-color: var(--signal); }
+.invasion-key:active { transform: scale(0.92); }
+.invasion-key.correct { border-color: var(--success); background: rgba(111,207,122,.15); }
+.invasion-key.wrong   { border-color: var(--danger); background: rgba(226,88,79,.15); }
+
+/* Кнопки "В бой"/"Остановить" в одной строке со статистикой (см. разметку в
+   learn.php) — компактнее, чем отдельная строка сверху. */
+.invasion-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* "Поле боя" — HP-бар + канвас — липнет под шапкой сайта при скролле (см.
+   комментарий в learn.php): реальная причина — своя клавиатура телефона
+   скроллит фокус-инпут в видимую область, а он стоит ниже канваса, так что
+   без sticky экран боя просто уезжал за пределы видимости на телефоне.
+   background — тот же цвет, что и у .card (var(--surface)), чтобы контент
+   ПОД липким блоком не "просвечивал" сквозь него при скролле. */
+.invasion-battlefield {
+    position: sticky;
+    top: calc(var(--nav-h) + 8px);
+    z-index: 5;
+    background: var(--surface);
+    padding-top: 2px;
+    padding-bottom: 10px;
+}
+/* Счётчики "уничтожено"/"комбо" прямо на канвасе — то, что нужно видеть
+   каждую секунду боя, не должно требовать отдельной строки ниже (см.
+   .invasion-controls-row — там теперь только "лучшее комбо" и кнопки). */
+.invasion-hud {
+    position: absolute;
+    top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(13, 15, 17, .65);
+    color: var(--text);
+    pointer-events: none;
+}
+.invasion-hud-left { left: 8px; }
+.invasion-hud-right { right: 8px; }
+
+@media (max-width: 600px) {
+    /* Убираем уступ — на узком экране важнее сантиметры ширины клавиш, чем
+       сходство с настоящей QWERTY-раскладкой. */
+    .invasion-kbd-row:nth-child(2),
+    .invasion-kbd-row:nth-child(3),
+    .invasion-kbd-row:nth-child(4) { padding-left: 0; }
+    .invasion-key { height: 42px; }
+}
+
 /* ---------- Morse pattern display ---------- */
 .morse-pattern {
     font-family: var(--font-mono);
@@ -779,6 +956,17 @@ input[type="range"] {
    в одну строку — без переноса ряд вылезал за экран и приходилось
    неудобно скроллить, чтобы дотянуться до "Сокращения" (было багом). */
 .mode-switch { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+@media (max-width: 480px) {
+    /* На телефоне чипы режимов ("Отправка"/"Приём"/"Ритм"/"Вторжение")
+       переносятся на несколько строк — без явной границы снизу контент
+       вкладки визуально "сливается" с самими чипами (реальный фидбек
+       владельца, 2026-07-31). Разделитель — тонкая линия и отступ. */
+    .mode-switch {
+        padding-bottom: 10px;
+        margin-bottom: 14px;
+        border-bottom: 1px solid var(--border);
+    }
+}
 
 /* ---------- Recognize mode keyboard tiles ---------- */
 .recognize-tile {
