@@ -166,7 +166,14 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="signal-line mt-2" id="rhythm-signal"></div>
+        <div class="rhythm-signal-line-labels mt-2">
+            <span><?= t('learn.rhythm_signal_up_hint') ?></span>
+        </div>
+        <div class="rhythm-signal-line" id="rhythm-signal"></div>
+        <div class="rhythm-signal-line-labels">
+            <span><?= t('learn.rhythm_signal_down_hint') ?></span>
+        </div>
+        <div class="rhythm-tempo-hint" id="rhythm-tempo-hint"></div>
     </section>
 </div>
 

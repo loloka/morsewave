@@ -376,6 +376,78 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .signal-bar.rhythm-warn.on { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 .signal-bar.rhythm-bad.on  { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
 
+/* ---------- Rhythm signal line ("Буквы" → "Ритм ключа") ---------- */
+/* v1 (высота столбика = величина отклонения от центральной линии) оказалась
+   нечитаемой: типичная ошибка в 15-20% превращается в разницу high в пару
+   пикселей — глазом не видно, проверено на реальном скриншоте владельца.
+   Вернули узнаваемый вид обычной SignalLine (столбик растёт СНИЗУ, высота
+   зависит от типа символа точка/тире/пауза, как везде на сайте) и вместо
+   тонкой высоты добавили ОДНОЗНАЧНУЮ стрелку над столбиком — она рисуется,
+   только если отклонение от идеала заметное (see learn.js: |ratio-1|>0.15,
+   тот же порог, что и у текстовой подсказки ниже), а не всегда — иначе
+   стрелка мельтешила бы на каждом почти-идеальном нажатии. Цвет столбика
+   по-прежнему кодирует точность (rhythm-good/warn/bad), стрелка — только
+   направление (▲ длиннее идеала → быстрее, ▼ короче → медленнее). */
+.rhythm-signal-line {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 64px;
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 14px 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+.rhythm-signal-line-labels {
+    display: flex;
+    justify-content: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    padding: 0 2px;
+}
+.rhythm-bar {
+    position: relative;
+    width: 10px;
+    border-radius: 2px;
+    background: var(--signal-dim);
+    flex: 0 0 auto;
+    transition: background .08s ease-out;
+}
+.rhythm-bar.dot   { flex-basis: 10px;  height: 40%; }
+.rhythm-bar.dash  { flex-basis: 26px;  height: 85%; }
+.rhythm-bar.pause { flex-basis: 6px;   height: 22%; opacity: .6; }
+.rhythm-bar.rhythm-good { background: var(--success); box-shadow: 0 0 8px var(--success); }
+.rhythm-bar.rhythm-warn { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.rhythm-bar.rhythm-bad  { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+/* Стрелка над столбиком — рисуется через ::after, чтобы не плодить лишние
+   DOM-узлы на каждый удар ключом. */
+.rhythm-bar.dir-over::after,
+.rhythm-bar.dir-under::after {
+    position: absolute;
+    left: 50%;
+    top: -15px;
+    transform: translateX(-50%);
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
+}
+.rhythm-bar.dir-over::after  { content: '▲'; color: var(--danger); }
+.rhythm-bar.dir-under::after { content: '▼'; color: var(--accent); }
+
+.rhythm-tempo-hint {
+    text-align: center;
+    font-size: 17px;
+    font-weight: 700;
+    min-height: 24px;
+    margin-top: 8px;
+}
+.rhythm-tempo-hint.speedup { color: var(--danger); }
+.rhythm-tempo-hint.slowdown { color: var(--accent); }
+.rhythm-tempo-hint.good { color: var(--success); }
+
 /* ---------- Morse pattern display ---------- */
 .morse-pattern {
     font-family: var(--font-mono);

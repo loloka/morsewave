@@ -27,6 +27,62 @@ class SignalLine {
 }
 
 /**
+ * RhythmSignalLine — специализированная сигнальная линия для "Буквы" →
+ * "Ритм ключа". Обычная SignalLine.pulse() умеет только мигнуть цветом —
+ * этого достаточно, когда важно лишь "верно/неверно" (приём на слух и
+ * т.п.), но в ритме нужно понять НАПРАВЛЕНИЕ ошибки: нажатие/пауза длиннее
+ * идеала ("затянул", надо быстрее) или короче ("поспешил", надо медленнее).
+ *
+ * Первая версия кодировала это высотой столбика от центральной линии — на
+ * практике оказалось нечитаемо: типичная ошибка новичка (15-20% от идеала)
+ * даёт разницу высоты в пару пикселей, глазом не различить (см. скриншот
+ * владельца при разборе фичи). Поэтому столбик снова растёт СНИЗУ и
+ * высотой кодирует только тип символа (точка/тире/пауза), как в обычной
+ * SignalLine — это узнаваемо и не нужно всматриваться. Направление ошибки
+ * показывает отдельная стрелка над столбиком (▲/▼), которая рисуется,
+ * только если отклонение заметное (см. NOTABLE_RATIO_DEVIATION) — иначе
+ * она мельтешила бы на каждом почти идеальном нажатии.
+ *
+ * Используется только в learn.js для rhythm-режима, остальные страницы
+ * (Кох/Группы/Слова/Сокращения/Позывные/Приём) продолжают работать через
+ * обычный SignalLine — это сознательно два разных компонента, а не два
+ * режима одного, чтобы не тащить в общий SignalLine логику отклонений,
+ * которая больше нигде не нужна.
+ */
+class RhythmSignalLine {
+    static NOTABLE_RATIO_DEVIATION = 0.15; // тот же порог, что и у текстовой подсказки в learn.js
+
+    constructor(el, maxBars = 16) {
+        this.el = el;
+        this.maxBars = maxBars;
+    }
+
+    clear() {
+        this.el.innerHTML = '';
+    }
+
+    /**
+     * type — 'dot'|'dash'|'pause' (тип столбика, задаёт высоту/ширину через CSS).
+     * ratio — actualMs / idealMs (>1 = длиннее идеала, <1 = короче).
+     * accClass — 'rhythm-good'|'rhythm-warn'|'rhythm-bad', та же метрика
+     * точности, что уже считает learn.js (timingAccuracy/accuracyClass).
+     */
+    pulse(type, ratio, accClass) {
+        const bar = document.createElement('div');
+        const deviation = ratio - 1;
+        let dirClass = '';
+        if (deviation > RhythmSignalLine.NOTABLE_RATIO_DEVIATION) dirClass = 'dir-over';
+        else if (deviation < -RhythmSignalLine.NOTABLE_RATIO_DEVIATION) dirClass = 'dir-under';
+        bar.className = `rhythm-bar ${type} ${accClass} ${dirClass}`.trim();
+        this.el.appendChild(bar);
+        while (this.el.children.length > this.maxBars) {
+            this.el.removeChild(this.el.firstChild);
+        }
+        return bar;
+    }
+}
+
+/**
  * MorseLamp — визуальная "сигнальная лампа" (как на корабле), дублирует
  * звук светом. Позволяет тренироваться без звука — полезно для тех, кто
  * учится в тишине, или для тренировки восприятия сигнальных ламп.

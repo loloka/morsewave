@@ -594,7 +594,8 @@
     const rhythmWpmValue = document.getElementById('rhythm-wpm-value');
     const rhythmKeyEl = document.getElementById('rhythm-key');
     const rhythmLampEl = new MorseLamp(document.getElementById('rhythm-lamp'));
-    const rhythmSignalLine = new SignalLine(document.getElementById('rhythm-signal'));
+    const rhythmSignalLine = new RhythmSignalLine(document.getElementById('rhythm-signal'));
+    const rhythmTempoHintEl = document.getElementById('rhythm-tempo-hint');
     const rhythmFeedbackEl = document.getElementById('rhythm-feedback');
     const rhythmStreakEl = document.getElementById('rhythm-streak');
     const rhythmStreakBarEl = document.getElementById('rhythm-streak-bar');
@@ -702,6 +703,8 @@
         rhythmPanel.style.display = 'block';
         rhythmFeedbackEl.className = 'feedback';
         rhythmSignalLine.clear();
+        rhythmTempoHintEl.textContent = '';
+        rhythmTempoHintEl.className = 'rhythm-tempo-hint';
         rhythmKey.setTable(isCyrillicOrderRhythm() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
         rhythmPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -722,6 +725,28 @@
         if (acc >= 0.85) return 'rhythm-good';
         if (acc >= 0.6) return 'rhythm-warn';
         return 'rhythm-bad';
+    }
+
+    // Живая текстовая подсказка направления ошибки — то же пороговое
+    // значение, что определяет, рисовать ли стрелку ▲/▼ над столбиком
+    // сигнальной линии (RhythmSignalLine.NOTABLE_RATIO_DEVIATION), чтобы
+    // текст и стрелка всегда были согласованы. ratio = actualMs / idealMs
+    // последнего нажатия/паузы; мягкая зона вокруг идеала нужна, чтобы
+    // подсказка не дёргалась от естественного дрожания руки.
+    function updateRhythmTempoHint(ratio) {
+        const dev = RhythmSignalLine.NOTABLE_RATIO_DEVIATION;
+        if (ratio > 1 + dev) {
+            // Держал/паузил ДОЛЬШЕ идеала — значит нужно быстрее (короче).
+            rhythmTempoHintEl.textContent = t('js.learn.rhythm_tempo_faster');
+            rhythmTempoHintEl.className = 'rhythm-tempo-hint speedup';
+        } else if (ratio < 1 - dev) {
+            // КОРОЧЕ идеала — значит нужно медленнее (дольше держать/паузить).
+            rhythmTempoHintEl.textContent = t('js.learn.rhythm_tempo_slower');
+            rhythmTempoHintEl.className = 'rhythm-tempo-hint slowdown';
+        } else {
+            rhythmTempoHintEl.textContent = t('js.learn.rhythm_tempo_good');
+            rhythmTempoHintEl.className = 'rhythm-tempo-hint good';
+        }
     }
 
     // Серия "точных подряд" для текущей буквы — визуально та же полоса-прогресс,
@@ -844,8 +869,20 @@
         wpm: 12,
         onPress: (isDown) => {
             if (isDown) {
+                // Начало новой попытки (ни одного символа/паузы ещё не записано) —
+                // очищаем линию, чтобы прошлая попытка не "утаскивала" за собой
+                // текущую и не заставляла новые столбики выталкивать её за экран
+                // на телефоне (см. CLAUDE.md-тикет про сигнальную линию ритма).
+                if (rhythmSymbols.length === 0 && rhythmPauses.length === 0) {
+                    rhythmSignalLine.clear();
+                }
                 if (rhythmLastUp !== null) {
-                    rhythmPauses.push(performance.now() - rhythmLastUp);
+                    const pauseMs = performance.now() - rhythmLastUp;
+                    rhythmPauses.push(pauseMs);
+                    const idealPause = rhythmKey.unit() * RHYTHM_IDEAL_PAUSE_UNITS;
+                    const ratio = pauseMs / idealPause;
+                    rhythmSignalLine.pulse('pause', ratio, accuracyClass(timingAccuracy(pauseMs, idealPause)));
+                    updateRhythmTempoHint(ratio);
                 }
                 rhythmLampEl.on();
             } else {
@@ -856,8 +893,10 @@
         onSymbol: (symbol, durationMs) => {
             rhythmSymbols.push({ symbol, duration: durationMs });
             const ideal = symbol === '.' ? rhythmKey.unit() : rhythmKey.unit() * 3;
+            const ratio = durationMs / ideal;
             const acc = timingAccuracy(durationMs, ideal);
-            rhythmSignalLine.pulse(`${symbol === '.' ? 'dot' : 'dash'} ${accuracyClass(acc)}`, durationMs);
+            rhythmSignalLine.pulse(symbol === '.' ? 'dot' : 'dash', ratio, accuracyClass(acc));
+            updateRhythmTempoHint(ratio);
         },
         onLetter: handleRhythmLetter,
     });
