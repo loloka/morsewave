@@ -25,6 +25,7 @@ return [
     // --- includes/footer.php ---
     'footer.license' => 'MIT License',
     'footer.author' => 'Author R9OGL',
+    'footer.main_site' => 'Main site r9o.ru',
     'footer.source' => 'Source code & changelog',
     'footer.terms' => 'Terms',
     'footer.privacy' => 'Privacy',
@@ -792,6 +793,10 @@ HTML,
     'ach_def.invasion_first.desc' => 'Clear your first invasion wave in the mini-game',
     'ach_def.invasion_10.title' => 'Defender of the airwaves',
     'ach_def.invasion_10.desc' => 'Clear 10 invasion waves in the mini-game',
+    'ach_def.rhythm_10.title' => 'Steady hand',
+    'ach_def.rhythm_10.desc' => 'Master the key rhythm for 10 characters',
+    'ach_def.rhythm_full.title' => 'Metronome',
+    'ach_def.rhythm_full.desc' => 'Master the key rhythm for every letter and digit',
 
     // --- assets/js/achievements.js ---
     'js.ach.load_failed' => 'Couldn\'t load achievements. Try refreshing the page in a bit.',

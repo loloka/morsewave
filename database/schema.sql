@@ -37,7 +37,8 @@ CREATE TABLE IF NOT EXISTS achievements (
         'exam_passed_count',
         'cyrillic_learned_count',
         'cyrillic_recognized_count',
-        'invasion_waves_count'
+        'invasion_waves_count',
+        'rhythm_mastered_count'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -92,7 +93,9 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('cyrillic_alphabet', 'Кириллический алфавит', 'Изучите все буквы кириллической азбуки Морзе', '🇷🇺', 'cyrillic_learned_count', 33, 21),
 ('cyrillic_recognized', 'Кириллица на слух', 'Опознайте на слух каждую букву кириллической азбуки Морзе хотя бы раз', '🎧', 'cyrillic_recognized_count', 33, 22),
 ('invasion_first',  'База под защитой',  'Отбейте первую волну вторжения в мини-игре',  '👾', 'invasion_waves_count', 1,  23),
-('invasion_10',     'Защитник эфира',    'Отбейте 10 волн вторжения в мини-игре',       '🛸', 'invasion_waves_count', 10, 24);
+('invasion_10',     'Защитник эфира',    'Отбейте 10 волн вторжения в мини-игре',       '🛸', 'invasion_waves_count', 10, 24),
+('rhythm_10',       'Ровная рука',       'Отточите ритм ключа для 10 символов',         '🎵', 'rhythm_mastered_count', 10, 25),
+('rhythm_full',     'Метроном',          'Отточите ритм ключа для всех букв и цифр',    '🎼', 'rhythm_mastered_count', 36, 26);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)

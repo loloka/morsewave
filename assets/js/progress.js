@@ -508,6 +508,12 @@ const Progress = (() => {
                 // волну (100 попаданий) — см. finishInvasion() в learn.js, так
                 // что фармить ачивку короткими заходами нельзя.
                 case 'invasion_waves_count': return state.stats.invasionWavesCompleted || 0;
+                // Буквы с отточенным ритмом (5 точных повторов подряд, см.
+                // markRhythmMastered). Считаем ТОЛЬКО латиницу+цифры — по той
+                // же причине, что и letters_learned_count выше: иначе сумма
+                // латиницы и кириллицы выдала бы ачивку раньше времени.
+                case 'rhythm_mastered_count':
+                    return (state.rhythmMasteredLetters || []).filter((ch) => ALL_LEARNABLE.includes(ch)).length;
                 default: return 0;
             }
         };

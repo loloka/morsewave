@@ -28,6 +28,7 @@ return [
     // --- includes/footer.php ---
     'footer.license' => 'MIT License',
     'footer.author' => 'Автор R9OGL',
+    'footer.main_site' => 'Основной сайт r9o.ru',
     'footer.source' => 'Исходный код и история изменений',
     'footer.terms' => 'Правила',
     'footer.privacy' => 'Конфиденциальность',

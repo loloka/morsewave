@@ -283,7 +283,8 @@ targeted daily challenges, self-service account deletion, leaderboard
 protection, a bilingual interface (Russian/English), the Cyrillic Morse
 alphabet in "Letters" (v2.51), the full leaderboard page plus a user's own
 rank on the home page (v2.52), key rhythm scoring in "Letters" (v2.53), the
-"Invasion" tower-defense mini-game (v2.54, BETA status).
+"Invasion" tower-defense mini-game (v2.54, BETA status), achievements for
+invasion waves and for mastered key rhythm (v2.55–v2.56).
 
 ## Related project
 

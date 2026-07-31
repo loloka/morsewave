@@ -855,6 +855,10 @@
                 Progress.markRhythmMastered(progressKeyForChar(rhythmCurrent));
                 Progress.addXp(RHYTHM_MASTER_XP);
                 Progress.markDailyActivity();
+                // Как и в мини-игре: ни markRhythmMastered(), ни addXp() сами
+                // ачивки не пересчитывают, поэтому без явного вызова награда
+                // за ритм «догонялась» бы только при заходе в другой режим.
+                Progress.checkAchievements();
                 rhythmCurrentWasMasteredAtStart = true; // дальше — без повторного XP
                 rhythmFeedbackEl.textContent = t('js.learn.rhythm_mastered', { '{ch}': rhythmCurrent, '{xp}': RHYTHM_MASTER_XP });
                 rhythmFeedbackEl.className = 'feedback show ok';
