@@ -51,6 +51,7 @@ const Progress = (() => {
             abbrCompleted: 0,
             abbrBestStreak: 0,
             wordsCompleted: 0,
+            invasionWavesCompleted: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -503,6 +504,10 @@ const Progress = (() => {
                 case 'recognized_count': return state.stats.recognizedCount;
                 case 'recognize_best_streak': return state.stats.recognizeBestStreak;
                 case 'exam_passed_count': return state.stats.examsPassed;
+                // Волны мини-игры засчитываются только за полностью пройденную
+                // волну (100 попаданий) — см. finishInvasion() в learn.js, так
+                // что фармить ачивку короткими заходами нельзя.
+                case 'invasion_waves_count': return state.stats.invasionWavesCompleted || 0;
                 default: return 0;
             }
         };

@@ -19,6 +19,26 @@ include __DIR__ . '/includes/header.php';
     </div>
 </section>
 
+<!-- Промо мини-игры. Стоит сразу под hero намеренно: сам режим живёт
+     ЧЕТВЁРТЫМ подрежимом внутри «Букв», а те, кто буквы давно прошёл, на
+     эту вкладку уже не заходят и про новинку просто не узнают (прямая
+     просьба владельца, v2.55). Обычная секция в потоке страницы, а не
+     что-то абсолютно спозиционированное — поэтому на телефоне карточка
+     честно попадает на первый экран, без отдельных медиазапросов.
+     Ссылка ведёт СРАЗУ в режим (learn.php?mode=invasion — см.
+     applyModeFromUrl в learn.js), а не просто на страницу букв. -->
+<section class="section">
+    <div class="card promo-card">
+        <div class="promo-card-emoji" aria-hidden="true">👾</div>
+        <div class="promo-card-body">
+            <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span></div>
+            <h3 class="mt-0"><?= t('index.invasion_title') ?></h3>
+            <p class="muted"><?= t('index.invasion_text') ?></p>
+            <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
+        </div>
+    </div>
+</section>
+
 <section class="section">
     <!-- Пробовали "тихую" строку без карточек — стало сложнее считывать
          на глаз, что вообще происходит на странице (владелец: "хоть и

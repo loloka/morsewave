@@ -1485,6 +1485,11 @@
             Progress.addXp(bonusXp);
             Progress.incrementStat('invasionWavesCompleted', 1);
             Progress.markDailyActivity();
+            // Без этого вызова ачивки за волны (invasion_first/invasion_10)
+            // не выдавались бы сразу после победы, а «догонялись» бы только
+            // при следующей проверке из другого режима — выглядело бы как
+            // потерянная награда. incrementStat сам ачивки не пересчитывает.
+            Progress.checkAchievements();
             invasionFeedback(t('js.learn.invasion_win', { '{xp}': bonusXp, '{hp}': hpBonus, '{speed}': speedBonus }), 'ok');
             invasionOverlayEl.textContent = t('js.learn.invasion_win_overlay');
             invasionOverlayEl.className = 'invasion-overlay show win';
@@ -1613,6 +1618,29 @@
             renderDailyBanner();
         }
     }
+
+    // Прямая ссылка на конкретный подрежим: learn.php?mode=invasion (работает
+    // для любого data-mode из .mode-switch). Нужно для промо-карточки на
+    // главной — мини-игра лежит четвёртым подрежимом внутри «Букв», и без
+    // прямой ссылки те, кто буквы уже прошёл, до неё просто не доходят.
+    //
+    // ВАЖНО, почему этот блок в самом конце файла, а не рядом с обработчиком
+    // .mode-switch наверху: chip.click() синхронно выполняет тот обработчик,
+    // а он трогает recStartBtn/rhythmKey и другие const, объявленные НИЖЕ по
+    // файлу. Вызов до их инициализации упал бы с ReferenceError (temporal
+    // dead zone). Не переносить наверх «для порядка».
+    //
+    // ?daily=1 обрабатывается отдельно ниже и при необходимости сам
+    // переключает вкладку — поэтому тут его пропускаем, чтобы два обработчика
+    // не дрались за активный режим.
+    (function applyModeFromUrl() {
+        const params = new URLSearchParams(location.search);
+        if (params.get('daily') === '1') return;
+        const mode = params.get('mode');
+        if (!mode) return;
+        const chip = document.querySelector(`.mode-switch .chip[data-mode="${mode}"]`);
+        if (chip) chip.click();
+    })();
 
     (function applyLearnDaily() {
         const params = new URLSearchParams(location.search);

@@ -1041,6 +1041,27 @@ input[type="range"] {
 }
 
 /* ---------- Daily challenge ---------- */
+/* Промо-карточка нового режима на главной (см. комментарий в index.php).
+   Зелёная рамка, а не акцентная — чтобы не сливаться с «Заданием дня»
+   ниже по странице, которое уже использует акцентный цвет. */
+.promo-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, var(--surface), #101d16 150%);
+    border: 1px solid rgba(111, 207, 122, .35);
+}
+.promo-card-emoji { font-size: 40px; line-height: 1; flex-shrink: 0; }
+.promo-card-body { flex: 1; min-width: 0; }
+.promo-card h3 { margin: 4px 0; }
+.promo-card p { margin: 0 0 12px; font-size: 14px; }
+@media (max-width: 560px) {
+    .promo-card { gap: 12px; }
+    .promo-card-emoji { font-size: 32px; }
+    .promo-card h3 { font-size: 17px; }
+    .promo-card p { font-size: 13px; }
+}
+
 .daily-card {
     background: linear-gradient(135deg, var(--surface), #1f1a10 150%);
     border: 1px solid var(--accent-dim);
