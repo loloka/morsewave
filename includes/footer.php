@@ -8,11 +8,6 @@
         <span class="dot">·</span>
         <span><?= t('footer.author') ?></span>
         <span class="dot">·</span>
-        <!-- Ссылка на основной сайт владельца. В подвале, а не в навигации,
-             намеренно: это внешний ресурс, а не раздел тренажёра — в таббаре
-             на телефоне и так 7 пунктов, восьмой пришлось бы ужимать. -->
-        <a href="https://r9o.ru" target="_blank" rel="noopener"><?= t('footer.main_site') ?></a>
-        <span class="dot">·</span>
         <a href="https://github.com/loloka/morsewave" target="_blank" rel="noopener"><?= t('footer.source') ?></a>
         <span class="dot">·</span>
         <a href="terms.php"><?= t('footer.terms') ?></a>

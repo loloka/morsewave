@@ -25,7 +25,6 @@ return [
     // --- includes/footer.php ---
     'footer.license' => 'MIT License',
     'footer.author' => 'Author R9OGL',
-    'footer.main_site' => 'Main site r9o.ru',
     'footer.source' => 'Source code & changelog',
     'footer.terms' => 'Terms',
     'footer.privacy' => 'Privacy',
