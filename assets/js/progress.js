@@ -557,8 +557,20 @@ const Progress = (() => {
                 // "Полный алфавит" (36) могла бы сработать раньше времени от
                 // суммы латиницы+кириллицы, не пройдя реально весь латинский
                 // алфавит и цифры (см. CLAUDE.md, бэклог п.1, "КРИТИЧНО").
+                // С v2.61 этот фильтрованный тип использует ТОЛЬКО
+                // full_alphabet — остальные ачивки на learnedLetters смотри
+                // ниже, у letters_learned_count_any.
                 case 'letters_learned_count':
                     return state.learnedLetters.filter((ch) => ALL_LEARNABLE.includes(ch)).length;
+                // Тот же баг и то же лечение, что у rhythm_mastered_count_any
+                // ниже (найдено при аудите после фикса "Ровной руки",
+                // 2026-08-01): "Первый сигнал"(1) и "Радист-новичок"(10) —
+                // произвольные ранние вехи, не "весь алфавит" — делили
+                // letters_learned_count с "Полным алфавитом"(36) и потому
+                // ТОЖЕ не засчитывались тем, кто учил кириллицу первой.
+                // Без фильтра, считает оба скрипта вместе.
+                case 'letters_learned_count_any':
+                    return state.learnedLetters.length;
                 case 'cyrillic_learned_count':
                     return state.learnedLetters.filter((ch) => ch.startsWith(CYRILLIC_PREFIX)).length;
                 case 'cyrillic_recognized_count':

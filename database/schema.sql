@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS achievements (
     icon            VARCHAR(10)  NOT NULL DEFAULT '🏆',
     condition_type  ENUM(
         'letters_learned_count',
+        -- Аналогично rhythm_mastered_count_any ниже (v2.60/v2.61, тот же
+        -- класс бага): letters_learned_count фильтруется по ALL_LEARNABLE
+        -- (нужно ТОЛЬКО для full_alphabet, порог которого буквально "весь
+        -- латинский набор"), но тот же тип по ошибке достался и
+        -- first_signal(1)/ten_signals(10) — произвольным вехам, где
+        -- фильтр только резал кириллицу без причины. Этот тип — без
+        -- фильтра, для НЕ-"полный набор" ачивок по learnedLetters.
+        'letters_learned_count_any',
         'xp_total',
         'streak_days',
         'koch_level',
@@ -76,8 +84,8 @@ INSERT IGNORE INTO global_stats (id) VALUES (1);
 -- Сид: достижения
 -- ---------------------------------------------------------
 INSERT IGNORE INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order) VALUES
-('first_signal',  'Первый сигнал',        'Изучите свой первый символ',                    '📡', 'letters_learned_count', 1,  1),
-('ten_signals',   'Радист-новичок',       'Изучите 10 символов',                           '📻', 'letters_learned_count', 10, 2),
+('first_signal',  'Первый сигнал',        'Изучите свой первый символ',                    '📡', 'letters_learned_count_any', 1,  1),
+('ten_signals',   'Радист-новичок',       'Изучите 10 символов',                           '📻', 'letters_learned_count_any', 10, 2),
 ('full_alphabet', 'Полный алфавит',       'Изучите все буквы и цифры',                     '🎓', 'letters_learned_count', 36, 3),
 ('xp_100',        'Первая сотня',         'Наберите 100 очков опыта',                      '⭐', 'xp_total', 100, 4),
 ('xp_1000',       'Опытный связист',      'Наберите 1000 очков опыта',                     '🌟', 'xp_total', 1000, 5),

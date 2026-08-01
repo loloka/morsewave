@@ -6,6 +6,39 @@
 Здесь — записи с **v2.49** и новее. Всё, что старше (v2.48 → v1), вынесено
 в [CHANGELOG-archive.md](CHANGELOG-archive.md) — целиком, без сокращений.
 
+## v2.61 — тот же баг найден и в «Первом сигнале»/«Радисте-новичке» (2026-08-01)
+
+- **Аудит после фикса v2.60** («Ровная рука» не считала кириллицу) нашёл
+  точную копию бага ещё в двух ачивках: `letters_learned_count` (фильтр по
+  `ALL_LEARNABLE`, нужен только для «Полного алфавита», порог 36) делили
+  ещё «Первый сигнал» (порог 1) и «Радист-новичок» (порог 10) —
+  произвольные ранние вехи, а не «весь алфавит». Тот, кто учил кириллицу
+  первой (или вообще без латиницы), не получал их вовсе.
+- **Фикс** — та же схема, что и с ритмом: новый `condition_type =
+  'letters_learned_count_any'` (без фильтра, считает оба алфавита вместе)
+  назначен «Первому сигналу» и «Радисту-новичку». «Полный алфавит»
+  остался на прежнем `letters_learned_count`, без изменений.
+- Остальные `condition_type` проверены при том же аудите — этот класс бага
+  (общий фильтрованный тип на "полный набор" + "произвольная веха" вместе)
+  больше нигде не встречается: `cyrillic_learned_count`/
+  `cyrillic_recognized_count` уже отдельные не-фильтрованные типы,
+  `koch_level`/`invasion_waves_count`/`xp_total` и другие плоские счётчики
+  скрипт вообще не различают.
+- **Владельцу накатить на живую базу вручную:**
+  ```sql
+  ALTER TABLE achievements MODIFY condition_type ENUM(
+      'letters_learned_count','letters_learned_count_any','xp_total','streak_days',
+      'koch_level','groups_completed','callsigns_completed','recognized_count',
+      'recognize_best_streak','exam_passed_count','cyrillic_learned_count',
+      'cyrillic_recognized_count','invasion_waves_count',
+      'rhythm_mastered_count','rhythm_mastered_count_any'
+  ) NOT NULL;
+  UPDATE achievements SET condition_type = 'letters_learned_count_any' WHERE code IN ('first_signal','ten_signals');
+  ```
+  Как и в прошлый раз — досчитается само на ближайшей загрузке страницы
+  (`Progress.checkAchievements()` на `DOMContentLoaded`), ничего нажимать
+  не нужно.
+
 ## v2.60 — фикс: ачивка «Ровная рука» не считала кириллицу (2026-08-01)
 
 - **Реальный баг.** Ачивки «Ровная рука» (10) и «Метроном» (36) использовали
