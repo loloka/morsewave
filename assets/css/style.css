@@ -189,6 +189,13 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     .nav-links { display: none; }
 }
 
+/* Подсказка про реальный телеграфный ключ (learn.php, режимы "Отправка" и
+   "Ритм ключа") — неактуальна на телефонах, там нет физического ключа для
+   подключения через Web Serial/аудиоразъём. */
+@media (max-width: 900px) {
+    .real-key-hint { display: none; }
+}
+
 @media (max-width: 420px) {
     .topnav { padding: 0 12px; }
     .brand-code { display: none; }

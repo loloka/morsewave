@@ -60,7 +60,7 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="signal-line mt-2" id="practice-signal"></div>
-        <p class="muted mt-1" style="font-size:12px;"><?= t('learn.real_key_hint') ?> <a href="keyhardware.php" class="link"><?= t('learn.real_key_hint_link') ?></a></p>
+        <p class="muted mt-1 real-key-hint" style="font-size:12px;"><?= t('learn.real_key_hint') ?> <a href="keyhardware.php" class="link"><?= t('learn.real_key_hint_link') ?></a></p>
     </section>
 </div>
 
@@ -167,7 +167,6 @@ include __DIR__ . '/includes/header.php';
                 <div class="morse-lamp" id="rhythm-lamp"></div>
             </div>
         </div>
-        <p class="muted mt-1" style="font-size:12px;"><?= t('learn.real_key_hint') ?> <a href="keyhardware.php" class="link"><?= t('learn.real_key_hint_link') ?></a></p>
 
         <div class="rhythm-signal-line-labels mt-2">
             <span><?= t('learn.rhythm_signal_up_hint') ?></span>
@@ -177,6 +176,7 @@ include __DIR__ . '/includes/header.php';
             <span><?= t('learn.rhythm_signal_down_hint') ?></span>
         </div>
         <div class="rhythm-tempo-hint" id="rhythm-tempo-hint"></div>
+        <p class="muted mt-1 real-key-hint" style="font-size:12px;"><?= t('learn.real_key_hint') ?> <a href="keyhardware.php" class="link"><?= t('learn.real_key_hint_link') ?></a></p>
     </section>
 </div>
 
