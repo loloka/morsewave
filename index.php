@@ -6,35 +6,43 @@ $pageScript = 'home.js';
 include __DIR__ . '/includes/header.php';
 ?>
 
+<!-- Герой — раньше h1/lead были жёстко ограничены по ширине (max-width,
+     см. .hero h1/.hero p.lead в style.css) просто для читаемости строки, и
+     на широких экранах это оставляло пустой прямоугольник справа от текста
+     (реальный фидбек владельца, 2026-08-01: "смотри какой там пустующий
+     квадрат"). Промо мини-игры раньше стояло отдельной секцией НИЖЕ hero —
+     теперь это вторая колонка .hero-grid, занимает именно то пустое место.
+     На мобильном/узком экране .hero-grid схлопывается в одну колонку (см.
+     media query в style.css) — получается ровно то же поведение, что было
+     раньше у отдельной секции: промо идёт в потоке сразу за текстом и
+     честно попадает на первый экран, без отдельных мобильных правил под
+     эту карточку. Ссылка по-прежнему ведёт СРАЗУ в режим
+     (learn.php?mode=invasion — см. applyModeFromUrl в learn.js). -->
 <section class="hero">
-    <div class="card-eyebrow">· − · · · − &nbsp;· · − &nbsp;· −</div>
-    <h1><?= t('index.hero_title') ?></h1>
-    <p class="lead"><?= t('index.hero_lead') ?></p>
+    <div class="hero-grid">
+        <div class="hero-main">
+            <div class="card-eyebrow">· − · · · − &nbsp;· · − &nbsp;· −</div>
+            <h1><?= t('index.hero_title') ?></h1>
+            <p class="lead"><?= t('index.hero_lead') ?></p>
 
-    <div id="hero-signal" class="signal-line" style="margin: 20px 0;"></div>
+            <div id="hero-signal" class="signal-line" style="margin: 20px 0;"></div>
 
-    <div class="btn-row" style="align-items:center;">
-        <a href="learn.php" class="btn btn-primary"><?= t('index.start_letters') ?></a>
-        <a href="koch.php" class="btn-quiet"><?= t('index.koch_method') ?></a>
-    </div>
-</section>
+            <div class="btn-row" style="align-items:center;">
+                <a href="learn.php" class="btn btn-primary"><?= t('index.start_letters') ?></a>
+                <a href="koch.php" class="btn-quiet"><?= t('index.koch_method') ?></a>
+            </div>
+        </div>
 
-<!-- Промо мини-игры. Стоит сразу под hero намеренно: сам режим живёт
-     ЧЕТВЁРТЫМ подрежимом внутри «Букв», а те, кто буквы давно прошёл, на
-     эту вкладку уже не заходят и про новинку просто не узнают (прямая
-     просьба владельца, v2.55). Обычная секция в потоке страницы, а не
-     что-то абсолютно спозиционированное — поэтому на телефоне карточка
-     честно попадает на первый экран, без отдельных медиазапросов.
-     Ссылка ведёт СРАЗУ в режим (learn.php?mode=invasion — см.
-     applyModeFromUrl в learn.js), а не просто на страницу букв. -->
-<section class="section">
-    <div class="card promo-card">
-        <div class="promo-card-emoji" aria-hidden="true">👾</div>
-        <div class="promo-card-body">
-            <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span></div>
-            <h3 class="mt-0"><?= t('index.invasion_title') ?></h3>
-            <p class="muted"><?= t('index.invasion_text') ?></p>
-            <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
+        <div class="hero-promo">
+            <div class="card promo-card">
+                <div class="promo-card-emoji" aria-hidden="true">👾</div>
+                <div class="promo-card-body">
+                    <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span></div>
+                    <h3 class="mt-0"><?= t('index.invasion_title') ?></h3>
+                    <p class="muted"><?= t('index.invasion_text') ?></p>
+                    <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
