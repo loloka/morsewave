@@ -249,6 +249,23 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 }
 .card-link:hover { border-color: var(--accent-dim); transform: translateY(-2px); }
 
+/* Блок кода в текстовых страницах (keyhardware.php — скетч для Arduino).
+   Раньше на сайте не было ни одной страницы со вставками кода, поэтому
+   готового .code-block ещё не существовало — переиспользует те же токены,
+   что и остальной дизайн (surface-2/border/font-mono), просто моноширинным
+   блоком со своим скроллом по горизонтали для длинных строк. */
+.code-block {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+}
+.code-block code { background: none; padding: 0; }
+
 .card-icon { font-size: 26px; margin-bottom: 10px; display: block; }
 .card-eyebrow {
     font-family: var(--font-mono);

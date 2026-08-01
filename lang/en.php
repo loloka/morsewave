@@ -29,6 +29,7 @@ return [
     'footer.source' => 'Source code & changelog',
     'footer.terms' => 'Terms',
     'footer.privacy' => 'Privacy',
+    'footer.key_hardware' => 'Real key',
 
     // --- index.php ---
     'index.hero_title' => 'Listen to the signal. Decode the telegraph code. Speak the language of the airwaves.',
@@ -106,6 +107,8 @@ return [
     'learn.streak_label' => 'Correct reps in a row:',
     'learn.tap_or_space' => 'Tap or<br>space',
     'learn.listen_btn' => '▶ Listen',
+    'learn.real_key_hint' => 'Want to train with a real telegraph key instead of the spacebar?',
+    'learn.real_key_hint_link' => 'How to connect →',
     'learn.rec_intro' => 'Press "Start training" — symbols will play one after another without stopping. After each answer (by tapping a tile <b>or using the keyboard</b>) the next symbol plays right away — you can\'t skip without answering.',
     'learn.rec_set_all' => 'All letters & digits',
     'learn.rec_set_letters' => 'Letters only',
@@ -473,6 +476,126 @@ HTML,
 <p>By registering an account, you confirm that you've read this policy and
     the <a href="terms.php" class="link">Terms of Service</a> and consent to
     the described data being processed as described here.</p>
+HTML,
+
+    // --- keyhardware.php ---
+    'keyhardware.eyebrow' => 'DIY',
+    'keyhardware.title' => 'Connecting a real telegraph key',
+    'keyhardware.h1' => 'A real telegraph key instead of a keyboard',
+    'keyhardware.updated' => 'Experimental guide, version 1 — feedback welcome.',
+    'keyhardware.body' => <<<'HTML'
+<p>In "Send" and "Key rhythm" (under "Letters"), holding a key down produces a
+    dot/dash, exactly like on a real telegraph key. You can already trigger it
+    not just by tapping the on-screen button, but with the <b>spacebar</b> on
+    a keyboard. The point of this page is to replace that spacebar with an
+    actual telegraph key, without changing anything in the site's code: all
+    you need is a board that sends a spacebar press to the computer, as a
+    regular USB keyboard, whenever the key's contacts close.</p>
+
+<h2>1. What you'll need</h2>
+<ul>
+    <li>A board built on the <b>ATmega32u4</b> with "real" native USB (not a
+        separate USB-serial chip) — for example an <b>Arduino Pro Micro</b>,
+        <b>Arduino Leonardo</b>, or <b>Arduino Micro</b>. Only these boards
+        have the <code>Keyboard.h</code> library in the Arduino IDE, which
+        can act as a keyboard out of the box.</li>
+    <li>The telegraph key itself (or any normally-open contact/button, if you
+        just want to test the circuit first).</li>
+    <li>Two wires (alligator clips are handy so you don't have to solder
+        right away).</li>
+    <li>A micro-USB cable (or whatever fits your board) to the computer.</li>
+    <li><a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener" class="link">Arduino IDE</a>,
+        free.</li>
+</ul>
+<p class="muted" style="font-size:13px;"><b>Important:</b> Arduino Uno and
+    Nano (based on the ATmega328P) will <em>not</em> work for this without
+    extra hoop-jumping (reflashing the USB controller) — they don't have
+    built-in <code>Keyboard.h</code> support. If you don't have a board yet
+    and are buying one, get a Pro Micro/Leonardo/Micro specifically.</p>
+
+<h2>2. Wiring</h2>
+<p>All you need is one digital pin and ground:</p>
+<ul>
+    <li>One key contact — to any digital pin, e.g. <b>D2</b>.</li>
+    <li>The other key contact — to the board's <b>GND</b>.</li>
+</ul>
+<p>No external resistor needed — the firmware below enables the pin's
+    internal pull-up resistor (<code>INPUT_PULLUP</code>): while the key is
+    open, the pin reads HIGH; the moment it closes, it reads LOW. That's the
+    transition the firmware uses to know "pressed"/"released".</p>
+
+<h2>3. Firmware</h2>
+<p>Open the Arduino IDE, paste the sketch below, and upload it to the board:</p>
+<pre class="code-block"><code>#include &lt;Keyboard.h&gt;
+
+const int KEY_PIN = 2;               // key: one contact here, the other to GND
+const unsigned long DEBOUNCE_MS = 5; // contact debounce
+
+bool pressed = false;      // has a HID "space down" already been sent
+bool lastReading = HIGH;   // last raw pin reading
+unsigned long lastChangeAt = 0;
+
+void setup() {
+  pinMode(KEY_PIN, INPUT_PULLUP); // open = HIGH, closed = LOW
+  Keyboard.begin();
+}
+
+void loop() {
+  bool reading = digitalRead(KEY_PIN);
+
+  if (reading != lastReading) {
+    lastChangeAt = millis();
+    lastReading = reading;
+  }
+
+  if (millis() - lastChangeAt > DEBOUNCE_MS) {
+    bool keyDown = (reading == LOW);
+    if (keyDown && !pressed) {
+      Keyboard.press(' ');
+      pressed = true;
+    } else if (!keyDown && pressed) {
+      Keyboard.release(' ');
+      pressed = false;
+    }
+  }
+}
+</code></pre>
+<p>Nothing more to it: while the key's contacts stay closed, the board holds
+    the spacebar "down" — exactly as if you were holding it with your finger.
+    Release the key and the board releases the spacebar. The press duration
+    is what determines dot vs. dash, and the site already handles that — the
+    board doesn't need to know anything about it.</p>
+
+<h2>4. Flashing it</h2>
+<ol>
+    <li>Install the Arduino IDE, connect the board over USB.</li>
+    <li>Under <b>Tools → Board</b>, choose "Arduino Leonardo" (for a genuine
+        Leonardo/Micro) or "SparkFun Pro Micro" via the boards manager if
+        you're using a Pro Micro clone — the seller's page usually says which
+        board setting to pick.</li>
+    <li>Under <b>Tools → Port</b>, choose the port the board shows up on.</li>
+    <li>Paste the code from step 3 and hit "Upload".</li>
+</ol>
+
+<h2>5. Testing it</h2>
+<p>Open "Letters" → "Send" or "Key rhythm", click anywhere on the page (so
+    focus definitely isn't in a text field), and press the key — it should
+    trigger the exact same reaction as pressing spacebar.</p>
+<p class="muted" style="font-size:13px;"><b>Good to know:</b> while the board
+    is connected, it sends the spacebar to <em>whatever window currently has
+    focus</em> — not just the browser. If you press the key while some other
+    window is active, a plain spacebar goes there instead (which might, say,
+    scroll a page or pause a video). Nothing breaks, but it's a reason to keep
+    the trainer's tab focused during practice.</p>
+
+<h2>6. What's next</h2>
+<p>This is the simplest path — keyboard emulation. Still on the list (no
+    promises on timing): a Web Serial API path for DIY adapters with their
+    own protocol, and receiving the signal straight from a microphone via tone
+    detection — that would let you use a real telegraph key wired to an
+    actual transmitter, no board required. If you build an adapter from this
+    guide and something doesn't work (or does!) — let us know at
+    <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
 HTML,
 
     // --- includes/mailer.php (emails) ---

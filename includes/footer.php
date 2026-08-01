@@ -18,6 +18,8 @@
         <a href="terms.php"><?= t('footer.terms') ?></a>
         <span class="dot">·</span>
         <a href="privacy.php"><?= t('footer.privacy') ?></a>
+        <span class="dot">·</span>
+        <a href="keyhardware.php"><?= t('footer.key_hardware') ?></a>
     </div>
 </footer>
 <script src="<?= asset_v('assets/js/i18n.js') ?>"></script>
