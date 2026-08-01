@@ -937,9 +937,21 @@
     const INVASION_XP_PER_KILL = 1;
     const INVASION_BASE_HP = 100;
     const INVASION_WIN_KILLS = 100;
-    const INVASION_SPRITES = ['👽', '🦎'];
+    // Было только 👽/🦎 — по фидбеку владельца 2026-08-01 "скучно, добавь
+    // монстриков" расширили зверинец, не выходя за тему "инопланетное или
+    // рептилия" (та же тема, что и в project_minigame_direction): 👾 —
+    // классический аркадный пришелец-монстр, 🦖 — ящер-переросток. Спрайт
+    // по-прежнему выбирается случайно при каждом спавне, на баланс/скорость
+    // не влияет — чисто визуальное разнообразие.
+    const INVASION_SPRITES = ['👽', '🦎', '👾', '🦖'];
     const INVASION_MAX_LANES = 5; // = потолок одновременных пришельцев (5-й уровень)
-    const INVASION_SHOVEL_MS = 220; // время полёта лопаты от базы до пришельца
+    // Было 220 — реальный фидбек владельца 2026-08-01: "лопата летит слишком
+    // быстро, слегка непонятно что это лопата". На 220мс глаз не успевал
+    // считать силуэт, даже узнаваемый (см. drawInvasionShovel — форма уже
+    // проходила две полировки). Увеличили почти вдвое; на темп волны это не
+    // влияет — лопата летит уже ПОСЛЕ того, как буква распознана и попадание
+    // засчитано, никакого "штрафа за скорость реакции" тут нет.
+    const INVASION_SHOVEL_MS = 400;
 
     const invasionWpmSlider = document.getElementById('invasion-wpm');
     const invasionWpmValueEl = document.getElementById('invasion-wpm-value');
@@ -988,6 +1000,15 @@
     let invasionAudioChain = Promise.resolve(); // сериализует звук — иначе 2-5 одновременных морзянок сливаются в кашу
     let invasionRafId = null;
     let invasionWaveStart = 0;
+    // Победный салют (см. startInvasionCelebration, 2026-08-01): держит
+    // requestAnimationFrame живым ещё немного ПОСЛЕ invasionRunning=false,
+    // чтобы фейерверк успел доиграть, а не оборвался вместе с концом волны.
+    let invasionCelebrating = false;
+    let invasionCelebrateTimers = [];
+    // Тряска поля при пропущенном пришельце (см. flashInvasionHit) — таймер
+    // снятия класса храним отдельно, чтобы серия быстрых пропусков подряд не
+    // плодила висящие setTimeout один поверх другого.
+    let invasionHitFlashTimer = null;
 
     function initInvasionGrid() {
         if (invasionGridBuilt) return;
@@ -1143,10 +1164,17 @@
     // по цветам и силуэту, оставаясь при этом рисунком на canvas (не эмодзи
     // — см. комментарий у самой функции в истории правок про тофу-квадратики
     // на некоторых десктопах).
+    // v3 полировки (2026-08-01, второй заход тем же днём) — тот же фидбек
+    // "непонятно что это лопата" повторился даже с узнаваемым силуэтом:
+    // проблема была не только в скорости полёта (см. INVASION_SHOVEL_MS
+    // выше), но и в том, что силуэт мелкий. Масштабируем прорисовку целиком
+    // (ctx.scale) — растут и фигуры, и толщина линий пропорционально, форма
+    // не "плывёт" при увеличении.
     function drawInvasionShovel(ctx, x, y, angle) {
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(angle + Math.PI / 2);
+        ctx.scale(1.4, 1.4);
         ctx.lineCap = 'round';
 
         // красная D-рукоятка (петля вверху)
@@ -1193,16 +1221,20 @@
         ctx.restore();
     }
 
-    function spawnInvasionParticles(x, y, color) {
-        for (let i = 0; i < 10; i++) {
+    // Параметры вынесены с дефолтами v1 (обычный взрыв пришельца) — победный
+    // салют (см. startInvasionCelebration) зовёт эту же функцию с большими
+    // count/speed/life, чтобы вспышки выглядели заметно крупнее и наряднее
+    // одиночного попадания лопатой.
+    function spawnInvasionParticles(x, y, color, count = 10, speedMin = 40, speedRange = 70, lifeMin = 400, lifeRange = 200) {
+        for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;
-            const speed = 40 + Math.random() * 70;
+            const speed = speedMin + Math.random() * speedRange;
             invasionParticles.push({
                 x, y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: 0,
-                maxLife: 400 + Math.random() * 200,
+                maxLife: lifeMin + Math.random() * lifeRange,
                 color,
             });
         }
@@ -1293,7 +1325,10 @@
     }
 
     function invasionFrame(now) {
-        if (!invasionRunning) return;
+        // invasionCelebrating держит кадр живым и после конца волны (победа)
+        // — см. startInvasionCelebration; при поражении/ручной остановке его
+        // не выставляют, так что обычный ранний выход ничего не меняет.
+        if (!invasionRunning && !invasionCelebrating) return;
         const w = invasionCanvasWrapEl.clientWidth;
         const h = invasionCanvasWrapEl.clientHeight;
         invasionCtx.clearRect(0, 0, w, h);
@@ -1350,7 +1385,9 @@
             invasionCtx.globalAlpha = 1;
         }
 
-        invasionRafId = requestAnimationFrame(invasionFrame);
+        if (invasionRunning || invasionCelebrating) {
+            invasionRafId = requestAnimationFrame(invasionFrame);
+        }
     }
 
     function findActiveInvasionEnemy(ch) {
@@ -1434,12 +1471,27 @@
         }
     }
 
+    // Чисто визуальная обратная связь "тебя ударили" (добавлено 2026-08-01
+    // по своей инициативе, владелец не просил конкретно это, но просил
+    // "что-нибудь ещё") — короткая тряска поля + красная вспышка по краю
+    // канваса, эхо .hp-bad у HP-бара. На логику/урон не влияет.
+    function flashInvasionHit() {
+        invasionCanvasWrapEl.classList.remove('invasion-hit-flash');
+        void invasionCanvasWrapEl.offsetWidth; // форсируем reflow — иначе повторный класс подряд не перезапустит анимацию
+        invasionCanvasWrapEl.classList.add('invasion-hit-flash');
+        clearTimeout(invasionHitFlashTimer);
+        invasionHitFlashTimer = setTimeout(() => {
+            invasionCanvasWrapEl.classList.remove('invasion-hit-flash');
+        }, 320);
+    }
+
     function resolveInvasionMiss(enemy) {
         if (enemy.state !== 'active') return; // защита от повторного срабатывания в этом же кадре
         enemy.state = 'hit';
         const dmg = invasionDamageFor(enemy.ch);
         invasionHp = Math.max(0, invasionHp - dmg);
         invasionCombo = 0;
+        flashInvasionHit();
         // Прорыв — худший возможный исход для бонуса скорости (см.
         // resolveInvasionKill): 0 очков, а не просто "не считаем".
         invasionSpeedScoreSum += 0;
@@ -1460,14 +1512,47 @@
         topUpInvasionEnemies();
     }
 
+    // Победный салют (2026-08-01, реальная просьба владельца: "в конце
+    // отбития волны надо чтобы все взорвались красиво, и типа ура волна
+    // отбита"). К моменту победы враги на поле уже не остались (последний
+    // убит лопатой чуть раньше — см. resolveInvasionKill), так что "салют"
+    // это не взрыв конкретных пришельцев, а несколько цветных фейерверков
+    // вразнобой по всему полю. requestAnimationFrame к этому моменту обычно
+    // уже остановлен вместе с invasionRunning=false, поэтому кадр держим
+    // живым отдельным флагом (см. invasionCelebrating в invasionFrame).
+    const INVASION_CELEBRATE_MS = 1500;
+    const INVASION_CELEBRATE_BURSTS = 7;
+    const INVASION_CELEBRATE_COLORS = ['#6fcf7a', '#f2c94c', '#56ccf2', '#eb5757', '#bb6bd9', '#f2994a'];
+
+    function startInvasionCelebration() {
+        invasionCelebrating = true;
+        invasionCelebrateTimers.forEach(clearTimeout);
+        invasionCelebrateTimers = [];
+        if (invasionRafId === null) invasionRafId = requestAnimationFrame(invasionFrame);
+        const w = invasionCanvasWrapEl.clientWidth;
+        const h = invasionCanvasWrapEl.clientHeight;
+        for (let i = 0; i < INVASION_CELEBRATE_BURSTS; i++) {
+            invasionCelebrateTimers.push(setTimeout(() => {
+                if (!invasionCelebrating) return; // отменили — например, владелец сразу нажал "В бой" заново
+                const x = w * (0.12 + Math.random() * 0.76);
+                const y = h * (0.15 + Math.random() * 0.7);
+                const color = INVASION_CELEBRATE_COLORS[i % INVASION_CELEBRATE_COLORS.length];
+                spawnInvasionParticles(x, y, color, 22, 90, 90, 550, 350);
+            }, i * 190));
+        }
+        invasionCelebrateTimers.push(setTimeout(() => {
+            invasionCelebrating = false;
+            cancelAnimationFrame(invasionRafId);
+            invasionRafId = null;
+        }, INVASION_CELEBRATE_MS));
+    }
+
     function finishInvasion(won) {
         // Если волну уже остановили руками (stopInvasion) — отложенный вызов
         // (см. setTimeout в resolveInvasionKill на 100-м попадании) не должен
         // задним числом показать экран победы/поражения.
         if (!invasionRunning) return;
         invasionRunning = false;
-        cancelAnimationFrame(invasionRafId);
-        invasionRafId = null;
         invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
         invasionEnemies = [];
         invasionStartBtn.style.display = 'inline-flex';
@@ -1497,7 +1582,12 @@
             invasionFeedback(t('js.learn.invasion_win', { '{xp}': bonusXp, '{hp}': hpBonus, '{speed}': speedBonus }), 'ok');
             invasionOverlayEl.textContent = t('js.learn.invasion_win_overlay');
             invasionOverlayEl.className = 'invasion-overlay show win';
+            startInvasionCelebration();
         } else {
+            // Поражению салют не положен — раф останавливаем сразу же, как
+            // и раньше.
+            cancelAnimationFrame(invasionRafId);
+            invasionRafId = null;
             invasionFeedback(t('js.learn.invasion_lose', { '{kills}': invasionKills }), 'bad');
             invasionOverlayEl.textContent = t('js.learn.invasion_lose_overlay', { '{kills}': invasionKills });
             invasionOverlayEl.className = 'invasion-overlay show lose';
@@ -1508,6 +1598,12 @@
     function stopInvasion() {
         if (!invasionRunning && invasionRafId === null) return;
         invasionRunning = false;
+        // Останавливаем и незавершённый победный салют (см.
+        // startInvasionCelebration) — иначе его отложенные setTimeout всё
+        // равно досыпали бы частицы в уже остановленную/новую игру.
+        invasionCelebrating = false;
+        invasionCelebrateTimers.forEach(clearTimeout);
+        invasionCelebrateTimers = [];
         cancelAnimationFrame(invasionRafId);
         invasionRafId = null;
         invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
@@ -1516,6 +1612,8 @@
         invasionParticles = [];
         invasionAudioChain = Promise.resolve();
         invasionOverlayEl.classList.remove('show');
+        invasionCanvasWrapEl.classList.remove('invasion-hit-flash');
+        clearTimeout(invasionHitFlashTimer);
         invasionStartBtn.style.display = 'inline-flex';
         invasionStopBtn.style.display = 'none';
         syncInvasionKeyHighlights();
@@ -1531,6 +1629,18 @@
         getSharedAudioContext();
         initInvasionGrid();
         resizeInvasionCanvas();
+        // Если "В бой" нажали прямо во время победного салюта прошлой волны
+        // (см. startInvasionCelebration) — гасим его, иначе его отложенные
+        // setTimeout досыплют случайные фейерверки поверх уже новой игры.
+        invasionCelebrating = false;
+        invasionCelebrateTimers.forEach(clearTimeout);
+        invasionCelebrateTimers = [];
+        // На случай того же "нажал В бой во время салюта" — салютный raf-цикл
+        // ещё мог быть жив (invasionRafId не null); без явной отмены ниже
+        // запустился бы ВТОРОЙ параллельный цикл поверх него (см. хвост
+        // invasionFrame — он сам себя планирует, пока invasionRunning ||
+        // invasionCelebrating истинно).
+        if (invasionRafId !== null) { cancelAnimationFrame(invasionRafId); invasionRafId = null; }
         invasionRunning = true;
         invasionHp = INVASION_BASE_HP;
         invasionKills = 0;
