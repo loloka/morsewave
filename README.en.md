@@ -92,7 +92,8 @@ morse-trainer/
 ├── README.en.md               # this file — project overview in English
 ├── DEPLOY.md                  # running, deployment, migrations, admin management
 ├── CLAUDE.md                 # context and rules for Claude Code
-├── CHANGELOG.md               # changelog (newest entries first)
+├── CHANGELOG.md               # changelog, v2.49+ (newest entries first)
+├── CHANGELOG-archive.md       # changelog, v2.48 and older
 ├── lang/
 │   ├── ru.php                # interface string dictionary — Russian
 │   └── en.php                 # interface string dictionary — English
@@ -242,7 +243,9 @@ site isn't enough.
 
 ## Changelog
 
-Full history is in [CHANGELOG.md](CHANGELOG.md) (newest entries first).
+Recent history (v2.49 and newer) is in [CHANGELOG.md](CHANGELOG.md), newest
+entries first. Earlier versions, all the way back to the first one, are in
+[CHANGELOG-archive.md](CHANGELOG-archive.md).
 
 ## Known limitations / open questions
 
