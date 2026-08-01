@@ -482,50 +482,61 @@ HTML,
     'keyhardware.eyebrow' => 'DIY',
     'keyhardware.title' => 'Connecting a real telegraph key',
     'keyhardware.h1' => 'A real telegraph key instead of a keyboard',
-    'keyhardware.updated' => 'Experimental guide, version 1 — feedback welcome.',
+    'keyhardware.updated' => 'Experimental guide, version 2 — feedback welcome.',
     'keyhardware.body' => <<<'HTML'
 <p>In "Send" and "Key rhythm" (under "Letters"), holding a key down produces a
     dot/dash, exactly like on a real telegraph key. You can already trigger it
     not just by tapping the on-screen button, but with the <b>spacebar</b> on
     a keyboard. The point of this page is to replace that spacebar with an
-    actual telegraph key, without changing anything in the site's code: all
-    you need is a board that sends a spacebar press to the computer, as a
-    regular USB keyboard, whenever the key's contacts close.</p>
+    actual telegraph key, without changing anything in the site's code: the
+    site doesn't care where a spacebar press comes from — a keyboard, a mouse
+    click on the on-screen button, or your own key.</p>
+<p class="muted" style="font-size:13px;"><b>Why bother if the on-screen
+    button already works?</b> There's no difference in responsiveness for the
+    site. The difference is in your hand: a real key's spring, contact travel,
+    and weight train the actual motor skill you'll need on the air, not
+    tapping a flat button. If that doesn't matter to you, the on-screen
+    button/spacebar is plenty — no need to read further.</p>
 
-<h2>1. What you'll need</h2>
+<h2>1. The cheap way: wire the key into a spare keyboard</h2>
+<p>The most accessible option needs no Arduino at all. Grab any spare or
+    dirt-cheap keyboard (even a half-dead one, as long as its spacebar still
+    works), open it up, and solder two wires from your telegraph key directly
+    in parallel with the spacebar switch's contacts. Closing the key is then
+    electrically identical to pressing the spacebar with a finger: no
+    programming, no drivers, works anywhere a keyboard works.</p>
 <ul>
-    <li>A board built on the <b>ATmega32u4</b> with "real" native USB (not a
-        separate USB-serial chip) — for example an <b>Arduino Pro Micro</b>,
-        <b>Arduino Leonardo</b>, or <b>Arduino Micro</b>. Only these boards
-        have the <code>Keyboard.h</code> library in the Arduino IDE, which
-        can act as a keyboard out of the box.</li>
-    <li>The telegraph key itself (or any normally-open contact/button, if you
-        just want to test the circuit first).</li>
-    <li>Two wires (alligator clips are handy so you don't have to solder
-        right away).</li>
-    <li>A micro-USB cable (or whatever fits your board) to the computer.</li>
-    <li><a href="https://www.arduino.cc/en/software" target="_blank" rel="noopener" class="link">Arduino IDE</a>,
-        free.</li>
+    <li>Open the keyboard, find the spacebar key and its contact pad (on a
+        membrane keyboard, two traces on the film under the key; on a
+        mechanical one, the two leads of the switch itself).</li>
+    <li>Use a multimeter's continuity mode to confirm exactly which two
+        points connect when the spacebar is pressed — solder to those exact
+        points.</li>
+    <li>Solder two wires to those points and run them out to your telegraph
+        key's terminals — polarity doesn't matter, it's just a switch
+        closure.</li>
+    <li>You don't need to reassemble the keyboard — it just needs to stay
+        plugged in over USB with wires running from it to the key.</li>
 </ul>
-<p class="muted" style="font-size:13px;"><b>Important:</b> Arduino Uno and
-    Nano (based on the ATmega328P) will <em>not</em> work for this without
-    extra hoop-jumping (reflashing the USB controller) — they don't have
-    built-in <code>Keyboard.h</code> support. If you don't have a board yet
-    and are buying one, get a Pro Micro/Leonardo/Micro specifically.</p>
+<p>The one real downside: the donor keyboard is now dedicated to this one job
+    — its other keys are irrelevant, and it still takes up some desk space.
+    For a one-off DIY project that's usually fine.</p>
 
-<h2>2. Wiring</h2>
-<p>All you need is one digital pin and ground:</p>
+<h2>2. The Arduino way — if you'd rather have a small board than a whole keyboard</h2>
+<p>If a full-size donor keyboard is awkward to fit somewhere, a small board
+    built on the <b>ATmega32u4</b> with "real" native USB (not a separate
+    USB-serial chip) gets you the same result — for example an <b>Arduino Pro
+    Micro</b>, <b>Arduino Leonardo</b>, or <b>Arduino Micro</b>. Only these
+    boards have the <code>Keyboard.h</code> library in the Arduino IDE, which
+    can act as a keyboard out of the box. Pricier than the option above and
+    needs flashing a sketch, but neater and more compact.</p>
 <ul>
-    <li>One key contact — to any digital pin, e.g. <b>D2</b>.</li>
+    <li>One key contact — to any digital pin on the board, e.g. <b>D2</b>.</li>
     <li>The other key contact — to the board's <b>GND</b>.</li>
 </ul>
 <p>No external resistor needed — the firmware below enables the pin's
     internal pull-up resistor (<code>INPUT_PULLUP</code>): while the key is
-    open, the pin reads HIGH; the moment it closes, it reads LOW. That's the
-    transition the firmware uses to know "pressed"/"released".</p>
-
-<h2>3. Firmware</h2>
-<p>Open the Arduino IDE, paste the sketch below, and upload it to the board:</p>
+    open, the pin reads HIGH; the moment it closes, it reads LOW.</p>
 <pre class="code-block"><code>#include &lt;Keyboard.h&gt;
 
 const int KEY_PIN = 2;               // key: one contact here, the other to GND
@@ -560,41 +571,31 @@ void loop() {
   }
 }
 </code></pre>
-<p>Nothing more to it: while the key's contacts stay closed, the board holds
-    the spacebar "down" — exactly as if you were holding it with your finger.
-    Release the key and the board releases the spacebar. The press duration
-    is what determines dot vs. dash, and the site already handles that — the
-    board doesn't need to know anything about it.</p>
+<p>Flash it like any Arduino sketch: Arduino IDE → <b>Tools → Board</b> →
+    "Arduino Leonardo" (for a genuine Leonardo/Micro) or "SparkFun Pro Micro"
+    via the boards manager for a Pro Micro clone → pick the port under
+    <b>Tools → Port</b> → "Upload". Arduino Uno and Nano (based on the
+    ATmega328P) won't work for this — they don't have built-in
+    <code>Keyboard.h</code> support.</p>
 
-<h2>4. Flashing it</h2>
-<ol>
-    <li>Install the Arduino IDE, connect the board over USB.</li>
-    <li>Under <b>Tools → Board</b>, choose "Arduino Leonardo" (for a genuine
-        Leonardo/Micro) or "SparkFun Pro Micro" via the boards manager if
-        you're using a Pro Micro clone — the seller's page usually says which
-        board setting to pick.</li>
-    <li>Under <b>Tools → Port</b>, choose the port the board shows up on.</li>
-    <li>Paste the code from step 3 and hit "Upload".</li>
-</ol>
-
-<h2>5. Testing it</h2>
+<h2>3. Testing it (either method)</h2>
 <p>Open "Letters" → "Send" or "Key rhythm", click anywhere on the page (so
     focus definitely isn't in a text field), and press the key — it should
     trigger the exact same reaction as pressing spacebar.</p>
-<p class="muted" style="font-size:13px;"><b>Good to know:</b> while the board
-    is connected, it sends the spacebar to <em>whatever window currently has
-    focus</em> — not just the browser. If you press the key while some other
-    window is active, a plain spacebar goes there instead (which might, say,
-    scroll a page or pause a video). Nothing breaks, but it's a reason to keep
-    the trainer's tab focused during practice.</p>
+<p class="muted" style="font-size:13px;"><b>Good to know:</b> while the
+    adapter is connected, it sends the spacebar to <em>whatever window
+    currently has focus</em> — not just the browser. If you press the key
+    while some other window is active, a plain spacebar goes there instead
+    (which might, say, scroll a page or pause a video). Nothing breaks, but
+    it's a reason to keep the trainer's tab focused during practice.</p>
 
-<h2>6. What's next</h2>
-<p>This is the simplest path — keyboard emulation. Still on the list (no
-    promises on timing): a Web Serial API path for DIY adapters with their
-    own protocol, and receiving the signal straight from a microphone via tone
-    detection — that would let you use a real telegraph key wired to an
-    actual transmitter, no board required. If you build an adapter from this
-    guide and something doesn't work (or does!) — let us know at
+<h2>4. What's next</h2>
+<p>Both methods above are keyboard emulation. For a real key wired to its own
+    practice oscillator or a transmitter, receiving the signal straight from
+    a microphone via tone detection is a lot more interesting — no adapter
+    needed at all, just listening to the tone the key already produces. That
+    path is still just research, not ready yet. If you try one of the methods
+    above and something doesn't work (or does!) — let us know at
     <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
 HTML,
 
