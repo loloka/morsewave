@@ -6,6 +6,36 @@
 Здесь — записи с **v2.49** и новее. Всё, что старше (v2.48 → v1), вынесено
 в [CHANGELOG-archive.md](CHANGELOG-archive.md) — целиком, без сокращений.
 
+## v2.60 — фикс: ачивка «Ровная рука» не считала кириллицу (2026-08-01)
+
+- **Реальный баг.** Ачивки «Ровная рука» (10) и «Метроном» (36) использовали
+  один `condition_type = 'rhythm_mastered_count'`, который в `progress.js`
+  фильтрует счётчик по `ALL_LEARNABLE` (только латиница+цифры) — для
+  «Метронома» это осознанно (36 = буквально «весь латинский набор», иначе
+  ачивка засчиталась бы раньше времени от суммы латиницы и кириллицы), но
+  для «Ровной руки» (порог 10, произвольная веха, а не «полный набор») тот
+  же фильтр был не нужен и просто резал кириллицу без причины: пользователь,
+  отточивший ритм для 10+ кириллических букв, ачивку не получал.
+- **Фикс.** Новый `condition_type = 'rhythm_mastered_count_any'` (без
+  фильтра, считает оба алфавита вместе) — на него переведена только
+  «Ровная рука». «Метроном» остался на прежнем `rhythm_mastered_count`
+  без изменений.
+- **Владельцу накатить на живую базу вручную** (см. правило в CLAUDE.md про
+  `schema.sql`):
+  ```sql
+  ALTER TABLE achievements MODIFY condition_type ENUM(
+      'letters_learned_count','xp_total','streak_days','koch_level',
+      'groups_completed','callsigns_completed','recognized_count',
+      'recognize_best_streak','exam_passed_count','cyrillic_learned_count',
+      'cyrillic_recognized_count','invasion_waves_count',
+      'rhythm_mastered_count','rhythm_mastered_count_any'
+  ) NOT NULL;
+  UPDATE achievements SET condition_type = 'rhythm_mastered_count_any' WHERE code = 'rhythm_10';
+  ```
+  Пользователям, у кого уже накоплено 10+ отточенных букв (латиница и/или
+  кириллица вместе), ачивка досчитается сама при следующем вызове
+  `Progress.checkAchievements()` (например, при заходе в любой режим "Букв").
+
 ## v2.59 — «Вторжение»: адаптивная сложность (2026-08-01)
 
 - **Буквы, которые ты чаще путаешь, теперь вылетают чаще.** Новое поле
