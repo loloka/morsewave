@@ -937,6 +937,19 @@
     const INVASION_XP_PER_KILL = 1;
     const INVASION_BASE_HP = 100;
     const INVASION_WIN_KILLS = 100;
+    // Босс на 100-м попадании (2026-08-01, прямая просьба владельца "чтобы
+    // концовка волны была ярче") — не отдельное поведение, тот же цикл
+    // "услышал букву → выбрал на клавиатуре", просто с летающей тарелкой,
+    // которая не умирает с одного попадания. См. spawnInvasionBoss/
+    // resolveInvasionKill/resolveInvasionMiss ниже.
+    const INVASION_BOSS_HITS = 3; // сколько верных попаданий нужно, чтобы добить
+    const INVASION_BOSS_SPRITE = '🛸'; // отдельно от INVASION_SPRITES — не спавнится как рядовой
+    // Прорыв босса — заметно больнее обычного (владелец 2026-07-01: "пусть
+    // сносит 30 хп, а то там как раз примерно 50-70 остаётся"), не плоская
+    // invasionDamageFor(). Прогресс по числу уже засчитанных попаданий по
+    // боссу при этом НЕ сгорает — 30 HP уже достаточное наказание, снова
+    // отвечать все 3 буквы с нуля было бы слишком жёстко.
+    const INVASION_BOSS_BREACH_DAMAGE = 30;
     // Было только 👽/🦎 — по фидбеку владельца 2026-08-01 "скучно, добавь
     // монстриков" расширили зверинец, не выходя за тему "инопланетное или
     // рептилия" (та же тема, что и в project_minigame_direction): 👾 —
@@ -1005,6 +1018,10 @@
     // чтобы фейерверк успел доиграть, а не оборвался вместе с концом волны.
     let invasionCelebrating = false;
     let invasionCelebrateTimers = [];
+    // true с момента, когда счётчик волны первый раз дошёл до 99 — с этого
+    // момента обычные пришельцы больше не спавнятся, финал волны решает
+    // только босс (см. topUpInvasionEnemies/spawnInvasionBoss).
+    let invasionBossPhase = false;
     // Тряска поля при пропущенном пришельце (см. flashInvasionHit) — таймер
     // снятия класса храним отдельно, чтобы серия быстрых пропусков подряд не
     // плодила висящие setTimeout один поверх другого.
@@ -1344,8 +1361,70 @@
         syncInvasionKeyHighlights();
     }
 
+    // Босс — тарелка покрупнее рядового, с тремя "сегментами" здоровья.
+    // Спавнится ОДИН раз за волну (topUpInvasionEnemies проверяет
+    // invasionBossPhase && поле пустое), letter — та же взвешенная выборка,
+    // что и у рядовых.
+    function spawnInvasionBoss() {
+        const wpm = parseInt(invasionWpmSlider.value, 10);
+        const ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        const enemy = {
+            id: ++invasionEnemySeq,
+            ch,
+            sprite: INVASION_BOSS_SPRITE,
+            duration: invasionTierDuration(ch, wpm),
+            startTime: performance.now(),
+            lane: acquireInvasionLane(),
+            state: 'active',
+            dieX: 0, dieY: 0,
+            audio: null,
+            isBoss: true,
+            bossHits: 0,
+        };
+        invasionEnemies.push(enemy);
+        queueInvasionAudio(enemy);
+        syncInvasionKeyHighlights();
+        invasionFeedback(t('js.learn.invasion_boss_incoming'), 'ok');
+    }
+
+    // Босс ещё не добит (bossHits < INVASION_BOSS_HITS) или прорвался, но
+    // база выжила — в обоих случаях он не удаляется с поля, а "воскресает"
+    // на месте: новая буква, сброшенная позиция/озвучка, тот же id/лейн.
+    function respawnInvasionBossSegment(enemy) {
+        const wpm = parseInt(invasionWpmSlider.value, 10);
+        enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        enemy.duration = invasionTierDuration(enemy.ch, wpm);
+        enemy.startTime = performance.now();
+        enemy.state = 'active';
+        queueInvasionAudio(enemy);
+        syncInvasionKeyHighlights();
+    }
+
+    // Полоска-сегменты здоровья босса над спрайтом — единственный способ
+    // увидеть прогресс "сколько ещё бить", т.к. сам босс визуально не
+    // меняется между попаданиями (буква и озвучка и так дают обратную связь).
+    function drawInvasionBossHealth(ctx, x, y, hits, total) {
+        const segW = 11, segH = 6, gap = 3;
+        const totalW = total * segW + (total - 1) * gap;
+        let sx = x - totalW / 2;
+        const sy = y - 36;
+        for (let i = 0; i < total; i++) {
+            ctx.fillStyle = i < hits ? 'rgba(255,255,255,.25)' : '#e0473b';
+            ctx.fillRect(sx, sy, segW, segH);
+            sx += segW + gap;
+        }
+    }
+
     function topUpInvasionEnemies() {
         if (!invasionRunning) return;
+        // Фаза босса — поле держим пустым от рядовых, финал волны решает
+        // только он один. Пока он жив (или пока летит лопата в него),
+        // ничего не подсаживаем; как только поле пустеет (сам заспавнился
+        // впервые, либо respawn ещё не случился) — спавним/держим босса.
+        if (invasionBossPhase) {
+            if (invasionEnemies.length === 0) spawnInvasionBoss();
+            return;
+        }
         const target = invasionConcurrency();
         while (invasionEnemies.length < target) {
             spawnOneInvasionEnemy();
@@ -1370,8 +1449,9 @@
 
         invasionEnemies.forEach((enemy) => {
             const pos = invasionEnemyPosition(enemy, now, w, h);
-            invasionCtx.font = '30px serif';
+            invasionCtx.font = enemy.isBoss ? '46px serif' : '30px serif';
             invasionCtx.fillText(enemy.sprite, pos.x, pos.y);
+            if (enemy.isBoss) drawInvasionBossHealth(invasionCtx, pos.x, pos.y, enemy.bossHits, INVASION_BOSS_HITS);
             if (enemy.state === 'active' && pos.progress >= 1) {
                 resolveInvasionMiss(enemy);
             }
@@ -1389,10 +1469,17 @@
                     spawnInvasionParticles(p.x1, p.y1, '#6fcf7a');
                     const enemy = invasionEnemies.find((e) => e.id === p.targetId);
                     if (enemy) {
-                        releaseInvasionLane(enemy.lane);
-                        invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
-                        syncInvasionKeyHighlights();
-                        topUpInvasionEnemies();
+                        if (enemy.isBoss && enemy.bossHits < INVASION_BOSS_HITS) {
+                            // Ещё не добит — "воскрешаем" на месте с новой
+                            // буквой вместо обычного удаления/освобождения
+                            // лейна (см. resolveInvasionKill).
+                            respawnInvasionBossSegment(enemy);
+                        } else {
+                            releaseInvasionLane(enemy.lane);
+                            invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+                            syncInvasionKeyHighlights();
+                            topUpInvasionEnemies();
+                        }
                     }
                 }
             });
@@ -1483,23 +1570,53 @@
             resolved: false,
         });
 
-        invasionKills++;
         invasionCombo++;
         if (invasionCombo > invasionBestCombo) invasionBestCombo = invasionCombo;
 
         // Питает адаптивный спавн (см. invasionSpawnWeight выше) — успел
         // убить вовремя, значит букву опознаёшь уверенно, дальше она будет
-        // вылетать чуть реже прежнего.
+        // вылетать чуть реже прежнего. Работает и для босса — каждое его
+        // попадание тоже честная буква со своей адаптивной статистикой.
         Progress.recordInvasionAttempt(enemy.ch, true);
         Progress.addXp(INVASION_XP_PER_KILL);
-        updateInvasionStatsUI();
         syncInvasionKeyHighlights();
-        invasionFeedback(t('js.learn.invasion_kill', { '{ch}': enemy.ch }), 'ok');
 
-        if (invasionKills >= INVASION_WIN_KILLS) {
+        if (enemy.isBoss) {
+            enemy.bossHits++;
+            updateInvasionStatsUI();
+            if (enemy.bossHits < INVASION_BOSS_HITS) {
+                // Не финальное попадание — "воскрешение" (новая буква, та же
+                // лопата долетит и оживит его) обрабатывает invasionFrame,
+                // здесь только счёт и фидбек.
+                invasionFeedback(t('js.learn.invasion_boss_hit', { '{hits}': enemy.bossHits, '{total}': INVASION_BOSS_HITS }), 'ok');
+                return;
+            }
+            invasionKills = INVASION_WIN_KILLS;
+            invasionFeedback(t('js.learn.invasion_boss_kill'), 'ok');
             // Даём долететь последней лопате и доиграть взрыву, прежде чем
             // показать экран победы — иначе финальный удар не видно.
             setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
+            return;
+        }
+
+        invasionKills++;
+        updateInvasionStatsUI();
+        invasionFeedback(t('js.learn.invasion_kill', { '{ch}': enemy.ch }), 'ok');
+
+        if (invasionKills >= INVASION_WIN_KILLS - 1 && !invasionBossPhase) {
+            // 99-е попадание волны — переходим в фазу босса. Финал волны
+            // (100-е попадание) решает ТОЛЬКО он, один на один: остальных
+            // рядовых пришельцев на поле убираем без урона и без начисления
+            // (это не прорыв, просто "смена декораций" перед боссом) —
+            // кроме самого текущего (умирающего), его лопата уже летит и
+            // уберёт его как обычно через invasionFrame.
+            invasionBossPhase = true;
+            invasionEnemies.forEach((e) => {
+                if (e.id === enemy.id) return;
+                if (e.audio) e.audio.stop();
+                releaseInvasionLane(e.lane);
+            });
+            invasionEnemies = invasionEnemies.filter((e) => e.id === enemy.id);
         }
     }
 
@@ -1520,7 +1637,9 @@
     function resolveInvasionMiss(enemy) {
         if (enemy.state !== 'active') return; // защита от повторного срабатывания в этом же кадре
         enemy.state = 'hit';
-        const dmg = invasionDamageFor(enemy.ch);
+        // Прорыв босса — заметно больнее обычного (см. INVASION_BOSS_BREACH_DAMAGE
+        // выше), не плоская invasionDamageFor().
+        const dmg = enemy.isBoss ? INVASION_BOSS_BREACH_DAMAGE : invasionDamageFor(enemy.ch);
         invasionHp = Math.max(0, invasionHp - dmg);
         invasionCombo = 0;
         flashInvasionHit();
@@ -1532,6 +1651,25 @@
         invasionSpeedScoreSum += 0;
         invasionSpeedScoreCount++;
         if (enemy.audio) enemy.audio.stop();
+
+        if (enemy.isBoss) {
+            updateInvasionHpUI();
+            updateInvasionStatsUI();
+            invasionFeedback(t('js.learn.invasion_boss_breach', { '{dmg}': dmg }), 'bad');
+            if (invasionHp <= 0) {
+                releaseInvasionLane(enemy.lane);
+                invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+                finishInvasion(false);
+                return;
+            }
+            // База выжила — босс не исчезает, а "заходит на новый круг" с той
+            // же лейн и уже накопленными попаданиями (bossHits не откатываем:
+            // 30 HP уже достаточное наказание, требовать все 3 буквы заново
+            // было бы слишком жёстко).
+            respawnInvasionBossSegment(enemy);
+            return;
+        }
+
         releaseInvasionLane(enemy.lane);
         invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
 
@@ -1639,6 +1777,7 @@
         invasionCelebrating = false;
         invasionCelebrateTimers.forEach(clearTimeout);
         invasionCelebrateTimers = [];
+        invasionBossPhase = false;
         cancelAnimationFrame(invasionRafId);
         invasionRafId = null;
         invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
@@ -1677,6 +1816,7 @@
         // invasionCelebrating истинно).
         if (invasionRafId !== null) { cancelAnimationFrame(invasionRafId); invasionRafId = null; }
         invasionRunning = true;
+        invasionBossPhase = false;
         invasionHp = INVASION_BASE_HP;
         invasionKills = 0;
         invasionCombo = 0;
