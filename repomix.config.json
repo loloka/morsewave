@@ -1,0 +1,61 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+
+  // Конфиг для ЛОКАЛЬНОГО запуска `npx repomix`.
+  // При пакинге по URL на repomix.com он НЕ загружается (удалённый конфиг
+  // требует --remote-trust-config) — там работает только .repomixignore
+  // и поле «Ignore Patterns» в интерфейсе.
+  //
+  // Профили под задачу (флаг -i перекрывает ignore.customPatterns,
+  // но .repomixignore продолжает действовать в любом случае):
+  //
+  //   npx repomix
+  //       — полный пак: код + переводы + README (оба языка).
+  //
+  //   npx repomix -i "lang/**,README.en.md"
+  //       — только код. Минус ~38k токенов. Брать, когда задача НЕ трогает
+  //         пользовательские строки: правило «ключ обязан быть и в ru.php,
+  //         и в en.php» без словарей не проверить.
+  //
+  //   npx repomix --include "assets/js/**,*.php,api/**"
+  //       — узкий пак под правку конкретной логики, без документации вообще.
+
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "fileSummary": true,
+    "directoryStructure": true,
+
+    // Сжатие Tree-sitter выкидывает тела функций, оставляя сигнатуры.
+    // Для этого проекта не годится: почти вся логика — в телах функций
+    // (`learn.js`, `groups.js`), от сигнатур толку нет.
+    "compress": false,
+
+    // НЕ включать. Комментарии в этом репозитории — не шум: в них записано,
+    // почему сделано именно так, и по ним же написана половина правил
+    // CLAUDE.md. Вырезать их = выкинуть ровно ту часть контекста, ради
+    // которой пак и собирается.
+    "removeComments": false,
+
+    "removeEmptyLines": false,
+    "showLineNumbers": false,
+    "topFilesLength": 10,
+
+    // Страховка от разрастания: пак генерируется, но команда завершается
+    // с ненулевым кодом. Сигнал сходить и подрезать .repomixignore.
+    "tokenBudget": 200000
+  },
+
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    // Постоянные исключения живут в .repomixignore — так они работают
+    // и для repomix.com. Здесь пусто намеренно, чтобы -i из командной
+    // строки ничего не затирал.
+    "customPatterns": []
+  },
+
+  "security": {
+    "enableSecurityCheck": true
+  }
+}
