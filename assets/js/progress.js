@@ -33,6 +33,13 @@ const Progress = (() => {
         // Ключи — как и у learnedLetters/rhythmMasteredLetters (с префиксом
         // RU_ у кириллицы).
         rhythmBestByLetter: {},
+        // Личная "успеваемость" по каждой букве в режиме "Вторжение" (0..1,
+        // выше = увереннее опознаёшь) — см. recordInvasionAttempt/
+        // invasionLetterScore. Используется только для того, КАКИЕ буквы
+        // чаще вылетают волной (адаптивная сложность, 2026-08-01), не влияет
+        // на XP/ачивки, поэтому упрощённый merge (max) в mergeFromServer —
+        // см. комментарий там.
+        invasionLetterScores: {},
         kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
         // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
         // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
@@ -257,6 +264,22 @@ const Progress = (() => {
             });
         }
 
+        // Успеваемость по буквам во "Вторжении" — тем же принципом (max по
+        // каждому ключу), что и rhythmBestByLetter выше. Строго говоря, это
+        // не "рекорд" (число может и падать при неудачах на одном
+        // устройстве), но раз оно используется только для частоты спавна, а
+        // не для XP/ачивок, берём более ВЫСОКОЕ (= "тебе тут увереннее")
+        // число с любого устройства — тот же дух "никогда не откатывать
+        // назад", просто применённый к менее строгому полю.
+        {
+            const localScores = (local.invasionLetterScores && typeof local.invasionLetterScores === 'object') ? local.invasionLetterScores : {};
+            const serverScores = (server.invasionLetterScores && typeof server.invasionLetterScores === 'object') ? server.invasionLetterScores : {};
+            merged.invasionLetterScores = {};
+            new Set([...Object.keys(localScores), ...Object.keys(serverScores)]).forEach((k) => {
+                merged.invasionLetterScores[k] = Math.max(Number(localScores[k]) || 0, Number(serverScores[k]) || 0);
+            });
+        }
+
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
         const localStats = local.stats || {};
@@ -370,6 +393,50 @@ const Progress = (() => {
             return pct;
         }
         return prev;
+    }
+
+    // Нейтральная стартовая "успеваемость" для буквы, которую ещё ни разу
+    // не видели во "Вторжении" — не 1 (иначе новая буква спавнилась бы реже
+    // всех, хотя её ещё не тренировали ни разу) и не 0 (иначе спавнилась бы
+    // подозрительно часто с первой волны). 0.7 — то же самое число, что уже
+    // используется как "хороший, но не идеальный" ориентир в других местах
+    // прогресса.
+    const INVASION_NEUTRAL_SCORE = 0.7;
+
+    /**
+     * Читает текущую "успеваемость" по букве во "Вторжении" — 0..1, выше =
+     * увереннее опознаёшь. Только чтение, ничего не пишет и не пушит на
+     * сервер (см. invasionSpawnWeight в learn.js, который вызывает это на
+     * каждый спавн пришельца).
+     */
+    function invasionLetterScore(ch) {
+        const state = load();
+        const scores = state.invasionLetterScores;
+        return (scores && typeof scores[ch] === 'number') ? scores[ch] : INVASION_NEUTRAL_SCORE;
+    }
+
+    /**
+     * Обновляет "успеваемость" по букве во "Вторжении" после каждого исхода
+     * (убил вовремя = correct true, пришелец прорвался = correct false) —
+     * экспоненциальное скользящее среднее (вес 0.2 у нового исхода), а не
+     * простое отношение побед/поражений, чтобы недавняя игра значила больше
+     * старой (человек мог за неделю подтянуть букву, которую путал раньше).
+     * Питает адаптивный спавн (см. invasionSpawnWeight в learn.js): буквы с
+     * низким счётом появляются в волне чаще. НЕ участвует в XP/ачивках —
+     * зовётся на КАЖДОЕ попадание/промах, не разово, поэтому фармить тут
+     * нечего.
+     */
+    function recordInvasionAttempt(ch, correct) {
+        const state = load();
+        if (!state.invasionLetterScores || typeof state.invasionLetterScores !== 'object') {
+            state.invasionLetterScores = {};
+        }
+        const prev = (typeof state.invasionLetterScores[ch] === 'number') ? state.invasionLetterScores[ch] : INVASION_NEUTRAL_SCORE;
+        const target = correct ? 1 : 0;
+        state.invasionLetterScores[ch] = prev * 0.8 + target * 0.2;
+        save(state);
+        pushFullProgress();
+        return state;
     }
 
     /**
@@ -583,6 +650,7 @@ const Progress = (() => {
 
     return {
         load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, updateRhythmBest, setKochLevel, incrementStat,
+        invasionLetterScore, recordInvasionAttempt,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,

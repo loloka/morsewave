@@ -1290,11 +1290,39 @@
         invasionAudioChain = invasionAudioChain.then(() => playInvasionEnemyAudio(enemy)).catch(() => {});
     }
 
+    // Адаптивная сложность (2026-08-01, по просьбе владельца): буквы, которые
+    // лично ты чаще путаешь/пропускаешь, должны вылетать чаще, а не с той же
+    // частотой, что и уже отточенные — так и в morsecommand.com (см. память
+    // project_minigame_direction). Persist — в Progress.invasionLetterScores
+    // (0..1, выше = увереннее), обновляется в resolveInvasionKill/
+    // resolveInvasionMiss. Тут — только чтение и превращение в вес для
+    // случайного выбора: 0.15 у идеально отточенной буквы (не ноль — иначе
+    // она вообще переставала бы появляться и тренировать было бы нечего),
+    // до ~1.15 у той, которую постоянно пропускаешь.
+    function invasionSpawnWeight(ch) {
+        const score = Progress.invasionLetterScore(ch);
+        return Math.max(0.15, 1.15 - score);
+    }
+
+    // Взвешенный случайный выбор — не topping the deck, а честная лотерея с
+    // разными "билетами" на буквы. При пустом/однобуквенном pool ведёт себя
+    // как обычный случайный выбор.
+    function pickInvasionLetterWeighted(pool) {
+        const weights = pool.map(invasionSpawnWeight);
+        const total = weights.reduce((sum, w) => sum + w, 0);
+        let r = Math.random() * total;
+        for (let i = 0; i < pool.length; i++) {
+            r -= weights[i];
+            if (r <= 0) return pool[i];
+        }
+        return pool[pool.length - 1]; // страховка от погрешности плавающей точки
+    }
+
     function spawnOneInvasionEnemy() {
         const activeChars = invasionEnemies.map((e) => e.ch);
         const available = ALL_LEARNABLE.filter((ch) => !activeChars.includes(ch));
         const pool = available.length ? available : ALL_LEARNABLE;
-        const ch = pool[Math.floor(Math.random() * pool.length)];
+        const ch = pickInvasionLetterWeighted(pool);
         const sprite = INVASION_SPRITES[Math.floor(Math.random() * INVASION_SPRITES.length)];
         const wpm = parseInt(invasionWpmSlider.value, 10);
         // Запас времени на очередь озвучки — сколько пришельцев уже стоят
@@ -1459,6 +1487,10 @@
         invasionCombo++;
         if (invasionCombo > invasionBestCombo) invasionBestCombo = invasionCombo;
 
+        // Питает адаптивный спавн (см. invasionSpawnWeight выше) — успел
+        // убить вовремя, значит букву опознаёшь уверенно, дальше она будет
+        // вылетать чуть реже прежнего.
+        Progress.recordInvasionAttempt(enemy.ch, true);
         Progress.addXp(INVASION_XP_PER_KILL);
         updateInvasionStatsUI();
         syncInvasionKeyHighlights();
@@ -1492,6 +1524,9 @@
         invasionHp = Math.max(0, invasionHp - dmg);
         invasionCombo = 0;
         flashInvasionHit();
+        // Питает адаптивный спавн (см. invasionSpawnWeight выше) — не успел
+        // опознать вовремя, значит букву стоит потренировать почаще.
+        Progress.recordInvasionAttempt(enemy.ch, false);
         // Прорыв — худший возможный исход для бонуса скорости (см.
         // resolveInvasionKill): 0 очков, а не просто "не считаем".
         invasionSpeedScoreSum += 0;
