@@ -126,6 +126,33 @@
     }
 
     /**
+     * Тот же randomGroup, но с лёгким перекосом вероятности в пользу букв, на
+     * которых пользователь чаще ошибается (Progress.groupsLetterScore, 0..1,
+     * ниже = слабее). По просьбе владельца (2026-08-02) эффект нарочно
+     * мягкий и незаметный — коэффициент 0.5 даёт разброс веса всего 1.0..1.5
+     * (самая слабая буква выпадает максимум в полтора раза чаще самой
+     * уверенной), никакого доминирования одной буквы в группе. НИКОГДА не
+     * зови на экзаменационной сессии — экзамен должен оставаться честно
+     * случайным (см. randomGroup выше, которым startSession пользуется для
+     * isExam).
+     */
+    function weightedRandomGroup(charset, len) {
+        const weights = charset.map(ch => 1 + (1 - Progress.groupsLetterScore(ch)) * 0.5);
+        const total = weights.reduce((sum, w) => sum + w, 0);
+        let g = '';
+        for (let i = 0; i < len; i++) {
+            let r = Math.random() * total;
+            let idx = 0;
+            while (idx < charset.length - 1 && r > weights[idx]) {
+                r -= weights[idx];
+                idx++;
+            }
+            g += charset[idx];
+        }
+        return g;
+    }
+
+    /**
      * Ставка XP за один верный символ. Маленький кастомный набор (например,
      * 5 лёгких букв) — это существенно проще полного алфавита, поэтому
      * даёт меньше опыта: иначе можно было бы фармить XP почти бесплатно.
@@ -202,7 +229,7 @@
         pendingExamMode = false;
 
         session = {
-            groups: Array.from({ length: count }, () => randomGroup(charset, groupLen)),
+            groups: Array.from({ length: count }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, groupLen)),
             index: 0, wpm, farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
             xpRate: xpRateForSession(charset.length, groupLen, { daily: isDailyChallenge, wpm }),
@@ -329,6 +356,16 @@
 
         session.correctChars += correct;
         session.totalChars += expected.length;
+
+        // Питает лёгкое взвешивание будущих групп (weightedRandomGroup) —
+        // только не-экзаменационные сессии сюда и попадают, submitAnswer не
+        // вызывается на isExam (см. finishExamSession/examSubmitBtn).
+        if (!session.isExam) {
+            const typedUpper = typed.toUpperCase();
+            for (let i = 0; i < expected.length; i++) {
+                Progress.recordGroupsAttempt(expected[i], typedUpper[i] === expected[i]);
+            }
+        }
 
         // Начисляем сразу за эту группу — так прогресс не теряется,
         // даже если сессия не будет пройдена до конца.

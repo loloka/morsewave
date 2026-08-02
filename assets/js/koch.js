@@ -214,9 +214,29 @@
         box.style.display = box.style.display === 'none' ? 'block' : 'none';
     });
 
-    function randomGroup(charset, len) {
+    /**
+     * Тот же принцип, что и weightedRandomGroup в groups.js (2026-08-02) —
+     * лёгкий уклон в сторону символов, которые пользователь чаще путает
+     * (Progress.kochLetterScore), вес 1.0..1.5, незаметно на глаз. В отличие
+     * от "Групп" тут нет отдельного "честного" режима вроде экзамена — но
+     * есть PASS_THRESHOLD (0.9) в finishSession, которым меряется открытие
+     * следующего символа. Уклон настолько мягкий, что не должен систематически
+     * мешать перейти порог — если и мешает, то ровно потому, что открытый
+     * набор реально ещё не освоен, а не из-за перекоса выборки.
+     */
+    function weightedRandomGroup(charset, len) {
+        const weights = charset.map(ch => 1 + (1 - Progress.kochLetterScore(ch)) * 0.5);
+        const total = weights.reduce((sum, w) => sum + w, 0);
         let g = '';
-        for (let i = 0; i < len; i++) g += charset[Math.floor(Math.random() * charset.length)];
+        for (let i = 0; i < len; i++) {
+            let r = Math.random() * total;
+            let idx = 0;
+            while (idx < charset.length - 1 && r > weights[idx]) {
+                r -= weights[idx];
+                idx++;
+            }
+            g += charset[idx];
+        }
         return g;
     }
 
@@ -253,7 +273,7 @@
         const charset = currentCharset();
 
         session = {
-            groups: Array.from({ length: count }, () => randomGroup(charset, GROUP_LEN)),
+            groups: Array.from({ length: count }, () => weightedRandomGroup(charset, GROUP_LEN)),
             index: 0,
             wpm, farnsworth, count,
             correctChars: 0,
@@ -293,6 +313,14 @@
 
         session.correctChars += correct;
         session.totalChars += expected.length;
+
+        // Питает weightedRandomGroup — см. комментарий там.
+        {
+            const typedUpper = typed.toUpperCase();
+            for (let i = 0; i < expected.length; i++) {
+                Progress.recordKochAttempt(expected[i], typedUpper[i] === expected[i]);
+            }
+        }
 
         // Начисляем сразу за эту группу — если сессия не будет
         // пройдена до конца, заработанное всё равно не потеряется.

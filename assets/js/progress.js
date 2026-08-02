@@ -40,6 +40,21 @@ const Progress = (() => {
         // на XP/ачивки, поэтому упрощённый merge (max) в mergeFromServer —
         // см. комментарий там.
         invasionLetterScores: {},
+        // Личная "успеваемость" по каждой букве/цифре в НЕ-экзаменационных
+        // сессиях "Групп" (0..1, тот же принцип EMA, что и у
+        // invasionLetterScores, но отдельный скоуп — см.
+        // groupsLetterScore/recordGroupsAttempt). Экзамен НИКОГДА не читает и
+        // не пишет это поле — его набор групп обязан быть честно случайным.
+        // Используется только для лёгкого смещения вероятности буквы при
+        // генерации следующей группы (по просьбе владельца — "чтобы сильно не
+        // влияло, чтобы было незаметно", 2026-08-02), не влияет на XP/ачивки.
+        groupsLetterScores: {},
+        // Тот же принцип для "Метода Коха" (weightedRandomGroup в koch.js),
+        // отдельный скоуп от groupsLetterScores — набор символов там задан
+        // уровнем, а не выбором человека, ключи и смысл те же, но мешать в
+        // одну статистику режимы с разной механикой не стоит (та же логика,
+        // что развела invasionLetterScores и groupsLetterScores).
+        kochLetterScores: {},
         kochLevel: 2, // сколько символов Koch-порядка уже открыто (можно двигать бегунком)
         // Сколько символов Коха РЕАЛЬНО заработано пройденной сессией (≥90%).
         // Отдельно от kochLevel: бегунок «Перейти к уровню» меняет только
@@ -280,6 +295,27 @@ const Progress = (() => {
             });
         }
 
+        // groupsLetterScores — тот же max-по-ключу принцип и по той же
+        // причине (не рекорд, просто "не откатываем назад").
+        {
+            const localScores = (local.groupsLetterScores && typeof local.groupsLetterScores === 'object') ? local.groupsLetterScores : {};
+            const serverScores = (server.groupsLetterScores && typeof server.groupsLetterScores === 'object') ? server.groupsLetterScores : {};
+            merged.groupsLetterScores = {};
+            new Set([...Object.keys(localScores), ...Object.keys(serverScores)]).forEach((k) => {
+                merged.groupsLetterScores[k] = Math.max(Number(localScores[k]) || 0, Number(serverScores[k]) || 0);
+            });
+        }
+
+        // kochLetterScores — тот же max-по-ключу принцип.
+        {
+            const localScores = (local.kochLetterScores && typeof local.kochLetterScores === 'object') ? local.kochLetterScores : {};
+            const serverScores = (server.kochLetterScores && typeof server.kochLetterScores === 'object') ? server.kochLetterScores : {};
+            merged.kochLetterScores = {};
+            new Set([...Object.keys(localScores), ...Object.keys(serverScores)]).forEach((k) => {
+                merged.kochLetterScores[k] = Math.max(Number(localScores[k]) || 0, Number(serverScores[k]) || 0);
+            });
+        }
+
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
         const localStats = local.stats || {};
@@ -434,6 +470,61 @@ const Progress = (() => {
         const prev = (typeof state.invasionLetterScores[ch] === 'number') ? state.invasionLetterScores[ch] : INVASION_NEUTRAL_SCORE;
         const target = correct ? 1 : 0;
         state.invasionLetterScores[ch] = prev * 0.8 + target * 0.2;
+        save(state);
+        pushFullProgress();
+        return state;
+    }
+
+    // Тот же нейтральный старт 0.7, что и у "Вторжения" (см. комментарий у
+    // INVASION_NEUTRAL_SCORE) — не 1 (иначе непройденная буква никогда не
+    // получила бы небольшой прибавки в шансе выпасть) и не 0 (иначе новые
+    // буквы сразу доминировали бы в группах).
+    const GROUPS_NEUTRAL_SCORE = 0.7;
+
+    /**
+     * Читает "успеваемость" по букве/цифре в НЕ-экзаменационных "Группах" —
+     * см. комментарий у groupsLetterScores в defaults(). Только чтение.
+     */
+    function groupsLetterScore(ch) {
+        const state = load();
+        const scores = state.groupsLetterScores;
+        return (scores && typeof scores[ch] === 'number') ? scores[ch] : GROUPS_NEUTRAL_SCORE;
+    }
+
+    /**
+     * Обновляет "успеваемость" по букве/цифре после каждой отвеченной группы
+     * в "Группах" (не в экзамене — вызывающий код обязан не звать это на
+     * isExam-сессиях). Та же EMA-схема (вес 0.2), что и у
+     * recordInvasionAttempt — недавние ответы значат больше старых.
+     */
+    function recordGroupsAttempt(ch, correct) {
+        const state = load();
+        if (!state.groupsLetterScores || typeof state.groupsLetterScores !== 'object') {
+            state.groupsLetterScores = {};
+        }
+        const prev = (typeof state.groupsLetterScores[ch] === 'number') ? state.groupsLetterScores[ch] : GROUPS_NEUTRAL_SCORE;
+        const target = correct ? 1 : 0;
+        state.groupsLetterScores[ch] = prev * 0.8 + target * 0.2;
+        save(state);
+        pushFullProgress();
+        return state;
+    }
+
+    /** То же самое, но для "Метода Коха" — см. kochLetterScores в defaults(). */
+    function kochLetterScore(ch) {
+        const state = load();
+        const scores = state.kochLetterScores;
+        return (scores && typeof scores[ch] === 'number') ? scores[ch] : GROUPS_NEUTRAL_SCORE;
+    }
+
+    function recordKochAttempt(ch, correct) {
+        const state = load();
+        if (!state.kochLetterScores || typeof state.kochLetterScores !== 'object') {
+            state.kochLetterScores = {};
+        }
+        const prev = (typeof state.kochLetterScores[ch] === 'number') ? state.kochLetterScores[ch] : GROUPS_NEUTRAL_SCORE;
+        const target = correct ? 1 : 0;
+        state.kochLetterScores[ch] = prev * 0.8 + target * 0.2;
         save(state);
         pushFullProgress();
         return state;
@@ -676,6 +767,8 @@ const Progress = (() => {
     return {
         load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, updateRhythmBest, setKochLevel, incrementStat,
         invasionLetterScore, recordInvasionAttempt,
+        groupsLetterScore, recordGroupsAttempt,
+        kochLetterScore, recordKochAttempt,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,
