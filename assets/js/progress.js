@@ -10,6 +10,66 @@ const Progress = (() => {
     // лежит отдельным ключом и не попадает в бэкап.
     const SYNC_KEY = 'morsewave_last_sync';
 
+    // --- api/dashboard.php: один batch-запрос вместо кучи отдельных ---
+    // Раньше achievements.php, stats.php, leaderboard.php, pull_progress.php
+    // дёргались отдельными fetch'ами почти одновременно на каждой загрузке
+    // страницы (через app.js) — 4-6 отдельных подключений к MySQL разом.
+    // Под нагрузкой это ловило "Host is blocked because of many connection
+    // errors" (инцидент 2026-08-09, см. CHANGELOG). Теперь всё через один
+    // эндпоинт с ?parts=, одно подключение на запрос.
+    //
+    // achievements/stats/leaderboard почти не меняются между страницами
+    // одной вкладки — кэшируем их в sessionStorage на DASH_CACHE_TTL_MS,
+    // чтобы переходы по сайту не дёргали БД заново. progress — ВСЕГДА
+    // свежий (нужен для merge при каждой загрузке) и в кэш не попадает.
+    const DASH_CACHE_TTL_MS = 60 * 1000;
+    const DASH_CACHE_KEY = 'morsewave_dash_cache_v1';
+    let dashInFlight = null; // {key, promise} — дедуп одновременных вызовов с одинаковым набором частей
+
+    function readDashCache() {
+        try { return JSON.parse(sessionStorage.getItem(DASH_CACHE_KEY)) || {}; }
+        catch { return {}; }
+    }
+    function readDashCacheEntry(part) {
+        const entry = readDashCache()[part];
+        if (!entry || (Date.now() - entry.at) > DASH_CACHE_TTL_MS) return undefined;
+        return entry.value;
+    }
+    function writeDashCacheEntry(part, value) {
+        try {
+            const cache = readDashCache();
+            cache[part] = { at: Date.now(), value };
+            sessionStorage.setItem(DASH_CACHE_KEY, JSON.stringify(cache));
+        } catch { /* приватный режим/переполнение квоты — не критично, просто не кэшируем */ }
+    }
+
+    async function fetchDashboard(parts) {
+        const result = {};
+        const need = [];
+        for (const part of parts) {
+            if (part === 'progress') { need.push(part); continue; }
+            const cached = readDashCacheEntry(part);
+            if (cached !== undefined) result[part] = cached;
+            else need.push(part);
+        }
+        if (!need.length) return result;
+
+        const key = need.slice().sort().join(',');
+        if (!dashInFlight || dashInFlight.key !== key) {
+            dashInFlight = {
+                key,
+                promise: fetch('api/dashboard.php?parts=' + need.join(','))
+                    .then((res) => res.json())
+                    .finally(() => { dashInFlight = null; }),
+            };
+        }
+        const data = await dashInFlight.promise;
+        for (const part of need) {
+            if (part !== 'progress' && data[part] !== undefined) writeDashCacheEntry(part, data[part]);
+        }
+        return { ...result, ...data };
+    }
+
     const defaults = () => ({
         xp: 0,
         learnedLetters: [],
@@ -353,10 +413,12 @@ const Progress = (() => {
      */
     async function syncWithServer() {
         try {
-            const res = await fetch('api/pull_progress.php');
-            if (!res.ok) return null;
-            const data = await res.json();
-            if (!data.ok) return null;
+            // Раньше — отдельный fetch('api/pull_progress.php') с проверкой
+            // res.ok/data.ok. Теперь тот же смысл несёт data.loggedIn из
+            // batch-эндпоинта (см. fetchDashboard выше): гость выходит здесь
+            // же, ничего не мержа и не пуша — как и раньше.
+            const data = await fetchDashboard(['progress']);
+            if (!data.loggedIn) return null;
             const merged = mergeFromServer(data.progress);
             save(merged);
             window.dispatchEvent(new CustomEvent('progress:updated', { detail: merged }));
@@ -621,16 +683,23 @@ const Progress = (() => {
     }
 
     let cachedAchievements = null;
+    // Отдельный in-flight промис, а не только резолвленное значение выше:
+    // renderNavStats()+checkAchievements() и следом syncWithServer() (оба
+    // зовутся из app.js на DOMContentLoaded практически синхронно) раньше
+    // ловили гонку — на момент второго вызова cachedAchievements ещё null,
+    // потому что первый fetch ещё не успел ответить, и улетал ВТОРОЙ такой
+    // же запрос. Кэш резолвленного значения не спасал именно от гонки.
+    let achievementsPromise = null;
 
     async function fetchAchievementDefs() {
         if (cachedAchievements) return cachedAchievements;
-        try {
-            const res = await fetch('api/achievements.php');
-            cachedAchievements = await res.json();
-        } catch {
-            cachedAchievements = [];
+        if (!achievementsPromise) {
+            achievementsPromise = fetchDashboard(['achievements'])
+                .then((data) => { cachedAchievements = data.achievements || []; return cachedAchievements; })
+                .catch(() => { cachedAchievements = []; return cachedAchievements; })
+                .finally(() => { achievementsPromise = null; });
         }
-        return cachedAchievements;
+        return achievementsPromise;
     }
 
     async function checkAchievements() {
@@ -773,5 +842,6 @@ const Progress = (() => {
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         mergeFromServer, syncWithServer, pushNow,
         lastSyncAt, exportBackup, importBackup,
+        fetchDashboard,
     };
 })();

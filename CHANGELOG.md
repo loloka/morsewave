@@ -6,6 +6,36 @@
 Здесь — записи с **v2.49** и новее. Всё, что старше (v2.48 → v1), вынесено
 в [CHANGELOG-archive.md](CHANGELOG-archive.md) — целиком, без сокращений.
 
+## v2.73 — api/dashboard.php: батч-эндпоинт вместо шторма подключений к MySQL (2026-08-09)
+
+Инцидент: на каждой загрузке любой страницы (`app.js` дёргается из
+`footer.php` глобально) параллельно улетали `achievements.php` (иногда даже
+дважды — гонка на ещё не установленном кэше) и `pull_progress.php`, следом
+`push_progress.php` и `refresh_published_stats.php`; на главной ещё
+`stats.php` и `leaderboard.php`. До 6 отдельных подключений к MySQL на один
+визит — под наплывом посетителей поймали `Host is blocked because of many
+connection errors` (09:44–09:52, одновременно с падением форума на основном
+домене).
+
+- Новый `api/dashboard.php` (GET, `?parts=achievements,stats,leaderboard,progress`)
+  отдаёт всё запрошенное одним подключением к БД вместо четырёх.
+- `progress.js`: `fetchDashboard()` — обёртка с дедупом одновременных вызовов
+  (in-flight промис, не только резолвленное значение — это и чинило гонку
+  `achievements.php`×2) и кэшем achievements/stats/leaderboard в
+  sessionStorage на 60 сек (progress — всегда свежий, в кэш не попадает).
+  `syncWithServer()` и `fetchAchievementDefs()` переведены на неё.
+- `home.js`: `stats.php`+`leaderboard.php` заменены на один
+  `Progress.fetchDashboard(['stats','leaderboard'])`.
+- `push_progress.php`/`refresh_published_stats.php` не трогали — это POST,
+  уже идут последовательно после pull, не параллельно.
+- Аудит подключений: каждый `api/*.php` открывает ровно одно PDO-соединение
+  на запрос (через `config/database.php`, включаемый один раз), дублей внутри
+  запроса не найдено — проблема была именно в числе ОТДЕЛЬНЫХ запросов, не в
+  количестве соединений на запрос.
+- `DB_HOST` в репозитории по умолчанию `localhost` (докер переопределяет на
+  `db`); `config/database.php` в `.gitignore`, боевое значение на VPS этой
+  сессией не проверялось — свериться вручную.
+
 ## v2.72 — банк позывных: контакты из личного лога R9OGL (2026-08-02)
 
 - `database/seed_logbook_callsigns.sql` — разовый готовый SQL (не PHP-скрипт,

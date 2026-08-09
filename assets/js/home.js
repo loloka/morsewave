@@ -64,16 +64,20 @@
         }
     })();
 
-    // Общая статистика сообщества
+    // Общая статистика сообщества + таблица лидеров — раньше два отдельных
+    // fetch'а (stats.php, leaderboard.php), теперь один batch-запрос к
+    // api/dashboard.php (см. progress.js: fetchDashboard кэширует ответ в
+    // sessionStorage на минуту, повторные заходы на главную в той же
+    // вкладке БД не дёргают). Общий try/catch — если запрос не прошёл,
+    // отваливаются обе секции разом, но это один сетевой сбой, не два.
+    let dash = {};
     try {
-        const res = await fetch('api/stats.php');
-        const stats = await res.json();
-        document.getElementById('stat-groups').textContent = stats.total_groups ?? 0;
-        document.getElementById('stat-callsigns').textContent = stats.total_callsigns ?? 0;
-    } catch {
-        document.getElementById('stat-groups').textContent = '—';
-        document.getElementById('stat-callsigns').textContent = '—';
-    }
+        dash = await Progress.fetchDashboard(['stats', 'leaderboard']);
+    } catch { /* обработка ниже — dash остаётся {} */ }
+
+    const stats = dash.stats || null;
+    document.getElementById('stat-groups').textContent = stats ? (stats.total_groups ?? 0) : '—';
+    document.getElementById('stat-callsigns').textContent = stats ? (stats.total_callsigns ?? 0) : '—';
 
     // Таблица лидеров: топ-10 + (если пользователь опубликован, но не попал
     // в десятку) отдельной строкой его настоящее место — "…" перед ней,
@@ -116,12 +120,10 @@
         return div.innerHTML;
     }
 
-    try {
-        const res = await fetch('api/leaderboard.php?limit=10');
-        const data = await res.json();
-        renderLeaderboard(document.getElementById('leaderboard-xp'), data.byXp || [], 'xp', 'xp_rank', data.me);
-        renderLeaderboard(document.getElementById('leaderboard-streak'), data.byStreak || [], 'streak_count', 'streak_rank', data.me);
-    } catch {
+    if (dash.leaderboard) {
+        renderLeaderboard(document.getElementById('leaderboard-xp'), dash.leaderboard.byXp || [], 'xp', 'xp_rank', dash.leaderboard.me);
+        renderLeaderboard(document.getElementById('leaderboard-streak'), dash.leaderboard.byStreak || [], 'streak_count', 'streak_rank', dash.leaderboard.me);
+    } else {
         document.getElementById('leaderboard-xp').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';
         document.getElementById('leaderboard-streak').innerHTML = '<p class="muted">' + t('js.home.leaderboard_load_failed') + '</p>';
     }
