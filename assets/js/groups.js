@@ -290,20 +290,24 @@
         }
     }
 
-    const EXAM_COUNTDOWN_STEPS = [3, 2, 1];
-    const EXAM_COUNTDOWN_STEP_MS = 800;
-
-    function delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
+    // «ЖЖЖ=» — русский вариант общепринятого настроечного сигнала (у Ж и
+    // латинской V один и тот же код Морзе «...-», см. CYRILLIC_CODE в
+    // morse-data.js), «=» на конце — стандартный знак раздела, означающий
+    // «начинаю передачу». Отсчёт синхронизирован с самими буквами (не идёт
+    // ПОСЛЕ сигнала отдельным шагом), см. onCharStart ниже.
+    const EXAM_ATTENTION_TEXT = 'ЖЖЖ=';
+    const EXAM_ATTENTION_COUNTDOWN = { 0: '3', 1: '2', 2: '1' };
 
     /**
-     * Настроечный VVV (общепринятый в радиотелеграфии сигнал готовности) +
-     * видимый обратный отсчёт «Приготовьтесь: 3…2…1…» перед самой передачей
-     * экзамена — чтобы человек успел взять карандаш. Поле ответа и кнопка
-     * «Остановить и проверить» на это время заблокированы (см. startSession):
-     * без этого можно было случайно начать печатать ещё до начала передачи.
-     * Просьба R8OA, мастера спорта по скоростной телеграфии, 2026-08-09.
+     * Настроечный ЖЖЖ= + видимый обратный отсчёт «Приготовьтесь: 3…2…1…»
+     * перед самой передачей экзамена, чтобы человек успел взять карандаш.
+     * Цифра переключается ровно в момент начала каждой из трёх букв Ж
+     * (audio.play() зовёт onCharStart в начале каждого символа) — отсчёт
+     * идёт СИНХРОННО с сигналом, а не отдельным шагом после него. Поле
+     * ответа и кнопка «Остановить и проверить» на это время заблокированы
+     * (см. startSession): без этого можно было случайно начать печатать
+     * ещё до начала передачи. Просьба R8OA, мастера спорта по скоростной
+     * телеграфии, 2026-08-09.
      *
      * mySession — снимок session на момент запуска: если пользователь как-то
      * успеет перезапустить сессию, пока эта асинхронная цепочка ещё идёт,
@@ -317,22 +321,22 @@
 
         try {
             const audio = new MorseAudio({ wpm: mySession.wpm });
-            await audio.play('VVV', {
+            await audio.play(EXAM_ATTENTION_TEXT, {
+                onCharStart: ({ index }) => {
+                    if (session !== mySession || mySession.examStopped) return;
+                    const n = EXAM_ATTENTION_COUNTDOWN[index];
+                    feedbackEl.textContent = n !== undefined
+                        ? t('js.groups.exam_get_ready', { '{n}': n })
+                        : t('js.groups.exam_go');
+                    feedbackEl.className = 'feedback show ok';
+                },
                 onSymbol: ({ symbol, durationMs }) => {
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
                 },
             });
         } catch (e) {
-            console.error('Ошибка воспроизведения сигнала VVV:', e);
-        }
-        if (session !== mySession || mySession.examStopped) return;
-
-        for (const n of EXAM_COUNTDOWN_STEPS) {
-            if (session !== mySession || mySession.examStopped) return;
-            feedbackEl.textContent = t('js.groups.exam_get_ready', { '{n}': String(n) });
-            feedbackEl.className = 'feedback show ok';
-            await delay(EXAM_COUNTDOWN_STEP_MS);
+            console.error('Ошибка воспроизведения сигнала ЖЖЖ=:', e);
         }
         if (session !== mySession || mySession.examStopped) return;
 

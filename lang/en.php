@@ -685,9 +685,12 @@ HTML,
     'js.groups.exam_stop_check' => '⏹ Stop and check',
     // Tuning signal before the exam (requested by R8OA, master of sport in
     // high-speed telegraphy, 2026-08-09): gives time to grab a pencil, the
-    // answer field is locked during it.
-    'js.groups.exam_attention' => '✎ Get ready — a VVV tuning signal will play, followed by a countdown.',
+    // answer field is locked during it. The countdown is synced with the
+    // ЖЖЖ= signal itself, not a separate step after it (ЖЖЖ is the Russian
+    // CW convention — same Morse code as Latin VVV).
+    'js.groups.exam_attention' => '✎ Get ready — the ЖЖЖ= tuning signal is about to play.',
     'js.groups.exam_get_ready' => 'Get ready: {n}…',
+    'js.groups.exam_go' => '📡 Copy now!',
     'js.groups.correct' => 'Correct: {expected}',
     'js.groups.wrong' => 'Expected: {expected} — you typed: {typed}',
     'js.groups.empty_placeholder' => '(empty)',
