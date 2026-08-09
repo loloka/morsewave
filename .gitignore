@@ -12,5 +12,9 @@ config/database.php
 # Реальные креды почты — аналогично, в git не попадают
 config/mail.php
 
+# Токен "рубильника" техобслуживания (maintenance-switch.php) — по сути
+# пароль, в git не попадает, на проде создаётся руками
+config/maintenance_secret.php
+
 # Локальные секреты для docker-compose (если заведёшь .env)
 .env
