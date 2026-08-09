@@ -1022,6 +1022,12 @@ input[type="range"] {
     display: inline-block;
     text-align: right;
 }
+/* Подсказка "≈N зн/мин" рядом со скоростью — вспомогательная, мельче и
+   тише основного значения wpm, чтобы не спорить с ним за внимание. */
+.speed-control .cpm-hint {
+    font-size: 11px;
+    margin-left: -4px;
+}
 
 /* ---------- Mode switch (learn page) ---------- */
 /* flex-wrap обязателен: на "Группах" тут три чипа ("Группы символов" /

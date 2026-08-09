@@ -33,6 +33,7 @@
 
     const wpmSlider = document.getElementById('koch-wpm');
     const wpmValue = document.getElementById('koch-wpm-value');
+    const wpmCpm = document.getElementById('koch-wpm-cpm');
     const fwEnabled = document.getElementById('koch-farnsworth-enabled');
     const fwWrap = document.getElementById('koch-farnsworth-wrap');
     const fwSlider = document.getElementById('koch-farnsworth');
@@ -200,7 +201,7 @@
         setTimeout(() => { feedbackEl.className = 'feedback'; }, 2500);
     });
 
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; });
+    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
     fwSlider.addEventListener('input', () => { fwValue.textContent = fwSlider.value; });
     fwEnabled.addEventListener('change', () => {
         const on = fwEnabled.checked;

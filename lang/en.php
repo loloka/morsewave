@@ -660,6 +660,10 @@ HTML,
     // --- shared JS: dit/dah ---
     'js.common.dit' => 'dit',
     'js.common.dah' => 'dah',
+    // "≈N chars/min" hint next to any wpm slider on the site — PARIS
+    // formula (1 word = 5 characters, cpm = wpm × 5), so beginners can
+    // relate 12 wpm to a familiar characters-per-minute number.
+    'js.common.cpm_hint' => '≈{cpm} chars/min',
 
     // --- assets/js/koch.js ---
     'js.koch.tap_to_hear' => 'Tap to hear it',
@@ -679,6 +683,11 @@ HTML,
     'js.groups.filter_learned_too_few' => 'The "Learned only" filter needs at least {min} known symbols (otherwise you could guess the group without listening) — using the full alphabet for now.',
     'js.groups.filter_custom_too_few' => '"Custom characters" needs at least {min} valid Latin characters (A-Z, 0-9) — using the full alphabet for now.',
     'js.groups.exam_stop_check' => '⏹ Stop and check',
+    // Tuning signal before the exam (requested by R8OA, master of sport in
+    // high-speed telegraphy, 2026-08-09): gives time to grab a pencil, the
+    // answer field is locked during it.
+    'js.groups.exam_attention' => '✎ Get ready — a VVV tuning signal will play, followed by a countdown.',
+    'js.groups.exam_get_ready' => 'Get ready: {n}…',
     'js.groups.correct' => 'Correct: {expected}',
     'js.groups.wrong' => 'Expected: {expected} — you typed: {typed}',
     'js.groups.empty_placeholder' => '(empty)',

@@ -13,7 +13,8 @@
 
     const wpmSlider = document.getElementById('cs-wpm');
     const wpmValue = document.getElementById('cs-wpm-value');
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; });
+    const wpmCpm = document.getElementById('cs-wpm-cpm');
+    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
 
     let session = null;
     let isPlaying = false;

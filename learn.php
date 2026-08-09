@@ -36,6 +36,7 @@ include __DIR__ . '/includes/header.php';
                 <?= t('learn.speed') ?>
                 <input type="range" id="wpm-select" min="5" max="35" step="1" value="12">
                 <span class="speed-value" id="wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
         </div>
 
@@ -87,6 +88,7 @@ include __DIR__ . '/includes/header.php';
                 <?= t('learn.speed') ?>
                 <input type="range" id="rec-wpm" min="5" max="35" step="1" value="12">
                 <span class="speed-value" id="rec-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="rec-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="rec-lamp"></div>
@@ -141,6 +143,7 @@ include __DIR__ . '/includes/header.php';
                 <?= t('learn.speed') ?>
                 <input type="range" id="rhythm-wpm" min="5" max="35" step="1" value="12">
                 <span class="speed-value" id="rhythm-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="rhythm-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
         </div>
 
@@ -190,6 +193,7 @@ include __DIR__ . '/includes/header.php';
                 <?= t('learn.speed') ?>
                 <input type="range" id="invasion-wpm" min="5" max="35" step="1" value="12">
                 <span class="speed-value" id="invasion-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="invasion-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
             <div class="morse-lamp" id="invasion-lamp"></div>
         </div>

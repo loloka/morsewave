@@ -83,6 +83,7 @@
     const playBtn = document.getElementById('play-btn');
     const wpmSlider = document.getElementById('wpm-select');
     const wpmValue = document.getElementById('wpm-value');
+    const wpmCpm = document.getElementById('wpm-cpm');
     const keyEl = document.getElementById('telegraph-key');
     const lampEl = document.getElementById('practice-lamp');
     const signalEl = document.getElementById('practice-signal');
@@ -297,6 +298,7 @@
 
     wpmSlider.addEventListener('input', () => {
         wpmValue.textContent = wpmSlider.value;
+        wpmCpm.textContent = cpmHintText(wpmSlider.value);
         key.setWpm(currentWpm());
     });
     playBtn.addEventListener('click', playCurrent);
@@ -307,6 +309,7 @@
     const recGrid = document.getElementById('recognize-grid');
     const recWpmSlider = document.getElementById('rec-wpm');
     const recWpmValue = document.getElementById('rec-wpm-value');
+    const recWpmCpm = document.getElementById('rec-wpm-cpm');
     const recStartBtn = document.getElementById('rec-start-btn');
     const recStopBtn = document.getElementById('rec-stop-btn');
     const recLamp = new MorseLamp(document.getElementById('rec-lamp'));
@@ -569,7 +572,7 @@
         if (tile) { e.preventDefault(); handleRecognizeAnswer(ch, tile); }
     });
 
-    recWpmSlider.addEventListener('input', () => { recWpmValue.textContent = recWpmSlider.value; });
+    recWpmSlider.addEventListener('input', () => { recWpmValue.textContent = recWpmSlider.value; recWpmCpm.textContent = cpmHintText(recWpmSlider.value); });
     recStartBtn.addEventListener('click', () => {
         if (recRunning) return;
         haltRecognize(); // добить хвосты предыдущего запуска, если они ещё живы
@@ -604,6 +607,7 @@
     const rhythmPatternEl = document.getElementById('rhythm-pattern');
     const rhythmWpmSlider = document.getElementById('rhythm-wpm');
     const rhythmWpmValue = document.getElementById('rhythm-wpm-value');
+    const rhythmWpmCpm = document.getElementById('rhythm-wpm-cpm');
     const rhythmKeyEl = document.getElementById('rhythm-key');
     const rhythmLampEl = new MorseLamp(document.getElementById('rhythm-lamp'));
     const rhythmSignalLine = new RhythmSignalLine(document.getElementById('rhythm-signal'));
@@ -919,6 +923,7 @@
 
     rhythmWpmSlider.addEventListener('input', () => {
         rhythmWpmValue.textContent = rhythmWpmSlider.value;
+        rhythmWpmCpm.textContent = cpmHintText(rhythmWpmSlider.value);
         rhythmKey.setWpm(currentRhythmWpm());
     });
 
@@ -968,6 +973,7 @@
 
     const invasionWpmSlider = document.getElementById('invasion-wpm');
     const invasionWpmValueEl = document.getElementById('invasion-wpm-value');
+    const invasionWpmCpmEl = document.getElementById('invasion-wpm-cpm');
     const invasionLampEl = new MorseLamp(document.getElementById('invasion-lamp'));
     const invasionStartBtn = document.getElementById('invasion-start-btn');
     const invasionStopBtn = document.getElementById('invasion-stop-btn');
@@ -1843,6 +1849,7 @@
     invasionStopBtn.addEventListener('click', stopInvasion);
     invasionWpmSlider.addEventListener('input', () => {
         invasionWpmValueEl.textContent = invasionWpmSlider.value;
+        invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value);
     });
 
     // Ввод с физической клавиатуры — тот же приём, что и в "Приёме на слух"

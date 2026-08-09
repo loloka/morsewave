@@ -37,6 +37,7 @@
 
     const wpmSlider = document.getElementById('groups-wpm');
     const wpmValue = document.getElementById('groups-wpm-value');
+    const wpmCpm = document.getElementById('groups-wpm-cpm');
     const fwEnabled = document.getElementById('groups-farnsworth-enabled');
     const fwWrap = document.getElementById('groups-farnsworth-wrap');
     const fwSlider = document.getElementById('groups-farnsworth');
@@ -50,7 +51,7 @@
     let isPlaying = false;
     const replayBtn = document.getElementById('replay-btn');
 
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; });
+    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
     fwSlider.addEventListener('input', () => { fwValue.textContent = fwSlider.value; });
     fwEnabled.addEventListener('change', () => {
         const on = fwEnabled.checked;
@@ -215,7 +216,19 @@
     const examSubmitRow = document.getElementById('exam-submit-row');
     const examSubmitBtn = document.getElementById('exam-submit-btn');
     const groupsSubmitRow = document.getElementById('groups-submit-row');
-    const EXAM_GROUP_GAP_MS = 1500; // небольшая пауза между группами в экзамене
+
+    /**
+     * Пауза между группами в экзамене — раньше была фиксированной (1500 мс)
+     * и не зависела от wpm вообще: на 12 wpm это ~15 единиц паузы вместо
+     * стандартных 7 (соотношение точка:тире:пауза = 1:3:7, как между
+     * словами в обычном тексте, см. wordGap в audio.js). Из-за этого реальная
+     * скорость экзамена проседала заметно ниже выставленных wpm — по замене
+     * от R8OA (мастер спорта по скоростной телеграфии), 2026-08-09.
+     */
+    function examGroupGapMs(wpm) {
+        const unit = 1200 / wpm;
+        return unit * 7;
+    }
 
     function startSession() {
         const wpm = parseInt(wpmSlider.value, 10);
@@ -258,11 +271,13 @@
             examAnswerEl.style.display = 'block';
             examSubmitRow.style.display = 'flex';
             examAnswerEl.value = '';
-            examSubmitBtn.disabled = false;
+            // Заблокированы до конца runExamAttentionSequence() — иначе можно
+            // случайно начать печатать ещё во время VVV/отсчёта.
+            examAnswerEl.disabled = true;
+            examSubmitBtn.disabled = true;
             examSubmitBtn.textContent = t('js.groups.exam_stop_check');
             replayBtn.style.display = 'none';
-            examAnswerEl.focus();
-            runExamPlayback();
+            runExamAttentionSequence();
         } else {
             answerInput.style.display = 'block';
             groupsSubmitRow.style.display = 'flex';
@@ -275,6 +290,59 @@
         }
     }
 
+    const EXAM_COUNTDOWN_STEPS = [3, 2, 1];
+    const EXAM_COUNTDOWN_STEP_MS = 800;
+
+    function delay(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * Настроечный VVV (общепринятый в радиотелеграфии сигнал готовности) +
+     * видимый обратный отсчёт «Приготовьтесь: 3…2…1…» перед самой передачей
+     * экзамена — чтобы человек успел взять карандаш. Поле ответа и кнопка
+     * «Остановить и проверить» на это время заблокированы (см. startSession):
+     * без этого можно было случайно начать печатать ещё до начала передачи.
+     * Просьба R8OA, мастера спорта по скоростной телеграфии, 2026-08-09.
+     *
+     * mySession — снимок session на момент запуска: если пользователь как-то
+     * успеет перезапустить сессию, пока эта асинхронная цепочка ещё идёт,
+     * дальнейшие шаги (разблокировка поля, запуск playback) должны молча
+     * прерваться, а не вмешаться в уже новую сессию.
+     */
+    async function runExamAttentionSequence() {
+        const mySession = session;
+        feedbackEl.textContent = t('js.groups.exam_attention');
+        feedbackEl.className = 'feedback show ok';
+
+        try {
+            const audio = new MorseAudio({ wpm: mySession.wpm });
+            await audio.play('VVV', {
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка воспроизведения сигнала VVV:', e);
+        }
+        if (session !== mySession || mySession.examStopped) return;
+
+        for (const n of EXAM_COUNTDOWN_STEPS) {
+            if (session !== mySession || mySession.examStopped) return;
+            feedbackEl.textContent = t('js.groups.exam_get_ready', { '{n}': String(n) });
+            feedbackEl.className = 'feedback show ok';
+            await delay(EXAM_COUNTDOWN_STEP_MS);
+        }
+        if (session !== mySession || mySession.examStopped) return;
+
+        feedbackEl.className = 'feedback';
+        examAnswerEl.disabled = false;
+        examSubmitBtn.disabled = false;
+        examAnswerEl.focus();
+        runExamPlayback();
+    }
+
     async function runExamPlayback() {
         for (session.index = 0; session.index < session.groups.length; session.index++) {
             if (session.examStopped) return;
@@ -283,7 +351,7 @@
             session.playedCount = session.index + 1;
             if (session.examStopped) return;
             if (session.index < session.groups.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, EXAM_GROUP_GAP_MS));
+                await new Promise(resolve => setTimeout(resolve, examGroupGapMs(session.wpm)));
                 if (session.examStopped) return;
             }
         }
@@ -539,6 +607,7 @@
         customHint.style.display = 'none';
         wpmSlider.value = '12'; // 60 знаков/мин по формуле PARIS = 12 wpm
         wpmValue.textContent = '12';
+        wpmCpm.textContent = cpmHintText(12);
         fwEnabled.checked = false;
         fwWrap.style.display = 'none';
         fwValue.style.display = 'none';
@@ -606,6 +675,7 @@
         if (wpm) {
             wpmSlider.value = String(wpm);
             wpmValue.textContent = String(wpm);
+            wpmCpm.textContent = cpmHintText(wpm);
         }
 
         if (isDailyChallenge) {
@@ -620,6 +690,7 @@
     const abbrevGrid = document.getElementById('abbrev-grid');
     const abbrevWpmSlider = document.getElementById('abbrev-wpm');
     const abbrevWpmValue = document.getElementById('abbrev-wpm-value');
+    const abbrevWpmCpm = document.getElementById('abbrev-wpm-cpm');
     const abbrevStartBtn = document.getElementById('abbrev-start-btn');
     const abbrevStopBtn = document.getElementById('abbrev-stop-btn');
     const abbrevLamp = new MorseLamp(document.getElementById('abbrev-lamp'));
@@ -747,7 +818,7 @@
         }
     }
 
-    abbrevWpmSlider.addEventListener('input', () => { abbrevWpmValue.textContent = abbrevWpmSlider.value; });
+    abbrevWpmSlider.addEventListener('input', () => { abbrevWpmValue.textContent = abbrevWpmSlider.value; abbrevWpmCpm.textContent = cpmHintText(abbrevWpmSlider.value); });
     abbrevStartBtn.addEventListener('click', () => {
         if (abbrevRunning) return;
         haltAbbrev(); // добить хвосты предыдущего запуска, если они ещё живы
@@ -812,6 +883,7 @@
     const wordsFeedback = document.getElementById('words-feedback');
     const wordsWpmSlider = document.getElementById('words-wpm');
     const wordsWpmValue = document.getElementById('words-wpm-value');
+    const wordsWpmCpm = document.getElementById('words-wpm-cpm');
     const wordsFwEnabled = document.getElementById('words-farnsworth-enabled');
     const wordsFwWrap = document.getElementById('words-farnsworth-wrap');
     const wordsFwSlider = document.getElementById('words-farnsworth');
@@ -851,7 +923,7 @@
         });
     });
 
-    wordsWpmSlider.addEventListener('input', () => { wordsWpmValue.textContent = wordsWpmSlider.value; });
+    wordsWpmSlider.addEventListener('input', () => { wordsWpmValue.textContent = wordsWpmSlider.value; wordsWpmCpm.textContent = cpmHintText(wordsWpmSlider.value); });
     wordsFwSlider.addEventListener('input', () => { wordsFwValue.textContent = wordsFwSlider.value; });
     wordsFwEnabled.addEventListener('change', () => {
         wordsFwWrap.style.display = wordsFwEnabled.checked ? 'inline-flex' : 'none';

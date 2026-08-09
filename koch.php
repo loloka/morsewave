@@ -39,6 +39,7 @@ include __DIR__ . '/includes/header.php';
             <?= t('koch.symbol_speed') ?>
             <input type="range" id="koch-wpm" min="10" max="40" step="1" value="12">
             <span class="speed-value" id="koch-wpm-value">12</span> wpm
+            <span class="muted cpm-hint" id="koch-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
         <label class="chip" style="gap:8px;">

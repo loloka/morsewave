@@ -52,6 +52,7 @@ include __DIR__ . '/includes/header.php';
             <?= t('groups.speed') ?>
             <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
             <span class="speed-value" id="groups-wpm-value">12</span> wpm
+            <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
         <label class="chip" style="gap:8px;">
@@ -148,6 +149,7 @@ include __DIR__ . '/includes/header.php';
             <?= t('groups.speed') ?>
             <input type="range" id="words-wpm" min="5" max="60" step="1" value="12">
             <span class="speed-value" id="words-wpm-value">12</span> wpm
+            <span class="muted cpm-hint" id="words-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
         <label class="chip" style="gap:8px;">
@@ -215,6 +217,7 @@ include __DIR__ . '/includes/header.php';
                 <?= t('groups.speed') ?>
                 <input type="range" id="abbrev-wpm" min="10" max="35" step="1" value="12">
                 <span class="speed-value" id="abbrev-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="abbrev-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
             <div class="lamp-row">
                 <div class="morse-lamp" id="abbrev-lamp"></div>

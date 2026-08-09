@@ -17,6 +17,7 @@ include __DIR__ . '/includes/header.php';
             <?= t('cs.speed') ?>
             <input type="range" id="cs-wpm" min="5" max="35" step="1" value="12">
             <span class="speed-value" id="cs-wpm-value">12</span> wpm
+            <span class="muted cpm-hint" id="cs-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
         <label class="chip"><?= t('cs.per_session') ?>
             <select id="cs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">

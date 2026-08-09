@@ -202,3 +202,17 @@ function speedXpFactor(wpm) {
     const w = Number(wpm) || 12;
     return Math.min(1.6, Math.max(1.0, 1 + (w - 12) * 0.04));
 }
+
+/**
+ * "≈N зн/мин" рядом с любым ползунком wpm на сайте (по просьбе R8OA, мастера
+ * спорта по скоростной телеграфии, 2026-08-09) — новичку проще понять
+ * скорость через привычные "знаков в минуту", чем через wpm. Формула из
+ * стандарта PARIS: одно "слово" = 5 знаков, значит cpm = wpm × 5. Это
+ * ЕДИНАЯ точка форматирования — используется во всех js-файлах со своими
+ * wpm-бегунками (groups.js, learn.js, koch.js, callsigns.js), чтобы текст и
+ * округление были одинаковыми везде.
+ */
+function cpmHintText(wpm) {
+    const w = Math.max(1, Math.round(Number(wpm) || 12));
+    return t('js.common.cpm_hint', { '{cpm}': String(w * 5) });
+}
