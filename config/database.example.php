@@ -8,6 +8,9 @@
  * На VPS так же можно задать переменные окружения вместо правки файла.
  */
 
+require_once __DIR__ . '/../includes/maintenance.php';
+mw_maintenance_guard();
+
 $DB_HOST = getenv('DB_HOST') ?: 'localhost';
 $DB_NAME = getenv('DB_NAME') ?: 'morse_trainer';
 $DB_USER = getenv('DB_USER') ?: 'root';

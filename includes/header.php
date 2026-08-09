@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/i18n.php';
+require_once __DIR__ . '/maintenance.php';
+mw_maintenance_guard();
 $mwLang = mw_current_lang();
 
 /**

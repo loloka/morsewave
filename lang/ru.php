@@ -13,6 +13,10 @@ return [
     'site.title_home' => 'MorseWave — учи азбуку Морзе',
     'site.meta_description' => 'MorseWave — современный тренажёр азбуки Морзе: метод Коха, группы символов, позывные, ачивки и ежедневные упражнения.',
 
+    // --- includes/maintenance.php ---
+    'maintenance.title' => 'Технические работы',
+    'maintenance.body' => 'MorseWave сейчас недоступен — идут технические работы. Загляни чуть позже, твой прогресс никуда не денется: он хранится в браузере.',
+
     // --- includes/nav.php ---
     'nav.home' => 'Главная',
     'nav.learn' => 'Буквы',

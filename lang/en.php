@@ -10,6 +10,10 @@ return [
     'site.title_home' => 'MorseWave — learn Morse code',
     'site.meta_description' => 'MorseWave — a modern Morse code trainer: Koch method, character groups, callsigns, achievements and daily drills.',
 
+    // --- includes/maintenance.php ---
+    'maintenance.title' => 'Under maintenance',
+    'maintenance.body' => 'MorseWave is temporarily unavailable — we\'re doing maintenance work. Check back soon, your progress is safe: it lives in your browser.',
+
     // --- includes/nav.php ---
     'nav.home' => 'Home',
     'nav.learn' => 'Letters',
