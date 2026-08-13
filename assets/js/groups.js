@@ -647,7 +647,13 @@
         fwEnabled.checked = false;
         fwWrap.style.display = 'none';
         fwValue.style.display = 'none';
-        document.getElementById('groups-count').value = '50';
+        // Отключаем — иначе можно было выставить, скажем, 10 групп и
+        // формально "сдать экзамен" совсем не в том объёме (50 групп по
+        // 5 знаков = 250 знаков — это часть самого стандарта, не просто
+        // дефолт).
+        const countSelectEl = document.getElementById('groups-count');
+        countSelectEl.value = '50';
+        countSelectEl.disabled = true;
         pendingExamMode = true;
 
         // Классический тон проверки приёма — 850 Гц
