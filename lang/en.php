@@ -178,6 +178,9 @@ return [
     'groups.start_session' => '▶ Start session',
     'groups.exam_mode' => '🎓 Exam mode',
     'groups.exam_hint' => 'Exam mode: 50 groups of 5 characters (letters + digits), 250 characters total, 850 Hz tone. Timing matches a real exam: letters sound crisp and fast (20 wpm element speed), while the stretched pauses between groups bring the effective pace down to ≈60 characters/min. Groups play one after another without waiting for your answer — endurance training.',
+    // Shown instead of the wpm slider in Exam mode (see groups.js,
+    // exam-mode-btn) — the slider no longer affects the exam's audio.
+    'groups.exam_speed_fixed' => '🎓 Exam speed is fixed by the standard (letters ~20 wpm, pauses stretched to ≈60 characters/min) — the slider plays no part here.',
     'groups.group_label' => 'Group',
     'groups.replay' => '🔁 Replay',
     'groups.answer_placeholder' => 'Type the symbols…',

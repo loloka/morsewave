@@ -38,6 +38,8 @@
     const wpmSlider = document.getElementById('groups-wpm');
     const wpmValue = document.getElementById('groups-wpm-value');
     const wpmCpm = document.getElementById('groups-wpm-cpm');
+    const wpmControl = document.getElementById('groups-wpm-control');
+    const examSpeedNote = document.getElementById('groups-exam-speed-note');
     const fwEnabled = document.getElementById('groups-farnsworth-enabled');
     const fwWrap = document.getElementById('groups-farnsworth-wrap');
     const fwSlider = document.getElementById('groups-farnsworth');
@@ -635,12 +637,13 @@
         charsetKey = 'mixed';
         customInput.style.display = 'none';
         customHint.style.display = 'none';
-        // Слайдер сюда выставляется только косметически (эффективный темп
-        // экзамена ≈60 зн/мин совпадает с cpm-подсказкой на 12 wpm) — сам
-        // звук экзамена на него больше не завязан, см. EXAM_CHAR_WPM.
-        wpmSlider.value = '12';
-        wpmValue.textContent = '12';
-        wpmCpm.textContent = cpmHintText(12);
+        // Слайдер wpm звук экзамена больше не определяет (см. EXAM_CHAR_WPM
+        // в startSession) — раньше он оставался на виду и молча показывал
+        // «12», хотя реально буквы звучат на 20 wpm; вводило в заблуждение
+        // (путали с обычными «Группами», где 12 wpm — это буквально 12 wpm).
+        // Теперь на месте слайдера — явная пометка о фиксированном тайминге.
+        wpmControl.style.display = 'none';
+        examSpeedNote.style.display = 'inline-block';
         fwEnabled.checked = false;
         fwWrap.style.display = 'none';
         fwValue.style.display = 'none';

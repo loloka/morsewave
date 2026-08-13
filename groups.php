@@ -47,12 +47,15 @@ include __DIR__ . '/includes/header.php';
         <div class="muted" id="custom-charset-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
     </div>
 
-    <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
-        <div class="speed-control">
+    <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="groups-speed-row">
+        <div class="speed-control" id="groups-wpm-control">
             <?= t('groups.speed') ?>
             <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
             <span class="speed-value" id="groups-wpm-value">12</span> wpm
             <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
+        </div>
+        <div class="muted" id="groups-exam-speed-note" style="display:none; font-size:13px;">
+            <?= t('groups.exam_speed_fixed') ?>
         </div>
 
         <label class="chip" style="gap:8px;">
