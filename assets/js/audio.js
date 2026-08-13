@@ -25,12 +25,16 @@ function getSharedAudioContext() {
  * аппроксимация стандартного расчёта ARRL.
  */
 class MorseAudio {
-    constructor({ freq, wpm = 12, farnsworthWpm = null, waveform } = {}) {
+    constructor({ freq, wpm = 12, farnsworthWpm = null, waveform, letterGapUnits = 3 } = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { freq: 600, waveform: 'sine' };
         this.freq = freq ?? settings.freq;
         this.waveform = waveform ?? settings.waveform;
         this.wpm = wpm;
         this.farnsworthWpm = farnsworthWpm;
+        // Межбуквенный интервал в единицах — стандартно 3 (не трогать нигде,
+        // кроме экзамена, ss. groups.js: там по замеру эталонной записи
+        // реального экзамена он оказался 4, не 3).
+        this.letterGapUnits = letterGapUnits;
         this.ctx = null;
         this._timer = null;
         this._stopped = false;
@@ -92,7 +96,7 @@ class MorseAudio {
         this._stopped = false;
         const unit = this.unitMs();
         const scale = this.gapScale();
-        const interCharGap = unit * 3 * scale;
+        const interCharGap = unit * this.letterGapUnits * scale;
         const wordGap = unit * 7 * scale;
 
         const chars = text.toUpperCase().split('');

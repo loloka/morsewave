@@ -196,7 +196,11 @@
         signalLine.clear();
         if (session && session.isExam) examAnswerEl.focus(); else answerInput.focus();
         try {
-            const audio = new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
+            // В экзамене — фиксированный тайминг эталонной записи, а не
+            // wpm-слайдер (см. EXAM_CHAR_WPM выше).
+            const audio = session.isExam
+                ? new MorseAudio({ wpm: EXAM_CHAR_WPM, letterGapUnits: EXAM_LETTER_GAP_UNITS })
+                : new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
             await audio.play(session.groups[session.index], {
                 onSymbol: ({ symbol, durationMs }) => {
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
@@ -218,22 +222,27 @@
     const groupsSubmitRow = document.getElementById('groups-submit-row');
 
     /**
-     * Пауза между группами в экзамене — раньше была фиксированной (1500 мс)
-     * и вообще не зависела от wpm. Сначала заменили на стандартные 7 единиц
-     * (как словный интервал в обычном тексте, см. wordGap в audio.js), но
-     * по эталонной записи реального экзамена (файл от R8OA, мастера спорта
-     * по скоростной телеграфии, 2026-08-09; разобран по огибающей —
-     * dot/dash 60/180 мс = 1:3 на 20 wpm, межбуквенный интервал внутри
-     * группы 240 мс = 4 единицы, а пауза между группами ВЕЗДЕ ровно 960 мс
-     * = 16 единиц) — оказалось, что в настоящем экзамене пауза 16 единиц,
-     * не 7. Используем измеренное значение; межбуквенный интервал внутри
-     * группы (4 единицы вместо обычных 3) не трогаем — это общий audio.js,
-     * влияет на все режимы сайта, отдельный вопрос.
+     * Тайминг «Режима экзамена» — НЕ линейно от wpm-слайдера (как в обычных
+     * «Группах»/«Словах»), а фиксированная схема, снятая по огибающей
+     * сигнала с эталонной записи настоящего экзамена (файл от R8OA, мастера
+     * спорта по скоростной телеграфии, 2026-08-09): dot/dash 60/180 мс —
+     * то есть буквы звучат чётко и БЫСТРО, на скорости элемента 20 wpm, а
+     * не 12. Межбуквенный интервал внутри группы — 240 мс = 4 единицы
+     * (шире стандартных 3, см. letterGapUnits в audio.js — сделан
+     * настраиваемым специально ради этого случая, по умолчанию везде
+     * остаётся 3). Пауза между группами — везде ровно 960 мс = 16 единиц,
+     * та же самая и сразу после сигнала ЖЖЖ= перед первой группой.
+     *
+     * Из-за такой растянутой паузы реальный ТЕМП приёма (сколько знаков в
+     * минуту фактически звучит) получается ~60 зн/мин — гораздо медленнее,
+     * чем ощущение от самих букв. Слайдер wpm на панели поэтому для
+     * экзамена больше не используется для звука (только косметически
+     * показывает «12» — оставлено, чтобы cpm-подсказка рядом продолжала
+     * показывать верные «≈60 зн/мин»).
      */
-    function examGroupGapMs(wpm) {
-        const unit = 1200 / wpm;
-        return unit * 16;
-    }
+    const EXAM_CHAR_WPM = 20;
+    const EXAM_LETTER_GAP_UNITS = 4;
+    const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
     function startSession() {
         const wpm = parseInt(wpmSlider.value, 10);
@@ -329,7 +338,7 @@
         feedbackEl.className = 'feedback show ok';
 
         try {
-            const audio = new MorseAudio({ wpm: mySession.wpm });
+            const audio = new MorseAudio({ wpm: EXAM_CHAR_WPM, letterGapUnits: EXAM_LETTER_GAP_UNITS });
             await audio.play(EXAM_ATTENTION_TEXT, {
                 onCharStart: ({ index }) => {
                     if (session !== mySession || mySession.examStopped) return;
@@ -356,9 +365,9 @@
 
         // Раньше первая группа стартовала сразу за «=» и сливалась с ним
         // встык. В эталонной записи пауза после сигнала — той же длины,
-        // что и между группами (см. examGroupGapMs), поэтому используем её
+        // что и между группами (EXAM_GROUP_GAP_MS), поэтому используем её
         // же здесь, а не отдельное число.
-        await delay(examGroupGapMs(mySession.wpm));
+        await delay(EXAM_GROUP_GAP_MS);
         if (session !== mySession || mySession.examStopped) return;
 
         runExamPlayback();
@@ -372,7 +381,7 @@
             session.playedCount = session.index + 1;
             if (session.examStopped) return;
             if (session.index < session.groups.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, examGroupGapMs(session.wpm)));
+                await delay(EXAM_GROUP_GAP_MS);
                 if (session.examStopped) return;
             }
         }
@@ -626,7 +635,10 @@
         charsetKey = 'mixed';
         customInput.style.display = 'none';
         customHint.style.display = 'none';
-        wpmSlider.value = '12'; // 60 знаков/мин по формуле PARIS = 12 wpm
+        // Слайдер сюда выставляется только косметически (эффективный темп
+        // экзамена ≈60 зн/мин совпадает с cpm-подсказкой на 12 wpm) — сам
+        // звук экзамена на него больше не завязан, см. EXAM_CHAR_WPM.
+        wpmSlider.value = '12';
         wpmValue.textContent = '12';
         wpmCpm.textContent = cpmHintText(12);
         fwEnabled.checked = false;
