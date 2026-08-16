@@ -55,30 +55,30 @@ class MorseAudio {
     }
 
     _tone(durationMs) {
-    return new Promise((resolve) => {
-        const osc = this.ctx.createOscillator();
-        const gain = this.ctx.createGain();
-        osc.frequency.value = this.freq;
-        osc.type = this.waveform || 'sine';
+        return new Promise((resolve) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.value = this.freq;
+            osc.type = this.waveform || 'sine';
 
-        const now = this.ctx.currentTime;
-        const dur = durationMs / 1000;
-        const tc = 0.0015; // временная константа ~1.5мс — как RC-формирователь в реальном трансивере
+            const now = this.ctx.currentTime;
+            const dur = durationMs / 1000;
+            // мягкая атака/затухание, чтобы не было щелчков
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.35, now + 0.005);
+            gain.gain.setValueAtTime(0.35, now + dur - 0.005 > now ? now + dur - 0.005 : now);
+            gain.gain.linearRampToValueAtTime(0, now + dur);
 
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.setTargetAtTime(0.35, now, tc);                 // мягкий подъём
-        gain.gain.setTargetAtTime(0, Math.max(now, now + dur - tc * 3), tc); // мягкий спад
-
-        osc.connect(gain).connect(this.ctx.destination);
-        osc.start(now);
-        osc.stop(now + dur + tc * 4); // с запасом, чтобы хвост доиграл
-        this._activeNodes = { osc, gain };
-        osc.onended = () => {
-            if (this._activeNodes && this._activeNodes.osc === osc) this._activeNodes = null;
-            resolve();
-        };
-    });
-}
+            osc.connect(gain).connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + dur);
+            this._activeNodes = { osc, gain };
+            osc.onended = () => {
+                if (this._activeNodes && this._activeNodes.osc === osc) this._activeNodes = null;
+                resolve();
+            };
+        });
+    }
 
     _silence(durationMs) {
         return new Promise((resolve) => {
