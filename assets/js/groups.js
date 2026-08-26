@@ -540,16 +540,16 @@
                 const e = expected[i] || '_';
                 const tChar = typed[i] || '_';
                 if (e === tChar.toUpperCase()) {
-                    expectedHTML += e;
-                    typedHTML += tChar.toUpperCase();
+                    expectedHTML += `<span style="color: var(--success);">${e}</span>`;
+                    typedHTML += `<span style="color: var(--success);">${tChar.toUpperCase()}</span>`;
                 } else {
-                    expectedHTML += `<span style="color: var(--success); font-weight: bold; text-decoration: underline;">${e}</span>`;
+                    expectedHTML += `<span style="color: var(--text); font-weight: bold; text-decoration: underline;">${e}</span>`;
                     typedHTML += `<span style="color: var(--danger); font-weight: bold; text-decoration: underline;">${tChar.toUpperCase()}</span>`;
                 }
             }
             
             const rawText = t('js.groups.wrong', { '{expected}': expectedHTML, '{typed}': typedHTML || t('js.groups.empty_placeholder') });
-            feedbackEl.innerHTML = `<span style="font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px;">${rawText}</span>`;
+            feedbackEl.innerHTML = `<span style="font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; color: var(--text);">${rawText}</span>`;
             feedbackEl.className = 'feedback show bad';
         }
 
