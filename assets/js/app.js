@@ -51,3 +51,40 @@ window.addEventListener('progress:updated', renderNavStats);
 window.addEventListener('achievements:unlocked', (e) => {
     e.detail.forEach((a, i) => setTimeout(() => showAchievementToast(a), i * 400));
 });
+
+// Перехват физической клавиатуры для ввода ответов на русской раскладке
+// Позволяет печатать ответы, не переключая ОС на английский.
+document.addEventListener('keydown', (e) => {
+    // Только для текстовых полей, где вбиваются ответы
+    const targetIds = ['groups-answer', 'exam-answer', 'koch-answer', 'words-answer', 'cs-answer'];
+    if (!e.target || !e.target.id || !targetIds.includes(e.target.id)) return;
+    
+    // Игнорируем шорткаты (Ctrl+C, Ctrl+V и т.д.)
+    if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+    const RU_TO_EN = {
+        'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u', 'ш': 'i', 'щ': 'o', 'з': 'p', 'х': '[', 'ъ': ']',
+        'ф': 'a', 'ы': 's', 'в': 'd', 'а': 'f', 'п': 'g', 'р': 'h', 'о': 'j', 'л': 'k', 'д': 'l', 'ж': ';', 'э': "'",
+        'я': 'z', 'ч': 'x', 'с': 'c', 'м': 'v', 'и': 'b', 'т': 'n', 'ь': 'm', 'б': ',', 'ю': '.', 'ё': '`',
+        'Й': 'Q', 'Ц': 'W', 'У': 'E', 'К': 'R', 'Е': 'T', 'Н': 'Y', 'Г': 'U', 'Ш': 'I', 'Щ': 'O', 'З': 'P', 'Х': '{', 'Ъ': '}',
+        'Ф': 'A', 'Ы': 'S', 'В': 'D', 'А': 'F', 'П': 'G', 'Р': 'H', 'О': 'J', 'Л': 'K', 'Д': 'L', 'Ж': ':', 'Э': '"',
+        'Я': 'Z', 'Ч': 'X', 'С': 'C', 'М': 'V', 'И': 'B', 'Т': 'N', 'Ь': 'M', 'Б': '<', 'Ю': '>', 'Ё': '~'
+    };
+
+    if (RU_TO_EN[e.key]) {
+        e.preventDefault();
+        const enChar = RU_TO_EN[e.key];
+        
+        const target = e.target;
+        const start = target.selectionStart;
+        const end = target.selectionEnd;
+        const val = target.value;
+        
+        // Вставляем английскую букву
+        target.value = val.slice(0, start) + enChar + val.slice(end);
+        target.setSelectionRange(start + 1, start + 1);
+        
+        // Дергаем событие input, чтобы сработали внутренние обработчики (подсветка ошибок в Кохе и т.д.)
+        target.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+});

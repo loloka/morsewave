@@ -563,6 +563,15 @@
         if (!recognizeModeActive || recBusy || !recRunning) return;
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        
+        // Если печатают на русской раскладке — выводим красивое сообщение
+        if (/[а-яё]/i.test(e.key)) {
+            e.preventDefault();
+            recFeedback.textContent = t('js.learn.wrong_layout');
+            recFeedback.className = 'feedback show bad';
+            return;
+        }
+
         const ch = e.key.toUpperCase();
         // Проверяем против фактически отрисованных тайлов, а не жёстко
         // латиницы/кириллицы целиком — так работает и для смешанного набора
@@ -1858,6 +1867,13 @@
         if (!invasionModeActive || !invasionRunning) return;
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (/[а-яё]/i.test(e.key)) {
+            e.preventDefault();
+            invasionFeedback(t('js.learn.wrong_layout'), 'bad');
+            return;
+        }
+
         const ch = e.key.toUpperCase();
         if (!ALL_LEARNABLE.includes(ch)) return;
         const key = invasionGridEl.querySelector(`[data-ch="${ch}"]`);
