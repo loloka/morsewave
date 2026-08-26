@@ -53,12 +53,62 @@
     let isPlaying = false;
     const replayBtn = document.getElementById('replay-btn');
 
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
-    fwSlider.addEventListener('input', () => { fwValue.textContent = fwSlider.value; });
+    // Восстанавливаем сохраненные настройки
+    const savedGroupLen = localStorage.getItem('morse_groups_len');
+    if (savedGroupLen) {
+        document.querySelectorAll('#length-chips .chip').forEach(c => {
+            const match = c.dataset.len === savedGroupLen;
+            c.classList.toggle('active', match);
+            if (match) groupLen = parseInt(savedGroupLen, 10);
+        });
+    }
+
+    const savedWpm = localStorage.getItem('morse_groups_wpm');
+    if (savedWpm) {
+        wpmSlider.value = savedWpm;
+        wpmValue.textContent = savedWpm;
+        wpmCpm.textContent = cpmHintText(savedWpm);
+    }
+
+    const groupsCountEl = document.getElementById('groups-count');
+    const savedCount = localStorage.getItem('morse_groups_count');
+    if (savedCount && groupsCountEl) {
+        groupsCountEl.value = savedCount;
+    }
+    if (groupsCountEl) {
+        groupsCountEl.addEventListener('change', () => {
+            localStorage.setItem('morse_groups_count', groupsCountEl.value);
+        });
+    }
+
+    const savedFwEnabled = localStorage.getItem('morse_groups_fw_enabled');
+    if (savedFwEnabled !== null) {
+        fwEnabled.checked = savedFwEnabled === 'true';
+        const on = fwEnabled.checked;
+        fwWrap.style.display = on ? 'inline-flex' : 'none';
+        fwValue.style.display = on ? 'inline-block' : 'none';
+    }
+
+    const savedFwWpm = localStorage.getItem('morse_groups_fw_wpm');
+    if (savedFwWpm) {
+        fwSlider.value = savedFwWpm;
+        fwValue.textContent = savedFwWpm;
+    }
+
+    wpmSlider.addEventListener('input', () => { 
+        wpmValue.textContent = wpmSlider.value; 
+        wpmCpm.textContent = cpmHintText(wpmSlider.value); 
+        localStorage.setItem('morse_groups_wpm', wpmSlider.value);
+    });
+    fwSlider.addEventListener('input', () => { 
+        fwValue.textContent = fwSlider.value; 
+        localStorage.setItem('morse_groups_fw_wpm', fwSlider.value);
+    });
     fwEnabled.addEventListener('change', () => {
         const on = fwEnabled.checked;
         fwWrap.style.display = on ? 'inline-flex' : 'none';
         fwValue.style.display = on ? 'inline-block' : 'none';
+        localStorage.setItem('morse_groups_fw_enabled', on);
     });
     document.getElementById('groups-farnsworth-info').addEventListener('click', (e) => {
         e.preventDefault();
@@ -72,6 +122,7 @@
             document.querySelectorAll('#length-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             groupLen = parseInt(chip.dataset.len, 10);
+            localStorage.setItem('morse_groups_len', groupLen);
         });
     });
     const customInput = document.getElementById('custom-charset-input');
@@ -480,7 +531,25 @@
             feedbackEl.className = 'feedback show ok';
         } else {
             session.wrongGroups.push(expected);
-            feedbackEl.textContent = t('js.groups.wrong', { '{expected}': expected, '{typed}': typed || t('js.groups.empty_placeholder') });
+            
+            const len = Math.max(expected.length, typed.length);
+            let expectedHTML = '';
+            let typedHTML = '';
+            
+            for (let i = 0; i < len; i++) {
+                const e = expected[i] || '_';
+                const tChar = typed[i] || '_';
+                if (e === tChar.toUpperCase()) {
+                    expectedHTML += e;
+                    typedHTML += tChar.toUpperCase();
+                } else {
+                    expectedHTML += `<span style="color: var(--success); font-weight: bold; text-decoration: underline;">${e}</span>`;
+                    typedHTML += `<span style="color: var(--danger); font-weight: bold; text-decoration: underline;">${tChar.toUpperCase()}</span>`;
+                }
+            }
+            
+            const rawText = t('js.groups.wrong', { '{expected}': expectedHTML, '{typed}': typedHTML || t('js.groups.empty_placeholder') });
+            feedbackEl.innerHTML = `<span style="font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px;">${rawText}</span>`;
             feedbackEl.className = 'feedback show bad';
         }
 
@@ -593,8 +662,24 @@
 
     function retrainMistakes() {
         if (!session || !session.wrongGroups || !session.wrongGroups.length) return;
+        
+        // Собрать все символы из неправильных групп
+        const allChars = session.wrongGroups.join('').split('');
+        
+        // Перемешать массив (алгоритм Фишера-Йетса)
+        for (let i = allChars.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+        }
+        
+        // Разбить обратно на группы по groupLen (последняя может быть короче, если не кратно)
+        const newGroups = [];
+        for (let i = 0; i < allChars.length; i += groupLen) {
+            newGroups.push(allChars.slice(i, i + groupLen).join(''));
+        }
+
         const retrySession = {
-            groups: [...session.wrongGroups],
+            groups: newGroups,
             index: 0, wpm: session.wpm, farnsworth: session.farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
             xpRate: 1, // отработка уже известных ошибок — не полная ставка свежей сессии
