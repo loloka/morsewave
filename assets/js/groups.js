@@ -456,12 +456,18 @@
         let correctChars = 0;
         let totalChars = 0;
         let wrongGroupCount = 0;
+        if (!session.wrongPairs) session.wrongPairs = [];
         playedGroups.forEach((expected, i) => {
             const guess = typed[i] || '';
             totalChars += expected.length;
             let groupCorrect = 0;
             for (let c = 0; c < expected.length; c++) {
-                if (guess[c] === expected[c]) { correctChars++; groupCorrect++; }
+                if (guess[c] === expected[c]) { 
+                    correctChars++; 
+                    groupCorrect++; 
+                } else if (expected[c]) {
+                    session.wrongPairs.push({ expected: expected[c], typed: guess[c] || '' });
+                }
             }
             if (groupCorrect !== expected.length) { session.wrongGroups.push(expected); wrongGroupCount++; }
         });
@@ -505,6 +511,16 @@
         const typed = answerInput.value.trim();
         const correct = scoreAnswer(expected, typed);
 
+        if (!session.wrongPairs) session.wrongPairs = [];
+        const typedUpper = typed.toUpperCase();
+        for (let i = 0; i < expected.length; i++) {
+            const e = expected[i] || '';
+            const tChar = typedUpper[i] || '';
+            if (e !== tChar && e) {
+                session.wrongPairs.push({ expected: e, typed: tChar });
+            }
+        }
+
         session.correctChars += correct;
         session.totalChars += expected.length;
 
@@ -512,7 +528,6 @@
         // только не-экзаменационные сессии сюда и попадают, submitAnswer не
         // вызывается на isExam (см. finishExamSession/examSubmitBtn).
         if (!session.isExam) {
-            const typedUpper = typed.toUpperCase();
             for (let i = 0; i < expected.length; i++) {
                 Progress.recordGroupsAttempt(expected[i], typedUpper[i] === expected[i]);
             }
@@ -521,8 +536,13 @@
         // Начисляем сразу за эту группу — так прогресс не теряется,
         // даже если сессия не будет пройдена до конца.
         const xpGain = Math.round(correct * session.xpRate);
-        session.xpEarned += xpGain;
-        if (xpGain > 0) Progress.addXp(xpGain);
+        let bonusGain = 0;
+        if (session.isRetrain && !session.isAbuse && correct === expected.length) {
+            bonusGain = 5; // Бонус за полностью правильную группу при перетренировке
+        }
+        
+        session.xpEarned += (xpGain + bonusGain);
+        if (xpGain + bonusGain > 0) Progress.addXp(xpGain + bonusGain);
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -577,6 +597,7 @@
         resultPanel.querySelectorAll('.js-result-note').forEach(n => n.remove());
 
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
+        session.finalAccuracy = accuracy; // сохраняем для анти-абуза
         let xpEarned = session.xpEarned;
 
         let dailyBonusMsg = '';
@@ -661,30 +682,60 @@
     }
 
     function retrainMistakes() {
-        if (!session || !session.wrongGroups || !session.wrongGroups.length) return;
+        if (!session || !session.wrongPairs || !session.wrongPairs.length) return;
         
-        // Собрать все символы из неправильных групп
-        const allChars = session.wrongGroups.join('').split('');
-        
-        // Перемешать массив (алгоритм Фишера-Йетса)
-        for (let i = allChars.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [allChars[i], allChars[j]] = [allChars[j], allChars[i]];
+        // Уникальные пары ошибок (чтобы не было 100 групп, если путали одну и ту же букву)
+        const uniquePairs = [];
+        const seenPairs = new Set();
+        for (const p of session.wrongPairs) {
+            const sig = p.expected + '_' + p.typed;
+            if (!seenPairs.has(sig)) {
+                seenPairs.add(sig);
+                uniquePairs.push(p);
+            }
         }
         
-        // Разбить обратно на группы по groupLen (последняя может быть короче, если не кратно)
+        const pairsToTrain = uniquePairs.slice(0, 20);
+        const charset = getCharset();
         const newGroups = [];
-        for (let i = 0; i < allChars.length; i += groupLen) {
-            newGroups.push(allChars.slice(i, i + groupLen).join(''));
+        
+        for (const p of pairsToTrain) {
+            const charsToInsert = [p.expected];
+            // Если вместо буквы ввели другой существующий символ, добавляем его в ту же группу,
+            // чтобы натренировать отличие между ними на слух!
+            if (p.typed && window.MORSE_CODE && window.MORSE_CODE[p.typed] && p.typed !== p.expected) {
+                charsToInsert.push(p.typed);
+            }
+            
+            const g = [];
+            const targetLen = Math.max(groupLen, charsToInsert.length);
+            const randomCount = targetLen - charsToInsert.length;
+            
+            // Заполняем остаток группы случайными символами
+            for (let i = 0; i < randomCount; i++) {
+                g.push(charset[Math.floor(Math.random() * charset.length)]);
+            }
+            
+            // Вставляем ошибочные символы в случайные позиции
+            for (const ch of charsToInsert) {
+                const insertPos = Math.floor(Math.random() * (g.length + 1));
+                g.splice(insertPos, 0, ch);
+            }
+            newGroups.push(g.join(''));
         }
+
+        // Анти-абуз: если точность оригинальной сессии была < 60% (специально мазал, чтобы пофармить)
+        const isAbuse = session.finalAccuracy < 0.6;
+        const retryXpRate = isAbuse ? 0 : 3;
 
         const retrySession = {
             groups: newGroups,
             index: 0, wpm: session.wpm, farnsworth: session.farnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
-            xpRate: 1, // отработка уже известных ошибок — не полная ставка свежей сессии
+            xpRate: retryXpRate,
             isExam: false, examStopped: false, playedCount: 0, finished: false,
-            wrongGroups: [], skipDailyCheck: true,
+            wrongGroups: [], wrongChars: [], skipDailyCheck: true,
+            isRetrain: true, isAbuse: isAbuse
         };
         session = retrySession;
 
@@ -698,7 +749,11 @@
         groupTotalEl.textContent = session.groups.length;
         groupIndexEl.textContent = 1;
         answerInput.value = '';
-        feedbackEl.textContent = t('js.groups.retrain_intro', { '{count}': session.groups.length });
+        
+        let introText = t('js.groups.retrain_intro', { '{count}': session.groups.length });
+        if (!isAbuse) introText += ' (Опыт x3 + бонус за группу!)';
+        
+        feedbackEl.textContent = introText;
         feedbackEl.className = 'feedback show ok';
         answerInput.focus();
         playCurrentGroup();
