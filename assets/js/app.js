@@ -55,6 +55,19 @@ window.addEventListener('achievements:unlocked', (e) => {
 // Перехват физической клавиатуры для ввода ответов на русской раскладке
 // Позволяет печатать ответы, не переключая ОС на английский.
 document.addEventListener('keydown', (e) => {
+    // Горячая клавиша F7 — Повторить (общепринятый стандарт в Morse-софте)
+    if (e.key === 'F7') {
+        e.preventDefault();
+        const replayBtns = document.querySelectorAll('#replay-btn, #words-replay-btn');
+        for (const btn of replayBtns) {
+            if (btn.offsetParent !== null && !btn.disabled) {
+                btn.click();
+                break;
+            }
+        }
+        return;
+    }
+
     // Только для текстовых полей, где вбиваются ответы
     const targetIds = ['groups-answer', 'exam-answer', 'koch-answer', 'words-answer', 'cs-answer'];
     if (!e.target || !e.target.id || !targetIds.includes(e.target.id)) return;

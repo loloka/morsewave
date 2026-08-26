@@ -69,7 +69,7 @@ include __DIR__ . '/includes/header.php';
         <div class="lamp-row">
             <div class="morse-lamp" id="koch-lamp"></div>
             <button class="btn btn-sm" id="koch-signal-toggle"></button>
-            <button class="btn btn-sm" id="replay-btn"><?= t('koch.replay') ?></button>
+            <button class="btn btn-sm" id="replay-btn" title="F7"><?= t('koch.replay') ?> <span style="opacity: 0.6; font-size: 0.9em; margin-left: 4px;">[F7]</span></button>
         </div>
     </div>
     <div class="signal-line mt-2" id="koch-signal"></div>
