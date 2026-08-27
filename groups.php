@@ -22,69 +22,73 @@ include __DIR__ . '/includes/header.php';
 <div class="card mt-2" id="setup-panel">
     <h3><?= t('groups.settings') ?></h3>
 
-    <div class="mt-2">
-        <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.length_label') ?></div>
-        <div class="chip-row" id="length-chips">
-            <div class="chip" data-len="2">2</div>
-            <div class="chip active" data-len="3">3</div>
-            <div class="chip" data-len="4">4</div>
-            <div class="chip" data-len="5">5</div>
+    <div class="chip-row mt-1" id="groups-exam-toggle" style="margin-bottom: 15px;">
+        <div class="chip active" data-type="training"><?= t('groups.mode_training') ?></div>
+        <div class="chip" data-type="exam"><?= t('groups.mode_exam') ?></div>
+    </div>
+
+    <div id="groups-training-config">
+        <div class="mt-2">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.length_label') ?></div>
+            <div class="chip-row" id="length-chips">
+                <div class="chip" data-len="2">2</div>
+                <div class="chip active" data-len="3">3</div>
+                <div class="chip" data-len="4">4</div>
+                <div class="chip" data-len="5">5</div>
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.charset_label') ?></div>
+            <div class="chip-row" id="charset-chips">
+                <div class="chip active" data-set="letters"><?= t('groups.set_letters') ?></div>
+                <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
+                <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
+                <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
+                <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
+            </div>
+            <input type="text" id="custom-charset-input" class="answer-input mt-1"
+                   placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"
+                   style="display:none; text-transform:uppercase;" autocomplete="off">
+            <div class="muted" id="custom-charset-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
+        </div>
+
+        <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="groups-speed-row">
+            <div class="speed-control" id="groups-wpm-control">
+                <?= t('groups.speed') ?>
+                <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
+                <span class="speed-value" id="groups-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
+            </div>
+
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+                <span class="info-icon" id="groups-farnsworth-info">?</span>
+            </label>
+            <div class="speed-control" id="groups-farnsworth-wrap" style="display:none;">
+                <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
+                <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
+            </div>
+
+            <label class="chip"><?= t('groups.groups_per_session') ?>
+                <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
+                    <option value="10" selected>10</option><option value="20">20</option>
+                    <option value="30">30</option><option value="50">50</option>
+                </select>
+            </label>
+        </div>
+        <div class="tooltip-box" id="groups-farnsworth-tooltip" style="display:none;">
+            <?= t('groups.farnsworth_tooltip') ?>
         </div>
     </div>
 
-    <div class="mt-2">
-        <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.charset_label') ?></div>
-        <div class="chip-row" id="charset-chips">
-            <div class="chip active" data-set="letters"><?= t('groups.set_letters') ?></div>
-            <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
-            <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
-            <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
-            <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
-        </div>
-        <input type="text" id="custom-charset-input" class="answer-input mt-1"
-               placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"
-               style="display:none; text-transform:uppercase;" autocomplete="off">
-        <div class="muted" id="custom-charset-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
-    </div>
-
-    <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="groups-speed-row">
-        <div class="speed-control" id="groups-wpm-control">
-            <?= t('groups.speed') ?>
-            <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
-            <span class="speed-value" id="groups-wpm-value">12</span> wpm
-            <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
-        </div>
-        <div class="muted" id="groups-exam-speed-note" style="display:none; font-size:13px;">
-            <?= t('groups.exam_speed_fixed') ?>
-        </div>
-
-        <label class="chip" style="gap:8px;">
-            <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
-            <span class="info-icon" id="groups-farnsworth-info">?</span>
-        </label>
-        <div class="speed-control" id="groups-farnsworth-wrap" style="display:none;">
-            <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
-            <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
-        </div>
-
-        <label class="chip"><?= t('groups.groups_per_session') ?>
-            <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="10" selected>10</option><option value="20">20</option>
-                <option value="30">30</option><option value="50">50</option>
-            </select>
-        </label>
-    </div>
-    <div class="tooltip-box" id="groups-farnsworth-tooltip" style="display:none;">
-        <?= t('groups.farnsworth_tooltip') ?>
-    </div>
+    <p class="muted mt-1" id="groups-exam-hint-text" style="display:none; font-size:12px; margin-bottom: 15px;">
+        <?= t('groups.exam_hint') ?>
+    </p>
 
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="start-session"><?= t('groups.start_session') ?></button>
-        <button class="btn" id="exam-mode-btn"><?= t('groups.exam_mode') ?></button>
     </div>
-    <p class="muted mt-1" style="font-size:12px;">
-        <?= t('groups.exam_hint') ?>
-    </p>
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">

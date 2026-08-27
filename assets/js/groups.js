@@ -156,9 +156,9 @@
         return chars.filter(ch => MORSE_CODE[ch]);
     }
 
-    function getCharset() {
+    function getCharset(key = charsetKey) {
         const state = Progress.load();
-        switch (charsetKey) {
+        switch (key) {
             case 'digits': return '0123456789'.split('');
             case 'mixed': return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
             case 'learned':
@@ -298,15 +298,24 @@
     const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
     function startSession() {
-        const wpm = parseInt(wpmSlider.value, 10);
-        const farnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
-        const count = parseInt(document.getElementById('groups-count').value, 10);
-        const state = Progress.load();
-        const learnedTooFew = charsetKey === 'learned' && state.learnedLetters.length < MIN_LEARNED_FOR_FILTER;
-        const customTooFew = charsetKey === 'custom' && parseCustomCharset().length < MIN_LEARNED_FOR_FILTER;
-        const charset = getCharset();
         const isExam = pendingExamMode;
-        pendingExamMode = false;
+        
+        let activeWpm = parseInt(wpmSlider.value, 10);
+        let activeFarnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
+        let activeCount = parseInt(document.getElementById('groups-count').value, 10);
+        let activeGroupLen = groupLen;
+        let activeCharsetKey = charsetKey;
+        
+        if (isExam) {
+            activeGroupLen = 5;
+            activeCharsetKey = 'mixed';
+            activeCount = 50;
+        }
+
+        const state = Progress.load();
+        const learnedTooFew = activeCharsetKey === 'learned' && state.learnedLetters.length < MIN_LEARNED_FOR_FILTER;
+        const customTooFew = activeCharsetKey === 'custom' && parseCustomCharset().length < MIN_LEARNED_FOR_FILTER;
+        const charset = getCharset(activeCharsetKey);
 
         session = {
             groups: Array.from({ length: count }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, groupLen)),
@@ -872,40 +881,39 @@
         } catch { /* игнорируем офлайн */ }
     }
 
-    document.getElementById('exam-mode-btn').addEventListener('click', () => {
-        document.querySelectorAll('#length-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.len === '5'));
-        groupLen = 5;
-        document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.toggle('active', c.dataset.set === 'mixed'));
-        charsetKey = 'mixed';
-        customInput.style.display = 'none';
-        customHint.style.display = 'none';
-        // Слайдер wpm звук экзамена больше не определяет (см. EXAM_CHAR_WPM
-        // в startSession) — раньше он оставался на виду и молча показывал
-        // «12», хотя реально буквы звучат на 20 wpm; вводило в заблуждение
-        // (путали с обычными «Группами», где 12 wpm — это буквально 12 wpm).
-        // Теперь на месте слайдера — явная пометка о фиксированном тайминге.
-        wpmControl.style.display = 'none';
-        examSpeedNote.style.display = 'inline-block';
-        fwEnabled.checked = false;
-        fwWrap.style.display = 'none';
-        fwValue.style.display = 'none';
-        // Отключаем — иначе можно было выставить, скажем, 10 групп и
-        // формально "сдать экзамен" совсем не в том объёме (50 групп по
-        // 5 знаков = 250 знаков — это часть самого стандарта, не просто
-        // дефолт).
-        const countSelectEl = document.getElementById('groups-count');
-        countSelectEl.value = '50';
-        countSelectEl.disabled = true;
-        pendingExamMode = true;
+    document.querySelectorAll('#groups-exam-toggle .chip').forEach(chip => {
+        chip.addEventListener('click', (e) => {
+            const target = e.target;
+            if (target.classList.contains('active')) return;
 
-        // Классический тон экзамена — 550 Гц (как в реальных записях)
-        const audioSettings = AudioSettings.load();
-        const oldFreq = audioSettings.freq;
-        audioSettings.freq = 550;
-        AudioSettings.save(audioSettings);
-
-        feedbackEl.textContent = t('js.groups.exam_configured');
-        feedbackEl.className = 'feedback show ok';
+            document.querySelectorAll('#groups-exam-toggle .chip').forEach(c => c.classList.remove('active'));
+            target.classList.add('active');
+            
+            const isExam = target.dataset.type === 'exam';
+            pendingExamMode = isExam;
+            
+            const trainingConfig = document.getElementById('groups-training-config');
+            const examHint = document.getElementById('groups-exam-hint-text');
+            const startBtn = document.getElementById('start-session');
+            
+            if (isExam) {
+                trainingConfig.style.display = 'none';
+                examHint.style.display = 'block';
+                startBtn.textContent = '▶ ' + t('groups.mode_exam');
+                
+                // Классический тон экзамена — 550 Гц
+                const audioSettings = AudioSettings.load();
+                audioSettings.freq = 550;
+                AudioSettings.save(audioSettings);
+            } else {
+                trainingConfig.style.display = 'block';
+                examHint.style.display = 'none';
+                startBtn.textContent = t('groups.start_session');
+                
+                // Возвращаем настройки тона на стандартные (850 Гц) или оставляем 550, если пользователь захочет поменять в профиле,
+                // но лучше просто оставить как есть, профиль глобален. Экзамен просто временно перезаписывает тон.
+            }
+        });
     });
 
     document.getElementById('start-session').addEventListener('click', startSession);
