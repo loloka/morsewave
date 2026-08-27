@@ -1426,7 +1426,7 @@
         invasionEnemies.push(enemy);
         queueInvasionAudio(enemy);
         syncInvasionKeyHighlights();
-        invasionFeedback(isMegaBoss ? '🛸 МЕГА-БОСС! Введите цитату без пробелов!' : t('js.learn.invasion_boss_incoming'), 'ok');
+        invasionFeedback(isMegaBoss ? t('js.learn.invasion_mega_boss') : t('js.learn.invasion_boss_incoming'), 'ok');
     }
 
     function respawnInvasionBossSegment(enemy) {
@@ -1671,7 +1671,7 @@
             } else {
                 invasionKills++;
                 invasionBossPhase = false;
-                invasionFeedback('Промежуточный босс уничтожен!', 'ok');
+                invasionFeedback(t('js.learn.invasion_boss_killed_mid'), 'ok');
                 releaseInvasionLane(enemy.lane);
                 invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
                 syncInvasionKeyHighlights();
@@ -1938,7 +1938,7 @@
                 e.duration = elapsed + remaining * 2;
             }
         });
-        invasionFeedback('⏱️ ВРЕМЯ ЗАМОРОЖЕНО (6 сек)', 'ok');
+        invasionFeedback(t('js.learn.invasion_pu_slow_msg'), 'ok');
         invasionCanvasWrapEl.classList.add('slow-field');
         setTimeout(() => invasionCanvasWrapEl.classList.remove('slow-field'), 6000);
     }
@@ -1947,7 +1947,7 @@
         if (!invasionPowerups.nuke || !invasionRunning) return;
         invasionPowerups.nuke = 0;
         updateInvasionStatsUI();
-        invasionFeedback('💥 EMP ВЗРЫВ', 'ok');
+        invasionFeedback(t('js.learn.invasion_pu_nuke_msg'), 'ok');
         invasionCanvasWrapEl.classList.add('nuke-flash');
         setTimeout(() => invasionCanvasWrapEl.classList.remove('nuke-flash'), 500);
         
