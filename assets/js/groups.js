@@ -542,7 +542,9 @@
                     Progress.incrementStat('examsPassed', 1);
                 }
             } else {
-                session.xpEarned = 0;
+                // Если прервали — даём базовый 1 XP за каждый верный символ (но без учета множителей и бонусов)
+                session.xpEarned = session.correctChars;
+                Progress.addXp(session.xpEarned);
             }
         }
 
