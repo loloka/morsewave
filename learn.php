@@ -224,15 +224,18 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="invasion-powerups mt-2" style="display:flex; gap:10px; justify-content:center;">
+        <div class="text-center mt-2 mb-1">
+            <small class="text-muted"><?= t('learn.invasion_pu_hint') ?></small>
+        </div>
+        <div class="invasion-powerups" style="display:flex; gap:10px; justify-content:center;">
             <button class="btn btn-sm powerup-btn" id="invasion-pu-repair" disabled>
                 <span class="pu-icon">💖</span> <span class="pu-name"><?= t('learn.invasion_pu_repair') ?></span> <span class="pu-cost">x10</span>
             </button>
             <button class="btn btn-sm powerup-btn" id="invasion-pu-slow" disabled>
-                <span class="pu-icon">⏱️</span> <span class="pu-name"><?= t('learn.invasion_pu_slow') ?></span> <span class="pu-cost">x15</span> <kbd class="muted">Spc</kbd>
+                <span class="pu-icon">⏱️</span> <span class="pu-name"><?= t('learn.invasion_pu_slow') ?></span> <span class="pu-cost">x15</span> <kbd class="muted">Space</kbd>
             </button>
             <button class="btn btn-sm powerup-btn" id="invasion-pu-nuke" disabled>
-                <span class="pu-icon">💥</span> <span class="pu-name"><?= t('learn.invasion_pu_nuke') ?></span> <span class="pu-cost">x30</span> <kbd class="muted">Ent</kbd>
+                <span class="pu-icon">📡</span> <span class="pu-name"><?= t('learn.invasion_pu_nuke') ?></span> <span class="pu-cost">x30</span> <kbd class="muted">Enter</kbd>
             </button>
         </div>
 
