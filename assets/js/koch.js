@@ -335,7 +335,24 @@
             feedbackEl.textContent = t('js.koch.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
         } else {
-            feedbackEl.textContent = t('js.koch.wrong', { '{expected}': expected, '{typed}': typed || t('js.koch.empty_placeholder') });
+            const len = Math.max(expected.length, typed.length);
+            let expectedHTML = '';
+            let typedHTML = '';
+            
+            for (let i = 0; i < len; i++) {
+                const e = expected[i] || '_';
+                const tChar = typed[i] || '_';
+                if (e === tChar.toUpperCase()) {
+                    expectedHTML += `<span style="color: var(--success);">${e}</span>`;
+                    typedHTML += `<span style="color: var(--success);">${tChar.toUpperCase()}</span>`;
+                } else {
+                    expectedHTML += `<span style="color: var(--text); font-weight: bold; text-decoration: underline;">${e}</span>`;
+                    typedHTML += `<span style="color: var(--danger); font-weight: bold; text-decoration: underline;">${tChar.toUpperCase()}</span>`;
+                }
+            }
+            
+            const rawText = t('js.koch.wrong', { '{expected}': expectedHTML, '{typed}': typedHTML || t('js.koch.empty_placeholder') });
+            feedbackEl.innerHTML = `<span style="font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; color: var(--text);">${rawText}</span>`;
             feedbackEl.className = 'feedback show bad';
         }
 
