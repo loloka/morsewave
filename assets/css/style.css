@@ -1372,3 +1372,19 @@ input[type="range"] {
 .powerup-btn .pu-cost {
     font-size: 11px; background: var(--bg-body); padding: 2px 4px; border-radius: 4px;
 }
+
+
+@media (max-width: 600px) {
+    .powerup-btn .pu-name {
+        display: none;
+    }
+    .powerup-btn {
+        padding: 4px 6px;
+        font-size: 13px;
+        gap: 4px;
+    }
+    .invasion-powerups {
+        flex-wrap: nowrap;
+        gap: 4px;
+    }
+}
