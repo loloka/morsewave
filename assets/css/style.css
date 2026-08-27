@@ -530,7 +530,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .invasion-canvas-wrap {
     position: relative;
     width: 100%;
-    height: 210px; /* до 5 дорожек одновременно (уровни 2-5) — нужно больше вертикали, чем для одного пришельца */
+    height: 170px; /* сузили по просьбе */ одновременно (уровни 2-5) — нужно больше вертикали, чем для одного пришельца */
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     overflow: hidden;
@@ -549,7 +549,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
        клавиатурой ниже (см. .invasion-keyboard) это и есть настоящий фикс
        "всё равно приходится скроллить": сам канвас логике игры не важен по
        конкретной высоте, а вот место на маленьком экране экономит. */
-    .invasion-canvas-wrap { height: 160px; }
+    .invasion-canvas-wrap { height: 120px; }
 }
 .invasion-canvas-wrap canvas {
     position: absolute;
@@ -1387,4 +1387,18 @@ input[type="range"] {
         flex-wrap: nowrap;
         gap: 4px;
     }
+}
+
+
+#invasion-feedback {
+    min-height: 48px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    transition: opacity 0.2s;
+}
+#invasion-feedback:not(.show) {
+    opacity: 0;
+    visibility: hidden;
 }

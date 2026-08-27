@@ -1175,8 +1175,11 @@
         let elapsed = now - enemy.startTime;
         let progress = Math.min(1, elapsed / enemy.duration);
         const x = 28 + progress * (w - 60);
+        const baseY = h / 2;
+        // Корабли летят в базу по центру: интерполируем y к baseY
+        const yBase = laneY + (baseY - laneY) * Math.pow(progress, 2);
         const bob = Math.sin((now + enemy.id * 137) / 180) * 5;
-        return { x, y: laneY + bob, progress };
+        return { x, y: yBase + bob, progress };
     }
 
     // Лопата рисуется вручную на canvas, а не эмодзи (🪏 "shovel" — символ
@@ -1449,14 +1452,18 @@
     // увидеть прогресс "сколько ещё бить", т.к. сам босс визуально не
     // меняется между попаданиями (буква и озвучка и так дают обратную связь).
     function drawInvasionBossHealth(ctx, x, y, hits, total) {
-        const segW = 11, segH = 6, gap = 3;
-        const totalW = total * segW + (total - 1) * gap;
-        let sx = x - totalW / 2;
-        const sy = y - 36;
-        for (let i = 0; i < total; i++) {
-            ctx.fillStyle = i < hits ? 'rgba(255,255,255,.25)' : '#e0473b';
-            ctx.fillRect(sx, sy, segW, segH);
-            sx += segW + gap;
+        const barW = Math.min(120, total * 10);
+        const sy = Math.max(10, y - 40); // Не даем уйти за верхний край!
+        
+        // Фон (потерянные хп)
+        ctx.fillStyle = 'rgba(255,255,255,.25)';
+        ctx.fillRect(x - barW/2, sy, barW, 6);
+        
+        // Текущее хп
+        const healthPct = (total - hits) / total;
+        if (healthPct > 0) {
+            ctx.fillStyle = '#e0473b';
+            ctx.fillRect(x - barW/2, sy, barW * healthPct, 6);
         }
     }
 
@@ -1498,7 +1505,12 @@
             const pos = invasionEnemyPosition(enemy, now, w, h);
             
             if (enemy.type === 'phantom' && enemy.state === 'active') {
-                invasionCtx.globalAlpha = Math.max(0, 1 - (pos.progress * 2));
+                // Появляется полностью, затем медленно исчезает к progress=0.7
+                let alpha = 1.0;
+                if (pos.progress > 0.2) {
+                    alpha = 1.0 - ((pos.progress - 0.2) / 0.5);
+                }
+                invasionCtx.globalAlpha = Math.max(0, alpha);
             } else {
                 invasionCtx.globalAlpha = 1;
             }
