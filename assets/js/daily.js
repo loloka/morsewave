@@ -29,8 +29,12 @@ const DailyChallenge = (() => {
     function stage(state) {
         const learned = (state && Array.isArray(state.learnedLetters))
             ? state.learnedLetters.length : 0;
+        const groupsCompleted = (state && state.stats && state.stats.groupsCompleted) || 0;
+        
         if (learned < 8) return 'novice';
         if (learned < 26) return 'learning';
+        // Если выучили весь алфавит с цифрами и набили руку (прошли более 500 групп)
+        if (learned >= 36 && groupsCompleted >= 500) return 'expert';
         return 'confident';
     }
 
@@ -66,13 +70,22 @@ const DailyChallenge = (() => {
             };
         }
 
-        // confident — приём групп. wpm намеренно мягкий (12/15/18, без 20/24):
-        // высокую скорость теперь и так вознаграждает скоростной множитель,
-        // принуждать к ней в задании дня не нужно.
         let seed = seedFrom(date);
-        const lens = [3, 4, 5];
-        const counts = [10, 20, 30];
-        const wpms = [12, 15, 18];
+        let lens, counts, wpms;
+
+        if (st === 'expert') {
+            // expert — хардкор для опытных. Скорости от 20 до 26 wpm,
+            // группы длиннее (4-5 знаков), число групп больше.
+            lens = [4, 5];
+            counts = [20, 30, 40, 50];
+            wpms = [20, 22, 24, 26];
+        } else {
+            // confident — базовый приём групп (12-18 wpm)
+            lens = [3, 4, 5];
+            counts = [10, 20, 30];
+            wpms = [12, 15, 18];
+        }
+
         const len = lens[seed % lens.length];
         seed = (seed * 7 + 3) >>> 0;
         const count = counts[seed % counts.length];
