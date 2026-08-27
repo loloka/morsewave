@@ -96,7 +96,7 @@ return [
     'learn.rhythm_signal_up_hint' => '▲ longer than ideal — go faster',
     'learn.rhythm_signal_down_hint' => '▼ shorter than ideal — go slower',
     'learn.mode_invasion' => '👽 Invasion',
-    'learn.invasion_intro' => 'Aliens are advancing on your base — listen to the signal, figure out the letter, and pick it on the keyboard before the alien gets there. 1 XP per correct hit. A missed alien costs the base 1 HP (100 HP total). Hit #100 is a boss saucer — it takes 3 correct hits in a row, and breaking through costs the base 30 HP. Win the wave for a one-time bonus: however much base HP survived, plus a reaction-speed bonus (10-30).',
+    'learn.invasion_intro' => 'Aliens are advancing on your base — listen to the signal, figure out the letter, and pick it on the keyboard before the alien gets there. 1 XP per correct hit. A missed alien costs the base 1 HP. Every 20 kills, intermediate bosses spawn (10 HP), and hit #100 is a Mega-Boss (type a full Latin quote). A boss breakthrough costs the base 30 HP. Build combos to use Power-Ups (Repair, Slow, Nuke)! Win the wave for a one-time bonus: surviving base HP plus a reaction-speed bonus (10-30).',
     'learn.invasion_start' => 'Engage',
     'learn.invasion_stop' => 'Stop',
     'learn.invasion_base_hp' => 'Base HP',
