@@ -452,39 +452,89 @@
         const playedGroups = session.groups.slice(0, session.playedCount);
         const fullyCompleted = session.playedCount >= session.groups.length;
 
-        const typed = examAnswerEl.value.toUpperCase().trim().split(/\s+/).filter(Boolean);
-        let correctChars = 0;
-        let totalChars = 0;
-        let wrongGroupCount = 0;
-        if (!session.wrongPairs) session.wrongPairs = [];
-        playedGroups.forEach((expected, i) => {
-            const guess = typed[i] || '';
-            totalChars += expected.length;
-            let groupCorrect = 0;
-            for (let c = 0; c < expected.length; c++) {
-                if (guess[c] === expected[c]) { 
-                    correctChars++; 
-                    groupCorrect++; 
-                } else if (expected[c]) {
-                    session.wrongPairs.push({ expected: expected[c], typed: guess[c] || '' });
+        const expectedStr = playedGroups.join(' ');
+        const rawTyped = examAnswerEl.value.trim();
+        session.isPaperMode = (rawTyped === '');
+        session.totalChars = playedGroups.reduce((acc, g) => acc + g.length, 0); // Без пробелов, как и было
+
+        session.examFullyCompleted = fullyCompleted;
+        
+        if (session.isPaperMode) {
+            session.correctChars = 0;
+            session.examErrors = 0;
+            session.examWrongGroupCount = 0;
+            session.xpEarned = 0;
+            session.wrongPairs = [];
+        } else {
+            const typedStr = rawTyped.toUpperCase().replace(/\s+/g, ' ');
+            const n = expectedStr.length;
+            const m = typedStr.length;
+            const dp = Array.from({ length: n + 1 }, () => Array(m + 1).fill(0));
+            
+            for (let i = 0; i <= n; i++) dp[i][0] = i;
+            for (let j = 0; j <= m; j++) dp[0][j] = j;
+            
+            for (let i = 1; i <= n; i++) {
+                for (let j = 1; j <= m; j++) {
+                    if (expectedStr[i - 1] === typedStr[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1];
+                    } else {
+                        dp[i][j] = 1 + Math.min(
+                            dp[i - 1][j],    // пропуск
+                            dp[i][j - 1],    // лишний
+                            dp[i - 1][j - 1] // замена
+                        );
+                    }
                 }
             }
-            if (groupCorrect !== expected.length) { session.wrongGroups.push(expected); wrongGroupCount++; }
-        });
-        session.correctChars = correctChars;
-        session.totalChars = totalChars;
-        session.examFullyCompleted = fullyCompleted;
-        session.examWrongGroupCount = wrongGroupCount;
-
-        if (fullyCompleted) {
-            // Опыт за экзамен — только если пройден целиком, размер зависит от % точности
-            session.xpEarned = Math.round(correctChars * session.xpRate);
-            Progress.addXp(session.xpEarned);
-            if (wrongGroupCount <= 3) {
-                Progress.incrementStat('examsPassed', 1);
+            
+            let i = n, j = m;
+            const alignExp = [];
+            const alignTyp = [];
+            
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && expectedStr[i - 1] === typedStr[j - 1]) {
+                    alignExp.unshift(expectedStr[i - 1]);
+                    alignTyp.unshift(typedStr[j - 1]);
+                    i--; j--;
+                } else if (i > 0 && j > 0 && dp[i][j] === dp[i - 1][j - 1] + 1) {
+                    alignExp.unshift(expectedStr[i - 1]);
+                    alignTyp.unshift(typedStr[j - 1]);
+                    i--; j--;
+                } else if (i > 0 && dp[i][j] === dp[i - 1][j] + 1) {
+                    alignExp.unshift(expectedStr[i - 1]);
+                    alignTyp.unshift('_');
+                    i--;
+                } else {
+                    alignExp.unshift('_');
+                    alignTyp.unshift(typedStr[j - 1]);
+                    j--;
+                }
             }
-        } else {
-            session.xpEarned = 0;
+
+            session.examErrors = dp[n][m];
+            session.correctChars = Math.max(0, session.totalChars - session.examErrors);
+            session.alignment = { alignExp, alignTyp };
+            session.examWrongGroupCount = session.examErrors; // Используем ошибки вместо "неправильных групп" для экзамена
+            
+            if (!session.wrongPairs) session.wrongPairs = [];
+            for (let k = 0; k < alignExp.length; k++) {
+                const e = alignExp[k];
+                const t = alignTyp[k];
+                if (e !== t && e !== ' ' && e !== '_') {
+                    session.wrongPairs.push({ expected: e, typed: (t === '_' || t === ' ') ? '' : t });
+                }
+            }
+
+            if (fullyCompleted) {
+                session.xpEarned = Math.round(session.correctChars * session.xpRate);
+                Progress.addXp(session.xpEarned);
+                if (session.examErrors <= 3) {
+                    Progress.incrementStat('examsPassed', 1);
+                }
+            } else {
+                session.xpEarned = 0;
+            }
         }
 
         // Частично отыгранные группы всё равно реально прозвучали и были
@@ -661,6 +711,9 @@
             if (!session.examFullyCompleted) {
                 note.className = 'feedback show bad mt-2';
                 note.textContent = t('js.groups.exam_stopped_early', { '{played}': session.playedCount, '{total}': session.groups.length });
+            } else if (session.isPaperMode) {
+                note.className = 'feedback show ok mt-2';
+                note.textContent = t('js.groups.exam_paper_mode');
             } else if (session.examWrongGroupCount <= 3) {
                 note.className = 'feedback show ok mt-2';
                 note.textContent = t('js.groups.exam_passed_category', { '{wrong}': session.examWrongGroupCount, '{total}': session.groups.length });
@@ -672,9 +725,57 @@
             document.getElementById('result-panel').appendChild(note);
         }
 
+        const diffBlock = document.getElementById('exam-diff-block');
+        if (session.isExam) {
+            diffBlock.style.display = 'block';
+            if (session.isPaperMode) {
+                diffBlock.innerHTML = `<div style="margin-bottom: 10px; font-weight: bold; font-family: var(--font-ui);">${t('js.groups.exam_diff_paper')}</div>` + session.groups.slice(0, session.playedCount).join(' ');
+            } else if (session.alignment) {
+                const { alignExp, alignTyp } = session.alignment;
+                let html = `<div style="margin-bottom: 10px; font-weight: bold; font-family: var(--font-ui);">${t('js.groups.exam_diff_report')}</div>`;
+                html += '<div style="display: flex; flex-wrap: wrap; gap: 15px;">';
+                
+                let curExp = '';
+                let curTyp = '';
+                for (let i = 0; i < alignExp.length; i++) {
+                    const e = alignExp[i];
+                    const t = alignTyp[i];
+                    
+                    if (e === ' ' && t === ' ') {
+                        html += `<div style="display: flex; flex-direction: column; text-align: center;"><div>${curExp}</div><div>${curTyp}</div></div>`;
+                        curExp = '';
+                        curTyp = '';
+                    } else {
+                        const displayE = e === ' ' ? '_' : e;
+                        const displayT = t === ' ' ? '_' : t;
+
+                        if (e === t) {
+                            curExp += `<span style="color: var(--success);">${displayE}</span>`;
+                            curTyp += `<span style="color: var(--success);">${displayT}</span>`;
+                        } else {
+                            curExp += `<span style="color: var(--text); font-weight: bold; text-decoration: underline;">${displayE}</span>`;
+                            curTyp += `<span style="color: var(--danger); font-weight: bold; text-decoration: underline;">${displayT}</span>`;
+                        }
+                    }
+                }
+                if (curExp || curTyp) {
+                    html += `<div style="display: flex; flex-direction: column; text-align: center;"><div>${curExp}</div><div>${curTyp}</div></div>`;
+                }
+                html += '</div>';
+                diffBlock.innerHTML = html;
+            }
+        } else {
+            diffBlock.style.display = 'none';
+        }
+
         const mistakesBlock = document.getElementById('mistakes-block');
-        if (session.wrongGroups && session.wrongGroups.length > 0) {
-            document.getElementById('mistake-count').textContent = session.wrongGroups.length;
+        // Показываем кнопку ошибок либо для обычных групп (wrongGroups), либо для экзамена (если есть wrongPairs)
+        const hasExamMistakes = session.isExam && !session.isPaperMode && session.wrongPairs && session.wrongPairs.length > 0;
+        const hasGroupMistakes = !session.isExam && session.wrongGroups && session.wrongGroups.length > 0;
+        
+        if (hasGroupMistakes || hasExamMistakes) {
+            const count = hasGroupMistakes ? session.wrongGroups.length : session.examErrors;
+            document.getElementById('mistake-count').textContent = count;
             mistakesBlock.style.display = 'block';
         } else {
             mistakesBlock.style.display = 'none';
@@ -796,9 +897,10 @@
         countSelectEl.disabled = true;
         pendingExamMode = true;
 
-        // Классический тон проверки приёма — 850 Гц
+        // Классический тон экзамена — 550 Гц (как в реальных записях)
         const audioSettings = AudioSettings.load();
-        audioSettings.freq = 850;
+        const oldFreq = audioSettings.freq;
+        audioSettings.freq = 550;
         AudioSettings.save(audioSettings);
 
         feedbackEl.textContent = t('js.groups.exam_configured');

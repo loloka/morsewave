@@ -118,6 +118,8 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('groups.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('groups.result_xp') ?></span></div>
     </div>
+    
+    <div id="exam-diff-block" class="mt-2" style="display:none; font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; color: var(--text); background: var(--surface-2); padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; text-align: left;"></div>
 
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
         <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>
