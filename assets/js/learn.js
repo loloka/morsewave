@@ -951,19 +951,13 @@
     const INVASION_XP_PER_KILL = 1;
     const INVASION_BASE_HP = 100;
     const INVASION_WIN_KILLS = 100;
-    // Босс на 100-м попадании (2026-08-01, прямая просьба владельца "чтобы
-    // концовка волны была ярче") — не отдельное поведение, тот же цикл
-    // "услышал букву → выбрал на клавиатуре", просто с летающей тарелкой,
-    // которая не умирает с одного попадания. См. spawnInvasionBoss/
-    // resolveInvasionKill/resolveInvasionMiss ниже.
-    const INVASION_BOSS_HITS = 3; // сколько верных попаданий нужно, чтобы добить
-    const INVASION_BOSS_SPRITE = '🛸'; // отдельно от INVASION_SPRITES — не спавнится как рядовой
-    // Прорыв босса — заметно больнее обычного (владелец 2026-07-01: "пусть
-    // сносит 30 хп, а то там как раз примерно 50-70 остаётся"), не плоская
-    // invasionDamageFor(). Прогресс по числу уже засчитанных попаданий по
-    // боссу при этом НЕ сгорает — 30 HP уже достаточное наказание, снова
-    // отвечать все 3 буквы с нуля было бы слишком жёстко.
+    const INVASION_BOSS_SPRITE = '🛸';
     const INVASION_BOSS_BREACH_DAMAGE = 30;
+
+    const INVASION_QUOTES = [
+        "VENI VIDI VICI", "MEMENTO MORI", "CARPE DIEM", "PER ASPERA AD ASTRA",
+        "COGITO ERGO SUM", "DUM SPIRO SPERO", "AUDENTES FORTUNA IUVAT"
+    ];
     // Было только 👽/🦎 — по фидбеку владельца 2026-08-01 "скучно, добавь
     // монстриков" расширили зверинец, не выходя за тему "инопланетное или
     // рептилия" (та же тема, что и в project_minigame_direction): 👾 —
@@ -997,6 +991,9 @@
     const invasionBestComboEl = document.getElementById('invasion-best-combo');
     const invasionFeedbackEl = document.getElementById('invasion-feedback');
     const invasionGridEl = document.getElementById('invasion-grid');
+    const invasionPuRepair = document.getElementById('invasion-pu-repair');
+    const invasionPuSlow = document.getElementById('invasion-pu-slow');
+    const invasionPuNuke = document.getElementById('invasion-pu-nuke');
 
     // QWERTY, а не алфавитный порядок — специально (владелец 2026-07-31):
     // "к ней сразу привыкать" — те же клавиши, что и на физической клавиатуре
@@ -1025,22 +1022,15 @@
     let invasionParticles = [];
     let invasionLanePool = [];
     let invasionEnemySeq = 0;
-    let invasionAudioChain = Promise.resolve(); // сериализует звук — иначе 2-5 одновременных морзянок сливаются в кашу
+    let invasionAudioChain = Promise.resolve();
     let invasionRafId = null;
     let invasionWaveStart = 0;
-    // Победный салют (см. startInvasionCelebration, 2026-08-01): держит
-    // requestAnimationFrame живым ещё немного ПОСЛЕ invasionRunning=false,
-    // чтобы фейерверк успел доиграть, а не оборвался вместе с концом волны.
     let invasionCelebrating = false;
     let invasionCelebrateTimers = [];
-    // true с момента, когда счётчик волны первый раз дошёл до 99 — с этого
-    // момента обычные пришельцы больше не спавнятся, финал волны решает
-    // только босс (см. topUpInvasionEnemies/spawnInvasionBoss).
     let invasionBossPhase = false;
-    // Тряска поля при пропущенном пришельце (см. flashInvasionHit) — таймер
-    // снятия класса храним отдельно, чтобы серия быстрых пропусков подряд не
-    // плодила висящие setTimeout один поверх другого.
     let invasionHitFlashTimer = null;
+    let invasionPowerups = { slow: 0, nuke: 0 };
+    let invasionSlowUntil = 0;
 
     function initInvasionGrid() {
         if (invasionGridBuilt) return;
@@ -1098,6 +1088,18 @@
         invasionKillsEl.textContent = invasionKills;
         invasionComboEl.textContent = invasionCombo;
         invasionBestComboEl.textContent = invasionBestCombo;
+        
+        if (invasionCombo >= 15) invasionPowerups.slow = 1;
+        if (invasionCombo >= 30) invasionPowerups.nuke = 1;
+        
+        if (invasionPuSlow) {
+            invasionPuSlow.disabled = !invasionPowerups.slow;
+            if (invasionPowerups.slow) invasionPuSlow.classList.add('ready'); else invasionPuSlow.classList.remove('ready');
+        }
+        if (invasionPuNuke) {
+            invasionPuNuke.disabled = !invasionPowerups.nuke;
+            if (invasionPowerups.nuke) invasionPuNuke.classList.add('ready'); else invasionPuNuke.classList.remove('ready');
+        }
     }
 
     function invasionFeedback(text, kind) {
@@ -1169,8 +1171,9 @@
     function invasionEnemyPosition(enemy, now, w, h) {
         const laneY = ((enemy.lane + 1) / (INVASION_MAX_LANES + 1)) * h;
         if (enemy.state !== 'active') return { x: enemy.dieX, y: enemy.dieY };
-        const elapsed = now - enemy.startTime;
-        const progress = Math.min(1, elapsed / enemy.duration);
+        
+        let elapsed = now - enemy.startTime;
+        let progress = Math.min(1, elapsed / enemy.duration);
         const x = 28 + progress * (w - 60);
         const bob = Math.sin((now + enemy.id * 137) / 180) * 5;
         return { x, y: laneY + bob, progress };
@@ -1355,60 +1358,87 @@
         const available = ALL_LEARNABLE.filter((ch) => !activeChars.includes(ch));
         const pool = available.length ? available : ALL_LEARNABLE;
         const ch = pickInvasionLetterWeighted(pool);
-        const sprite = INVASION_SPRITES[Math.floor(Math.random() * INVASION_SPRITES.length)];
         const wpm = parseInt(invasionWpmSlider.value, 10);
-        // Запас времени на очередь озвучки — сколько пришельцев уже стоят
-        // впереди в очереди звука прямо сейчас (с запасом, см. комментарий у
-        // invasionAudioEstimate).
         const queueAhead = invasionEnemies.length;
-        const duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(wpm);
+        let duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(wpm);
+        
+        const rand = Math.random();
+        let type = 'normal';
+        let sprite = INVASION_SPRITES[Math.floor(Math.random() * INVASION_SPRITES.length)];
+        let tankHits = 0;
+        
+        if (rand < 0.06) {
+            type = 'tank';
+            sprite = '🛡️';
+        } else if (rand < 0.12) {
+            type = 'rusher';
+            sprite = '⚡';
+            duration *= 0.6;
+        } else if (rand < 0.18) {
+            type = 'phantom';
+            sprite = '👻';
+        }
+
         const enemy = {
             id: ++invasionEnemySeq,
-            ch, sprite, duration,
+            type, ch, sprite, duration,
             startTime: performance.now(),
             lane: acquireInvasionLane(),
-            state: 'active', // active → dying (лопата летит) → удалён из массива
+            state: 'active',
             dieX: 0, dieY: 0,
             audio: null,
+            tankHits
         };
         invasionEnemies.push(enemy);
         queueInvasionAudio(enemy);
         syncInvasionKeyHighlights();
     }
 
-    // Босс — тарелка покрупнее рядового, с тремя "сегментами" здоровья.
-    // Спавнится ОДИН раз за волну (topUpInvasionEnemies проверяет
-    // invasionBossPhase && поле пустое), letter — та же взвешенная выборка,
-    // что и у рядовых.
-    function spawnInvasionBoss() {
+    function spawnInvasionBoss(isMegaBoss = false) {
         const wpm = parseInt(invasionWpmSlider.value, 10);
-        const ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        let ch, bossTotalHits, bossQuote;
+        
+        if (isMegaBoss) {
+            bossQuote = INVASION_QUOTES[Math.floor(Math.random() * INVASION_QUOTES.length)].replace(/\s/g, '');
+            ch = bossQuote[0];
+            bossTotalHits = bossQuote.length;
+        } else {
+            ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+            bossTotalHits = 10;
+        }
+        
         const enemy = {
             id: ++invasionEnemySeq,
             ch,
             sprite: INVASION_BOSS_SPRITE,
-            duration: invasionTierDuration(ch, wpm),
+            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 1.5 : 1.2),
             startTime: performance.now(),
             lane: acquireInvasionLane(),
             state: 'active',
             dieX: 0, dieY: 0,
             audio: null,
             isBoss: true,
+            isMegaBoss,
+            bossQuote,
             bossHits: 0,
+            bossTotalHits
         };
         invasionEnemies.push(enemy);
         queueInvasionAudio(enemy);
         syncInvasionKeyHighlights();
-        invasionFeedback(t('js.learn.invasion_boss_incoming'), 'ok');
+        invasionFeedback(isMegaBoss ? '🛸 МЕГА-БОСС! Введите цитату без пробелов!' : t('js.learn.invasion_boss_incoming'), 'ok');
     }
 
-    // Босс ещё не добит (bossHits < INVASION_BOSS_HITS) или прорвался, но
-    // база выжила — в обоих случаях он не удаляется с поля, а "воскресает"
-    // на месте: новая буква, сброшенная позиция/озвучка, тот же id/лейн.
     function respawnInvasionBossSegment(enemy) {
         const wpm = parseInt(invasionWpmSlider.value, 10);
-        enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        if (enemy.isMegaBoss && enemy.bossQuote) {
+            enemy.ch = enemy.bossQuote[enemy.bossHits % enemy.bossQuote.length];
+        } else {
+            enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        }
         enemy.duration = invasionTierDuration(enemy.ch, wpm);
+        if (performance.now() < invasionSlowUntil) enemy.duration *= 2;
+        
         enemy.startTime = performance.now();
         enemy.state = 'active';
         queueInvasionAudio(enemy);
@@ -1432,12 +1462,14 @@
 
     function topUpInvasionEnemies() {
         if (!invasionRunning) return;
-        // Фаза босса — поле держим пустым от рядовых, финал волны решает
-        // только он один. Пока он жив (или пока летит лопата в него),
-        // ничего не подсаживаем; как только поле пустеет (сам заспавнился
-        // впервые, либо respawn ещё не случился) — спавним/держим босса.
+        
+        const zone = Math.min(4, Math.floor(invasionKills / 20));
+        invasionCanvasWrapEl.className = 'invasion-canvas-wrap zone-' + zone;
+        
         if (invasionBossPhase) {
-            if (invasionEnemies.length === 0) spawnInvasionBoss();
+            if (invasionEnemies.length === 0) {
+                spawnInvasionBoss(invasionKills >= 99);
+            }
             return;
         }
         const target = invasionConcurrency();
@@ -1464,9 +1496,22 @@
 
         invasionEnemies.forEach((enemy) => {
             const pos = invasionEnemyPosition(enemy, now, w, h);
-            invasionCtx.font = enemy.isBoss ? '46px serif' : '30px serif';
+            
+            if (enemy.type === 'phantom' && enemy.state === 'active') {
+                invasionCtx.globalAlpha = Math.max(0, 1 - (pos.progress * 2));
+            } else {
+                invasionCtx.globalAlpha = 1;
+            }
+            
+            invasionCtx.font = enemy.isBoss ? (enemy.isMegaBoss ? '56px serif' : '46px serif') : '30px serif';
             invasionCtx.fillText(enemy.sprite, pos.x, pos.y);
-            if (enemy.isBoss) drawInvasionBossHealth(invasionCtx, pos.x, pos.y, enemy.bossHits, INVASION_BOSS_HITS);
+            
+            if (enemy.isBoss) {
+                invasionCtx.globalAlpha = 1;
+                drawInvasionBossHealth(invasionCtx, pos.x, pos.y, enemy.bossHits, enemy.bossTotalHits);
+            }
+            invasionCtx.globalAlpha = 1;
+            
             if (enemy.state === 'active' && pos.progress >= 1) {
                 resolveInvasionMiss(enemy);
             }
@@ -1484,7 +1529,7 @@
                     spawnInvasionParticles(p.x1, p.y1, '#6fcf7a');
                     const enemy = invasionEnemies.find((e) => e.id === p.targetId);
                     if (enemy) {
-                        if (enemy.isBoss && enemy.bossHits < INVASION_BOSS_HITS) {
+                        if (enemy.isBoss && enemy.bossHits < enemy.bossTotalHits) {
                             // Ещё не добит — "воскрешаем" на месте с новой
                             // буквой вместо обычного удаления/освобождения
                             // лейна (см. resolveInvasionKill).
@@ -1562,9 +1607,17 @@
         const w = invasionCanvasWrapEl.clientWidth;
         const h = invasionCanvasWrapEl.clientHeight;
         const pos = invasionEnemyPosition(enemy, performance.now(), w, h);
-        // Скорость реакции для бонуса победы — pos.progress ещё считается
-        // от 'active'-состояния прямо перед заморозкой ниже: 0 = убил сразу
-        // как появился, 1 = тянул до самого конца пути.
+        if (enemy.type === 'tank' && enemy.tankHits === 0) {
+            enemy.tankHits++;
+            enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+            enemy.duration += invasionTierDuration(enemy.ch, parseInt(invasionWpmSlider.value, 10));
+            enemy.startTime = performance.now();
+            queueInvasionAudio(enemy);
+            syncInvasionKeyHighlights();
+            flashInvasionHit();
+            return;
+        }
+
         invasionSpeedScoreSum += 1 - (pos.progress ?? 0);
         invasionSpeedScoreCount++;
 
@@ -1586,6 +1639,11 @@
         });
 
         invasionCombo++;
+        if (invasionCombo % 10 === 0 && invasionCombo > 0) {
+            invasionHp = Math.min(INVASION_BASE_HP, invasionHp + 1);
+            updateInvasionHpUI();
+            invasionFeedback('💖 База починена (+1 HP)', 'ok');
+        }
         if (invasionCombo > invasionBestCombo) invasionBestCombo = invasionCombo;
 
         // Питает адаптивный спавн (см. invasionSpawnWeight выше) — успел
@@ -1593,24 +1651,32 @@
         // вылетать чуть реже прежнего. Работает и для босса — каждое его
         // попадание тоже честная буква со своей адаптивной статистикой.
         Progress.recordInvasionAttempt(enemy.ch, true);
-        Progress.addXp(INVASION_XP_PER_KILL);
+        let xp = INVASION_XP_PER_KILL;
+        if (enemy.type === 'tank') xp = 2;
+        Progress.addXp(xp);
         syncInvasionKeyHighlights();
 
         if (enemy.isBoss) {
             enemy.bossHits++;
             updateInvasionStatsUI();
-            if (enemy.bossHits < INVASION_BOSS_HITS) {
-                // Не финальное попадание — "воскрешение" (новая буква, та же
-                // лопата долетит и оживит его) обрабатывает invasionFrame,
-                // здесь только счёт и фидбек.
-                invasionFeedback(t('js.learn.invasion_boss_hit', { '{hits}': enemy.bossHits, '{total}': INVASION_BOSS_HITS }), 'ok');
+            if (enemy.bossHits < enemy.bossTotalHits) {
+                invasionFeedback(t('js.learn.invasion_boss_hit', { '{hits}': enemy.bossHits, '{total}': enemy.bossTotalHits }), 'ok');
                 return;
             }
-            invasionKills = INVASION_WIN_KILLS;
-            invasionFeedback(t('js.learn.invasion_boss_kill'), 'ok');
-            // Даём долететь последней лопате и доиграть взрыву, прежде чем
-            // показать экран победы — иначе финальный удар не видно.
-            setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
+            
+            if (enemy.isMegaBoss) {
+                invasionKills = INVASION_WIN_KILLS;
+                invasionFeedback(t('js.learn.invasion_boss_kill'), 'ok');
+                setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
+            } else {
+                invasionKills++;
+                invasionBossPhase = false;
+                invasionFeedback('Промежуточный босс уничтожен!', 'ok');
+                releaseInvasionLane(enemy.lane);
+                invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+                syncInvasionKeyHighlights();
+                topUpInvasionEnemies();
+            }
             return;
         }
 
@@ -1618,13 +1684,8 @@
         updateInvasionStatsUI();
         invasionFeedback(t('js.learn.invasion_kill', { '{ch}': enemy.ch }), 'ok');
 
-        if (invasionKills >= INVASION_WIN_KILLS - 1 && !invasionBossPhase) {
-            // 99-е попадание волны — переходим в фазу босса. Финал волны
-            // (100-е попадание) решает ТОЛЬКО он, один на один: остальных
-            // рядовых пришельцев на поле убираем без урона и без начисления
-            // (это не прорыв, просто "смена декораций" перед боссом) —
-            // кроме самого текущего (умирающего), его лопата уже летит и
-            // уберёт его как обычно через invasionFrame.
+        const isBossTime = (invasionKills === 19 || invasionKills === 39 || invasionKills === 59 || invasionKills === 79 || invasionKills === 99);
+        if (isBossTime && !invasionBossPhase) {
             invasionBossPhase = true;
             invasionEnemies.forEach((e) => {
                 if (e.id === enemy.id) return;
@@ -1864,8 +1925,62 @@
 
     // Ввод с физической клавиатуры — тот же приём, что и в "Приёме на слух"
     // (см. window.addEventListener('keydown', ...) выше для recognizeModeActive).
+
+    function activateInvasionSlow() {
+        if (!invasionPowerups.slow || !invasionRunning) return;
+        invasionPowerups.slow = 0;
+        updateInvasionStatsUI();
+        invasionSlowUntil = performance.now() + 6000;
+        invasionEnemies.forEach(e => {
+            if (e.state === 'active') {
+                const elapsed = performance.now() - e.startTime;
+                const remaining = e.duration - elapsed;
+                e.duration = elapsed + remaining * 2;
+            }
+        });
+        invasionFeedback('⏱️ ВРЕМЯ ЗАМОРОЖЕНО (6 сек)', 'ok');
+        invasionCanvasWrapEl.classList.add('slow-field');
+        setTimeout(() => invasionCanvasWrapEl.classList.remove('slow-field'), 6000);
+    }
+
+    function activateInvasionNuke() {
+        if (!invasionPowerups.nuke || !invasionRunning) return;
+        invasionPowerups.nuke = 0;
+        updateInvasionStatsUI();
+        invasionFeedback('💥 EMP ВЗРЫВ', 'ok');
+        invasionCanvasWrapEl.classList.add('nuke-flash');
+        setTimeout(() => invasionCanvasWrapEl.classList.remove('nuke-flash'), 500);
+        
+        invasionEnemies.forEach(e => {
+            if (e.state !== 'active') return;
+            if (e.isBoss) {
+                e.bossHits++; // Deal 1 dmg
+                if (e.bossHits < e.bossTotalHits) {
+                    respawnInvasionBossSegment(e);
+                } else {
+                    resolveInvasionKill(e);
+                }
+            } else {
+                resolveInvasionKill(e);
+            }
+        });
+    }
+
+    if (invasionPuSlow) invasionPuSlow.addEventListener('click', activateInvasionSlow);
+    if (invasionPuNuke) invasionPuNuke.addEventListener('click', activateInvasionNuke);
+
     window.addEventListener('keydown', (e) => {
         if (!invasionModeActive || !invasionRunning) return;
+        if (e.code === 'Space' && invasionPowerups.slow) {
+            e.preventDefault();
+            activateInvasionSlow();
+            return;
+        }
+        if (e.code === 'Enter' && invasionPowerups.nuke) {
+            e.preventDefault();
+            activateInvasionNuke();
+            return;
+        }
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 

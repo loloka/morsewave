@@ -224,6 +224,18 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <div class="invasion-powerups mt-2" style="display:flex; gap:10px; justify-content:center;">
+            <button class="btn btn-sm powerup-btn" id="invasion-pu-repair" disabled title="Пассивно: восстанавливает 1 HP за комбо x10">
+                <span class="pu-icon">💖</span> <span class="pu-name">Repair</span> <span class="pu-cost">x10</span>
+            </button>
+            <button class="btn btn-sm powerup-btn" id="invasion-pu-slow" disabled title="Заморозка времени">
+                <span class="pu-icon">⏱️</span> <span class="pu-name">Slow</span> <span class="pu-cost">x15</span> <kbd class="muted">Spc</kbd>
+            </button>
+            <button class="btn btn-sm powerup-btn" id="invasion-pu-nuke" disabled title="EMP Взрыв">
+                <span class="pu-icon">💥</span> <span class="pu-name">Nuke</span> <span class="pu-cost">x30</span> <kbd class="muted">Ent</kbd>
+            </button>
+        </div>
+
         <!-- Кнопки "В бой"/"Остановить" — в одной строке с "лучшим комбо"
              (уничтожено/комбо теперь в HUD на канвасе выше, см. .invasion-hud) —
              компактнее отдельной строки над канвасом. -->
