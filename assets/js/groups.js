@@ -318,10 +318,10 @@
         const charset = getCharset(activeCharsetKey);
 
         session = {
-            groups: Array.from({ length: count }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, groupLen)),
-            index: 0, wpm, farnsworth,
+            groups: Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen)),
+            index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0,
-            xpRate: xpRateForSession(charset.length, groupLen, { daily: isDailyChallenge, wpm }),
+            xpRate: xpRateForSession(charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [],
         };
@@ -329,7 +329,7 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
-        groupTotalEl.textContent = count;
+        groupTotalEl.textContent = activeCount;
         groupIndexEl.textContent = 1;
         if (learnedTooFew) {
             feedbackEl.textContent = t('js.groups.filter_learned_too_few', { '{min}': MIN_LEARNED_FOR_FILTER });
