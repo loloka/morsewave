@@ -71,16 +71,63 @@ const DailyChallenge = (() => {
         }
 
         let seed = seedFrom(date);
-        let lens, counts, wpms;
+        let taskType = 'groups';
 
+        if (st === 'confident' || st === 'expert') {
+            let availableTasks = ['groups', 'callsigns', 'invasion'];
+            if ((state.kochLevel || 1) < 43) {
+                availableTasks.push('koch');
+            }
+            taskType = availableTasks[seed % availableTasks.length];
+            seed = (seed * 7 + 3) >>> 0;
+        }
+
+        if (taskType === 'callsigns') {
+            let counts, wpms;
+            if (st === 'expert') {
+                counts = [20, 25, 30];
+                wpms = [20, 22, 24];
+            } else {
+                counts = [15, 20];
+                wpms = [15, 18, 20];
+            }
+            const count = counts[seed % counts.length];
+            seed = (seed * 7 + 3) >>> 0;
+            const wpm = wpms[seed % wpms.length];
+
+            return {
+                type: 'callsigns', stage: st, date, count, wpm,
+                title: t('js.daily.callsigns_title', { '{count}': count, '{wpm}': wpm }),
+                desc: t('js.daily.callsigns_desc'),
+                href: `callsigns.php?daily=1&count=${count}&wpm=${wpm}`,
+            };
+        }
+
+        if (taskType === 'koch') {
+            return {
+                type: 'koch', stage: st, date,
+                title: t('js.daily.koch_title'),
+                desc: t('js.daily.koch_desc'),
+                href: `koch.php?daily=1`,
+            };
+        }
+
+        if (taskType === 'invasion') {
+            return {
+                type: 'invasion', stage: st, date,
+                title: t('js.daily.invasion_title'),
+                desc: t('js.daily.invasion_desc'),
+                href: `learn.php?daily=1&mode=invasion`,
+            };
+        }
+
+        // groups
+        let lens, counts, wpms;
         if (st === 'expert') {
-            // expert — хардкор для опытных. Скорости от 20 до 26 wpm,
-            // группы длиннее (4-5 знаков), число групп больше.
             lens = [4, 5];
             counts = [20, 30, 40, 50];
-            wpms = [20, 22, 24, 26];
+            wpms = [20, 22, 24];
         } else {
-            // confident — базовый приём групп (12-18 wpm)
             lens = [3, 4, 5];
             counts = [10, 20, 30];
             wpms = [12, 15, 18];

@@ -894,6 +894,12 @@ HTML,
     'js.daily.recognize_desc' => 'Верно распознай 20 символов в режиме «Обучение → Приём на слух». Бонус +50 XP один раз в день.',
     'js.daily.groups_title' => '{count} групп по {len} символа(ов) на {wpm} wpm',
     'js.daily.groups_desc' => 'Прими группы в режиме «Группы символов». Бонус +50 XP один раз в день.',
+    'js.daily.callsigns_title' => '{count} позывных на {wpm} wpm',
+    'js.daily.callsigns_desc' => 'Прими позывные в режиме «Позывные». Бонус +50 XP один раз в день.',
+    'js.daily.koch_title' => 'Пройди тренировку по методу Коха',
+    'js.daily.koch_desc' => 'Заверши одну сессию в режиме «Метод Коха». Бонус +50 XP один раз в день.',
+    'js.daily.invasion_title' => 'Отбей волну Вторжения',
+    'js.daily.invasion_desc' => 'Защити базу от инопланетян в режиме «Обучение → Вторжение». Бонус +50 XP один раз в день.',
 
     // --- api/achievements.php (определения достижений из БД, achievements.code) ---
     'ach_def.first_signal.title' => 'Первый сигнал',

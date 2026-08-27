@@ -1762,6 +1762,7 @@
             Progress.addXp(bonusXp);
             Progress.incrementStat('invasionWavesCompleted', 1);
             Progress.markDailyActivity();
+            tickDaily('invasion');
             // Без этого вызова ачивки за волны (invasion_first/invasion_10)
             // не выдавались бы сразу после победы, а «догонялись» бы только
             // при следующей проверке из другого режима — выглядело бы как
@@ -1962,14 +1963,23 @@
 
         // Активируем только если сегодняшнее задание совпадает с открытой
         // вкладкой — иначе это просто обычная тренировка без бонуса.
-        if (task.type === 'learn' && !wantRecognize) {
+        const wantInvasion = params.get('mode') === 'invasion';
+        
+        if (task.type === 'learn' && !wantRecognize && !wantInvasion) {
             dailyTask = task;
             dailyBannerEl = makeDailyBanner(sendModeEl);
         } else if (task.type === 'recognize' && wantRecognize) {
             dailyTask = task;
             const chip = document.querySelector('.mode-switch .chip[data-mode="recognize"]');
-            if (chip) chip.click(); // переключаемся на приём на слух
+            if (chip) chip.click();
             dailyBannerEl = makeDailyBanner(recognizeModeEl);
+        } else if (task.type === 'invasion' && wantInvasion) {
+            // Для вторжения target = 1 (одна волна)
+            task.target = 1;
+            dailyTask = task;
+            const chip = document.querySelector('.mode-switch .chip[data-mode="invasion"]');
+            if (chip) chip.click();
+            dailyBannerEl = makeDailyBanner(invasionModeEl);
         } else {
             return;
         }

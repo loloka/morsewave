@@ -21,7 +21,7 @@ include __DIR__ . '/includes/header.php';
         </div>
         <label class="chip"><?= t('cs.per_session') ?>
             <select id="cs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="5" selected>5</option><option value="10">10</option><option value="15">15</option><option value="25">25</option>
+                <option value="5" selected>5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option>
             </select>
         </label>
     </div>

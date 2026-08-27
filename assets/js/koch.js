@@ -387,6 +387,42 @@
         document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
         document.getElementById('result-xp').textContent = xpEarned;
 
+        let dailyBonusMsg = '';
+        let dailyBonusFail = false;
+        
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('daily') === '1') {
+            const req = DailyChallenge.forToday();
+            if (req.type === 'koch') {
+                if (accuracy < 0.6) {
+                    dailyBonusFail = true;
+                    dailyBonusMsg = t('js.groups.daily_low_accuracy', {
+                        '{min}': 60,
+                        '{acc}': Math.round(accuracy * 100)
+                    });
+                } else {
+                    if (DailyChallenge.isDoneToday()) {
+                        dailyBonusMsg = t('js.groups.daily_already');
+                    } else {
+                        Progress.completeDailyChallenge();
+                        dailyBonusMsg = t('js.groups.daily_bonus');
+                    }
+                }
+            }
+        }
+
+        // Clean up previous daily note if any
+        const oldNote = document.getElementById('koch-daily-note');
+        if (oldNote) oldNote.remove();
+
+        if (dailyBonusMsg) {
+            const note = document.createElement('div');
+            note.id = 'koch-daily-note';
+            note.className = (dailyBonusFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2') + ' js-result-note';
+            note.textContent = (dailyBonusFail ? t('js.groups.daily_note_fail_prefix') : t('js.groups.daily_note_ok_prefix')) + dailyBonusMsg;
+            document.querySelector('.grid.grid-3').insertAdjacentElement('afterend', note);
+        }
+
         Progress.incrementStat('sessionsCompleted', 1);
         Progress.markDailyActivity();
         postStat('total_sessions', 1);
@@ -436,4 +472,18 @@
     });
 
     renderHeader();
+
+    // Обработка параметров из URL (для заданий дня)
+    const initParams = new URLSearchParams(window.location.search);
+    if (initParams.get('daily') === '1') {
+        if (!DailyChallenge.isDoneToday()) {
+            const req = DailyChallenge.forToday();
+            if (req.type === 'koch') {
+                const banner = document.createElement('div');
+                banner.className = 'feedback show mt-2';
+                banner.textContent = t('js.groups.daily_banner');
+                document.getElementById('setup-panel').appendChild(banner);
+            }
+        }
+    }
 })();
