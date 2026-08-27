@@ -825,9 +825,10 @@
             newGroups.push(g.join(''));
         }
 
-        // Анти-абуз: если точность оригинальной сессии была < 60% (специально мазал, чтобы пофармить)
+        // Анти-абуз: если точность оригинальной сессии была < 60%, то вместо 3x опыта 
+        // за перетренировку начисляется стандартный 1x опыт за верный символ
         const isAbuse = session.finalAccuracy < 0.6;
-        const retryXpRate = isAbuse ? 0 : 3;
+        const retryXpRate = isAbuse ? 1 : 3;
 
         const retrySession = {
             groups: newGroups,
