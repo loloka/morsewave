@@ -1157,11 +1157,14 @@
     }
 
     function acquireInvasionLane() {
-        return invasionLanePool.length ? invasionLanePool.shift() : 0;
+        if (!invasionLanePool.length) return Math.floor(Math.random() * INVASION_MAX_LANES);
+        const idx = Math.floor(Math.random() * invasionLanePool.length);
+        return invasionLanePool.splice(idx, 1)[0];
     }
     function releaseInvasionLane(lane) {
-        invasionLanePool.push(lane);
-        invasionLanePool.sort((a, b) => a - b);
+        if (!invasionLanePool.includes(lane)) {
+            invasionLanePool.push(lane);
+        }
     }
 
     // Позиция пришельца на канвасе. У "умирающего" (лопата уже летит в него)
