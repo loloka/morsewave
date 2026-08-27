@@ -227,7 +227,7 @@ include __DIR__ . '/includes/header.php';
         <div class="text-center mt-2 mb-1">
             <small class="text-muted"><?= t('learn.invasion_pu_hint') ?></small>
         </div>
-        <div class="invasion-powerups" style="display:flex; gap:10px; justify-content:center;">
+        <div class="invasion-powerups">
             <button class="btn btn-sm powerup-btn" id="invasion-pu-repair" disabled>
                 <span class="pu-icon">💖</span> <span class="pu-name"><?= t('learn.invasion_pu_repair') ?></span> <span class="pu-cost">x10</span>
             </button>

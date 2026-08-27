@@ -1354,12 +1354,12 @@ input[type="range"] {
 }
 
 .invasion-powerups {
-    display: flex; gap: 8px; justify-content: center; align-items: center;
+    display: flex; gap: 8px; justify-content: center; align-items: stretch; flex-wrap: wrap;
 }
 .powerup-btn {
     display: flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px;
     background: var(--bg-hover); border: 1px solid var(--border); color: var(--text-muted);
-    transition: all 0.2s;
+    transition: all 0.2s; flex: 1 1 auto; justify-content: center;
 }
 .powerup-btn.ready {
     background: var(--bg-active); border-color: var(--accent); color: var(--text);
