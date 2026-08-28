@@ -267,7 +267,28 @@
         }
     }
 
+    function abortCurrentSession() {
+        if (session && !session.finished && session.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.logXp(session.dbXpEarned, 'koch', {
+                wpm: session.wpm,
+                fw: session.farnsworth,
+                dur,
+                err: session.totalChars - session.correctChars,
+                acc: session.totalChars > 0 ? Math.round((session.correctChars / session.totalChars) * 100) : 0,
+                history: session.history || []
+            });
+            session.dbXpEarned = 0;
+            session.finished = true;
+        }
+    }
+
+    window.addEventListener('beforeunload', abortCurrentSession);
+    window.addEventListener('pagehide', abortCurrentSession);
+
     function startSession() {
+        abortCurrentSession();
+        
         const wpm = parseInt(wpmSlider.value, 10);
         const farnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
         const count = parseInt(document.getElementById('koch-count').value, 10);
@@ -282,7 +303,8 @@
             xpEarned: 0,
             dbXpEarned: 0,
             xpRate: xpRateForSession(charset.length, GROUP_LEN),
-            startTime: Date.now()
+            startTime: Date.now(),
+            history: []
         };
 
         setupPanel.style.display = 'none';
@@ -333,6 +355,13 @@
             session.dbXpEarned += xpGain;
             Progress.addXp(xpGain);
         }
+        
+        session.history.push({
+            e: expected,
+            t: typed.toUpperCase(),
+            xp: xpGain
+        });
+        
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -389,16 +418,7 @@
             Progress.addXp(bonus);
         }
 
-        if (session.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.logXp(session.dbXpEarned, 'koch', {
-                wpm: session.wpm,
-                fw: session.farnsworth,
-                dur,
-                err: session.totalChars - session.correctChars,
-                acc: Math.round(accuracy * 100)
-            });
-        }
+        abortCurrentSession();
 
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
         document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;

@@ -11,7 +11,7 @@ try {
                EXISTS(
                    SELECT 1 FROM xp_log 
                    WHERE user_id = u.id 
-                     AND amount >= 100 
+                     AND amount >= 500 
                      AND created_at >= DATE_SUB(NOW(), INTERVAL 1 DAY)
                ) as recent_anomalies
         FROM users u

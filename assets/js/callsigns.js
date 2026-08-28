@@ -57,7 +57,28 @@
         }
     }
 
+    function abortCurrentSession() {
+        if (session && !session.finished && session.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            const total = session.index || 1; // estimate
+            const acc = total ? Math.round((session.correct / total) * 100) : 0;
+            Progress.logXp(session.dbXpEarned, 'callsigns', {
+                wpm: session.wpm,
+                dur,
+                err: total - session.correct,
+                acc,
+                history: session.history || []
+            });
+            session.dbXpEarned = 0;
+            session.finished = true;
+        }
+    }
+
+    window.addEventListener('beforeunload', abortCurrentSession);
+    window.addEventListener('pagehide', abortCurrentSession);
+
     async function startSession() {
+        abortCurrentSession();
         const wpm = parseInt(wpmSlider.value, 10);
         const count = parseInt(document.getElementById('cs-count').value, 10);
         setupError.className = 'feedback';
@@ -72,7 +93,7 @@
             return;
         }
 
-        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now() };
+        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now(), history: [] };
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -103,6 +124,8 @@
             feedbackEl.textContent = t('js.cs.wrong', { '{expected}': expected, '{typed}': typed || t('js.cs.empty_placeholder') });
             feedbackEl.className = 'feedback show bad';
         }
+        
+        session.history.push({ e: expected, t: typed, xp: isCorrect ? 20 : 0 });
 
         session.index++;
         answerInput.value = '';
@@ -127,15 +150,7 @@
         document.getElementById('result-correct').textContent = `${session.correct}/${total}`;
         document.getElementById('result-xp').textContent = xpEarned;
         
-        if (session.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.logXp(session.dbXpEarned, 'callsigns', {
-                wpm: session.wpm,
-                dur,
-                err: total - session.correct,
-                acc: Math.round(accuracy * 100)
-            });
-        }
+        abortCurrentSession();
 
         let dailyBonusMsg = '';
         let dailyBonusFail = false;

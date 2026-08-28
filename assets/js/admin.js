@@ -38,7 +38,7 @@
                             ${escapeHtml(u.name)}
                             ${u.email_verified_at ? `<span title="${t('js.admin.email_verified_title')}">✅</span>` : `<span title="${t('js.admin.email_not_verified_title')}" style="opacity:.5;">✉️</span>`}
                             ${Number(u.is_admin) ? `<span title="${t('js.admin.admin_title')}" style="color:var(--accent);">🛠 ${t('js.admin.admin_label')}</span>` : ''}
-                            ${u.recent_anomalies ? `<span title="Подозрительная активность" style="color:var(--danger);">🚩</span>` : ''}
+                            ${Number(u.recent_anomalies) ? `<span title="Подозрительная активность" style="color:var(--danger);">🚩</span>` : ''}
                         </div>
                         <div class="muted" style="font-size:12px;">${escapeHtml(u.email)} · ${t('js.admin.registered_on')} ${escapeHtml((u.created_at || '').slice(0, 10))}</div>
                         <div class="mono muted" style="font-size:12px; margin-top:4px;">
@@ -163,12 +163,13 @@
                 logEl.innerHTML = '<tr><td colspan="7" class="muted">Нет данных</td></tr>';
             } else {
                 logEl.innerHTML = data.log.map(row => {
-                    const isAnomaly = parseInt(row.amount) >= 100;
+                    const isAnomaly = parseInt(row.amount) >= 500;
                     
                     let wpmStr = '-';
                     let durStr = '-';
                     let errStr = '-';
                     let accStr = '-';
+                    let historyHtml = '';
                     
                     if (row.details) {
                         try {
@@ -181,17 +182,39 @@
                             }
                             if (d.err !== undefined) errStr = d.err;
                             if (d.acc !== undefined) accStr = `${d.acc}%`;
+                            
+                            if (d.history && Array.isArray(d.history) && d.history.length > 0) {
+                                historyHtml = `
+                                <details style="margin-top: 5px; font-size: 12px; cursor: pointer;">
+                                    <summary class="muted">Подробно (${d.history.length})</summary>
+                                    <div style="max-height: 150px; overflow-y: auto; background: var(--bg); padding: 5px; border-radius: 4px; margin-top: 5px; border: 1px solid var(--border);">
+                                        ${d.history.map((h, i) => {
+                                            const isCorrect = h.e === h.t;
+                                            return `<div style="display:flex; justify-content:space-between; margin-bottom: 2px;">
+                                                <span class="mono">
+                                                    ${escapeHtml(h.e)} → 
+                                                    <span style="color: ${isCorrect ? 'var(--success)' : 'var(--danger)'}">${escapeHtml(h.t)}</span>
+                                                </span>
+                                                <span style="color:var(--text); font-weight:bold;">+${h.xp} XP</span>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                </details>`;
+                            }
                         } catch(e) {}
                     }
                     
                     return `<tr style="${isAnomaly ? 'background:rgba(255,0,0,0.1);' : ''}">
                         <td style="padding:10px; border-bottom:1px solid var(--border); font-size:12px;" class="muted">${escapeHtml(row.created_at)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(row.source)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(wpmStr)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(durStr)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(errStr)}</td>
-                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(accStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top;">
+                            ${escapeHtml(row.source)}
+                            ${historyHtml}
+                        </td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; vertical-align: top; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top;">${escapeHtml(wpmStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top;">${escapeHtml(durStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top;">${escapeHtml(errStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; vertical-align: top;">${escapeHtml(accStr)}</td>
                     </tr>`;
                 }).join('');
             }

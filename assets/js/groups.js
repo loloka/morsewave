@@ -305,7 +305,41 @@
     const EXAM_LETTER_GAP_UNITS = 4;
     const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
+    function abortCurrentSession() {
+        if (session && !session.finished && session.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            const isAbbrev = !!session.abbrevActive;
+            const isWords = !!session.wordsActive;
+            const isExam = !!session.isExam;
+            const isExamAbort = isExam && session.examErrors === undefined; // if not finished fully
+            
+            let source = 'groups';
+            if (isExam) source = isExamAbort ? 'groups_exam_abort' : 'groups_exam';
+            else if (isAbbrev) source = 'groups_abbrev';
+            else if (isWords) source = 'groups_words';
+            
+            const err = isExam ? (session.examErrors || (session.totalChars - session.correctChars)) : (session.totalChars - session.correctChars);
+
+            Progress.logXp(session.dbXpEarned, source, {
+                wpm: session.wpm,
+                fw: session.farnsworth,
+                dur,
+                err,
+                acc: session.totalChars > 0 ? Math.round((session.correctChars / session.totalChars) * 100) : 0,
+                history: session.history || []
+            });
+            session.dbXpEarned = 0;
+            session.finished = true;
+        }
+    }
+
+    // При уходе со страницы или закрытии вкладки
+    window.addEventListener('beforeunload', abortCurrentSession);
+    window.addEventListener('pagehide', abortCurrentSession);
+
     function startSession() {
+        abortCurrentSession();
+        
         const isExam = pendingExamMode;
         
         let activeWpm = parseInt(wpmSlider.value, 10);
@@ -331,7 +365,7 @@
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: xpRateForSession(charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
-            wrongGroups: [], startTime: Date.now()
+            wrongGroups: [], startTime: Date.now(), history: []
         };
 
         setupPanel.style.display = 'none';
@@ -545,19 +579,18 @@
                 }
             }
 
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
             if (fullyCompleted) {
                 session.xpEarned = Math.round(session.correctChars * session.xpRate);
+                session.dbXpEarned = session.xpEarned;
                 Progress.addXp(session.xpEarned);
-                Progress.logXp(session.xpEarned, 'groups_exam', { wpm: session.wpm, fw: session.farnsworth, dur, err: session.examErrors });
                 if (session.examErrors <= 3) {
                     Progress.incrementStat('examsPassed', 1);
                 }
             } else {
                 // Если прервали — даём базовый 1 XP за каждый верный символ (но без учета множителей и бонусов)
                 session.xpEarned = session.correctChars;
+                session.dbXpEarned = session.xpEarned;
                 Progress.addXp(session.xpEarned);
-                Progress.logXp(session.xpEarned, 'groups_exam_abort', { wpm: session.wpm, fw: session.farnsworth, dur, err: session.examErrors });
             }
         }
 
@@ -620,6 +653,13 @@
             session.dbXpEarned += (xpGain + bonusGain);
             Progress.addXp(xpGain + bonusGain);
         }
+        
+        session.history.push({
+            e: expected,
+            t: typedUpper,
+            xp: xpGain + bonusGain
+        });
+        
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -677,17 +717,7 @@
         session.finalAccuracy = accuracy; // сохраняем для анти-абуза
         let xpEarned = session.xpEarned;
         
-        // Логируем сессию в БД одним запросом
-        if (session.dbXpEarned > 0 && !session.isExam) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.logXp(session.dbXpEarned, 'groups', { 
-                wpm: session.wpm, 
-                fw: session.farnsworth, 
-                dur, 
-                err: session.wrongPairs ? session.wrongPairs.length : 0, 
-                acc: Math.round(accuracy * 100) 
-            });
-        }
+        abortCurrentSession();
 
         let dailyBonusMsg = '';
         let dailyBonusFail = false;
@@ -1056,6 +1086,7 @@
 
     let abbrevDbXpEarned = 0;
     let abbrevStartTime = 0;
+    let abbrevHistoryArr = [];
 
     /**
      * Полная остановка потока: гасит звук, снимает отложенный запуск и
@@ -1077,9 +1108,11 @@
                 wpm: abbrevWpmSlider.value, 
                 dur, 
                 err: abbrevTotal - abbrevCorrect, 
-                acc
+                acc,
+                history: abbrevHistoryArr
             });
             abbrevDbXpEarned = 0;
+            abbrevHistoryArr = [];
         }
         
         abbrevNextTimer = null;
@@ -1087,6 +1120,9 @@
         abbrevSignalLine.clear();
         abbrevLamp.off();
     }
+    
+    window.addEventListener('beforeunload', haltAbbrev);
+    window.addEventListener('pagehide', haltAbbrev);
 
     async function playAbbrevTarget() {
         if (!abbrevRunning) return;
@@ -1139,13 +1175,16 @@
         if (isCorrect) {
             abbrevStreak++;
             abbrevCorrect++;
-            Progress.addXp(5, 'groups_abbrev');
+            abbrevDbXpEarned += 5;
+            Progress.addXp(5);
             Progress.incrementStat('groupsCompleted', 1);
             postStat('total_groups', 1);
             pushAbbrevHistory(true, t('js.groups.abbrev_correct', { '{code}': abbrevTarget.code, '{meaning}': abbrevTarget.meaning }));
+            abbrevHistoryArr.push({ e: abbrevTarget.code, t: item.code, xp: 5 });
         } else {
             abbrevStreak = 0;
             pushAbbrevHistory(false, t('js.groups.abbrev_wrong', { '{code}': abbrevTarget.code, '{meaning}': abbrevTarget.meaning, '{got}': item.code }));
+            abbrevHistoryArr.push({ e: abbrevTarget.code, t: item.code, xp: 0 });
         }
 
         abbrevStreakEl.textContent = abbrevStreak;
@@ -1331,7 +1370,27 @@
         }
     }
 
+    function abortWordsSession() {
+        if (wordsSession && !wordsSession.finished && wordsSession.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - wordsSession.startTime) / 1000);
+            Progress.logXp(wordsSession.dbXpEarned, 'words', {
+                wpm: wordsSession.wpm,
+                fw: wordsSession.farnsworth,
+                dur,
+                err: wordsSession.totalChars - wordsSession.correctChars,
+                acc: wordsSession.totalChars > 0 ? Math.round((wordsSession.correctChars / wordsSession.totalChars) * 100) : 0,
+                history: wordsSession.history || []
+            });
+            wordsSession.dbXpEarned = 0;
+            wordsSession.finished = true;
+        }
+    }
+
+    window.addEventListener('beforeunload', abortWordsSession);
+    window.addEventListener('pagehide', abortWordsSession);
+
     function startWordsSession() {
+        abortWordsSession();
         const pool = wordsPool();
         const count = parseInt(document.getElementById('words-count').value, 10);
         const wpm = parseInt(wordsWpmSlider.value, 10);
@@ -1342,7 +1401,7 @@
             items: Array.from({ length: count }, () => pool[Math.floor(Math.random() * pool.length)]),
             index: 0, wpm, farnsworth,
             correctChars: 0, totalChars: 0, fullyCorrect: 0, xpEarned: 0, dbXpEarned: 0,
-            missed: [], startTime: Date.now()
+            missed: [], startTime: Date.now(), history: []
         };
 
         wordsSetup.style.display = 'none';
@@ -1387,6 +1446,13 @@
             wordsSession.dbXpEarned += xpGain;
             Progress.addXp(xpGain);
         }
+        
+        wordsSession.history.push({
+            e: expected,
+            t: typed,
+            xp: xpGain
+        });
+        
         Progress.incrementStat('wordsCompleted', 1);
 
         if (correct === scorable && typed.length === expected.length) {
@@ -1422,16 +1488,7 @@
             `${wordsSession.fullyCorrect} / ${wordsSession.index}`;
         document.getElementById('words-result-xp').textContent = wordsSession.xpEarned;
 
-        if (wordsSession.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - wordsSession.startTime) / 1000);
-            Progress.logXp(wordsSession.dbXpEarned, 'words', {
-                wpm: wordsSession.wpm,
-                fw: wordsSession.farnsworth,
-                dur,
-                err: wordsSession.missed.length,
-                acc: accuracy
-            });
-        }
+        abortWordsSession();
 
         const mistakesBox = document.getElementById('words-mistakes');
         if (wordsSession.missed.length) {
