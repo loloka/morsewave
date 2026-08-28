@@ -1218,6 +1218,14 @@
     let wordsAudio = null;
     let wordsPlaying = false;
     let wordsSessionId = 0;
+    
+    const vkbWordsEl = document.getElementById('words-vkb');
+    let vkbWords = null;
+    function renderWordsVkb() {
+        if (!vkbWords && typeof VirtualKeyboard !== 'undefined' && vkbWordsEl) {
+            vkbWords = new VirtualKeyboard(vkbWordsEl, wordsAnswerInput, { showSpace: true });
+        }
+    }
 
     document.querySelectorAll('#words-set-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -1309,6 +1317,8 @@
         wordsIndexEl.textContent = '1';
         wordsAnswerInput.value = '';
         wordsFeedback.className = 'feedback';
+        if (typeof renderWordsVkb !== 'undefined') renderWordsVkb();
+        wordsAnswerInput.focus();
         playCurrentWord();
     }
 

@@ -198,6 +198,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="signal-line mt-2" id="words-signal"></div>
     <input type="text" id="words-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.words_answer_placeholder')) ?>" autocomplete="off">
+    <div class="vkb mt-2" id="words-vkb" style="display:none;"></div>
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="words-submit-btn"><?= t('groups.check') ?></button>
         <button class="btn" id="words-stop-btn"><?= t('groups.words_stop') ?></button>
