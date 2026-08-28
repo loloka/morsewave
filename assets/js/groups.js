@@ -878,6 +878,7 @@
         
         feedbackEl.textContent = introText;
         feedbackEl.className = 'feedback show ok';
+        if (typeof renderVkb !== 'undefined') renderVkb(answerInput, false);
         answerInput.focus();
         playCurrentGroup();
     }
