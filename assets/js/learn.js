@@ -1605,6 +1605,25 @@
             // повторное нажатие той же (правильной) буквы просто игнорируем,
             // а не штрафуем за "неверно": человек не ошибся, просто чуть
             // поторопился со следующим нажатием.
+            // Penalize: speed up the active monsters slightly.
+            invasionEnemies.forEach(e => {
+                if (e.state === 'active') {
+                    const now = performance.now();
+                    const oldElapsed = now - e.startTime;
+                    const oldDuration = e.duration;
+                    const newDuration = oldDuration * 0.85; // 15% faster
+                    e.duration = newDuration;
+                    e.startTime = now - oldElapsed * (newDuration / oldDuration);
+                }
+            });
+            // Try to find the oldest active enemy to guess what they meant to type
+            const oldest = invasionEnemies.filter(e => e.state === 'active').sort((a,b) => a.startTime - b.startTime)[0];
+            if (oldest) {
+                Progress.recordInvasionAttempt(oldest.ch, false);
+                if (ch && window.MORSE_CODE && window.MORSE_CODE[ch]) {
+                    Progress.recordInvasionAttempt(ch, false);
+                }
+            }
             if (invasionEnemies.some((e) => e.ch === ch && e.state !== 'active')) return;
             key.classList.add('wrong');
             setTimeout(() => key.classList.remove('wrong'), 400);
@@ -1973,9 +1992,16 @@
 
     invasionStartBtn.addEventListener('click', startInvasion);
     invasionStopBtn.addEventListener('click', stopInvasion);
+    const savedInvasionWpm = localStorage.getItem('morse_invasion_wpm');
+    if (savedInvasionWpm) {
+        invasionWpmSlider.value = savedInvasionWpm;
+        invasionWpmValueEl.textContent = savedInvasionWpm;
+        invasionWpmCpmEl.textContent = cpmHintText(savedInvasionWpm);
+    }
     invasionWpmSlider.addEventListener('input', () => {
         invasionWpmValueEl.textContent = invasionWpmSlider.value;
         invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value);
+        localStorage.setItem('morse_invasion_wpm', invasionWpmSlider.value);
     });
 
     // Ввод с физической клавиатуры — тот же приём, что и в "Приёме на слух"
@@ -2039,13 +2065,34 @@
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
-        if (/[а-яё]/i.test(e.key)) {
-            e.preventDefault();
-            invasionFeedback(t('js.learn.wrong_layout'), 'bad');
-            return;
+        let ch = e.key.toUpperCase();
+        
+        // Автозамена кириллицы
+        const RU_TO_EN = {
+            'Й': 'Q', 'Ц': 'W', 'У': 'E', 'К': 'R', 'Е': 'T', 'Н': 'Y', 'Г': 'U', 'Ш': 'I', 'Щ': 'O', 'З': 'P', 'Х': '{', 'Ъ': '}',
+            'Ф': 'A', 'Ы': 'S', 'В': 'D', 'А': 'F', 'П': 'G', 'Р': 'H', 'О': 'J', 'Л': 'K', 'Д': 'L', 'Ж': ':', 'Э': '"',
+            'Я': 'Z', 'Ч': 'X', 'С': 'C', 'М': 'V', 'И': 'B', 'Т': 'N', 'Ь': 'M', 'Б': '<', 'Ю': '>', 'Ё': '~'
+        };
+        
+        if (/[А-ЯЁ]/i.test(ch)) {
+            if (RU_TO_EN[ch]) {
+                ch = RU_TO_EN[ch];
+                if (!window.__layoutHintShown) {
+                    window.__layoutHintShown = true;
+                    const hint = document.createElement('div');
+                    hint.innerHTML = 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘).</span>';
+                    hint.style.cssText = `position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: var(--font-ui); font-weight: 700; font-size: 15px; z-index: 9999; opacity: 0; transform: translateY(20px); transition: opacity 0.4s, transform 0.4s; pointer-events: none;`;
+                    document.body.appendChild(hint);
+                    requestAnimationFrame(() => { hint.style.opacity = '1'; hint.style.transform = 'translateY(0)'; });
+                    setTimeout(() => { hint.style.opacity = '0'; hint.style.transform = 'translateY(20px)'; setTimeout(() => hint.remove(), 400); }, 6000);
+                }
+            } else {
+                e.preventDefault();
+                invasionFeedback(t('js.learn.wrong_layout'), 'bad');
+                return;
+            }
         }
 
-        const ch = e.key.toUpperCase();
         if (!ALL_LEARNABLE.includes(ch)) return;
         const key = invasionGridEl.querySelector(`[data-ch="${ch}"]`);
         if (key) { e.preventDefault(); handleInvasionAnswer(ch, key); }

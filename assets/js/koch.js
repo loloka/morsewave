@@ -381,7 +381,13 @@
         // Питает weightedRandomGroup — см. комментарий там.
         {
             for (let i = 0; i < expected.length; i++) {
-                Progress.recordKochAttempt(expected[i], typedUpper[i] === expected[i]);
+                const e = expected[i];
+                const t = typedUpper[i];
+                const isCorrect = (e === t);
+                Progress.recordKochAttempt(e, isCorrect);
+                if (!isCorrect && t && window.MORSE_CODE && window.MORSE_CODE[t]) {
+                    Progress.recordKochAttempt(t, false);
+                }
             }
         }
 

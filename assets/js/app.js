@@ -99,5 +99,44 @@ document.addEventListener('keydown', (e) => {
         
         // Дергаем событие input, чтобы сработали внутренние обработчики (подсветка ошибок в Кохе и т.д.)
         target.dispatchEvent(new Event('input', { bubbles: true }));
+
+        // Показываем жирную подсказку сменить раскладку (1 раз за сессию)
+        if (!window.__layoutHintShown) {
+            window.__layoutHintShown = true;
+            const hint = document.createElement('div');
+            hint.innerHTML = 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘), чтобы избежать проблем с горячими клавишами.</span>';
+            hint.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: var(--primary);
+                color: #fff;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                font-family: var(--font-ui);
+                font-weight: 700;
+                font-size: 15px;
+                z-index: 9999;
+                opacity: 0;
+                transform: translateY(20px);
+                transition: opacity 0.4s, transform 0.4s;
+                pointer-events: none;
+            `;
+            document.body.appendChild(hint);
+            
+            // Анимация появления
+            requestAnimationFrame(() => {
+                hint.style.opacity = '1';
+                hint.style.transform = 'translateY(0)';
+            });
+            
+            // Анимация исчезновения через 6 секунд
+            setTimeout(() => {
+                hint.style.opacity = '0';
+                hint.style.transform = 'translateY(20px)';
+                setTimeout(() => hint.remove(), 400);
+            }, 6000);
+        }
     }
 });

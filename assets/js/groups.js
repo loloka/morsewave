@@ -140,11 +140,18 @@
             document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             charsetKey = chip.dataset.set;
+            localStorage.setItem('morse_groups_charset', charsetKey);
             const isCustom = charsetKey === 'custom';
             customInput.style.display = isCustom ? 'block' : 'none';
             customHint.style.display = isCustom ? 'block' : 'none';
         });
     });
+
+    const savedCharset = localStorage.getItem('morse_groups_charset');
+    if (savedCharset) {
+        const chip = document.querySelector(`#charset-chips .chip[data-set="${savedCharset}"]`);
+        if (chip) chip.click();
+    }
 
     const MIN_LEARNED_FOR_FILTER = 5;
 
@@ -636,7 +643,13 @@
         // вызывается на isExam (см. finishExamSession/examSubmitBtn).
         if (!session.isExam) {
             for (let i = 0; i < expected.length; i++) {
-                Progress.recordGroupsAttempt(expected[i], typedUpper[i] === expected[i]);
+                const e = expected[i];
+                const t = typedUpper[i];
+                const isCorrect = (e === t);
+                Progress.recordGroupsAttempt(e, isCorrect);
+                if (!isCorrect && t && window.MORSE_CODE && window.MORSE_CODE[t]) {
+                    Progress.recordGroupsAttempt(t, false);
+                }
             }
         }
 
