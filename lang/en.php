@@ -692,6 +692,7 @@ HTML,
     'js.koch.new_symbol_unlocked' => 'Great accuracy! New symbol unlocked: "{ch}"',
     'js.koch.all_unlocked' => 'Great accuracy — all Koch method symbols are already unlocked!',
     'js.koch.below_threshold' => 'Accuracy {pct}% is below the 90% threshold — practice this symbol set a bit more.',
+    'js.koch.below_threshold_max' => 'Accuracy {pct}% is below the 90% threshold — try practicing your mistakes and lower the receiving speed for the next session.',
 
     // --- assets/js/groups.js ---
     'js.groups.filter_learned_too_few' => 'The "Learned only" filter needs at least {min} known symbols (otherwise you could guess the group without listening) — using the full alphabet for now.',

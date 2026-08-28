@@ -98,6 +98,12 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('koch.result_xp') ?></span></div>
     </div>
     <div class="feedback mt-2 show" id="result-message"></div>
+    
+    <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
+        <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>
+        <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
+    </div>
+
     <button class="btn btn-primary mt-2" id="restart-btn"><?= t('koch.new_session') ?></button>
 </div>
 

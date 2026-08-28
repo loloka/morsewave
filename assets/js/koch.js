@@ -62,6 +62,40 @@
 
     const kochCharsetFeedback = document.getElementById('koch-charset-feedback');
 
+    const savedWpm = localStorage.getItem('morse_koch_wpm');
+    if (savedWpm) {
+        wpmSlider.value = savedWpm;
+        wpmValue.textContent = savedWpm;
+        wpmCpm.textContent = cpmHintText(savedWpm);
+    }
+    const savedFwEnabled = localStorage.getItem('morse_koch_fw_enabled');
+    if (savedFwEnabled === 'true') {
+        fwEnabled.checked = true;
+        fwWrap.style.display = 'inline-flex';
+        fwValue.style.display = 'inline-block';
+    }
+    const savedFwWpm = localStorage.getItem('morse_koch_fw_wpm');
+    if (savedFwWpm) {
+        fwSlider.value = savedFwWpm;
+        fwValue.textContent = savedFwWpm;
+    }
+
+    wpmSlider.addEventListener('input', () => { 
+        wpmValue.textContent = wpmSlider.value; 
+        wpmCpm.textContent = cpmHintText(wpmSlider.value); 
+        localStorage.setItem('morse_koch_wpm', wpmSlider.value);
+    });
+    fwSlider.addEventListener('input', () => { 
+        fwValue.textContent = fwSlider.value; 
+        localStorage.setItem('morse_koch_fw_wpm', fwSlider.value);
+    });
+    fwEnabled.addEventListener('change', () => {
+        const on = fwEnabled.checked;
+        fwWrap.style.display = on ? 'inline-flex' : 'none';
+        fwValue.style.display = on ? 'inline-block' : 'none';
+        localStorage.setItem('morse_koch_fw_enabled', on);
+    });
+
     /**
      * Экранная клавиатура — только для тач-устройств (см. koch.php). На
      * Кохе набор символов смешивает буквы/цифры/знаки (. и ?), а у
@@ -201,13 +235,7 @@
         setTimeout(() => { feedbackEl.className = 'feedback'; }, 2500);
     });
 
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
-    fwSlider.addEventListener('input', () => { fwValue.textContent = fwSlider.value; });
-    fwEnabled.addEventListener('change', () => {
-        const on = fwEnabled.checked;
-        fwWrap.style.display = on ? 'inline-flex' : 'none';
-        fwValue.style.display = on ? 'inline-block' : 'none';
-    });
+
     document.getElementById('koch-farnsworth-info').addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -303,6 +331,7 @@
             xpEarned: 0,
             dbXpEarned: 0,
             xpRate: xpRateForSession(charset.length, GROUP_LEN),
+            wrongPairs: [],
             startTime: Date.now(),
             history: []
         };
@@ -336,12 +365,21 @@
         const typed = answerInput.value.trim();
         const correct = scoreAnswer(expected, typed);
 
+        if (!session.wrongPairs) session.wrongPairs = [];
+        const typedUpper = typed.toUpperCase();
+        for (let i = 0; i < expected.length; i++) {
+            const e = expected[i] || '';
+            const tChar = typedUpper[i] || '';
+            if (e !== tChar && e) {
+                session.wrongPairs.push({ expected: e, typed: tChar });
+            }
+        }
+
         session.correctChars += correct;
         session.totalChars += expected.length;
 
         // Питает weightedRandomGroup — см. комментарий там.
         {
-            const typedUpper = typed.toUpperCase();
             for (let i = 0; i < expected.length; i++) {
                 Progress.recordKochAttempt(expected[i], typedUpper[i] === expected[i]);
             }
@@ -350,16 +388,21 @@
         // Начисляем сразу за эту группу — если сессия не будет
         // пройдена до конца, заработанное всё равно не потеряется.
         const xpGain = Math.round(correct * session.xpRate);
-        session.xpEarned += xpGain;
-        if (xpGain > 0) {
-            session.dbXpEarned += xpGain;
-            Progress.addXp(xpGain);
+        let bonusGain = 0;
+        if (session.isRetrain && !session.isAbuse && correct === expected.length) {
+            bonusGain = 5;
+        }
+        
+        session.xpEarned += (xpGain + bonusGain);
+        if ((xpGain + bonusGain) > 0) {
+            session.dbXpEarned += (xpGain + bonusGain);
+            Progress.addXp(xpGain + bonusGain);
         }
         
         session.history.push({
             e: expected,
-            t: typed.toUpperCase(),
-            xp: xpGain
+            t: typedUpper,
+            xp: xpGain + bonusGain
         });
         
         Progress.incrementStat('groupsCompleted', 1);
@@ -481,9 +524,24 @@
             msg.textContent = t('js.koch.all_unlocked');
             msg.className = 'feedback show ok';
         } else {
-            msg.textContent = t('js.koch.below_threshold', { '{pct}': Math.round(accuracy * 100) });
+            if (state.kochLevel === KOCH_ORDER.length) {
+                msg.textContent = t('js.koch.below_threshold_max', { '{pct}': Math.round(accuracy * 100) });
+            } else {
+                msg.textContent = t('js.koch.below_threshold', { '{pct}': Math.round(accuracy * 100) });
+            }
             msg.className = 'feedback show bad';
         }
+        const mistakesBlock = document.getElementById('mistakes-block');
+        const hasMistakes = session.wrongPairs && session.wrongPairs.length > 0;
+        
+        if (hasMistakes) {
+            const uniquePairs = new Set(session.wrongPairs.map(p => p.expected + '_' + p.typed));
+            document.getElementById('mistake-count').textContent = uniquePairs.size;
+            mistakesBlock.style.display = 'block';
+        } else {
+            mistakesBlock.style.display = 'none';
+        }
+        
         renderHeader();
     }
 
@@ -496,6 +554,75 @@
             });
         } catch { /* тихо игнорируем, если сервер недоступен */ }
     }
+
+    function retrainMistakes() {
+        if (!session || !session.wrongPairs || !session.wrongPairs.length) return;
+        
+        const uniquePairs = [];
+        const seenPairs = new Set();
+        for (const p of session.wrongPairs) {
+            const sig = p.expected + '_' + p.typed;
+            if (!seenPairs.has(sig)) {
+                seenPairs.add(sig);
+                uniquePairs.push(p);
+            }
+        }
+        
+        const pairsToTrain = uniquePairs.slice(0, 20);
+        const charset = currentCharset();
+        const newGroups = [];
+        const groupLen = 5;
+        
+        for (const p of pairsToTrain) {
+            const charsToInsert = [p.expected];
+            if (p.typed && window.MORSE_CODE && window.MORSE_CODE[p.typed] && p.typed !== p.expected) {
+                charsToInsert.push(p.typed);
+            }
+            
+            const g = [];
+            const targetLen = Math.max(groupLen, charsToInsert.length);
+            const randomCount = targetLen - charsToInsert.length;
+            
+            for (let i = 0; i < randomCount; i++) {
+                g.push(charset[Math.floor(Math.random() * charset.length)]);
+            }
+            
+            for (const ch of charsToInsert) {
+                const insertPos = Math.floor(Math.random() * (g.length + 1));
+                g.splice(insertPos, 0, ch);
+            }
+            newGroups.push(g.join(''));
+        }
+
+        const isAbuse = session.totalChars > 0 ? (session.correctChars / session.totalChars) < 0.6 : false;
+        const retryXpRate = isAbuse ? 1 : 3;
+
+        const retrySession = {
+            groups: newGroups,
+            count: session.count, // for bonus computation
+            index: 0, wpm: session.wpm,
+            correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
+            xpRate: retryXpRate,
+            isRetrain: true, isAbuse: isAbuse,
+            wrongPairs: [],
+            startTime: Date.now(), history: []
+        };
+        session = retrySession;
+
+        resultPanel.style.display = 'none';
+        sessionPanel.style.display = 'block';
+        answerInput.style.display = 'block';
+        answerInput.value = '';
+        replayBtn.style.display = 'inline-flex';
+        groupTotalEl.textContent = session.groups.length;
+        
+        renderGroupIndex();
+        if (typeof renderVkb !== 'undefined') renderVkb();
+        answerInput.focus();
+        playCurrentGroup();
+    }
+
+    document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
