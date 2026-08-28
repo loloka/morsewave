@@ -162,10 +162,21 @@
                 logEl.innerHTML = '<tr><td colspan="3" class="muted">Нет данных</td></tr>';
             } else {
                 logEl.innerHTML = data.log.map(row => {
-                    const isAnomaly = parseInt(row.amount) >= 100; // Помечаем как аномалию
+                    const isAnomaly = parseInt(row.amount) >= 100;
+                    
+                    let detailsHtml = '';
+                    if (row.details) {
+                        try {
+                            const d = JSON.parse(row.details);
+                            if (d.wpm) detailsHtml += ` <span style="font-size:11px; padding:2px 4px; background:var(--border); border-radius:4px;">WPM: ${d.wpm}${d.fw ? ' (fw:' + d.fw + ')' : ''}</span>`;
+                        } catch(e) {}
+                    }
+                    
                     return `<tr style="${isAnomaly ? 'background:rgba(255,0,0,0.2);' : ''}">
                         <td style="padding:8px; border-bottom:1px solid var(--border); font-size:12px;" class="muted">${escapeHtml(row.created_at)}</td>
-                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(row.source)}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px;">
+                            ${escapeHtml(row.source)}${detailsHtml}
+                        </td>
                         <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
                     </tr>`;
                 }).join('');

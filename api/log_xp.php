@@ -21,6 +21,7 @@ $data = json_decode($raw, true);
 
 $amount = isset($data['amount']) ? (int)$data['amount'] : 0;
 $source = isset($data['source']) ? trim((string)$data['source']) : 'unknown';
+$details = isset($data['details']) && is_array($data['details']) ? json_encode($data['details'], JSON_UNESCAPED_UNICODE) : null;
 
 if ($amount <= 0 || empty($source)) {
     http_response_code(400);
@@ -31,13 +32,14 @@ if ($amount <= 0 || empty($source)) {
 try {
     // Добавляем запись о начислении опыта
     $stmt = $pdo->prepare('
-        INSERT INTO xp_log (user_id, amount, source, created_at) 
-        VALUES (:user_id, :amount, :source, NOW())
+        INSERT INTO xp_log (user_id, amount, source, details, created_at) 
+        VALUES (:user_id, :amount, :source, :details, NOW())
     ');
     $stmt->execute([
         'user_id' => $userId,
         'amount' => $amount,
-        'source' => substr($source, 0, 50)
+        'source' => substr($source, 0, 50),
+        'details' => $details
     ]);
 
     // Ленивая очистка старых логов для этого юзера (старше 30 дней)

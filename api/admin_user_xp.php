@@ -16,7 +16,7 @@ if (!$userId) {
 try {
     // Получаем последние транзакции (лог)
     $logStmt = $pdo->prepare('
-        SELECT amount, source, created_at
+        SELECT amount, source, details, created_at
         FROM xp_log
         WHERE user_id = :id
         ORDER BY created_at DESC

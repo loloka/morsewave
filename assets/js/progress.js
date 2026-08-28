@@ -431,7 +431,7 @@ const Progress = (() => {
         }
     }
 
-    function addXp(amount, source = 'unknown') {
+    function addXp(amount, source = 'unknown', details = null) {
         const state = load();
         state.xp = Math.round(state.xp + amount);
         save(state);
@@ -442,10 +442,13 @@ const Progress = (() => {
 
         // Логирование транзакции XP для аналитики и античита
         if (amount > 0) {
+            const payload = { amount, source };
+            if (details) payload.details = details;
+            
             fetch('api/log_xp.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: amount, source: source })
+                body: JSON.stringify(payload)
             }).catch(() => {});
         }
 

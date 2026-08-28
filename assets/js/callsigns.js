@@ -97,7 +97,7 @@
             feedbackEl.className = 'feedback show ok';
             // Начисляем сразу — не нужно дожидаться конца сессии,
             // чтобы засчитанный позывной действительно засчитался.
-            Progress.addXp(20, 'callsigns');
+            Progress.addXp(20, 'callsigns', { wpm: session.wpm });
             Progress.incrementStat('callsignsCompleted', 1);
             postStat('total_callsigns', 1);
         } else {
