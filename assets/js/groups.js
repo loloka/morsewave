@@ -1258,7 +1258,7 @@
     let vkbWords = null;
     function renderWordsVkb() {
         if (!vkbWords && typeof VirtualKeyboard !== 'undefined' && vkbWordsEl) {
-            vkbWords = new VirtualKeyboard(vkbWordsEl, wordsAnswerInput, { showSpace: true });
+            vkbWords = new VirtualKeyboard(vkbWordsEl, wordsAnswerInput, { showSpace: false });
         }
     }
 
