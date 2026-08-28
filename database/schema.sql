@@ -175,3 +175,16 @@ CREATE TABLE IF NOT EXISTS user_progress (
     updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+-- Журнал начисления опыта (XP Analytics) и античит.
+-- Хранит детальную ленту транзакций (до 30 дней) для каждого юзера.
+CREATE TABLE IF NOT EXISTS xp_log (
+    id            INT PRIMARY KEY AUTO_INCREMENT,
+    user_id       INT NOT NULL,
+    amount        INT NOT NULL,
+    source        VARCHAR(50) NOT NULL,
+    details       JSON NULL,
+    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (user_id, created_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
