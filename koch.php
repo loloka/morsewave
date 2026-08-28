@@ -56,7 +56,7 @@ include __DIR__ . '/includes/header.php';
 
         <label class="chip"><?= t('koch.groups_per_session') ?>
             <select id="koch-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="10" selected>10</option><option value="20">20</option><option value="30">30</option>
+                <option value="30" selected>30</option><option value="40">40</option><option value="50">50</option>
             </select>
         </label>
     </div>

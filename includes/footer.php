@@ -8,8 +8,6 @@
         <span class="dot">·</span>
         <span><?= t('footer.author') ?></span>
         <span class="dot">·</span>
-        <a href="https://github.com/loloka/morsewave" target="_blank" rel="noopener"><?= t('footer.source') ?></a>
-        <span class="dot">·</span>
         <a href="terms.php"><?= t('footer.terms') ?></a>
         <span class="dot">·</span>
         <a href="privacy.php"><?= t('footer.privacy') ?></a>
