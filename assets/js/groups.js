@@ -902,11 +902,12 @@
         const retrySession = {
             groups: newGroups,
             index: 0, wpm: session.wpm, farnsworth: session.farnsworth,
-            correctChars: 0, totalChars: 0, xpEarned: 0,
+            correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: retryXpRate,
             isExam: false, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], wrongChars: [], skipDailyCheck: true,
-            isRetrain: true, isAbuse: isAbuse
+            isRetrain: true, isAbuse: isAbuse,
+            startTime: Date.now(), history: []
         };
         session = retrySession;
 
