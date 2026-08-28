@@ -1668,6 +1668,15 @@
         Progress.recordInvasionAttempt(enemy.ch, true);
         let xp = INVASION_XP_PER_KILL;
         if (enemy.type === 'tank') xp = 2;
+        
+        // Множитель за плотность волны, аналогично формуле из Метода Коха/Групп:
+        // 2 * charsetFactor * (length / 3).
+        // В Вторжении charsetSize = ALL_LEARNABLE.length (около 60+), поэтому charsetFactor = 1.
+        // Вместо длины группы используем количество одновременно летящих пришельцев.
+        const lengthFactor = invasionConcurrency() / 3;
+        const invasionXpMultiplier = 2 * 1 * lengthFactor;
+        xp = Math.max(1, Math.round(xp * invasionXpMultiplier));
+        
         Progress.addXp(xp);
         syncInvasionKeyHighlights();
 
