@@ -2065,6 +2065,10 @@
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
 
+        if (/^[a-zA-Z]$/.test(e.key)) {
+            if (window.hideLayoutHint) window.hideLayoutHint();
+        }
+
         let ch = e.key.toUpperCase();
         
         // Автозамена кириллицы
@@ -2077,15 +2081,7 @@
         if (/[А-ЯЁ]/i.test(ch)) {
             if (RU_TO_EN[ch]) {
                 ch = RU_TO_EN[ch];
-                if (!window.__layoutHintShown) {
-                    window.__layoutHintShown = true;
-                    const hint = document.createElement('div');
-                    hint.innerHTML = 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘).</span>';
-                    hint.style.cssText = `position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: var(--font-ui); font-weight: 700; font-size: 15px; z-index: 9999; opacity: 0; transform: translateY(20px); transition: opacity 0.4s, transform 0.4s; pointer-events: none;`;
-                    document.body.appendChild(hint);
-                    requestAnimationFrame(() => { hint.style.opacity = '1'; hint.style.transform = 'translateY(0)'; });
-                    setTimeout(() => { hint.style.opacity = '0'; hint.style.transform = 'translateY(20px)'; setTimeout(() => hint.remove(), 400); }, 6000);
-                }
+                if (window.showLayoutHint) window.showLayoutHint();
             } else {
                 e.preventDefault();
                 invasionFeedback(t('js.learn.wrong_layout'), 'bad');
