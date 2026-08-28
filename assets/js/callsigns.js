@@ -17,6 +17,14 @@
     wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
 
     let session = null;
+    
+    const vkbEl = document.getElementById('cs-vkb');
+    let vkb = null;
+    function renderVkb() {
+        if (!vkb && typeof VirtualKeyboard !== 'undefined' && vkbEl) {
+            vkb = new VirtualKeyboard(vkbEl, answerInput, { showSpace: false });
+        }
+    }
     let isPlaying = false;
     const replayBtn = document.getElementById('replay-btn');
 
@@ -72,6 +80,7 @@
         csIndexEl.textContent = 1;
         feedbackEl.className = 'feedback';
         answerInput.value = '';
+        if (typeof renderVkb !== 'undefined') renderVkb();
         answerInput.focus();
         playCurrent();
     }

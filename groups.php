@@ -112,6 +112,8 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary" id="exam-submit-btn" disabled><?= t('groups.exam_transmitting') ?></button>
     </div>
 
+    <div class="vkb mt-2" id="groups-vkb" style="display:none;"></div>
+
     <div class="feedback mt-2" id="groups-feedback"></div>
 </div>
 

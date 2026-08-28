@@ -43,6 +43,8 @@ include __DIR__ . '/includes/header.php';
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="submit-answer"><?= t('cs.check') ?></button>
     </div>
+
+    <div class="vkb mt-2" id="cs-vkb" style="display:none;"></div>
     <div class="feedback mt-2" id="cs-feedback"></div>
 </div>
 

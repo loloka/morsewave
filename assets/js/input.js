@@ -162,3 +162,101 @@ class TelegraphKey {
         clearTimeout(this.wordTimer);
     }
 }
+
+
+class VirtualKeyboard {
+    constructor(containerEl, inputEl, options = {}) {
+        this.container = containerEl;
+        this.input = inputEl;
+        this.options = options;
+        
+        if (typeof isTouch !== 'undefined' && isTouch) {
+            this.input.setAttribute('inputmode', 'none');
+            this.container.style.display = 'flex';
+        } else {
+            this.container.style.display = 'none';
+            return;
+        }
+
+        this.render();
+    }
+
+    render() {
+        this.container.innerHTML = '';
+        this.container.classList.add('vkb');
+        
+        const QWERTY_ROWS = [
+            ['1','2','3','4','5','6','7','8','9','0'],
+            ['Q','W','E','R','T','Y','U','I','O','P'],
+            ['A','S','D','F','G','H','J','K','L'],
+            ['Z','X','C','V','B','N','M','.','?'],
+        ];
+
+        QWERTY_ROWS.forEach((row) => {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'vkb-row';
+            row.forEach((ch) => {
+                const key = document.createElement('div');
+                key.className = 'vkb-key';
+                key.textContent = ch;
+                key.addEventListener('click', (e) => { e.preventDefault(); this.insertText(ch); });
+                rowEl.appendChild(key);
+            });
+            this.container.appendChild(rowEl);
+        });
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'vkb-row';
+
+        if (this.options.showSpace) {
+            const space = document.createElement('div');
+            space.className = 'vkb-key vkb-space';
+            space.textContent = 'Space';
+            space.style.flex = '2';
+            space.addEventListener('click', (e) => { e.preventDefault(); this.insertText(' '); });
+            bottomRow.appendChild(space);
+        }
+
+        const back = document.createElement('div');
+        back.className = 'vkb-key vkb-backspace';
+        back.style.flex = '1';
+        back.innerHTML = typeof t !== 'undefined' ? t('js.koch.erase') : '⌫';
+        back.addEventListener('click', (e) => { e.preventDefault(); this.backspace(); });
+        bottomRow.appendChild(back);
+        
+        this.container.appendChild(bottomRow);
+    }
+
+    insertText(ch) {
+        const start = this.input.selectionStart ?? this.input.value.length;
+        const end = this.input.selectionEnd ?? this.input.value.length;
+        const val = this.input.value;
+        this.input.value = val.slice(0, start) + ch + val.slice(end);
+        
+        this.input.focus();
+        const pos = start + ch.length;
+        this.input.setSelectionRange(pos, pos);
+        
+        // Dispatch input event to trigger any listeners
+        this.input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    backspace() {
+        const start = this.input.selectionStart ?? this.input.value.length;
+        const end = this.input.selectionEnd ?? this.input.value.length;
+        const val = this.input.value;
+        if (start !== end) {
+            this.input.value = val.slice(0, start) + val.slice(end);
+            this.input.focus();
+            this.input.setSelectionRange(start, start);
+        } else if (start > 0) {
+            this.input.value = val.slice(0, start - 1) + val.slice(start);
+            this.input.focus();
+            this.input.setSelectionRange(start - 1, start - 1);
+        } else {
+            this.input.focus();
+        }
+        
+        this.input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+}

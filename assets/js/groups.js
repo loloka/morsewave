@@ -353,6 +353,7 @@
             examSubmitBtn.disabled = true;
             examSubmitBtn.textContent = t('js.groups.exam_stop_check');
             replayBtn.style.display = 'none';
+            if (typeof renderVkb !== 'undefined') renderVkb(examAnswerEl, true);
             runExamAttentionSequence();
         } else {
             answerInput.style.display = 'block';
@@ -361,6 +362,7 @@
             examSubmitRow.style.display = 'none';
             replayBtn.style.display = 'inline-flex';
             answerInput.value = '';
+            if (typeof renderVkb !== 'undefined') renderVkb(answerInput, false);
             answerInput.focus();
             playCurrentGroup();
         }
