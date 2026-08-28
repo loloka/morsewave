@@ -431,7 +431,7 @@ const Progress = (() => {
         }
     }
 
-    function addXp(amount, source = 'unknown', details = null) {
+    function addXp(amount) {
         const state = load();
         state.xp = Math.round(state.xp + amount);
         save(state);
@@ -439,20 +439,24 @@ const Progress = (() => {
         checkAchievements();
         refreshPublishedStats(state);
         pushFullProgress();
-
-        // Логирование транзакции XP для аналитики и античита
-        if (amount > 0) {
-            const payload = { amount, source };
-            if (details) payload.details = details;
-            
-            fetch('api/log_xp.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).catch(() => {});
-        }
-
         return state;
+    }
+
+    /**
+     * Явное логирование сессии в БД (XP Analytics).
+     * Отвязано от локального начисления (addXp), чтобы не спамить БД
+     * при каждой отгаданной группе/букве, а отправлять один лог за сессию.
+     */
+    function logXp(amount, source, details = null) {
+        if (amount <= 0 || !source) return;
+        const payload = { amount, source };
+        if (details) payload.details = details;
+        
+        fetch('api/log_xp.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).catch(() => {});
     }
 
     function markLetterLearned(ch) {
@@ -854,7 +858,7 @@ const Progress = (() => {
     }
 
     return {
-        load, save, addXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, updateRhythmBest, setKochLevel, incrementStat,
+        load, save, addXp, logXp, markLetterLearned, markRecognizedUnique, markRhythmMastered, updateRhythmBest, setKochLevel, incrementStat,
         invasionLetterScore, recordInvasionAttempt,
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,

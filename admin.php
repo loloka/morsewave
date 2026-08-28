@@ -26,17 +26,18 @@ if (!is_admin_user($loggedInUser)) {
         <button id="xp-modal-close" style="position:absolute; right:15px; top:15px; background:transparent; border:none; color:var(--text); font-size:24px; cursor:pointer;">&times;</button>
         <h2>Статистика XP (<span id="xp-modal-username"></span>)</h2>
         
-        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;">
-            <div style="flex:1; min-width:300px;">
-                <canvas id="xp-pie-chart" width="300" height="300"></canvas>
-            </div>
-            <div style="flex:2; min-width:300px; max-height:400px; overflow-y:auto; border:1px solid var(--border); padding:10px;">
+        <div style="margin-top:20px;">
+            <div style="max-height:500px; overflow-y:auto; border:1px solid var(--border);">
                 <table style="width:100%; text-align:left; border-collapse: collapse;">
-                    <thead>
+                    <thead style="background: var(--bg-alt); position: sticky; top: 0;">
                         <tr style="border-bottom:1px solid var(--border);">
-                            <th style="padding:8px;">Время</th>
-                            <th style="padding:8px;">Режим</th>
-                            <th style="padding:8px;">XP</th>
+                            <th style="padding:10px;">Время</th>
+                            <th style="padding:10px;">Режим</th>
+                            <th style="padding:10px;">XP</th>
+                            <th style="padding:10px;">WPM</th>
+                            <th style="padding:10px;">Длительность</th>
+                            <th style="padding:10px;">Ошибки</th>
+                            <th style="padding:10px;">Точность</th>
                         </tr>
                     </thead>
                     <tbody id="xp-modal-log">
@@ -48,5 +49,4 @@ if (!is_admin_user($loggedInUser)) {
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <?php include __DIR__ . '/includes/footer.php'; ?>

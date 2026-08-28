@@ -72,7 +72,7 @@
             return;
         }
 
-        session = { items, index: 0, wpm, correct: 0 };
+        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now() };
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -95,9 +95,8 @@
             session.correct++;
             feedbackEl.textContent = t('js.cs.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
-            // Начисляем сразу — не нужно дожидаться конца сессии,
-            // чтобы засчитанный позывной действительно засчитался.
-            Progress.addXp(20, 'callsigns', { wpm: session.wpm });
+            session.dbXpEarned += 20;
+            Progress.addXp(20);
             Progress.incrementStat('callsignsCompleted', 1);
             postStat('total_callsigns', 1);
         } else {
@@ -127,6 +126,16 @@
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
         document.getElementById('result-correct').textContent = `${session.correct}/${total}`;
         document.getElementById('result-xp').textContent = xpEarned;
+        
+        if (session.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.logXp(session.dbXpEarned, 'callsigns', {
+                wpm: session.wpm,
+                dur,
+                err: total - session.correct,
+                acc: Math.round(accuracy * 100)
+            });
+        }
 
         let dailyBonusMsg = '';
         let dailyBonusFail = false;

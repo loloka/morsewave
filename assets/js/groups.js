@@ -328,10 +328,10 @@
         session = {
             groups: Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen)),
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
-            correctChars: 0, totalChars: 0, xpEarned: 0,
+            correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: xpRateForSession(charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
-            wrongGroups: [],
+            wrongGroups: [], startTime: Date.now()
         };
 
         setupPanel.style.display = 'none';
@@ -545,16 +545,19 @@
                 }
             }
 
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
             if (fullyCompleted) {
                 session.xpEarned = Math.round(session.correctChars * session.xpRate);
-                Progress.addXp(session.xpEarned, 'groups_exam', { wpm: session.wpm, fw: session.fwWpm, isExam: true });
+                Progress.addXp(session.xpEarned);
+                Progress.logXp(session.xpEarned, 'groups_exam', { wpm: session.wpm, fw: session.farnsworth, dur, err: session.examErrors });
                 if (session.examErrors <= 3) {
                     Progress.incrementStat('examsPassed', 1);
                 }
             } else {
                 // Если прервали — даём базовый 1 XP за каждый верный символ (но без учета множителей и бонусов)
                 session.xpEarned = session.correctChars;
-                Progress.addXp(session.xpEarned, 'groups_exam_abort', { wpm: session.wpm, fw: session.fwWpm, isExam: true });
+                Progress.addXp(session.xpEarned);
+                Progress.logXp(session.xpEarned, 'groups_exam_abort', { wpm: session.wpm, fw: session.farnsworth, dur, err: session.examErrors });
             }
         }
 
@@ -614,7 +617,8 @@
         
         session.xpEarned += (xpGain + bonusGain);
         if (xpGain + bonusGain > 0) {
-            Progress.addXp(xpGain + bonusGain, 'groups', { wpm: session.wpm, fw: session.fwWpm });
+            session.dbXpEarned += (xpGain + bonusGain);
+            Progress.addXp(xpGain + bonusGain);
         }
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
@@ -672,6 +676,18 @@
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
         session.finalAccuracy = accuracy; // сохраняем для анти-абуза
         let xpEarned = session.xpEarned;
+        
+        // Логируем сессию в БД одним запросом
+        if (session.dbXpEarned > 0 && !session.isExam) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.logXp(session.dbXpEarned, 'groups', { 
+                wpm: session.wpm, 
+                fw: session.farnsworth, 
+                dur, 
+                err: session.wrongPairs ? session.wrongPairs.length : 0, 
+                acc: Math.round(accuracy * 100) 
+            });
+        }
 
         let dailyBonusMsg = '';
         let dailyBonusFail = false;
@@ -1038,6 +1054,9 @@
         });
     }
 
+    let abbrevDbXpEarned = 0;
+    let abbrevStartTime = 0;
+
     /**
      * Полная остановка потока: гасит звук, снимает отложенный запуск и
      * инвалидирует уже идущую await-цепочку через abbrevSessionId. Иначе
@@ -1050,6 +1069,19 @@
         abbrevBusy = false;
         abbrevTarget = null;
         clearTimeout(abbrevNextTimer);
+        
+        if (abbrevDbXpEarned > 0) {
+            const dur = Math.round((Date.now() - abbrevStartTime) / 1000);
+            const acc = abbrevTotal ? Math.round((abbrevCorrect / abbrevTotal) * 100) : 0;
+            Progress.logXp(abbrevDbXpEarned, 'groups_abbrev', {
+                wpm: abbrevWpmSlider.value, 
+                dur, 
+                err: abbrevTotal - abbrevCorrect, 
+                acc
+            });
+            abbrevDbXpEarned = 0;
+        }
+        
         abbrevNextTimer = null;
         if (abbrevAudio) { abbrevAudio.stop(); abbrevAudio = null; }
         abbrevSignalLine.clear();
@@ -1309,8 +1341,8 @@
         wordsSession = {
             items: Array.from({ length: count }, () => pool[Math.floor(Math.random() * pool.length)]),
             index: 0, wpm, farnsworth,
-            correctChars: 0, totalChars: 0, fullyCorrect: 0, xpEarned: 0,
-            missed: [],
+            correctChars: 0, totalChars: 0, fullyCorrect: 0, xpEarned: 0, dbXpEarned: 0,
+            missed: [], startTime: Date.now()
         };
 
         wordsSetup.style.display = 'none';
@@ -1352,7 +1384,8 @@
         const xpGain = accuracy >= WORDS_MIN_ACCURACY ? Math.round(correct * rate) : 0;
         wordsSession.xpEarned += xpGain;
         if (xpGain > 0) {
-            Progress.addXp(xpGain, 'words', { wpm: wordsSession.wpm, fw: wordsSession.farnsworth });
+            wordsSession.dbXpEarned += xpGain;
+            Progress.addXp(xpGain);
         }
         Progress.incrementStat('wordsCompleted', 1);
 
@@ -1388,6 +1421,17 @@
         document.getElementById('words-result-correct').textContent =
             `${wordsSession.fullyCorrect} / ${wordsSession.index}`;
         document.getElementById('words-result-xp').textContent = wordsSession.xpEarned;
+
+        if (wordsSession.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - wordsSession.startTime) / 1000);
+            Progress.logXp(wordsSession.dbXpEarned, 'words', {
+                wpm: wordsSession.wpm,
+                fw: wordsSession.farnsworth,
+                dur,
+                err: wordsSession.missed.length,
+                acc: accuracy
+            });
+        }
 
         const mistakesBox = document.getElementById('words-mistakes');
         if (wordsSession.missed.length) {

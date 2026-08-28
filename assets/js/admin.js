@@ -142,75 +142,61 @@
 
     async function showXpStats(card) {
         const id = card.dataset.userId;
-        const name = card.dataset.userName;
+        const name = card.querySelector('div[style*="font-weight:700"]').textContent.trim().replace(/[✅✉️]/g, '').trim();
+        
         document.getElementById('xp-modal-username').textContent = name;
         document.getElementById('xp-modal').style.display = 'block';
-        document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="3">Загрузка...</td></tr>';
+        document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="7" class="muted">Загрузка...</td></tr>';
         
         try {
             const res = await fetch(`api/admin_user_xp.php?id=${id}`);
             const data = await res.json();
             
             if (!res.ok) {
-                document.getElementById('xp-modal-log').innerHTML = `<tr><td colspan="3">${escapeHtml(data.error || 'Ошибка загрузки')}</td></tr>`;
+                document.getElementById('xp-modal-log').innerHTML = `<tr><td colspan="7">${escapeHtml(data.error || 'Ошибка загрузки')}</td></tr>`;
                 return;
             }
             
             // Заполняем ленту
             const logEl = document.getElementById('xp-modal-log');
             if (data.log.length === 0) {
-                logEl.innerHTML = '<tr><td colspan="3" class="muted">Нет данных</td></tr>';
+                logEl.innerHTML = '<tr><td colspan="7" class="muted">Нет данных</td></tr>';
             } else {
                 logEl.innerHTML = data.log.map(row => {
                     const isAnomaly = parseInt(row.amount) >= 100;
                     
-                    let detailsHtml = '';
+                    let wpmStr = '-';
+                    let durStr = '-';
+                    let errStr = '-';
+                    let accStr = '-';
+                    
                     if (row.details) {
                         try {
                             const d = JSON.parse(row.details);
-                            if (d.wpm) detailsHtml += ` <span style="font-size:11px; padding:2px 4px; background:var(--border); border-radius:4px;">WPM: ${d.wpm}${d.fw ? ' (fw:' + d.fw + ')' : ''}</span>`;
+                            if (d.wpm) wpmStr = `${d.wpm}${d.fw ? ' (fw:' + d.fw + ')' : ''}`;
+                            if (d.dur !== undefined) {
+                                const m = Math.floor(d.dur / 60);
+                                const s = d.dur % 60;
+                                durStr = m > 0 ? `${m}м ${s}с` : `${s}с`;
+                            }
+                            if (d.err !== undefined) errStr = d.err;
+                            if (d.acc !== undefined) accStr = `${d.acc}%`;
                         } catch(e) {}
                     }
                     
-                    return `<tr style="${isAnomaly ? 'background:rgba(255,0,0,0.2);' : ''}">
-                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:12px;" class="muted">${escapeHtml(row.created_at)}</td>
-                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px;">
-                            ${escapeHtml(row.source)}${detailsHtml}
-                        </td>
-                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
+                    return `<tr style="${isAnomaly ? 'background:rgba(255,0,0,0.1);' : ''}">
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:12px;" class="muted">${escapeHtml(row.created_at)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(row.source)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(wpmStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(durStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(errStr)}</td>
+                        <td style="padding:10px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(accStr)}</td>
                     </tr>`;
                 }).join('');
             }
-            
-            // Рисуем график
-            const ctx = document.getElementById('xp-pie-chart').getContext('2d');
-            if (window.xpChartInstance) {
-                window.xpChartInstance.destroy();
-            }
-            
-            const labels = data.distribution.map(d => d.source);
-            const values = data.distribution.map(d => d.total);
-            const colors = labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 50%)`);
-            
-            window.xpChartInstance = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: colors
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
-                }
-            });
-            
         } catch (err) {
-            document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="3">Ошибка сети</td></tr>';
+            document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="7">Ошибка сети</td></tr>';
         }
     }
 

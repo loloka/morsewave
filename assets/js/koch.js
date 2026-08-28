@@ -280,7 +280,9 @@
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
+            dbXpEarned: 0,
             xpRate: xpRateForSession(charset.length, GROUP_LEN),
+            startTime: Date.now()
         };
 
         setupPanel.style.display = 'none';
@@ -327,7 +329,10 @@
         // пройдена до конца, заработанное всё равно не потеряется.
         const xpGain = Math.round(correct * session.xpRate);
         session.xpEarned += xpGain;
-        if (xpGain > 0) Progress.addXp(xpGain, 'koch', { wpm: session.wpm, fw: session.fwWpm });
+        if (xpGain > 0) {
+            session.dbXpEarned += xpGain;
+            Progress.addXp(xpGain);
+        }
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -380,7 +385,19 @@
             // Клампим на случай подмены значения select в DOM.
             const bonus = Math.min(30, Math.max(0, Math.round(session.count) || 0));
             xpEarned += bonus;
-            Progress.addXp(bonus, 'koch_bonus', { wpm: session.wpm, fw: session.fwWpm });
+            session.dbXpEarned += bonus;
+            Progress.addXp(bonus);
+        }
+
+        if (session.dbXpEarned > 0) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.logXp(session.dbXpEarned, 'koch', {
+                wpm: session.wpm,
+                fw: session.farnsworth,
+                dur,
+                err: session.totalChars - session.correctChars,
+                acc: Math.round(accuracy * 100)
+            });
         }
 
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;

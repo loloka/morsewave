@@ -271,7 +271,8 @@
                 feedbackEl.className = 'feedback show ok';
             } else {
                 Progress.markLetterLearned(progressKeyFor(current));
-                Progress.addXp(LEARN_XP, 'learn_send');
+                Progress.addXp(LEARN_XP);
+                Progress.logXp(LEARN_XP, 'learn_send');
                 Progress.markDailyActivity();
                 currentWasLearnedAtStart = true; // чтобы дальше не начислять XP при повторах
                 feedbackEl.textContent = t('js.learn.learned_symbol', { '{ch}': current, '{xp}': LEARN_XP });
@@ -530,7 +531,8 @@
             recStreak++;
             recSessionCorrect++;
             let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': REC_XP });
-            Progress.addXp(REC_XP, 'learn_listen');
+            Progress.addXp(REC_XP);
+            Progress.logXp(REC_XP, 'learn_listen');
             Progress.incrementStat('recognizedCount', 1);
             // Отдельно от XP — отмечаем сам символ как хоть раз опознанный на
             // слух (для ачивок вида "весь кириллический набор на слух").
@@ -866,7 +868,8 @@
                 rhythmFeedbackEl.className = 'feedback show ok';
             } else {
                 Progress.markRhythmMastered(progressKeyForChar(rhythmCurrent));
-                Progress.addXp(RHYTHM_MASTER_XP, 'learn_rhythm');
+                Progress.addXp(RHYTHM_MASTER_XP);
+                Progress.logXp(RHYTHM_MASTER_XP, 'learn_rhythm');
                 Progress.markDailyActivity();
                 // Как и в мини-игре: ни markRhythmMastered(), ни addXp() сами
                 // ачивки не пересчитывают, поэтому без явного вызова награда
@@ -1028,6 +1031,8 @@
     let invasionCelebrating = false;
     let invasionCelebrateTimers = [];
     let invasionBossPhase = false;
+    let invasionDbXpEarned = 0;
+    let invasionSessionStartTime = 0;
     let invasionHitFlashTimer = null;
     let invasionPowerups = { slow: 0, nuke: 0 };
     let invasionSlowUntil = 0;
@@ -1677,7 +1682,8 @@
         const invasionXpMultiplier = 2 * 1 * lengthFactor;
         xp = Math.max(1, Math.round(xp * invasionXpMultiplier));
         
-        Progress.addXp(xp, 'invasion');
+        invasionDbXpEarned += xp;
+        Progress.addXp(xp);
         syncInvasionKeyHighlights();
 
         if (enemy.isBoss) {
@@ -1690,7 +1696,8 @@
             
             // Дополнительный опыт за группу символов (добивание босса)
             const bossBonus = enemy.bossTotalHits * 2; // Например, 10 букв = +20 XP бонус
-            Progress.addXp(bossBonus, 'invasion_boss');
+            invasionDbXpEarned += bossBonus;
+            Progress.addXp(bossBonus);
             
             if (enemy.isMegaBoss) {
                 invasionKills = INVASION_WIN_KILLS;
@@ -1848,7 +1855,8 @@
             const avgSpeedScore = invasionSpeedScoreCount ? (invasionSpeedScoreSum / invasionSpeedScoreCount) : 0;
             const speedBonus = Math.round(10 + avgSpeedScore * 20);
             const bonusXp = hpBonus + speedBonus;
-            Progress.addXp(bonusXp, 'invasion_wave');
+            invasionDbXpEarned += bonusXp;
+            Progress.addXp(bonusXp);
             Progress.incrementStat('invasionWavesCompleted', 1);
             Progress.markDailyActivity();
             tickDaily('invasion');
@@ -1870,7 +1878,22 @@
             invasionOverlayEl.textContent = t('js.learn.invasion_lose_overlay', { '{kills}': invasionKills });
             invasionOverlayEl.className = 'invasion-overlay show lose';
         }
+        
+        logInvasionXp();
         setTimeout(() => { invasionOverlayEl.classList.remove('show'); }, 3500);
+    }
+
+    function logInvasionXp() {
+        if (invasionDbXpEarned > 0) {
+            const dur = Math.round((Date.now() - invasionSessionStartTime) / 1000);
+            Progress.logXp(invasionDbXpEarned, 'invasion', {
+                wpm: invasionWpmSlider.value,
+                dur,
+                err: INVASION_BASE_HP - invasionHp,
+                acc: invasionSpeedScoreCount ? Math.round((invasionSpeedScoreSum / invasionSpeedScoreCount) * 100) : 0
+            });
+            invasionDbXpEarned = 0;
+        }
     }
 
     function stopInvasion() {
@@ -1896,6 +1919,8 @@
         invasionStartBtn.style.display = 'inline-flex';
         invasionStopBtn.style.display = 'none';
         syncInvasionKeyHighlights();
+        
+        logInvasionXp();
     }
 
     function startInvasion() {
@@ -1934,6 +1959,8 @@
         invasionLanePool = Array.from({ length: INVASION_MAX_LANES }, (_, i) => i);
         invasionAudioChain = Promise.resolve();
         invasionWaveStart = performance.now();
+        invasionDbXpEarned = 0;
+        invasionSessionStartTime = Date.now();
         updateInvasionHpUI();
         updateInvasionStatsUI();
         invasionOverlayEl.classList.remove('show');
