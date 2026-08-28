@@ -170,7 +170,7 @@ class VirtualKeyboard {
         this.input = inputEl;
         this.options = options;
         
-        if (typeof isTouch !== 'undefined' && isTouch) {
+        if (window.matchMedia('(pointer: coarse)').matches) {
             this.input.setAttribute('inputmode', 'none');
             this.container.style.display = 'flex';
         } else {
