@@ -50,6 +50,14 @@
     let session = null;
     let isDailyChallenge = false;
     let pendingExamMode = false;
+    
+    const vkbEl = document.getElementById('groups-vkb');
+    let vkb = null;
+    function renderVkb(inputEl, isExam) {
+        if (typeof VirtualKeyboard !== 'undefined' && vkbEl) {
+            vkb = new VirtualKeyboard(vkbEl, inputEl, { showSpace: isExam });
+        }
+    }
     let isPlaying = false;
     const replayBtn = document.getElementById('replay-btn');
 
