@@ -163,7 +163,7 @@
                 logEl.innerHTML = '<tr><td colspan="7" class="muted">Нет данных</td></tr>';
             } else {
                 logEl.innerHTML = data.log.map(row => {
-                    const isAnomaly = parseInt(row.amount) >= 500;
+                    const isAnomaly = parseInt(row.amount) >= 1500;
                     
                     let wpmStr = '-';
                     let durStr = '-';
