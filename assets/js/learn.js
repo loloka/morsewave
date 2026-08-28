@@ -1679,6 +1679,10 @@
                 return;
             }
             
+            // Дополнительный опыт за группу символов (добивание босса)
+            const bossBonus = enemy.bossTotalHits * 2; // Например, 10 букв = +20 XP бонус
+            Progress.addXp(bossBonus);
+            
             if (enemy.isMegaBoss) {
                 invasionKills = INVASION_WIN_KILLS;
                 invasionFeedback(t('js.learn.invasion_boss_kill'), 'ok');
