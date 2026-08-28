@@ -31,13 +31,14 @@
             return;
         }
         listEl.innerHTML = users.map(u => `
-            <div class="card mt-2" data-user-id="${u.id}">
+            <div class="card mt-2" data-user-id="${u.id}" data-user-name="${escapeHtml(u.name)}">
                 <div class="flex-between flex-wrap gap-2">
                     <div>
                         <div style="font-weight:700; font-size:15px;">
                             ${escapeHtml(u.name)}
                             ${u.email_verified_at ? `<span title="${t('js.admin.email_verified_title')}">✅</span>` : `<span title="${t('js.admin.email_not_verified_title')}" style="opacity:.5;">✉️</span>`}
                             ${Number(u.is_admin) ? `<span title="${t('js.admin.admin_title')}" style="color:var(--accent);">🛠 ${t('js.admin.admin_label')}</span>` : ''}
+                            ${u.recent_anomalies ? `<span title="Подозрительная активность" style="color:var(--danger);">🚩</span>` : ''}
                         </div>
                         <div class="muted" style="font-size:12px;">${escapeHtml(u.email)} · ${t('js.admin.registered_on')} ${escapeHtml((u.created_at || '').slice(0, 10))}</div>
                         <div class="mono muted" style="font-size:12px; margin-top:4px;">
@@ -45,6 +46,7 @@
                         </div>
                     </div>
                     <div class="btn-row">
+                        <button class="btn btn-sm xp-stats-btn" style="border-color:#3498db; color:#3498db;">📊 Статистика XP</button>
                         ${Number(u.is_admin)
                             ? `<button class="btn btn-sm admin-toggle-btn" data-make="0">${t('js.admin.remove_admin_btn')}</button>`
                             : `<button class="btn btn-sm admin-toggle-btn" data-make="1" style="border-color:var(--accent); color:var(--accent);">${t('js.admin.make_admin_btn')}</button>`}
@@ -63,6 +65,9 @@
         });
         listEl.querySelectorAll('.admin-toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => setAdmin(btn.closest('[data-user-id]'), btn.dataset.make === '1'));
+        });
+        listEl.querySelectorAll('.xp-stats-btn').forEach(btn => {
+            btn.addEventListener('click', () => showXpStats(btn.closest('[data-user-id]')));
         });
     }
 
@@ -134,6 +139,78 @@
             alert(t('js.admin.network_error'));
         }
     }
+
+    async function showXpStats(card) {
+        const id = card.dataset.userId;
+        const name = card.dataset.userName;
+        document.getElementById('xp-modal-username').textContent = name;
+        document.getElementById('xp-modal').style.display = 'block';
+        document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="3">Загрузка...</td></tr>';
+        
+        try {
+            const res = await fetch(`api/admin_user_xp.php?id=${id}`);
+            const data = await res.json();
+            
+            if (!res.ok) {
+                document.getElementById('xp-modal-log').innerHTML = `<tr><td colspan="3">${escapeHtml(data.error || 'Ошибка загрузки')}</td></tr>`;
+                return;
+            }
+            
+            // Заполняем ленту
+            const logEl = document.getElementById('xp-modal-log');
+            if (data.log.length === 0) {
+                logEl.innerHTML = '<tr><td colspan="3" class="muted">Нет данных</td></tr>';
+            } else {
+                logEl.innerHTML = data.log.map(row => {
+                    const isAnomaly = parseInt(row.amount) >= 100; // Помечаем как аномалию
+                    return `<tr style="${isAnomaly ? 'background:rgba(255,0,0,0.2);' : ''}">
+                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:12px;" class="muted">${escapeHtml(row.created_at)}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px;">${escapeHtml(row.source)}</td>
+                        <td style="padding:8px; border-bottom:1px solid var(--border); font-size:14px; font-weight:bold; ${isAnomaly ? 'color:var(--danger);' : ''}">+${escapeHtml(row.amount)}</td>
+                    </tr>`;
+                }).join('');
+            }
+            
+            // Рисуем график
+            const ctx = document.getElementById('xp-pie-chart').getContext('2d');
+            if (window.xpChartInstance) {
+                window.xpChartInstance.destroy();
+            }
+            
+            const labels = data.distribution.map(d => d.source);
+            const values = data.distribution.map(d => d.total);
+            const colors = labels.map((_, i) => `hsl(${(i * 360 / labels.length) % 360}, 70%, 50%)`);
+            
+            window.xpChartInstance = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+            
+        } catch (err) {
+            document.getElementById('xp-modal-log').innerHTML = '<tr><td colspan="3">Ошибка сети</td></tr>';
+        }
+    }
+
+    document.getElementById('xp-modal-close')?.addEventListener('click', () => {
+        document.getElementById('xp-modal').style.display = 'none';
+    });
+    
+    // Close modal on outside click
+    document.getElementById('xp-modal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'xp-modal') e.target.style.display = 'none';
+    });
 
     loadUsers();
 })();

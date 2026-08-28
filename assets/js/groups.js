@@ -547,14 +547,14 @@
 
             if (fullyCompleted) {
                 session.xpEarned = Math.round(session.correctChars * session.xpRate);
-                Progress.addXp(session.xpEarned);
+                Progress.addXp(session.xpEarned, 'groups_exam');
                 if (session.examErrors <= 3) {
                     Progress.incrementStat('examsPassed', 1);
                 }
             } else {
                 // Если прервали — даём базовый 1 XP за каждый верный символ (но без учета множителей и бонусов)
                 session.xpEarned = session.correctChars;
-                Progress.addXp(session.xpEarned);
+                Progress.addXp(session.xpEarned, 'groups_exam_abort');
             }
         }
 
@@ -613,7 +613,7 @@
         }
         
         session.xpEarned += (xpGain + bonusGain);
-        if (xpGain + bonusGain > 0) Progress.addXp(xpGain + bonusGain);
+        if (xpGain + bonusGain > 0) Progress.addXp(xpGain + bonusGain, 'groups');
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -1105,7 +1105,7 @@
         if (isCorrect) {
             abbrevStreak++;
             abbrevCorrect++;
-            Progress.addXp(5);
+            Progress.addXp(5, 'groups_abbrev');
             Progress.incrementStat('groupsCompleted', 1);
             postStat('total_groups', 1);
             pushAbbrevHistory(true, t('js.groups.abbrev_correct', { '{code}': abbrevTarget.code, '{meaning}': abbrevTarget.meaning }));
@@ -1349,7 +1349,7 @@
         const rate = isPhrase(expected) ? PHRASES_XP_RATE : WORDS_XP_RATE;
         const xpGain = accuracy >= WORDS_MIN_ACCURACY ? Math.round(correct * rate) : 0;
         wordsSession.xpEarned += xpGain;
-        if (xpGain > 0) Progress.addXp(xpGain);
+        if (xpGain > 0) Progress.addXp(xpGain, 'words');
         Progress.incrementStat('wordsCompleted', 1);
 
         if (correct === scorable && typed.length === expected.length) {

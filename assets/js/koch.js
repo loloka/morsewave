@@ -327,7 +327,7 @@
         // пройдена до конца, заработанное всё равно не потеряется.
         const xpGain = Math.round(correct * session.xpRate);
         session.xpEarned += xpGain;
-        if (xpGain > 0) Progress.addXp(xpGain);
+        if (xpGain > 0) Progress.addXp(xpGain, 'koch');
         Progress.incrementStat('groupsCompleted', 1);
         postStat('total_groups', 1);
 
@@ -380,7 +380,7 @@
             // Клампим на случай подмены значения select в DOM.
             const bonus = Math.min(30, Math.max(0, Math.round(session.count) || 0));
             xpEarned += bonus;
-            Progress.addXp(bonus);
+            Progress.addXp(bonus, 'koch_bonus');
         }
 
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;

@@ -431,7 +431,7 @@ const Progress = (() => {
         }
     }
 
-    function addXp(amount) {
+    function addXp(amount, source = 'unknown') {
         const state = load();
         state.xp = Math.round(state.xp + amount);
         save(state);
@@ -439,6 +439,16 @@ const Progress = (() => {
         checkAchievements();
         refreshPublishedStats(state);
         pushFullProgress();
+
+        // Логирование транзакции XP для аналитики и античита
+        if (amount > 0) {
+            fetch('api/log_xp.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: amount, source: source })
+            }).catch(() => {});
+        }
+
         return state;
     }
 
@@ -656,6 +666,13 @@ const Progress = (() => {
         checkAchievements();
         refreshPublishedStats(state);
         pushFullProgress();
+
+        fetch('api/log_xp.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: 50, source: 'daily_bonus' })
+        }).catch(() => {});
+
         return true;
     }
 

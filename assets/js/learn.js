@@ -271,7 +271,7 @@
                 feedbackEl.className = 'feedback show ok';
             } else {
                 Progress.markLetterLearned(progressKeyFor(current));
-                Progress.addXp(LEARN_XP);
+                Progress.addXp(LEARN_XP, 'learn_send');
                 Progress.markDailyActivity();
                 currentWasLearnedAtStart = true; // чтобы дальше не начислять XP при повторах
                 feedbackEl.textContent = t('js.learn.learned_symbol', { '{ch}': current, '{xp}': LEARN_XP });
@@ -530,7 +530,7 @@
             recStreak++;
             recSessionCorrect++;
             let correctText = t('js.learn.rec_correct', { '{ch}': recTarget, '{xp}': REC_XP });
-            Progress.addXp(REC_XP);
+            Progress.addXp(REC_XP, 'learn_listen');
             Progress.incrementStat('recognizedCount', 1);
             // Отдельно от XP — отмечаем сам символ как хоть раз опознанный на
             // слух (для ачивок вида "весь кириллический набор на слух").
@@ -866,7 +866,7 @@
                 rhythmFeedbackEl.className = 'feedback show ok';
             } else {
                 Progress.markRhythmMastered(progressKeyForChar(rhythmCurrent));
-                Progress.addXp(RHYTHM_MASTER_XP);
+                Progress.addXp(RHYTHM_MASTER_XP, 'learn_rhythm');
                 Progress.markDailyActivity();
                 // Как и в мини-игре: ни markRhythmMastered(), ни addXp() сами
                 // ачивки не пересчитывают, поэтому без явного вызова награда
@@ -1677,7 +1677,7 @@
         const invasionXpMultiplier = 2 * 1 * lengthFactor;
         xp = Math.max(1, Math.round(xp * invasionXpMultiplier));
         
-        Progress.addXp(xp);
+        Progress.addXp(xp, 'invasion');
         syncInvasionKeyHighlights();
 
         if (enemy.isBoss) {
@@ -1690,7 +1690,7 @@
             
             // Дополнительный опыт за группу символов (добивание босса)
             const bossBonus = enemy.bossTotalHits * 2; // Например, 10 букв = +20 XP бонус
-            Progress.addXp(bossBonus);
+            Progress.addXp(bossBonus, 'invasion_boss');
             
             if (enemy.isMegaBoss) {
                 invasionKills = INVASION_WIN_KILLS;
@@ -1848,7 +1848,7 @@
             const avgSpeedScore = invasionSpeedScoreCount ? (invasionSpeedScoreSum / invasionSpeedScoreCount) : 0;
             const speedBonus = Math.round(10 + avgSpeedScore * 20);
             const bonusXp = hpBonus + speedBonus;
-            Progress.addXp(bonusXp);
+            Progress.addXp(bonusXp, 'invasion_wave');
             Progress.incrementStat('invasionWavesCompleted', 1);
             Progress.markDailyActivity();
             tickDaily('invasion');
