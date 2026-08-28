@@ -22,7 +22,7 @@
     let vkb = null;
     function renderVkb() {
         if (!vkb && typeof VirtualKeyboard !== 'undefined' && vkbEl) {
-            vkb = new VirtualKeyboard(vkbEl, answerInput, { showSpace: false });
+            vkb = new VirtualKeyboard(vkbEl, answerInput, { showSpace: false, showSlash: true });
         }
     }
     let isPlaying = false;

@@ -192,6 +192,10 @@ class VirtualKeyboard {
             ['Z','X','C','V','B','N','M'],
         ];
 
+        if (this.options.showSlash) {
+            QWERTY_ROWS[3].push('/');
+        }
+
         QWERTY_ROWS.forEach((row) => {
             const rowEl = document.createElement('div');
             rowEl.className = 'vkb-row';
