@@ -12,7 +12,7 @@
     async function loadUsers() {
         listEl.innerHTML = '<p class="muted">' + t('admin.loading') + '</p>';
         try {
-            const res = await fetch('api/admin_users.php');
+            const res = await fetch('api/admin_users.php?sort=' + document.getElementById('admin-sort-select').value);
             const data = await res.json();
             if (!res.ok) {
                 listEl.innerHTML = `<p class="feedback show bad" style="display:block;">${escapeHtml(data.error || t('js.admin.load_error_default'))}</p>`;
@@ -232,5 +232,6 @@
         if (e.target.id === 'xp-modal') e.target.style.display = 'none';
     });
 
+    document.getElementById('admin-sort-select')?.addEventListener('change', loadUsers);
     loadUsers();
 })();

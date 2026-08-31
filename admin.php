@@ -18,6 +18,15 @@ if (!is_admin_user($loggedInUser)) {
 <h1><?= t('admin.h1') ?></h1>
 <p class="muted"><?= t('admin.total_accounts') ?> <b class="mono" id="admin-user-count">…</b></p>
 
+<div style="margin-bottom: 20px;">
+    <label for="admin-sort-select" style="margin-right: 10px;">Сортировка:</label>
+    <select id="admin-sort-select" style="padding: 5px; border-radius: 4px; border: 1px solid var(--border); background: var(--bg); color: var(--text);">
+        <option value="date_desc">По дате регистрации</option>
+        <option value="active_desc">По последней активности</option>
+        <option value="xp_desc">По макс опыту</option>
+    </select>
+</div>
+
 <div id="admin-users-list"><p class="muted"><?= t('admin.loading') ?></p></div>
 
 <!-- Modal for XP Stats -->
