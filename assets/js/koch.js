@@ -20,7 +20,7 @@
     function xpRateForSession(charsetSize, len) {
         const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
         const lengthFactor = len / 3;
-        return 2 * charsetFactor * lengthFactor;
+        return Math.max(1.0, 2 * charsetFactor * lengthFactor);
     }
 
     const kochLevelEl = document.getElementById('koch-level');

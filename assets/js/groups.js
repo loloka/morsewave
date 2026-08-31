@@ -290,7 +290,7 @@
         // высокий wpm там просто наказание. В остальных режимах человек сам
         // выбирает скорость, доплачивать не за что.
         const speed = opts.daily ? speedXpFactor(opts.wpm) : 1;
-        return 2 * charsetFactor * lengthFactor * speed;
+        return Math.max(1.0, 2 * charsetFactor * lengthFactor * speed);
     }
 
     async function playCurrentGroup() {
