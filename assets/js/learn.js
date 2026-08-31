@@ -1151,14 +1151,18 @@
     // Грубая (заведомо с запасом) оценка длины ОДНОЙ буквы в очереди звука —
     // нужна только чтобы прибавить пришельцам, стоящим в очереди на озвучку,
     // честный запас времени на дорогу (см. spawnOneInvasionEnemy).
-    function invasionAudioEstimate(ch, wpm) {
-        const code = MORSE_CODE[ch] || '.';
-        let units = 0;
-        for (const sym of code) {
-            units += (sym === '-' ? 3 : 1) + 1;
+    function invasionAudioEstimate(chStr, wpm) {
+        let totalUnits = 0;
+        for (let i = 0; i < chStr.length; i++) {
+            const code = MORSE_CODE[chStr[i]] || '.';
+            let units = 0;
+            for (const sym of code) {
+                units += (sym === '-' ? 3 : 1) + 1;
+            }
+            units = units - 1 + 3;
+            totalUnits += units;
         }
-        units = units - 1 + 3; // subtract last gap, add 3-unit inter-char gap
-        return (1200 / wpm) * units;
+        return (1200 / wpm) * totalUnits;
     }
 
     // Сколько пришельцев одновременно в волне — растёт с числом убийств:
@@ -1373,10 +1377,15 @@
     }
 
     function spawnOneInvasionEnemy() {
-        const activeChars = invasionEnemies.map((e) => e.ch);
-        const available = ALL_LEARNABLE.filter((ch) => !activeChars.includes(ch));
-        const pool = available.length ? available : ALL_LEARNABLE;
-        const ch = pickInvasionLetterWeighted(pool);
+        const wave = Math.floor(invasionKills / 20) + 1;
+        const groupLen = Math.min(wave, 4);
+        let ch = "";
+        for (let i = 0; i < groupLen; i++) {
+            const activeChars = invasionEnemies.map((e) => e.ch[0] || '');
+            const available = ALL_LEARNABLE.filter((c) => !activeChars.includes(c));
+            const pool = available.length ? available : ALL_LEARNABLE;
+            ch += pickInvasionLetterWeighted(pool);
+        }
         const wpm = parseInt(invasionWpmSlider.value, 10);
         const queueAhead = invasionEnemies.length;
         let duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(ch, wpm);
@@ -1430,7 +1439,7 @@
             id: ++invasionEnemySeq,
             ch,
             sprite: INVASION_BOSS_SPRITE,
-            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 15 : 10),
+            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 45 : 30),
             startTime: performance.now(),
             lane: acquireInvasionLane(),
             state: 'active',
@@ -1591,7 +1600,7 @@
     }
 
     function findActiveInvasionEnemy(ch) {
-        return invasionEnemies.find((e) => e.ch === ch && e.state === 'active');
+        return invasionEnemies.find((e) => e.state === 'active' && e.ch[e.typed || 0] === ch);
     }
 
     function handleInvasionAnswer(ch, key) {
@@ -1605,6 +1614,8 @@
         // самое надёжное место, чтобы попытаться его разбудить.
         getSharedAudioContext();
         const enemy = findActiveInvasionEnemy(ch);
+        if (enemy) enemy.typed = (enemy.typed || 0) + 1;
+        
         if (!enemy) {
             // Уже убит долю секунды назад, лопата ещё летит (state='dying') —
             // повторное нажатие той же (правильной) буквы просто игнорируем,
@@ -1616,7 +1627,7 @@
                     const now = performance.now();
                     const oldElapsed = now - e.startTime;
                     const oldDuration = e.duration;
-                    const newDuration = oldDuration * 0.85; // 15% faster
+                    const newDuration = oldDuration * (e.isBoss ? 0.98 : 0.85);
                     e.duration = newDuration;
                     e.startTime = now - oldElapsed * (newDuration / oldDuration);
                 }
@@ -1651,7 +1662,14 @@
         const w = invasionCanvasWrapEl.clientWidth;
         const h = invasionCanvasWrapEl.clientHeight;
         const pos = invasionEnemyPosition(enemy, performance.now(), w, h);
+        
+        if (!enemy.isBoss && enemy.type !== 'tank' && enemy.typed < enemy.ch.length) {
+            syncInvasionKeyHighlights();
+            spawnInvasionParticles(pos.x, pos.y, '#6fcf7a');
+            return;
+        }
         if (enemy.type === 'tank' && enemy.tankHits === 0) {
+            enemy.typed = 0;
             enemy.tankHits++;
             enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
             enemy.duration += invasionTierDuration(enemy.ch, parseInt(invasionWpmSlider.value, 10));
@@ -1714,6 +1732,7 @@
         syncInvasionKeyHighlights();
 
         if (enemy.isBoss) {
+            enemy.typed = 0;
             enemy.bossHits++;
             updateInvasionStatsUI();
             if (enemy.bossHits < enemy.bossTotalHits) {
@@ -1802,18 +1821,19 @@
         if (enemy.isBoss) {
             updateInvasionHpUI();
             updateInvasionStatsUI();
-            invasionFeedback(t('js.learn.invasion_boss_breach', { '{dmg}': dmg }), 'bad');
             if (invasionHp <= 0) {
+                invasionFeedback(t('js.learn.invasion_boss_breach', { '{dmg}': dmg }), 'bad');
                 releaseInvasionLane(enemy.lane);
                 invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
                 finishInvasion(false);
                 return;
             }
-            // База выжила — босс не исчезает, а "заходит на новый круг" с той
-            // же лейн и уже накопленными попаданиями (bossHits не откатываем:
-            // 30 HP уже достаточное наказание, требовать все 3 буквы заново
-            // было бы слишком жёстко).
-            // respawnInvasionBossSegment(enemy); // Removed to prevent teleport
+            invasionFeedback("Босс прорвался! Начинаем волну заново.", 'bad');
+            invasionKills = 0;
+            invasionBossPhase = false;
+            releaseInvasionLane(enemy.lane);
+            invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+            topUpInvasionEnemies();
             return;
         }
 
