@@ -275,8 +275,13 @@
      * маленьким набором нельзя — для этого пришлось бы сидеть на низком
      * уровне, а он и так даёт мало.
      */
-    function xpRateForSession(charsetSize, len, opts = {}) {
-        const charsetFactor = Math.min(1, Math.max(0.15, Math.sqrt(charsetSize / 26)));
+    function xpRateForSession(charsetKey, charsetSize, len, opts = {}) {
+        let charsetFactor = Math.max(0.15, Math.sqrt(charsetSize / 26));
+        if (charsetKey === 'digits') {
+            charsetFactor = 1.0;
+        } else if (charsetKey === 'mixed') {
+            charsetFactor = 1.25;
+        }
         const lengthFactor = len / 3;
         // Надбавка за скорость (speedXpFactor из morse-data.js) — ТОЛЬКО для
         // задания дня. В обычных сессиях баланс не трогаем: полный алфавит на
@@ -401,7 +406,7 @@
             groups: Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen)),
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
-            xpRate: xpRateForSession(charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
+            xpRate: xpRateForSession(activeCharsetKey, charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], startTime: Date.now(), history: []
         };
