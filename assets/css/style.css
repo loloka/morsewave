@@ -401,6 +401,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .signal-line {
     display: flex;
     align-items: flex-end;
+    justify-content: flex-end;
     gap: 3px;
     height: 56px;
     width: 100%;
