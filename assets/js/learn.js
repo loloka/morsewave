@@ -2242,3 +2242,4 @@
         }
     })();
 })();
+window.addEventListener('beforeunload', () => { if (typeof invasionRunning !== 'undefined' && invasionRunning) logInvasionXp(); });
