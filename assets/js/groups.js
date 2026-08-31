@@ -1074,29 +1074,28 @@
             document.querySelectorAll('#length-chips .chip').forEach(c => {
                 const match = parseInt(c.dataset.len, 10) === len;
                 c.classList.toggle('active', match);
-                if (match) {
-                    groupLen = len;
-                    localStorage.setItem('morse_groups_len', String(len));
-                }
+                if (match) groupLen = len;
             });
         }
         if (count) {
             const countSelect = document.getElementById('groups-count');
             const hasOption = [...countSelect.options].some(o => parseInt(o.value, 10) === count);
             if (!hasOption) {
+                // На случай будущего рассинхрона между генератором на главной
+                // и вариантами в select — добавляем недостающий вариант сами,
+                // а не молча оставляем старое значение (это и было причиной
+                // бага: задание требовало 15, а выбор оставался на 10).
                 const opt = document.createElement('option');
                 opt.value = String(count);
                 opt.textContent = String(count);
                 countSelect.appendChild(opt);
             }
             countSelect.value = String(count);
-            localStorage.setItem('morse_groups_count', String(count));
         }
         if (wpm) {
             wpmSlider.value = String(wpm);
             wpmValue.textContent = String(wpm);
             wpmCpm.textContent = cpmHintText(wpm);
-            localStorage.setItem('morse_groups_wpm', String(wpm));
         }
 
         if (isDailyChallenge) {
