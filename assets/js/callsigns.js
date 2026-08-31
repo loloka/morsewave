@@ -319,12 +319,14 @@
             // Убедимся, что опция существует, прежде чем выставлять
             if (Array.from(select.options).some(o => o.value === pCount.toString())) {
                 select.value = pCount.toString();
+                localStorage.setItem('morse_cs_count', pCount.toString());
             }
         }
         if (pWpm) {
             wpmSlider.value = pWpm;
             wpmValue.textContent = pWpm;
             wpmCpm.textContent = cpmHintText(pWpm);
+            localStorage.setItem('morse_cs_wpm', pWpm);
         }
         
         // Создадим баннер, что задание активно
