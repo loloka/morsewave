@@ -1025,7 +1025,8 @@
     let invasionParticles = [];
     let invasionLanePool = [];
     let invasionEnemySeq = 0;
-    let invasionAudioChain = Promise.resolve();
+    let invasionAudioChain = Promise.resolve(); invasionAudioQueueEndTime = performance.now();
+    let invasionAudioQueueEndTime = 0;
     let invasionRafId = null;
     let invasionWaveStart = 0;
     let invasionCelebrating = false;
@@ -1149,8 +1150,14 @@
     // Грубая (заведомо с запасом) оценка длины ОДНОЙ буквы в очереди звука —
     // нужна только чтобы прибавить пришельцам, стоящим в очереди на озвучку,
     // честный запас времени на дорогу (см. spawnOneInvasionEnemy).
-    function invasionAudioEstimate(wpm) {
-        return (1200 / wpm) * 10;
+    function invasionAudioEstimate(ch, wpm) {
+        const code = MORSE_CODE[ch] || '.';
+        let units = 0;
+        for (const sym of code) {
+            units += (sym === '-' ? 3 : 1) + 1;
+        }
+        units = units - 1 + 3; // subtract last gap, add 3-unit inter-char gap
+        return (1200 / wpm) * units;
     }
 
     // Сколько пришельцев одновременно в волне — растёт с числом убийств:
@@ -1422,7 +1429,7 @@
             id: ++invasionEnemySeq,
             ch,
             sprite: INVASION_BOSS_SPRITE,
-            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 1.5 : 1.2),
+            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 15 : 10),
             startTime: performance.now(),
             lane: acquireInvasionLane(),
             state: 'active',
@@ -1549,11 +1556,8 @@
                     spawnInvasionParticles(p.x1, p.y1, '#6fcf7a');
                     const enemy = invasionEnemies.find((e) => e.id === p.targetId);
                     if (enemy) {
-                        if (enemy.isBoss && enemy.bossHits < enemy.bossTotalHits) {
-                            // Ещё не добит — "воскрешаем" на месте с новой
-                            // буквой вместо обычного удаления/освобождения
-                            // лейна (см. resolveInvasionKill).
-                            respawnInvasionBossSegment(enemy);
+                        if (p.isBossHit) {
+                            // Boss is still alive, do nothing on impact except particles
                         } else {
                             releaseInvasionLane(enemy.lane);
                             invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
@@ -1660,9 +1664,11 @@
         invasionSpeedScoreSum += 1 - (pos.progress ?? 0);
         invasionSpeedScoreCount++;
 
-        enemy.state = 'dying';
-        enemy.dieX = pos.x;
-        enemy.dieY = pos.y;
+        if (!enemy.isBoss || (enemy.isBoss && enemy.bossHits + 1 >= enemy.bossTotalHits)) {
+            enemy.state = 'dying';
+            enemy.dieX = pos.x;
+            enemy.dieY = pos.y;
+        }
         if (enemy.audio) enemy.audio.stop();
 
         const x0 = w - 28;
@@ -1675,6 +1681,7 @@
             duration: INVASION_SHOVEL_MS,
             targetId: enemy.id,
             resolved: false,
+            isBossHit: enemy.isBoss && enemy.bossHits < enemy.bossTotalHits,
         });
 
         invasionCombo++;
@@ -1710,7 +1717,16 @@
             updateInvasionStatsUI();
             if (enemy.bossHits < enemy.bossTotalHits) {
                 invasionFeedback(t('js.learn.invasion_boss_hit', { '{hits}': enemy.bossHits, '{total}': enemy.bossTotalHits }), 'ok');
-                return;
+                
+                if (enemy.isMegaBoss && enemy.bossQuote) {
+                    enemy.ch = enemy.bossQuote[enemy.bossHits % enemy.bossQuote.length];
+                } else {
+                    enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+                }
+                queueInvasionAudio(enemy);
+                syncInvasionKeyHighlights();
+                
+                return; // Let the shovel hit it visually, but it won't die
             }
             
             // Дополнительный опыт за группу символов (добивание босса)
@@ -1796,7 +1812,7 @@
             // же лейн и уже накопленными попаданиями (bossHits не откатываем:
             // 30 HP уже достаточное наказание, требовать все 3 буквы заново
             // было бы слишком жёстко).
-            respawnInvasionBossSegment(enemy);
+            // respawnInvasionBossSegment(enemy); // Removed to prevent teleport
             return;
         }
 
@@ -1931,7 +1947,7 @@
         invasionEnemies = [];
         invasionProjectiles = [];
         invasionParticles = [];
-        invasionAudioChain = Promise.resolve();
+        invasionAudioChain = Promise.resolve(); invasionAudioQueueEndTime = performance.now();
         invasionOverlayEl.classList.remove('show');
         invasionCanvasWrapEl.classList.remove('invasion-hit-flash');
         clearTimeout(invasionHitFlashTimer);
@@ -1976,7 +1992,7 @@
         invasionProjectiles = [];
         invasionParticles = [];
         invasionLanePool = Array.from({ length: INVASION_MAX_LANES }, (_, i) => i);
-        invasionAudioChain = Promise.resolve();
+        invasionAudioChain = Promise.resolve(); invasionAudioQueueEndTime = performance.now();
         invasionWaveStart = performance.now();
         invasionDbXpEarned = 0;
         invasionSessionStartTime = Date.now();
