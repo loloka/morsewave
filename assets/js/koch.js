@@ -80,6 +80,17 @@
         fwValue.textContent = savedFwWpm;
     }
 
+    const kochCountEl = document.getElementById('koch-count');
+    const savedKochCount = localStorage.getItem('morse_koch_count');
+    if (savedKochCount && kochCountEl) {
+        kochCountEl.value = savedKochCount;
+    }
+    if (kochCountEl) {
+        kochCountEl.addEventListener('change', () => {
+            localStorage.setItem('morse_koch_count', kochCountEl.value);
+        });
+    }
+
     wpmSlider.addEventListener('input', () => { 
         wpmValue.textContent = wpmSlider.value; 
         wpmCpm.textContent = cpmHintText(wpmSlider.value); 

@@ -49,6 +49,34 @@
     let charsetKey = 'letters';
     let session = null;
     let isDailyChallenge = false;
+    let dailyRequired = null;
+
+    function updateDailyBanner() {
+        if (!isDailyChallenge || !dailyRequired) return;
+        const banner = document.getElementById('groups-daily-banner');
+        if (!banner) return;
+        
+        const countInput = document.getElementById('groups-count');
+        const count = countInput ? parseInt(countInput.value, 10) : 0;
+        const wpm = parseInt(wpmSlider.value, 10);
+        
+        const matchesRequirement = count === dailyRequired.count
+            && groupLen === dailyRequired.len
+            && wpm === dailyRequired.wpm;
+            
+        if (matchesRequirement) {
+            banner.className = 'feedback show ok mt-2';
+            banner.textContent = t('js.groups.daily_banner');
+        } else {
+            banner.className = 'feedback show bad mt-2';
+            banner.textContent = t('js.groups.daily_mismatch', {
+                '{count}': dailyRequired.count,
+                '{len}': dailyRequired.len,
+                '{wpm}': dailyRequired.wpm,
+            });
+        }
+    }
+
     let pendingExamMode = false;
     
     const vkbEl = document.getElementById('groups-vkb');
@@ -86,6 +114,7 @@
     if (groupsCountEl) {
         groupsCountEl.addEventListener('change', () => {
             localStorage.setItem('morse_groups_count', groupsCountEl.value);
+            updateDailyBanner();
         });
     }
 
@@ -107,6 +136,7 @@
         wpmValue.textContent = wpmSlider.value; 
         wpmCpm.textContent = cpmHintText(wpmSlider.value); 
         localStorage.setItem('morse_groups_wpm', wpmSlider.value);
+        updateDailyBanner();
     });
     fwSlider.addEventListener('input', () => { 
         fwValue.textContent = fwSlider.value; 
@@ -131,6 +161,7 @@
             chip.classList.add('active');
             groupLen = parseInt(chip.dataset.len, 10);
             localStorage.setItem('morse_groups_len', groupLen);
+            updateDailyBanner();
         });
     });
     const customInput = document.getElementById('custom-charset-input');
@@ -1048,6 +1079,7 @@
 
         if (isDailyChallenge) {
             const banner = document.createElement('div');
+            banner.id = 'groups-daily-banner';
             banner.className = 'feedback show ok mt-2';
             banner.textContent = t('js.groups.daily_banner');
             setupPanel.appendChild(banner);

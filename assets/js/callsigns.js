@@ -282,14 +282,32 @@
         }
         
         // Создадим баннер, что задание активно
-        if (!DailyChallenge.isDoneToday()) {
-            const req = DailyChallenge.forToday();
-            if (req.type === 'callsigns') {
-                const banner = document.createElement('div');
-                banner.className = 'feedback show mt-2';
-                banner.textContent = t('js.groups.daily_banner');
-                document.getElementById('setup-panel').appendChild(banner);
+        const req = DailyChallenge.forToday();
+        if (!DailyChallenge.isDoneToday() && req.type === 'callsigns') {
+            const banner = document.createElement('div');
+            banner.id = 'cs-daily-banner';
+            banner.className = 'feedback show ok mt-2';
+            banner.textContent = t('js.groups.daily_banner');
+            document.getElementById('setup-panel').appendChild(banner);
+            
+            function updateCsDailyBanner() {
+                const count = parseInt(document.getElementById('cs-count').value, 10);
+                const wpm = parseInt(wpmSlider.value, 10);
+                const matches = (count === req.count) && (wpm === req.wpm);
+                if (matches) {
+                    banner.className = 'feedback show ok mt-2';
+                    banner.textContent = t('js.groups.daily_banner');
+                } else {
+                    banner.className = 'feedback show bad mt-2';
+                    banner.textContent = t('js.groups.daily_mismatch', {
+                        '{count}': req.count,
+                        '{len}': 0,
+                        '{wpm}': req.wpm
+                    });
+                }
             }
+            document.getElementById('cs-count').addEventListener('change', updateCsDailyBanner);
+            wpmSlider.addEventListener('input', updateCsDailyBanner);
         }
     }
 })();
