@@ -18,7 +18,14 @@
      * бы мотивацию на средних уровнях метода.
      */
     function xpRateForSession(charsetSize, len) {
-        const charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
+        let charsetFactor = Math.min(1, Math.max(0.15, charsetSize / 15));
+        
+        // Когда появляются цифры (с 18-го уровня) и пунктуация,
+        // плавно поднимаем множитель до 1.25 (как в groups.js для mixed).
+        if (charsetSize >= 18) {
+            charsetFactor = 1.0 + 0.25 * ((charsetSize - 18) / (40 - 18));
+        }
+        
         const lengthFactor = len / 3;
         return Math.max(1.0, 2 * charsetFactor * lengthFactor);
     }
