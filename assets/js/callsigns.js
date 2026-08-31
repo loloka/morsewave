@@ -93,7 +93,11 @@
             return;
         }
 
-        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now(), history: [] };
+        let isDaily = new URLSearchParams(window.location.search).get('daily') === '1';
+        let speedMult = isDaily ? speedXpFactor(wpm) : 1;
+        let xpPerCallsign = Math.round(20 * speedMult);
+
+        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now(), history: [], xpPerCallsign, isDaily };
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -116,8 +120,8 @@
             session.correct++;
             feedbackEl.textContent = t('js.cs.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
-            session.dbXpEarned += 20;
-            Progress.addXp(20);
+            session.dbXpEarned += session.xpPerCallsign;
+            Progress.addXp(session.xpPerCallsign);
             Progress.incrementStat('callsignsCompleted', 1);
             postStat('total_callsigns', 1);
         } else {
@@ -125,7 +129,7 @@
             feedbackEl.className = 'feedback show bad';
         }
         
-        session.history.push({ e: expected, t: typed, xp: isCorrect ? 20 : 0 });
+        session.history.push({ e: expected, t: typed, xp: isCorrect ? session.xpPerCallsign : 0 });
 
         session.index++;
         answerInput.value = '';
@@ -144,8 +148,9 @@
 
         const total = session.items.length;
         const accuracy = total ? session.correct / total : 0;
-        let xpEarned = session.correct * 20;
-        let baseXP = xpEarned;
+        let xpEarned = session.correct * session.xpPerCallsign;
+        let baseXP = session.correct * 20;
+        let hasDailyBonus = false;
         
         abortCurrentSession();
 
@@ -176,6 +181,7 @@
                     } else {
                         if (Progress.completeDailyChallenge()) {
                             xpEarned += 50;
+                            hasDailyBonus = true;
                             dailyBonusMsg = t('js.groups.daily_bonus');
                         }
                     }
@@ -194,8 +200,15 @@
         brBox.id = 'cs-xp-breakdown';
         brBox.className = 'mt-2 muted mono text-center';
         brBox.style.fontSize = '14px';
-        let parts = [`${baseXP} (база)`];
-        if (xpEarned > baseXP) parts.push(`50 (бонус)`);
+        
+        let parts = [];
+        let speedMult = session.isDaily ? speedXpFactor(session.wpm) : 1;
+        if (speedMult > 1) {
+            parts.push(`${baseXP} &times; ${speedMult.toFixed(1)} (скорость)`);
+        } else {
+            parts.push(`${baseXP} (база)`);
+        }
+        if (hasDailyBonus) parts.push(`50 (бонус)`);
         brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
         grid.insertAdjacentElement('afterend', brBox);
 
