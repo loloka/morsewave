@@ -1379,7 +1379,7 @@
         const ch = pickInvasionLetterWeighted(pool);
         const wpm = parseInt(invasionWpmSlider.value, 10);
         const queueAhead = invasionEnemies.length;
-        let duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(wpm);
+        let duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(ch, wpm);
         
         const rand = Math.random();
         let type = 'normal';
