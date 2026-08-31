@@ -467,22 +467,16 @@
 
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
         let xpEarned = session.xpEarned;
+        let baseXP = Math.round(xpEarned);
+        let passBonus = 0;
         if (accuracy >= PASS_THRESHOLD) {
-            // Бонус за пройденную сессию пропорционален её длине: 30/40/50
-            // групп → +30/+40/+50 XP (раньше был плоский +30 — короткая
-            // сессия из 10 групп награждалась как длинная из 30, нелогично).
-            // Клампим на случай подмены значения select в DOM.
-            const bonus = Math.min(50, Math.max(0, Math.round(session.count) || 0));
-            xpEarned += bonus;
-            session.dbXpEarned += bonus;
-            Progress.addXp(bonus);
+            passBonus = Math.min(50, Math.max(0, Math.round(session.count) || 0));
+            xpEarned += passBonus;
+            session.dbXpEarned += passBonus;
+            Progress.addXp(passBonus);
         }
 
         abortCurrentSession();
-
-        document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
-        document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
-        document.getElementById('result-xp').textContent = xpEarned;
 
         let dailyBonusMsg = '';
         let dailyBonusFail = false;
@@ -501,12 +495,31 @@
                     if (DailyChallenge.isDoneToday()) {
                         dailyBonusMsg = t('js.groups.daily_already');
                     } else {
-                        Progress.completeDailyChallenge();
-                        dailyBonusMsg = t('js.groups.daily_bonus');
+                        if (Progress.completeDailyChallenge()) {
+                            xpEarned += 50;
+                            dailyBonusMsg = t('js.groups.daily_bonus');
+                        }
                     }
                 }
             }
         }
+
+        document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
+        document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
+        document.getElementById('result-xp').textContent = xpEarned;
+
+        const grid = document.querySelector('#result-panel .grid.grid-3');
+        let oldBr = document.getElementById('koch-xp-breakdown');
+        if (oldBr) oldBr.remove();
+        let brBox = document.createElement('div');
+        brBox.id = 'koch-xp-breakdown';
+        brBox.className = 'mt-2 muted mono text-center';
+        brBox.style.fontSize = '14px';
+        let parts = [`${baseXP} (база)`];
+        if (passBonus > 0) parts.push(`${passBonus} (бонус)`);
+        if (xpEarned > baseXP + passBonus) parts.push(`50 (задание дня)`);
+        brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
+        grid.insertAdjacentElement('afterend', brBox);
 
         // Clean up previous daily note if any
         const oldNote = document.getElementById('koch-daily-note');

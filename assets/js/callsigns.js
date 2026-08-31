@@ -144,11 +144,8 @@
 
         const total = session.items.length;
         const accuracy = total ? session.correct / total : 0;
-        const xpEarned = session.correct * 20;
-
-        document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
-        document.getElementById('result-correct').textContent = `${session.correct}/${total}`;
-        document.getElementById('result-xp').textContent = xpEarned;
+        let xpEarned = session.correct * 20;
+        let baseXP = xpEarned;
         
         abortCurrentSession();
 
@@ -177,12 +174,30 @@
                     if (DailyChallenge.isDoneToday()) {
                         dailyBonusMsg = t('js.groups.daily_already');
                     } else {
-                        Progress.completeDailyChallenge();
-                        dailyBonusMsg = t('js.groups.daily_bonus');
+                        if (Progress.completeDailyChallenge()) {
+                            xpEarned += 50;
+                            dailyBonusMsg = t('js.groups.daily_bonus');
+                        }
                     }
                 }
             }
         }
+
+        document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
+        document.getElementById('result-correct').textContent = `${session.correct}/${total}`;
+        document.getElementById('result-xp').textContent = xpEarned;
+
+        const grid = resultPanel.querySelector('.grid');
+        let oldBr = document.getElementById('cs-xp-breakdown');
+        if (oldBr) oldBr.remove();
+        let brBox = document.createElement('div');
+        brBox.id = 'cs-xp-breakdown';
+        brBox.className = 'mt-2 muted mono text-center';
+        brBox.style.fontSize = '14px';
+        let parts = [`${baseXP} (база)`];
+        if (xpEarned > baseXP) parts.push(`50 (бонус)`);
+        brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
+        grid.insertAdjacentElement('afterend', brBox);
 
         // Clean up previous daily note if any
         const oldNote = document.getElementById('cs-daily-note');
@@ -193,10 +208,7 @@
             note.id = 'cs-daily-note';
             note.className = (dailyBonusFail ? 'feedback show bad mt-2' : 'feedback show ok mt-2') + ' js-result-note';
             note.textContent = (dailyBonusFail ? t('js.groups.daily_note_fail_prefix') : t('js.groups.daily_note_ok_prefix')) + dailyBonusMsg;
-            
-            // Insert note after the grid
-            const grid = resultPanel.querySelector('.grid');
-            grid.insertAdjacentElement('afterend', note);
+            brBox.insertAdjacentElement('afterend', note);
         }
 
         Progress.incrementStat('sessionsCompleted', 1);

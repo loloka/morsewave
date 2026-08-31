@@ -808,6 +808,28 @@
         document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
         document.getElementById('result-xp').textContent = xpEarned;
 
+        // XP Breakdown
+        const grid = document.querySelector('#result-panel .grid');
+        let oldBr = document.getElementById('groups-xp-breakdown');
+        if (oldBr) oldBr.remove();
+        let brBox = document.createElement('div');
+        brBox.id = 'groups-xp-breakdown';
+        brBox.className = 'mt-2 muted mono text-center';
+        brBox.style.fontSize = '14px';
+        let parts = [];
+        let baseXP = Math.round(session.xpEarned);
+        let speedMult = isDailyChallenge ? speedXpFactor(session.wpm) : 1;
+        if (speedMult > 1) {
+            parts.push(`${Math.round(baseXP / speedMult)} &times; ${speedMult.toFixed(1)} (скорость)`);
+        } else {
+            parts.push(`${baseXP} (база)`);
+        }
+        if (xpEarned > baseXP) {
+            parts.push(`50 (бонус)`);
+        }
+        brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
+        grid.insertAdjacentElement('afterend', brBox);
+
         Progress.incrementStat('sessionsCompleted', 1);
         Progress.markDailyActivity();
         postStat('total_sessions', 1);
