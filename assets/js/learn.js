@@ -1025,8 +1025,9 @@
     let invasionParticles = [];
     let invasionLanePool = [];
     let invasionEnemySeq = 0;
-    let invasionAudioChain = Promise.resolve(); invasionAudioQueueEndTime = performance.now();
-    let invasionAudioQueueEndTime = 0;
+        let invasionAudioQueueEndTime = 0;
+    let invasionAudioChain = Promise.resolve();
+    invasionAudioQueueEndTime = performance.now();
     let invasionRafId = null;
     let invasionWaveStart = 0;
     let invasionCelebrating = false;
