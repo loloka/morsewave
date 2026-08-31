@@ -14,7 +14,28 @@
     const wpmSlider = document.getElementById('cs-wpm');
     const wpmValue = document.getElementById('cs-wpm-value');
     const wpmCpm = document.getElementById('cs-wpm-cpm');
-    wpmSlider.addEventListener('input', () => { wpmValue.textContent = wpmSlider.value; wpmCpm.textContent = cpmHintText(wpmSlider.value); });
+    const savedWpm = localStorage.getItem('morse_cs_wpm');
+    if (savedWpm) {
+        wpmSlider.value = savedWpm;
+        wpmValue.textContent = savedWpm;
+        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(savedWpm);
+    }
+    wpmSlider.addEventListener('input', () => { 
+        wpmValue.textContent = wpmSlider.value; 
+        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(wpmSlider.value); 
+        localStorage.setItem('morse_cs_wpm', wpmSlider.value);
+    });
+
+    const csCountEl = document.getElementById('cs-count');
+    const savedCount = localStorage.getItem('morse_cs_count');
+    if (savedCount && csCountEl) {
+        csCountEl.value = savedCount;
+    }
+    if (csCountEl) {
+        csCountEl.addEventListener('change', () => {
+            localStorage.setItem('morse_cs_count', csCountEl.value);
+        });
+    }
 
     let session = null;
     
