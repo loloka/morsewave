@@ -1033,7 +1033,6 @@
     answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
 
     /* ---------- Задание дня (пришли по ссылке с главной) ---------- */
-    let dailyRequired = null; // { len, count, wpm } — что реально нужно пройти
 
     (function applyDailyParams() {
         const params = new URLSearchParams(location.search);
