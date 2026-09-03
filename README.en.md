@@ -229,17 +229,19 @@ site isn't enough.
   `morse-data.js`) are a phonetic memory aid tied to Russian sounds, so
   they're deliberately disabled in the English interface rather than
   translated word-for-word.
-- **Cyrillic Morse alphabet** (`learn.php`, v2.51) — a separate 33-letter
-  table (`CYRILLIC_CODE`/`CYRILLIC_TO_CHAR` in `morse-data.js`), deliberately
-  *not* merged with the Latin `MORSE_CODE`/`MORSE_TO_CHAR`: several Cyrillic
-  letters share the exact same dot/dash code as a "similar-sounding" Latin
-  letter (by design of the historical alphabet), so a merged reverse lookup
-  would make keyed decoding ambiguous. `TelegraphKey` (`input.js`) takes the
-  decode table as an option/`setTable()` call instead of a hardcoded global.
-  Progress for Cyrillic letters is stored with an `RU_` prefix
-  (`learnedLetters`), so Latin `A` and Cyrillic `А` never collide — and the
-  "full alphabet" achievement counts strictly against the Latin+digit set
-  (`progress.js`), unaffected by Cyrillic progress living in the same array.
+- **Cyrillic Morse alphabet** (`learn.php`, v2.51) — a separate 33-code
+  table (`CYRILLIC_CODE`/`CYRILLIC_TO_CHAR` in `morse-data.js`, with 31 learnable
+  letters — `Ъ` and `Ё` are omitted from training to avoid confusion with `Е` and
+  keep drills practical), deliberately *not* merged with the Latin
+  `MORSE_CODE`/`MORSE_TO_CHAR`: several Cyrillic letters share the exact same
+  dot/dash code as a "similar-sounding" Latin letter (by design of the historical
+  alphabet), so a merged reverse lookup would make keyed decoding ambiguous.
+  `TelegraphKey` (`input.js`) takes the decode table as an option/`setTable()`
+  call instead of a hardcoded global. Progress for Cyrillic letters is stored
+  with an `RU_` prefix (`learnedLetters`), so Latin `A` and Cyrillic `А` never
+  collide — and the "full alphabet" achievement counts strictly against the
+  Latin+digit set (`progress.js`), unaffected by Cyrillic progress living in
+  the same array.
 
 ## Changelog
 
