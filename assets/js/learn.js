@@ -297,11 +297,20 @@
         onPress: (isDown) => { if (isDown) lamp.on(); else lamp.off(); },
     });
 
+    const savedLearnWpm = localStorage.getItem('morse_learn_wpm');
+    if (savedLearnWpm) {
+        wpmSlider.value = savedLearnWpm;
+        wpmValue.textContent = savedLearnWpm;
+        wpmCpm.textContent = cpmHintText(savedLearnWpm);
+    }
+    
     wpmSlider.addEventListener('input', () => {
         wpmValue.textContent = wpmSlider.value;
         wpmCpm.textContent = cpmHintText(wpmSlider.value);
         key.setWpm(currentWpm());
+        localStorage.setItem('morse_learn_wpm', wpmSlider.value);
     });
+    if (savedLearnWpm) key.setWpm(currentWpm());
     playBtn.addEventListener('click', playCurrent);
 
     renderTiles();
@@ -583,7 +592,17 @@
         if (tile) { e.preventDefault(); handleRecognizeAnswer(ch, tile); }
     });
 
-    recWpmSlider.addEventListener('input', () => { recWpmValue.textContent = recWpmSlider.value; recWpmCpm.textContent = cpmHintText(recWpmSlider.value); });
+    const savedRecWpm = localStorage.getItem('morse_rec_wpm');
+    if (savedRecWpm) {
+        recWpmSlider.value = savedRecWpm;
+        recWpmValue.textContent = savedRecWpm;
+        recWpmCpm.textContent = cpmHintText(savedRecWpm);
+    }
+    recWpmSlider.addEventListener('input', () => { 
+        recWpmValue.textContent = recWpmSlider.value; 
+        recWpmCpm.textContent = cpmHintText(recWpmSlider.value); 
+        localStorage.setItem('morse_rec_wpm', recWpmSlider.value);
+    });
     recStartBtn.addEventListener('click', () => {
         if (recRunning) return;
         haltRecognize(); // добить хвосты предыдущего запуска, если они ещё живы
@@ -933,11 +952,20 @@
         onLetter: handleRhythmLetter,
     });
 
+    const savedRhythmWpm = localStorage.getItem('morse_rhythm_wpm');
+    if (savedRhythmWpm) {
+        rhythmWpmSlider.value = savedRhythmWpm;
+        rhythmWpmValue.textContent = savedRhythmWpm;
+        rhythmWpmCpm.textContent = cpmHintText(savedRhythmWpm);
+    }
+
     rhythmWpmSlider.addEventListener('input', () => {
         rhythmWpmValue.textContent = rhythmWpmSlider.value;
         rhythmWpmCpm.textContent = cpmHintText(rhythmWpmSlider.value);
         rhythmKey.setWpm(currentRhythmWpm());
+        localStorage.setItem('morse_rhythm_wpm', rhythmWpmSlider.value);
     });
+    if (savedRhythmWpm) rhythmKey.setWpm(currentRhythmWpm());
 
     /* ===================== РЕЖИМ: ВТОРЖЕНИЕ (BETA) =====================
        Tower-defense мини-игра поверх уже готового цикла "услышал букву на
