@@ -35,12 +35,54 @@ include __DIR__ . '/includes/header.php';
 
         <div class="hero-promo">
             <div class="card promo-card">
-                <div class="promo-card-emoji" aria-hidden="true">👾</div>
+                <!-- Интерактивная дуэль-шапка: монстр против боевой лопаты -->
+                <div class="promo-card-arena">
+                    <div class="promo-fighter monster">
+                        <div class="promo-fighter-sprite" aria-hidden="true">👾</div>
+                        <div class="promo-fighter-info">
+                            <span class="promo-fighter-name"><?= t('index.invasion_enemy_role') ?></span>
+                            <span class="promo-fighter-title"><?= t('index.invasion_enemy_name') ?></span>
+                        </div>
+                    </div>
+                    <div class="promo-arena-vs">
+                        <span class="promo-arena-code" aria-hidden="true">· · − ·</span>
+                        <span class="promo-arena-badge">VS</span>
+                    </div>
+                    <div class="promo-fighter shovel">
+                        <div class="promo-fighter-sprite" aria-hidden="true">
+                            <svg viewBox="0 0 32 32" width="30" height="30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M13 3 C13 1.5, 19 1.5, 19 3 L19 8 C19 9.5, 13 9.5, 13 8 Z" stroke="#e0473b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                                <line x1="16" y1="8" x2="16" y2="19" stroke="#c98a3e" stroke-width="2.5" stroke-linecap="round"/>
+                                <rect x="14" y="18" width="4" height="2.5" rx="0.5" fill="#9aa0a6"/>
+                                <path d="M11 20.5 L21 20.5 L19.5 26.5 L16 30 L12.5 26.5 Z" fill="#d8dee3" stroke="#6b7075" stroke-width="1.2"/>
+                                <path d="M14 22 L15.5 28" stroke="#ffffff" stroke-width="1" stroke-linecap="round" opacity="0.8"/>
+                            </svg>
+                        </div>
+                        <div class="promo-fighter-info">
+                            <span class="promo-fighter-name"><?= t('index.invasion_weapon_role') ?></span>
+                            <span class="promo-fighter-title"><?= t('index.invasion_weapon_name') ?></span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="promo-card-body">
-                    <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span></div>
-                    <h3 class="mt-0"><?= t('index.invasion_title') ?></h3>
-                    <p class="muted"><?= t('index.invasion_text') ?></p>
-                    <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
+                    <div class="promo-card-top">
+                        <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span> <span class="badge-v">v2.86</span></div>
+                        <span class="promo-card-stages-badge"><?= t('index.invasion_badge_stages') ?></span>
+                    </div>
+                    <h3 class="promo-card-title"><?= t('index.invasion_title') ?></h3>
+                    <p class="promo-card-desc"><?= t('index.invasion_text') ?></p>
+
+                    <!-- Отдельный абзац с подсветкой исправлений -->
+                    <div class="promo-card-highlight">
+                        <span class="highlight-icon" aria-hidden="true">⚡</span>
+                        <span><?= t('index.invasion_highlight') ?></span>
+                    </div>
+
+                    <div class="promo-card-footer">
+                        <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
+                        <span class="promo-weapon-tag"><?= t('index.invasion_weapon_footer') ?></span>
+                    </div>
                 </div>
             </div>
         </div>

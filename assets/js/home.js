@@ -1,32 +1,31 @@
 (async function () {
     // Декоративная, но честная демонстрация сигнальной линии
-    const heroLine = new SignalLine(document.getElementById('hero-signal'), 24);
-    const demoAudio = new MorseAudio({ wpm: 18, farnsworthWpm: 12 });
-    const demoText = 'CQ CQ MORSEWAVE';
+    const heroLine = new SignalLine(document.getElementById('hero-signal'), 36);
+    const demoText = 'CQ CQ MORSEWAVE ';
 
-    async function loopDemo() {
-        await demoAudio.play(demoText, {
-            onSymbol: ({ symbol }) => heroLine.pulse(symbol === '.' ? 'dot' : 'dash'),
-        });
-        setTimeout(loopDemo, 1200);
-    }
     // Звук не включаем автоматически (браузеры блокируют autoplay) —
-    // просто анимируем визуально через видимые импульсы по таймеру.
-    (function visualOnlyLoop() {
-        const codeStream = demoText.toUpperCase().split('').filter(c => c !== ' ').join('');
-        let i = 0;
-        setInterval(() => {
-            const ch = codeStream[i % codeStream.length];
-            const code = MORSE_CODE[ch];
-            if (code) {
-                let d = 0;
-                for (const sym of code) {
-                    setTimeout(() => heroLine.pulse(sym === '.' ? 'dot' : 'dash'), d);
-                    d += sym === '.' ? 140 : 320;
-                }
+    // анимируем визуально через последовательные импульсы по чистому таймингу Морзе,
+    // без наложения таймеров и паразитных скачков макета.
+    (async function visualOnlyLoop() {
+        let charIndex = 0;
+        while (true) {
+            const ch = demoText[charIndex % demoText.length];
+            charIndex++;
+            if (ch === ' ') {
+                await new Promise((r) => setTimeout(r, 550));
+                continue;
             }
-            i++;
-        }, 420);
+            const code = (typeof MORSE_CODE !== 'undefined') ? MORSE_CODE[ch] : null;
+            if (code) {
+                for (let s = 0; s < code.length; s++) {
+                    const sym = code[s];
+                    const dur = sym === '.' ? 110 : 260;
+                    heroLine.pulse(sym === '.' ? 'dot' : 'dash', dur);
+                    await new Promise((r) => setTimeout(r, dur + 80));
+                }
+                await new Promise((r) => setTimeout(r, 240));
+            }
+        }
     })();
 
     // Счётчик выученных символов
