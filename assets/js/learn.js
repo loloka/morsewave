@@ -2108,6 +2108,7 @@
         let sessionHpBonus = 0;
         let sessionSpeedBonus = 0;
         let sessionDailyBonus = 0;
+        let sessionFirstWinBonus = 0;
 
         if (won) {
             // Разовый бонус за волну целиком — НЕ за каждое попадание (см.
@@ -2127,7 +2128,14 @@
             Progress.incrementStat('invasionWavesCompleted', 1);
             Progress.markDailyActivity();
 
-            // Задание дня для Вторжения: если сегодняшнее задание — Вторжение,
+            // 1. Постоянный ежедневный бонус за первую победу дня во Вторжении (+50 XP)
+            if (!Progress.isInvasionDailyWinDone()) {
+                if (Progress.completeInvasionDailyWin()) {
+                    sessionFirstWinBonus = 50;
+                }
+            }
+
+            // 2. Задание дня для Вторжения: если сегодняшнее задание — Вторжение,
             // начисляем бонус +50 XP независимо от наличия ?daily=1 в URL!
             const todayTask = DailyChallenge.forToday();
             if (todayTask && todayTask.type === 'invasion') {
@@ -2164,7 +2172,8 @@
         showInvasionResults(won, {
             hpBonus: sessionHpBonus,
             speedBonus: sessionSpeedBonus,
-            dailyBonus: sessionDailyBonus
+            dailyBonus: sessionDailyBonus,
+            firstWinBonus: sessionFirstWinBonus,
         });
     }
 
@@ -2174,7 +2183,8 @@
         const hpBonus = bonuses.hpBonus || 0;
         const speedBonus = bonuses.speedBonus || 0;
         const dailyBonus = bonuses.dailyBonus || 0;
-        const totalXp = invasionSessionKillsXp + invasionSessionBossXp + hpBonus + speedBonus + dailyBonus;
+        const firstWinBonus = bonuses.firstWinBonus || 0;
+        const totalXp = invasionSessionKillsXp + invasionSessionBossXp + hpBonus + speedBonus + dailyBonus + firstWinBonus;
 
         const accuracy = invasionSessionTotalHits > 0
             ? Math.round((invasionSessionCorrectHits / invasionSessionTotalHits) * 100)
@@ -2213,6 +2223,7 @@
             if (invasionSessionBossXp > 0) parts.push(t('js.learn.invasion_xp_bosses', { '{xp}': invasionSessionBossXp }));
             if (hpBonus > 0) parts.push(t('js.learn.invasion_xp_hp', { '{xp}': hpBonus }));
             if (speedBonus > 0) parts.push(t('js.learn.invasion_xp_speed', { '{xp}': speedBonus }));
+            if (firstWinBonus > 0) parts.push(t('js.learn.invasion_xp_first_win', { '{xp}': firstWinBonus }));
             if (dailyBonus > 0) parts.push(t('js.learn.invasion_xp_daily', { '{xp}': dailyBonus }));
 
             if (parts.length > 0) {
@@ -2224,27 +2235,50 @@
 
         if (invasionDailyNoteEl) {
             const todayTask = DailyChallenge.forToday();
-            if (todayTask && todayTask.type === 'invasion') {
-                invasionDailyNoteEl.style.display = 'block';
+            const isDailyInvasion = todayTask && todayTask.type === 'invasion';
+            const notes = [];
+
+            if (firstWinBonus > 0) {
+                notes.push({ text: t('js.learn.invasion_first_win_done'), type: 'ok' });
+            } else if (won && Progress.isInvasionDailyWinDone()) {
+                notes.push({ text: t('js.learn.invasion_first_win_already'), type: 'info' });
+            }
+
+            if (isDailyInvasion) {
                 if (dailyBonus > 0) {
-                    invasionDailyNoteEl.className = 'feedback show ok mt-2';
-                    invasionDailyNoteEl.textContent = t('js.learn.invasion_daily_win');
+                    notes.push({ text: t('js.learn.invasion_daily_win'), type: 'ok' });
                 } else if (won && DailyChallenge.isDoneToday()) {
-                    invasionDailyNoteEl.className = 'feedback show info mt-2';
-                    invasionDailyNoteEl.textContent = t('js.learn.invasion_daily_already');
+                    notes.push({ text: t('js.learn.invasion_daily_already'), type: 'info' });
                 } else if (!won) {
-                    invasionDailyNoteEl.className = 'feedback show bad mt-2';
-                    invasionDailyNoteEl.textContent = t('js.learn.invasion_daily_lose');
+                    notes.push({ text: t('js.learn.invasion_daily_lose'), type: 'bad' });
                 }
+            }
+
+            if (notes.length > 0) {
+                invasionDailyNoteEl.style.display = 'block';
+                const hasOk = notes.some(n => n.type === 'ok');
+                const hasBad = notes.some(n => n.type === 'bad');
+                invasionDailyNoteEl.className = 'feedback show ' + (hasOk ? 'ok' : (hasBad ? 'bad' : 'info')) + ' mt-2';
+                invasionDailyNoteEl.innerHTML = notes.map(n => `<div>${n.text}</div>`).join('');
             } else {
                 invasionDailyNoteEl.style.display = 'none';
             }
         }
 
         const b = document.getElementById('invasion-daily-banner');
-        if (b && dailyBonus > 0) {
-            b.className = 'feedback show ok mt-2';
-            b.textContent = t('js.learn.daily_done_bonus');
+        if (b) {
+            const todayTask = DailyChallenge.forToday();
+            if (todayTask && todayTask.type === 'invasion') {
+                if (dailyBonus > 0 || DailyChallenge.isDoneToday()) {
+                    b.className = 'feedback show ok mt-2';
+                    b.textContent = t('js.learn.daily_done_bonus');
+                }
+            } else {
+                if (firstWinBonus > 0 || Progress.isInvasionDailyWinDone()) {
+                    b.className = 'feedback show ok mt-2';
+                    b.textContent = t('js.learn.invasion_first_win_already');
+                }
+            }
         }
 
         invasionResultPanelEl.style.display = 'block';
@@ -2506,20 +2540,31 @@
     }
 
     function checkInvasionDailyBanner() {
+        if (!invasionModeEl) return;
         const task = DailyChallenge.forToday();
-        if (!task || task.type !== 'invasion' || !invasionModeEl) return;
+        const isDailyInvasion = task && task.type === 'invasion';
         let b = document.getElementById('invasion-daily-banner');
         if (!b) {
             b = document.createElement('div');
             b.id = 'invasion-daily-banner';
             invasionModeEl.insertBefore(b, invasionModeEl.firstChild);
         }
-        if (DailyChallenge.isDoneToday()) {
-            b.className = 'feedback show ok mt-2';
-            b.textContent = t('js.learn.daily_already_done');
+        if (isDailyInvasion) {
+            if (DailyChallenge.isDoneToday()) {
+                b.className = 'feedback show ok mt-2';
+                b.textContent = t('js.learn.daily_already_done');
+            } else {
+                b.className = 'feedback show info mt-2';
+                b.textContent = '🎯 ' + t('js.daily.invasion_title') + ': ' + t('js.daily.invasion_desc');
+            }
         } else {
-            b.className = 'feedback show info mt-2';
-            b.textContent = '🎯 ' + t('js.daily.invasion_title') + ': ' + t('js.daily.invasion_desc');
+            if (Progress.isInvasionDailyWinDone()) {
+                b.className = 'feedback show ok mt-2';
+                b.textContent = t('js.learn.invasion_first_win_already');
+            } else {
+                b.className = 'feedback show info mt-2';
+                b.textContent = '🌟 ' + t('js.learn.invasion_first_win_title') + ': ' + t('js.learn.invasion_first_win_desc');
+            }
         }
     }
 
@@ -2575,11 +2620,13 @@
         const wantRecognize = params.get('mode') === 'recognize';
         const wantInvasion = params.get('mode') === 'invasion';
 
-        if (task.type === 'invasion') {
+        if (task && task.type === 'invasion') {
+            checkInvasionDailyBanner();
+        } else if (invasionModeEl && invasionModeEl.style.display !== 'none') {
             checkInvasionDailyBanner();
         }
 
-        if (!wantDaily) return;
+        if (!wantDaily || !task) return;
         
         if (task.type === 'learn' && !wantRecognize && !wantInvasion) {
             dailyTask = task;

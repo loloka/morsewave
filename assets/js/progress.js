@@ -137,6 +137,7 @@ const Progress = (() => {
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
+        invasionDailyWinDate: null,
     });
 
     function load() {
@@ -402,6 +403,7 @@ const Progress = (() => {
         // Более поздняя дата и тут — чтобы бонус задания дня нельзя было
         // получить второй раз, залогинившись с другого устройства.
         merged.dailyChallengeDate = laterDate(local.dailyChallengeDate, server.dailyChallengeDate);
+        merged.invasionDailyWinDate = laterDate(local.invasionDailyWinDate, server.invasionDailyWinDate);
 
         return merged;
     }
@@ -683,6 +685,36 @@ const Progress = (() => {
         return true;
     }
 
+    /**
+     * Атомарно засчитать ежедневный бонус за первую победу во Вторжении: +50 XP
+     * и отметка сегодняшней даты invasionDailyWinDate в одном load→save.
+     * Возвращает true, если бонус реально начислен сейчас.
+     */
+    function completeInvasionDailyWin() {
+        const state = load();
+        if (state.invasionDailyWinDate === today()) return false;
+        state.xp = Math.round(state.xp + 50);
+        state.invasionDailyWinDate = today();
+        save(state);
+        window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
+        checkAchievements();
+        refreshPublishedStats(state);
+        pushFullProgress();
+
+        fetch('api/log_xp.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: 50, source: 'invasion_first_win' })
+        }).catch(() => {});
+
+        return true;
+    }
+
+    function isInvasionDailyWinDone() {
+        const state = load();
+        return state.invasionDailyWinDate === today();
+    }
+
     function incrementStat(field, by = 1) {
         const state = load();
         state.stats[field] = (state.stats[field] || 0) + by;
@@ -864,6 +896,7 @@ const Progress = (() => {
         kochLetterScore, recordKochAttempt,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
+        completeInvasionDailyWin, isInvasionDailyWinDone,
         mergeFromServer, syncWithServer, pushNow,
         lastSyncAt, exportBackup, importBackup,
         fetchDashboard,
