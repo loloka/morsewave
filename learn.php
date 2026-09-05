@@ -250,6 +250,46 @@ include __DIR__ . '/includes/header.php';
 
         <div class="feedback mt-2" id="invasion-feedback"></div>
 
+        <!-- Панель подробного отчёта результатов боя (как в других режимах) -->
+        <div class="card mt-2" id="invasion-result-panel" style="display:none; background:var(--surface-2); border:1px solid var(--border);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <h3 id="invasion-result-title" class="mt-0" style="margin-bottom:0; font-size:18px;"><?= t('learn.invasion_result_title_win') ?></h3>
+                <span class="badge" id="invasion-result-badge"><?= t('learn.invasion_badge_win') ?></span>
+            </div>
+            
+            <div class="grid grid-4 mt-2" id="invasion-result-grid">
+                <div class="stat">
+                    <span class="value" id="invasion-result-accuracy">0%</span>
+                    <span class="label"><?= mw_icon('check', 12) ?> <?= t('learn.invasion_stat_accuracy') ?></span>
+                </div>
+                <div class="stat">
+                    <span class="value" id="invasion-result-kills">0</span>
+                    <span class="label">👾 <?= t('learn.invasion_stat_kills') ?></span>
+                </div>
+                <div class="stat">
+                    <span class="value" id="invasion-result-hp">100/100</span>
+                    <span class="label">💖 <?= t('learn.invasion_base_hp') ?></span>
+                </div>
+                <div class="stat">
+                    <span class="value" id="invasion-result-xp" style="color:var(--primary); font-weight:bold;">+0</span>
+                    <span class="label">⭐ <?= t('learn.invasion_stat_xp') ?></span>
+                </div>
+            </div>
+
+            <!-- Детальный разбор опыта (XP Breakdown) -->
+            <div class="mt-2 p-2" id="invasion-xp-breakdown-box" style="background:var(--bg); border-radius:6px; border:1px solid var(--border);">
+                <div class="muted mono text-center" style="font-size:11px; margin-bottom:4px; letter-spacing:0.5px;"><?= t('learn.invasion_breakdown_label') ?></div>
+                <div id="invasion-xp-breakdown" class="mono text-center" style="font-size:13px; line-height:1.4;"></div>
+            </div>
+
+            <!-- Блок задания дня -->
+            <div id="invasion-daily-note" class="mt-2" style="display:none;"></div>
+
+            <div class="text-center mt-2">
+                <button class="btn btn-primary btn-sm" id="invasion-restart-btn"><?= t('learn.invasion_restart_btn') ?></button>
+            </div>
+        </div>
+
         <div class="invasion-keyboard mt-2" id="invasion-grid"></div>
         <p class="muted mt-1" style="font-size:11px;"><?= t('learn.invasion_kbd_hint') ?></p>
     </div>
