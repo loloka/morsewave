@@ -88,14 +88,53 @@
     let qrqStopRequested = false;
     let qrqSessionActive = false;
     let qrqAudio = null;
+    let currentAudio = null;
 
     const bufferCheckbox = document.getElementById('groups-buffer-enabled');
     const bufferInfo = document.getElementById('groups-buffer-info');
     const bufferTooltip = document.getElementById('groups-buffer-tooltip');
+    const bufferPanel = document.getElementById('groups-buffer-panel');
+    let selectedBufferDepth = localStorage.getItem('morse_groups_buffer_depth') || 'all';
+
+    function updateBufferPanelVisibility() {
+        if (bufferPanel) {
+            bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
+        }
+    }
+
+    if (bufferCheckbox) {
+        const savedBufferEnabled = localStorage.getItem('morse_groups_buffer_enabled');
+        if (savedBufferEnabled !== null) {
+            bufferCheckbox.checked = (savedBufferEnabled === 'true');
+        }
+        updateBufferPanelVisibility();
+        bufferCheckbox.addEventListener('change', () => {
+            localStorage.setItem('morse_groups_buffer_enabled', bufferCheckbox.checked);
+            updateBufferPanelVisibility();
+        });
+    }
+
+    document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
+        if (chip.dataset.depth === selectedBufferDepth) {
+            document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        }
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedBufferDepth = chip.dataset.depth;
+            localStorage.setItem('morse_groups_buffer_depth', selectedBufferDepth);
+        });
+    });
+
     if (bufferInfo && bufferTooltip) {
         bufferInfo.addEventListener('click', (e) => {
+            e.preventDefault();
             e.stopPropagation();
             bufferTooltip.style.display = bufferTooltip.style.display === 'none' ? 'block' : 'none';
+        });
+        bufferTooltip.addEventListener('click', (e) => {
+            e.stopPropagation();
         });
         document.addEventListener('click', () => { bufferTooltip.style.display = 'none'; });
     }
@@ -170,12 +209,19 @@
         fwValue.style.display = on ? 'inline-block' : 'none';
         localStorage.setItem('morse_groups_fw_enabled', on);
     });
-    document.getElementById('groups-farnsworth-info').addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const box = document.getElementById('groups-farnsworth-tooltip');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    });
+    const fwInfo = document.getElementById('groups-farnsworth-info');
+    const fwTooltip = document.getElementById('groups-farnsworth-tooltip');
+    if (fwInfo && fwTooltip) {
+        fwInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fwTooltip.style.display = fwTooltip.style.display === 'none' ? 'block' : 'none';
+        });
+        fwTooltip.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+        document.addEventListener('click', () => { fwTooltip.style.display = 'none'; });
+    }
 
     document.querySelectorAll('#length-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -317,11 +363,14 @@
 
     function getSelectedPairChars() {
         if (selectedPairKey === 'custom') {
-            const customVal = document.getElementById('custom-pair-input')?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
-            if (customVal.length >= 2) {
-                return { a: customVal[0], b: customVal[1] };
+            const inputA = document.getElementById('custom-pair-a');
+            const inputB = document.getElementById('custom-pair-b');
+            const valA = inputA?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
+            const valB = inputB?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
+            if (valA && valB) {
+                return { a: valA[0], b: valB[0] };
             }
-            return { a: 'S', b: 'H' };
+            return { a: valA[0] || 'S', b: valB[0] || 'H' };
         }
         const mapping = {
             'SH': { a: 'S', b: 'H' },
@@ -372,10 +421,16 @@
         document.querySelectorAll('#pairs-chips .chip').forEach(c => {
             c.classList.toggle('active', c.dataset.pair === pairKey);
         });
-        const customInput = document.getElementById('custom-pair-input');
-        if (customInput) {
-            customInput.style.display = (pairKey === 'custom') ? 'block' : 'none';
-            if (pairKey === 'custom' && a && b) customInput.value = `${a}${b}`;
+        const customWrap = document.getElementById('custom-pair-wrap');
+        const customA = document.getElementById('custom-pair-a');
+        const customB = document.getElementById('custom-pair-b');
+        if (customWrap) {
+            customWrap.style.display = (pairKey === 'custom') ? 'block' : 'none';
+            if (pairKey === 'custom') {
+                if (a && customA) customA.value = a.toUpperCase();
+                if (b && customB) customB.value = b.toUpperCase();
+                if (!a && customA && !customA.value) customA.focus();
+            }
         }
         const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
         selectedPairStage = pt[pairKey]?.stage || 1;
@@ -384,26 +439,31 @@
 
     function checkPairRecommendation() {
         const recBox = document.getElementById('pairs-smart-recommendation');
-        if (!recBox || typeof Progress.getRecommendedPair !== 'function') return;
+        const infoBox = document.getElementById('pairs-smart-info');
+        if (typeof Progress.getRecommendedPair !== 'function') return;
         const rec = Progress.getRecommendedPair();
         if (rec) {
-            document.getElementById('pairs-rec-name').textContent = `${rec.a} / ${rec.b}`;
-            const reasonEl = document.getElementById('pairs-rec-reason');
-            if (reasonEl) {
-                reasonEl.textContent = rec.reason === 'confusion'
-                    ? `(${t('groups.pairs_recommendation_reason')}: ${rec.count} ${rec.count === 1 ? 'ошибка' : 'ошибок'})`
-                    : `(${t('groups.pairs_recommendation_reason')})`;
-            }
-            recBox.style.display = 'block';
+            if (recBox) {
+                document.getElementById('pairs-rec-name').textContent = `${rec.a} / ${rec.b}`;
+                const reasonEl = document.getElementById('pairs-rec-reason');
+                if (reasonEl) {
+                    reasonEl.textContent = rec.reason === 'confusion'
+                        ? `(${t('groups.pairs_recommendation_reason')}: ${rec.count} ${rec.count === 1 ? 'ошибка' : 'ошибок'})`
+                        : `(${t('groups.pairs_recommendation_reason')})`;
+                }
+                recBox.style.display = 'block';
 
-            const applyBtn = document.getElementById('pairs-apply-rec-btn');
-            if (applyBtn) {
-                applyBtn.onclick = () => {
-                    selectPair(rec.pair, rec.a, rec.b);
-                };
+                const applyBtn = document.getElementById('pairs-apply-rec-btn');
+                if (applyBtn) {
+                    applyBtn.onclick = () => {
+                        selectPair(rec.pair, rec.a, rec.b);
+                    };
+                }
             }
+            if (infoBox) infoBox.style.display = 'none';
         } else {
-            recBox.style.display = 'none';
+            if (recBox) recBox.style.display = 'none';
+            if (infoBox) infoBox.style.display = 'block';
         }
     }
 
@@ -466,7 +526,15 @@
         replayBtn.disabled = true;
         signalLine.clear();
 
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+
         const isBuffer = !!session?.isBufferMode;
+        const bufferDepth = session?.bufferDepth || 'all';
+        let bufferUnlocked = false;
+
         if (isBuffer && answerInput) {
             answerInput.disabled = true;
             answerInput.placeholder = t('groups.buffer_listening');
@@ -478,10 +546,21 @@
         try {
             // В экзамене — фиксированный тайминг эталонной записи, а не
             // wpm-слайдер (см. EXAM_CHAR_WPM выше).
-            const audio = session.isExam
+            currentAudio = session.isExam
                 ? new MorseAudio({ wpm: EXAM_CHAR_WPM, letterGapUnits: EXAM_LETTER_GAP_UNITS })
                 : new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
-            await audio.play(session.groups[session.index], {
+            await currentAudio.play(session.groups[session.index], {
+                onCharStart: ({ index }) => {
+                    if (isBuffer && answerInput && !bufferUnlocked) {
+                        const targetDepth = parseInt(bufferDepth, 10);
+                        if (!isNaN(targetDepth) && index >= targetDepth) {
+                            bufferUnlocked = true;
+                            answerInput.disabled = false;
+                            answerInput.placeholder = t('groups.answer_placeholder');
+                            answerInput.focus();
+                        }
+                    }
+                },
                 onSymbol: ({ symbol, durationMs }) => {
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
@@ -490,6 +569,7 @@
         } catch (e) {
             console.error('Ошибка воспроизведения группы:', e);
         } finally {
+            currentAudio = null;
             isPlaying = false;
             replayBtn.disabled = false;
             if (isBuffer && answerInput) {
@@ -533,6 +613,11 @@
     const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
     function abortCurrentSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         if (qrqSessionActive) {
             qrqStopRequested = true;
             if (qrqAudio) {
@@ -603,6 +688,7 @@
         }
 
         const isBufferMode = (currentSubmode === 'training') && bufferCheckbox && bufferCheckbox.checked;
+        const bufferDepth = selectedBufferDepth || 'all';
 
         let pairData = null;
         let generatedGroups = null;
@@ -641,6 +727,7 @@
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], startTime: Date.now(), history: [],
             isBufferMode,
+            bufferDepth,
             isPairs,
             ...(pairData || {})
         };
@@ -1040,6 +1127,11 @@
 
     function submitAnswer() {
         if (!session) return;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         const expected = session.groups[session.index];
         const typed = answerInput.value.trim();
         const correct = scoreAnswer(expected, typed);
@@ -1485,12 +1577,12 @@
         } catch { /* игнорируем офлайн */ }
     }
 
-    document.querySelectorAll('#groups-exam-toggle .chip').forEach(chip => {
-        chip.addEventListener('click', (e) => {
-            const target = e.currentTarget || e.target;
+    document.querySelectorAll('#groups-exam-toggle .segmented-tab, #groups-exam-toggle .chip').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const target = e.currentTarget;
             if (target.classList.contains('active')) return;
 
-            document.querySelectorAll('#groups-exam-toggle .chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#groups-exam-toggle .segmented-tab, #groups-exam-toggle .chip').forEach(c => c.classList.remove('active'));
             target.classList.add('active');
             
             const type = target.dataset.type; // 'training' | 'pairs' | 'qrq' | 'exam'
@@ -1532,12 +1624,34 @@
         });
     });
 
-    const customPairInput = document.getElementById('custom-pair-input');
-    if (customPairInput) {
-        customPairInput.addEventListener('input', () => {
-            const cleaned = customPairInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 2);
-            if (cleaned !== customPairInput.value) customPairInput.value = cleaned;
+    const customPairA = document.getElementById('custom-pair-a');
+    const customPairB = document.getElementById('custom-pair-b');
+    if (customPairA && customPairB) {
+        customPairA.addEventListener('input', () => {
+            const cleaned = customPairA.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            customPairA.value = cleaned.slice(0, 1);
+            if (customPairA.value.length === 1) {
+                customPairB.focus();
+                customPairB.select();
+            }
             updatePairStageUI();
+        });
+        customPairB.addEventListener('input', () => {
+            const cleaned = customPairB.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            customPairB.value = cleaned.slice(0, 1);
+            updatePairStageUI();
+        });
+        customPairA.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                customPairB.focus();
+            }
+        });
+        customPairB.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !customPairB.value) {
+                customPairA.focus();
+            } else if (e.key === 'ArrowLeft') {
+                customPairA.focus();
+            }
         });
     }
 
@@ -1642,7 +1756,7 @@
         qrqReturnBtn.addEventListener('click', () => {
             resultPanel.style.display = 'none';
             setupPanel.style.display = 'block';
-            const trainingChip = document.querySelector('#groups-exam-toggle .chip[data-type="training"]');
+            const trainingChip = document.querySelector('#groups-exam-toggle [data-type="training"]');
             if (trainingChip) trainingChip.click();
         });
     }

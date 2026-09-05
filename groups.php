@@ -22,11 +22,23 @@ include __DIR__ . '/includes/header.php';
 <div class="card mt-2" id="setup-panel">
     <h3><?= t('groups.settings') ?></h3>
 
-    <div class="chip-row mt-1" id="groups-exam-toggle" style="margin-bottom: 15px;">
-        <div class="chip active" data-type="training"><?= t('groups.mode_training') ?></div>
-        <div class="chip" data-type="pairs"><?= t('groups.mode_pairs') ?></div>
-        <div class="chip" data-type="qrq"><?= t('groups.mode_qrq') ?></div>
-        <div class="chip" data-type="exam"><?= t('groups.mode_exam') ?></div>
+    <div class="segmented-nav mt-1" id="groups-exam-toggle">
+        <button type="button" class="segmented-tab active" data-type="training">
+            <span class="tab-icon">🏋️</span>
+            <span class="tab-label"><?= t('groups.mode_training') ?></span>
+        </button>
+        <button type="button" class="segmented-tab" data-type="pairs">
+            <span class="tab-icon">🥊</span>
+            <span class="tab-label"><?= t('groups.mode_pairs') ?></span>
+        </button>
+        <button type="button" class="segmented-tab" data-type="qrq">
+            <span class="tab-icon">🚀</span>
+            <span class="tab-label"><?= t('groups.mode_qrq') ?></span>
+        </button>
+        <button type="button" class="segmented-tab" data-type="exam">
+            <span class="tab-icon">🎓</span>
+            <span class="tab-label"><?= t('groups.mode_exam') ?></span>
+        </button>
     </div>
 
     <div id="groups-training-config">
@@ -63,19 +75,23 @@ include __DIR__ . '/includes/header.php';
                 <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
 
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
-                <span class="info-icon" id="groups-farnsworth-info">?</span>
-            </label>
+            <div class="flex gap-1" style="align-items:center;">
+                <label class="chip" style="gap:8px;">
+                    <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+                </label>
+                <span class="info-icon" id="groups-farnsworth-info" style="cursor:pointer;" title="Подробнее">?</span>
+            </div>
             <div class="speed-control" id="groups-farnsworth-wrap" style="display:none;">
                 <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
                 <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
             </div>
 
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
-                <span class="info-icon" id="groups-buffer-info">?</span>
-            </label>
+            <div class="flex gap-1" style="align-items:center;">
+                <label class="chip" style="gap:8px;">
+                    <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
+                </label>
+                <span class="info-icon" id="groups-buffer-info" style="cursor:pointer;" title="Подробнее">?</span>
+            </div>
 
             <label class="chip"><?= t('groups.groups_per_session') ?>
                 <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
@@ -84,12 +100,32 @@ include __DIR__ . '/includes/header.php';
                 </select>
             </label>
         </div>
+
         <div class="tooltip-box" id="groups-farnsworth-tooltip" style="display:none;">
             <?= t('groups.farnsworth_tooltip') ?>
         </div>
         <div class="tooltip-box" id="groups-buffer-tooltip" style="display:none;">
             <?= t('groups.buffer_tooltip') ?>
             <div class="muted mt-1" style="font-size:11px;"><?= t('groups.buffer_hint') ?></div>
+        </div>
+
+        <!-- Панель настройки буфера памяти -->
+        <div id="groups-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+                </div>
+                <div class="chip-row" id="buffer-depth-chips">
+                    <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                    <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                    <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                    <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+                </div>
+            </div>
+            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                💡 <?= t('groups.buffer_tooltip') ?>
+            </div>
         </div>
     </div>
 
@@ -106,7 +142,17 @@ include __DIR__ . '/includes/header.php';
                     <span id="pairs-rec-name" class="mono" style="font-size:16px; font-weight:bold; margin-left:6px;">S / H</span>
                     <span class="muted" style="font-size:12px; margin-left:8px;" id="pairs-rec-reason">(<?= t('groups.pairs_recommendation_reason') ?>)</span>
                 </div>
-                <button class="btn btn-sm btn-primary" id="pairs-apply-rec-btn"><?= t('groups.pairs_recommendation_btn') ?></button>
+                <button class="btn btn-sm btn-primary" id="pairs-apply-rec-btn" type="button"><?= t('groups.pairs_recommendation_btn') ?></button>
+            </div>
+        </div>
+
+        <div id="pairs-smart-info" class="card mt-2" style="background:var(--surface-2); border:1px dashed var(--border); padding:12px 16px;">
+            <div class="flex gap-2" style="align-items:center;">
+                <span style="font-size:22px;">🧠</span>
+                <div style="font-size:12px; line-height:1.4;">
+                    <b style="color:var(--text);"><?= t('groups.pairs_smart_active_title') ?>:</b> 
+                    <span class="muted"><?= t('groups.pairs_smart_active_desc') ?></span>
+                </div>
             </div>
         </div>
 
@@ -123,9 +169,18 @@ include __DIR__ . '/includes/header.php';
                 <div class="chip" data-pair="PJ">P / J</div>
                 <div class="chip" data-pair="custom"><?= t('groups.pairs_custom') ?></div>
             </div>
-            <input type="text" id="custom-pair-input" class="answer-input mt-1"
-                   placeholder="<?= htmlspecialchars(t('groups.pairs_custom_placeholder')) ?>"
-                   style="display:none; text-transform:uppercase; max-width:200px;" maxlength="4" autocomplete="off">
+
+            <div id="custom-pair-wrap" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                <div class="config-section-title"><?= t('groups.pairs_custom_enter_title') ?></div>
+                <div class="flex gap-2" style="align-items:center;">
+                    <input type="text" id="custom-pair-a" class="custom-pair-input-char mono" maxlength="1"
+                           placeholder="S" autocomplete="off">
+                    <span style="font-size:22px; font-weight:900; color:var(--accent);">/</span>
+                    <input type="text" id="custom-pair-b" class="custom-pair-input-char mono" maxlength="1"
+                           placeholder="H" autocomplete="off">
+                    <span class="muted" style="font-size:12px; margin-left:8px;"><?= t('groups.pairs_custom_hint') ?></span>
+                </div>
+            </div>
         </div>
 
         <div class="mt-3">
