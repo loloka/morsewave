@@ -1200,6 +1200,7 @@ input[type="range"] {
     text-align: center;
 }
 .site-footer-inner .dot { color: var(--border); }
+.site-footer-inner .footer-version { font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); opacity: .85; }
 .site-footer-inner a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
 .site-footer-inner a:hover { color: var(--signal); }
 

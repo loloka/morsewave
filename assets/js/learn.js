@@ -981,6 +981,9 @@
        одного лёгкого символа, потому что он не капает за каждое попадание. */
     const INVASION_XP_PER_KILL = 1;
     const INVASION_BASE_HP = 100;
+    const INVASION_STAGE1_KILLS = 20; // 20 одиночных пришельцев
+    const INVASION_STAGE2_GROUPS = 10; // 10 пар пришельцев (20 знаков)
+    const INVASION_STAGE3_GROUPS = 10; // 10 троек пришельцев (30 знаков)
     const INVASION_WIN_KILLS = 100;
     const INVASION_BOSS_SPRITE = '🛸';
     const INVASION_BOSS_BREACH_DAMAGE = 30;
@@ -1053,7 +1056,7 @@
     let invasionParticles = [];
     let invasionLanePool = [];
     let invasionEnemySeq = 0;
-        let invasionAudioQueueEndTime = 0;
+    let invasionAudioQueueEndTime = 0;
     let invasionAudioChain = Promise.resolve();
     invasionAudioQueueEndTime = performance.now();
     let invasionRafId = null;
@@ -1061,6 +1064,11 @@
     let invasionCelebrating = false;
     let invasionCelebrateTimers = [];
     let invasionBossPhase = false;
+    let invasionStage = 1; // 1 = одиночные, 2 = пары, 3 = тройки
+    let invasionStageKills = 0; // счётчик одиночных целей этапа 1
+    let invasionStageGroups = 0; // счётчик групп для этапов 2 и 3
+    let invasionCurrentBoss = 0; // 0 = нет, 1 = Босс 1, 2 = Босс 2, 3 = Босс 3
+    let invasionGroupSpawnTimer = null;
     let invasionDbXpEarned = 0;
     let invasionSessionStartTime = 0;
     let invasionHitFlashTimer = null;
@@ -1193,12 +1201,15 @@
         return (1200 / wpm) * totalUnits;
     }
 
-    // Сколько пришельцев одновременно в волне — растёт с числом убийств:
-    // 0-19 — 1 (как раньше), 20-39 — 2, ... 80-99 — 5. Ровно те "уровни 2-5",
-    // о которых просил владелец, без отдельного экрана/меню уровней — просто
-    // встроено в существующую волну до 100 попаданий.
+    // Время на прослушивание одного символа босса + ввод человеком на клавиатуре:
+    // ~12.5 юнитов звука (с паузой) + ~9.5 юнитов на реакцию и нажатие клавиши.
+    function invasionBossSymbolTime(wpm) {
+        const unit = 1200 / wpm;
+        return unit * 22;
+    }
+
     function invasionConcurrency() {
-        return Math.min(INVASION_MAX_LANES, 1 + Math.floor(invasionKills / 20));
+        return invasionStage;
     }
 
     function acquireInvasionLane() {
@@ -1218,9 +1229,12 @@
     // одновременно всё ещё атакует.
     function invasionEnemyPosition(enemy, now, w, h) {
         const laneY = ((enemy.lane + 1) / (INVASION_MAX_LANES + 1)) * h;
-        if (enemy.state !== 'active') return { x: enemy.dieX, y: enemy.dieY };
+        if (enemy.state !== 'active') return { x: enemy.dieX, y: enemy.dieY, progress: 1 };
         
         let elapsed = now - enemy.startTime;
+        if (elapsed < 0) {
+            return { x: -30, y: laneY, progress: -0.1 };
+        }
         let progress = Math.min(1, elapsed / enemy.duration);
         const x = 28 + progress * (w - 60);
         const baseY = h / 2;
@@ -1405,18 +1419,10 @@
     }
 
     function spawnOneInvasionEnemy() {
-        const wave = Math.floor(invasionKills / 20) + 1;
-        const groupLen = Math.min(wave, 4);
-        let ch = "";
-        for (let i = 0; i < groupLen; i++) {
-            const activeChars = invasionEnemies.map((e) => e.ch[0] || '');
-            const available = ALL_LEARNABLE.filter((c) => !activeChars.includes(c));
-            const pool = available.length ? available : ALL_LEARNABLE;
-            ch += pickInvasionLetterWeighted(pool);
-        }
+        if (!invasionRunning || invasionBossPhase) return;
         const wpm = parseInt(invasionWpmSlider.value, 10);
-        const queueAhead = invasionEnemies.length;
-        let duration = invasionTierDuration(ch, wpm) + queueAhead * invasionAudioEstimate(ch, wpm);
+        const ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+        let duration = invasionTierDuration(ch, wpm);
         
         const rand = Math.random();
         let type = 'normal';
@@ -1450,91 +1456,225 @@
         syncInvasionKeyHighlights();
     }
 
-    function spawnInvasionBoss(isMegaBoss = false) {
+    function spawnInvasionGroup(groupSize) {
+        if (!invasionRunning || invasionBossPhase) return;
+        if (invasionEnemies.length > 0) return;
+
         const wpm = parseInt(invasionWpmSlider.value, 10);
-        let ch, bossTotalHits, bossQuote;
-        
-        if (isMegaBoss) {
+        const lane = acquireInvasionLane();
+        const now = performance.now();
+
+        let cumulativeStagger = 0;
+        const groupEnemies = [];
+
+        for (let i = 0; i < groupSize; i++) {
+            const ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+            const sprite = INVASION_SPRITES[Math.floor(Math.random() * INVASION_SPRITES.length)];
+            const estAudioMs = invasionAudioEstimate(ch, wpm);
+            const charDuration = invasionTierDuration(ch, wpm);
+
+            const enemy = {
+                id: ++invasionEnemySeq,
+                type: 'normal',
+                ch,
+                sprite,
+                duration: charDuration,
+                startTime: now + cumulativeStagger,
+                lane,
+                state: 'active',
+                dieX: 0, dieY: 0,
+                audio: null,
+                tankHits: 0
+            };
+            groupEnemies.push(enemy);
+            cumulativeStagger += estAudioMs;
+        }
+
+        groupEnemies.forEach((e) => {
+            invasionEnemies.push(e);
+            queueInvasionAudio(e);
+        });
+        syncInvasionKeyHighlights();
+    }
+
+    function spawnInvasionBoss(bossNum) {
+        if (!invasionRunning) return;
+        const wpm = parseInt(invasionWpmSlider.value, 10);
+        let ch, bossTotalHits, bossQuote, duration;
+        const isMega = (bossNum === 3);
+
+        if (bossNum === 1) {
+            ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+            bossTotalHits = 10;
+            // Ровно время на 10 символов + 1 право на ошибку
+            duration = (10 + 1) * invasionBossSymbolTime(wpm);
+        } else if (bossNum === 2) {
+            ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
+            bossTotalHits = 20;
+            // 20 символов подряд + допуск на 2-3 ошибки (2.5)
+            duration = (20 + 2.5) * invasionBossSymbolTime(wpm);
+        } else {
             bossQuote = INVASION_QUOTES[Math.floor(Math.random() * INVASION_QUOTES.length)].replace(/\s/g, '');
             ch = bossQuote[0];
             bossTotalHits = bossQuote.length;
-        } else {
-            ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
-            bossTotalHits = 10;
+            // Фраза на латыни + 1 ошибка на каждые 10 символов
+            const extraErrors = Math.max(1, Math.round(bossTotalHits / 10));
+            duration = (bossTotalHits + extraErrors) * invasionBossSymbolTime(wpm);
         }
-        
+
         const enemy = {
             id: ++invasionEnemySeq,
             ch,
             sprite: INVASION_BOSS_SPRITE,
-            duration: invasionTierDuration(ch, wpm) * (isMegaBoss ? 45 : 30),
+            duration,
             startTime: performance.now(),
             lane: acquireInvasionLane(),
             state: 'active',
             dieX: 0, dieY: 0,
             audio: null,
             isBoss: true,
-            isMegaBoss,
+            isMegaBoss: isMega,
+            bossNum,
             bossQuote,
             bossHits: 0,
             bossTotalHits
         };
-        invasionEnemies.push(enemy);
+        invasionEnemies = [enemy];
         queueInvasionAudio(enemy);
         syncInvasionKeyHighlights();
-        invasionFeedback(isMegaBoss ? t('js.learn.invasion_mega_boss') : t('js.learn.invasion_boss_incoming'), 'ok');
+
+        const bossIncomingMsg = bossNum === 1
+            ? t('js.learn.invasion_boss1_incoming')
+            : (bossNum === 2 ? t('js.learn.invasion_boss2_incoming') : t('js.learn.invasion_boss3_incoming'));
+        invasionFeedback(bossIncomingMsg, 'ok');
     }
 
     function respawnInvasionBossSegment(enemy) {
-        const wpm = parseInt(invasionWpmSlider.value, 10);
         if (enemy.isMegaBoss && enemy.bossQuote) {
             enemy.ch = enemy.bossQuote[enemy.bossHits % enemy.bossQuote.length];
         } else {
             enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
         }
-        enemy.duration = invasionTierDuration(enemy.ch, wpm);
-        if (performance.now() < invasionSlowUntil) enemy.duration *= 2;
-        
-        enemy.startTime = performance.now();
-        enemy.state = 'active';
         queueInvasionAudio(enemy);
         syncInvasionKeyHighlights();
     }
 
-    // Полоска-сегменты здоровья босса над спрайтом — единственный способ
-    // увидеть прогресс "сколько ещё бить", т.к. сам босс визуально не
-    // меняется между попаданиями (буква и озвучка и так дают обратную связь).
-    function drawInvasionBossHealth(ctx, x, y, hits, total) {
-        const barW = Math.min(120, total * 10);
-        const sy = Math.max(10, y - 40); // Не даем уйти за верхний край!
+    function advanceToStage(stage) {
+        invasionStage = stage;
+        invasionStageKills = 0;
+        invasionStageGroups = 0;
+        invasionBossPhase = false;
+        invasionCurrentBoss = 0;
+        clearTimeout(invasionGroupSpawnTimer);
+        invasionGroupSpawnTimer = null;
+
+        const stageMsg = (stage === 2) ? t('js.learn.invasion_stage2') : t('js.learn.invasion_stage3');
+        invasionFeedback(stageMsg, 'ok');
+
+        setTimeout(() => {
+            if (invasionRunning && !invasionBossPhase) {
+                topUpInvasionEnemies();
+            }
+        }, 1200);
+    }
+
+    function startBossPhase(bossNum) {
+        invasionBossPhase = true;
+        invasionCurrentBoss = bossNum;
+        clearTimeout(invasionGroupSpawnTimer);
+        invasionGroupSpawnTimer = null;
+
+        invasionEnemies.forEach((e) => {
+            if (e.audio) e.audio.stop();
+            releaseInvasionLane(e.lane);
+        });
+        invasionEnemies = [];
+
+        setTimeout(() => {
+            if (invasionRunning && invasionBossPhase) {
+                spawnInvasionBoss(bossNum);
+            }
+        }, 800);
+    }
+
+    function checkGroupCompletion() {
+        if (!invasionRunning || invasionBossPhase || invasionStage === 1) return;
+        if (invasionEnemies.length > 0) return;
+
+        invasionStageGroups++;
+        const targetGroups = (invasionStage === 2) ? INVASION_STAGE2_GROUPS : INVASION_STAGE3_GROUPS;
+        if (invasionStageGroups >= targetGroups) {
+            startBossPhase(invasionStage);
+        } else {
+            const wpm = parseInt(invasionWpmSlider.value, 10);
+            const unit = 1200 / wpm;
+            const interGroupPause = unit * 7;
+            clearTimeout(invasionGroupSpawnTimer);
+            invasionGroupSpawnTimer = setTimeout(() => {
+                invasionGroupSpawnTimer = null;
+                if (invasionRunning && !invasionBossPhase) {
+                    topUpInvasionEnemies();
+                }
+            }, interGroupPause);
+        }
+    }
+
+    // Полоска-сегменты здоровья босса над спрайтом
+    function drawInvasionBossHealth(ctx, x, y, hits, total, bossNum) {
+        const barW = Math.min(130, Math.max(80, total * 6));
+        const sy = Math.max(12, y - 40);
         
-        // Фон (потерянные хп)
         ctx.fillStyle = 'rgba(255,255,255,.25)';
         ctx.fillRect(x - barW/2, sy, barW, 6);
         
-        // Текущее хп
         const healthPct = (total - hits) / total;
         if (healthPct > 0) {
             ctx.fillStyle = '#e0473b';
             ctx.fillRect(x - barW/2, sy, barW * healthPct, 6);
         }
+
+        ctx.fillStyle = '#eae6df';
+        ctx.font = '11px sans-serif';
+        const label = (bossNum === 3 ? 'МЕГА-БОСС' : `БОСС ${bossNum || 1}`) + ` (${total - hits})`;
+        ctx.fillText(label, x, sy - 8);
     }
 
     function topUpInvasionEnemies() {
         if (!invasionRunning) return;
         
-        const zone = Math.min(4, Math.floor(invasionKills / 20));
-        invasionCanvasWrapEl.className = 'invasion-canvas-wrap zone-' + zone;
+        invasionCanvasWrapEl.className = 'invasion-canvas-wrap zone-' + invasionStage;
         
         if (invasionBossPhase) {
             if (invasionEnemies.length === 0) {
-                spawnInvasionBoss(invasionKills >= 99);
+                spawnInvasionBoss(invasionCurrentBoss || 1);
             }
             return;
         }
-        const target = invasionConcurrency();
-        while (invasionEnemies.length < target) {
-            spawnOneInvasionEnemy();
+
+        if (invasionStage === 1) {
+            if (invasionStageKills < INVASION_STAGE1_KILLS) {
+                if (invasionEnemies.length === 0) {
+                    spawnOneInvasionEnemy();
+                }
+            } else {
+                startBossPhase(1);
+            }
+        } else if (invasionStage === 2) {
+            if (invasionStageGroups < INVASION_STAGE2_GROUPS) {
+                if (invasionEnemies.length === 0 && !invasionGroupSpawnTimer) {
+                    spawnInvasionGroup(2);
+                }
+            } else {
+                startBossPhase(2);
+            }
+        } else if (invasionStage === 3) {
+            if (invasionStageGroups < INVASION_STAGE3_GROUPS) {
+                if (invasionEnemies.length === 0 && !invasionGroupSpawnTimer) {
+                    spawnInvasionGroup(3);
+                }
+            } else {
+                startBossPhase(3);
+            }
         }
     }
 
@@ -1556,6 +1696,7 @@
 
         invasionEnemies.forEach((enemy) => {
             const pos = invasionEnemyPosition(enemy, now, w, h);
+            if (pos.progress < 0) return; // Ещё не стартовал из очереди группы
             
             if (enemy.type === 'phantom' && enemy.state === 'active') {
                 // Появляется полностью, затем медленно исчезает к progress=0.7
@@ -1573,7 +1714,7 @@
             
             if (enemy.isBoss) {
                 invasionCtx.globalAlpha = 1;
-                drawInvasionBossHealth(invasionCtx, pos.x, pos.y, enemy.bossHits, enemy.bossTotalHits);
+                drawInvasionBossHealth(invasionCtx, pos.x, pos.y, enemy.bossHits, enemy.bossTotalHits, enemy.bossNum);
             }
             invasionCtx.globalAlpha = 1;
             
@@ -1600,6 +1741,9 @@
                             releaseInvasionLane(enemy.lane);
                             invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
                             syncInvasionKeyHighlights();
+                            if (invasionStage > 1) {
+                                checkGroupCompletion();
+                            }
                             topUpInvasionEnemies();
                         }
                     }
@@ -1627,58 +1771,47 @@
         }
     }
 
-    function findActiveInvasionEnemy(ch) {
-        return invasionEnemies.find((e) => e.state === 'active' && e.ch[e.typed || 0] === ch);
+    function getFrontActiveEnemy() {
+        const now = performance.now();
+        const active = invasionEnemies.filter((e) => e.state === 'active' && now >= e.startTime);
+        if (!active.length) {
+            return invasionEnemies.filter((e) => e.state === 'active').sort((a, b) => a.startTime - b.startTime)[0] || null;
+        }
+        active.sort((a, b) => b.progress - a.progress);
+        return active[0];
     }
 
     function handleInvasionAnswer(ch, key) {
         if (!invasionRunning) return;
-        // Реальный баг с телефона (владелец, 2026-07-31): звук пропадал
-        // молча примерно после 5-го нажатия — похоже на типичную для
-        // мобильного Safari историю, когда общий AudioContext засыпает
-        // (например, экран притух/звонок/переключение приложений) и уже не
-        // просыпается сам собой из недр async-цепочки озвучки. Каждое
-        // нажатие клавиши — настоящий пользовательский жест, так что это
-        // самое надёжное место, чтобы попытаться его разбудить.
         getSharedAudioContext();
-        const enemy = findActiveInvasionEnemy(ch);
-        if (enemy) enemy.typed = (enemy.typed || 0) + 1;
-        
-        if (!enemy) {
-            // Уже убит долю секунды назад, лопата ещё летит (state='dying') —
-            // повторное нажатие той же (правильной) буквы просто игнорируем,
-            // а не штрафуем за "неверно": человек не ошибся, просто чуть
-            // поторопился со следующим нажатием.
-            // Penalize: speed up the active monsters slightly.
-            invasionEnemies.forEach(e => {
-                if (e.state === 'active') {
-                    const now = performance.now();
-                    const oldElapsed = now - e.startTime;
-                    const oldDuration = e.duration;
-                    const newDuration = oldDuration * (e.isBoss ? 0.98 : 0.85);
-                    e.duration = newDuration;
-                    e.startTime = now - oldElapsed * (newDuration / oldDuration);
-                }
-            });
-            // Try to find the oldest active enemy to guess what they meant to type
-            const oldest = invasionEnemies.filter(e => e.state === 'active').sort((a,b) => a.startTime - b.startTime)[0];
-            if (oldest) {
-                Progress.recordInvasionAttempt(oldest.ch, false);
-                if (ch && window.MORSE_CODE && window.MORSE_CODE[ch]) {
-                    Progress.recordInvasionAttempt(ch, false);
-                }
-            }
-            if (invasionEnemies.some((e) => e.ch === ch && e.state !== 'active')) return;
+
+        // Если лопата уже летит в эту букву — дубликат не штрафуем
+        if (invasionEnemies.some((e) => e.ch === ch && e.state === 'dying')) return;
+
+        const enemy = getFrontActiveEnemy();
+        if (!enemy) return;
+
+        if (enemy.ch === ch) {
+            key.classList.add('correct');
+            setTimeout(() => key.classList.remove('correct'), 400);
+            resolveInvasionKill(enemy);
+        } else {
             key.classList.add('wrong');
             setTimeout(() => key.classList.remove('wrong'), 400);
             invasionCombo = 0;
             updateInvasionStatsUI();
             invasionFeedback(t('js.learn.invasion_wrong', { '{got}': ch }), 'bad');
-            return;
+
+            Progress.recordInvasionAttempt(enemy.ch, false);
+            if (ch && window.MORSE_CODE && window.MORSE_CODE[ch]) {
+                Progress.recordInvasionAttempt(ch, false);
+            }
+
+            // На боссе повторяем звук текущего символа, чтобы использовать право на ошибку
+            if (enemy.isBoss) {
+                queueInvasionAudio(enemy);
+            }
         }
-        key.classList.add('correct');
-        setTimeout(() => key.classList.remove('correct'), 400);
-        resolveInvasionKill(enemy);
     }
 
     // Убийство НЕ убирает пришельца немедленно — по просьбе владельца: "с
@@ -1691,13 +1824,7 @@
         const h = invasionCanvasWrapEl.clientHeight;
         const pos = invasionEnemyPosition(enemy, performance.now(), w, h);
         
-        if (!enemy.isBoss && enemy.type !== 'tank' && enemy.typed < enemy.ch.length) {
-            syncInvasionKeyHighlights();
-            spawnInvasionParticles(pos.x, pos.y, '#6fcf7a');
-            return;
-        }
         if (enemy.type === 'tank' && enemy.tankHits === 0) {
-            enemy.typed = 0;
             enemy.tankHits++;
             enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
             enemy.duration += invasionTierDuration(enemy.ch, parseInt(invasionWpmSlider.value, 10));
@@ -1711,7 +1838,8 @@
         invasionSpeedScoreSum += 1 - (pos.progress ?? 0);
         invasionSpeedScoreCount++;
 
-        if (!enemy.isBoss || (enemy.isBoss && enemy.bossHits + 1 >= enemy.bossTotalHits)) {
+        const isFinalBossHit = enemy.isBoss && (enemy.bossHits + 1 >= enemy.bossTotalHits);
+        if (!enemy.isBoss || isFinalBossHit) {
             enemy.state = 'dying';
             enemy.dieX = pos.x;
             enemy.dieY = pos.y;
@@ -1728,7 +1856,7 @@
             duration: INVASION_SHOVEL_MS,
             targetId: enemy.id,
             resolved: false,
-            isBossHit: enemy.isBoss && enemy.bossHits < enemy.bossTotalHits,
+            isBossHit: enemy.isBoss && !isFinalBossHit,
         });
 
         invasionCombo++;
@@ -1739,28 +1867,16 @@
         }
         if (invasionCombo > invasionBestCombo) invasionBestCombo = invasionCombo;
 
-        // Питает адаптивный спавн (см. invasionSpawnWeight выше) — успел
-        // убить вовремя, значит букву опознаёшь уверенно, дальше она будет
-        // вылетать чуть реже прежнего. Работает и для босса — каждое его
-        // попадание тоже честная буква со своей адаптивной статистикой.
         Progress.recordInvasionAttempt(enemy.ch, true);
-        let xp = INVASION_XP_PER_KILL;
-        if (enemy.type === 'tank') xp = 2;
         
-        // Множитель за плотность волны, аналогично формуле из Метода Коха/Групп:
-        // 2 * charsetFactor * (length / 3).
-        // В Вторжении charsetSize = ALL_LEARNABLE.length (около 60+), поэтому charsetFactor = 1.
-        // Вместо длины группы используем количество одновременно летящих пришельцев.
-        const lengthFactor = invasionConcurrency() / 3;
-        const invasionXpMultiplier = 2 * 1 * lengthFactor;
-        xp = Math.max(1, Math.round(xp * invasionXpMultiplier));
+        let xp = INVASION_XP_PER_KILL * invasionStage;
+        if (enemy.type === 'tank') xp = 2 * invasionStage;
         
         invasionDbXpEarned += xp;
         Progress.addXp(xp);
         syncInvasionKeyHighlights();
 
         if (enemy.isBoss) {
-            enemy.typed = 0;
             enemy.bossHits++;
             updateInvasionStatsUI();
             if (enemy.bossHits < enemy.bossTotalHits) {
@@ -1773,27 +1889,37 @@
                 }
                 queueInvasionAudio(enemy);
                 syncInvasionKeyHighlights();
-                
-                return; // Let the shovel hit it visually, but it won't die
+                return;
             }
             
-            // Дополнительный опыт за группу символов (добивание босса)
-            const bossBonus = enemy.bossTotalHits * 2; // Например, 10 букв = +20 XP бонус
+            // Дополнительный опыт за добивание босса
+            const bossBonus = enemy.bossTotalHits * 2;
             invasionDbXpEarned += bossBonus;
             Progress.addXp(bossBonus);
             
-            if (enemy.isMegaBoss) {
-                invasionKills = INVASION_WIN_KILLS;
-                invasionFeedback(t('js.learn.invasion_boss_kill'), 'ok');
-                setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
-            } else {
+            if (enemy.isMegaBoss || enemy.bossNum === 3) {
                 invasionKills++;
+                updateInvasionStatsUI();
+                invasionFeedback(t('js.learn.invasion_boss3_kill'), 'ok');
+                setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
+            } else if (enemy.bossNum === 1) {
+                invasionKills++;
+                updateInvasionStatsUI();
+                invasionFeedback(t('js.learn.invasion_boss1_kill'), 'ok');
                 invasionBossPhase = false;
-                invasionFeedback(t('js.learn.invasion_boss_killed_mid'), 'ok');
                 releaseInvasionLane(enemy.lane);
                 invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
                 syncInvasionKeyHighlights();
-                topUpInvasionEnemies();
+                advanceToStage(2);
+            } else if (enemy.bossNum === 2) {
+                invasionKills++;
+                updateInvasionStatsUI();
+                invasionFeedback(t('js.learn.invasion_boss2_kill'), 'ok');
+                invasionBossPhase = false;
+                releaseInvasionLane(enemy.lane);
+                invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
+                syncInvasionKeyHighlights();
+                advanceToStage(3);
             }
             return;
         }
@@ -1802,15 +1928,11 @@
         updateInvasionStatsUI();
         invasionFeedback(t('js.learn.invasion_kill', { '{ch}': enemy.ch }), 'ok');
 
-        const isBossTime = (invasionKills === 19 || invasionKills === 39 || invasionKills === 59 || invasionKills === 79 || invasionKills === 99);
-        if (isBossTime && !invasionBossPhase) {
-            invasionBossPhase = true;
-            invasionEnemies.forEach((e) => {
-                if (e.id === enemy.id) return;
-                if (e.audio) e.audio.stop();
-                releaseInvasionLane(e.lane);
-            });
-            invasionEnemies = invasionEnemies.filter((e) => e.id === enemy.id);
+        if (invasionStage === 1) {
+            invasionStageKills++;
+            if (invasionStageKills >= INVASION_STAGE1_KILLS) {
+                startBossPhase(1);
+            }
         }
     }
 
@@ -1829,19 +1951,13 @@
     }
 
     function resolveInvasionMiss(enemy) {
-        if (enemy.state !== 'active') return; // защита от повторного срабатывания в этом же кадре
+        if (enemy.state !== 'active') return;
         enemy.state = 'hit';
-        // Прорыв босса — заметно больнее обычного (см. INVASION_BOSS_BREACH_DAMAGE
-        // выше), не плоская invasionDamageFor().
         const dmg = enemy.isBoss ? INVASION_BOSS_BREACH_DAMAGE : invasionDamageFor(enemy.ch);
         invasionHp = Math.max(0, invasionHp - dmg);
         invasionCombo = 0;
         flashInvasionHit();
-        // Питает адаптивный спавн (см. invasionSpawnWeight выше) — не успел
-        // опознать вовремя, значит букву стоит потренировать почаще.
         Progress.recordInvasionAttempt(enemy.ch, false);
-        // Прорыв — худший возможный исход для бонуса скорости (см.
-        // resolveInvasionKill): 0 очков, а не просто "не считаем".
         invasionSpeedScoreSum += 0;
         invasionSpeedScoreCount++;
         if (enemy.audio) enemy.audio.stop();
@@ -1856,12 +1972,12 @@
                 finishInvasion(false);
                 return;
             }
-            invasionFeedback("Босс прорвался! Начинаем волну заново.", 'bad');
-            invasionKills = 0;
-            invasionBossPhase = false;
+            invasionFeedback(t('js.learn.invasion_boss_breach', { '{dmg}': dmg }) + ' Повторная атака босса!', 'bad');
             releaseInvasionLane(enemy.lane);
             invasionEnemies = invasionEnemies.filter((e) => e.id !== enemy.id);
-            topUpInvasionEnemies();
+            setTimeout(() => {
+                if (invasionRunning) spawnInvasionBoss(enemy.bossNum || 1);
+            }, 1000);
             return;
         }
 
@@ -1876,6 +1992,15 @@
         if (invasionHp <= 0) {
             finishInvasion(false);
             return;
+        }
+        if (invasionStage === 1) {
+            invasionStageKills++;
+            if (invasionStageKills >= INVASION_STAGE1_KILLS) {
+                startBossPhase(1);
+                return;
+            }
+        } else {
+            checkGroupCompletion();
         }
         topUpInvasionEnemies();
     }
@@ -1990,6 +2115,12 @@
         invasionCelebrateTimers.forEach(clearTimeout);
         invasionCelebrateTimers = [];
         invasionBossPhase = false;
+        invasionStage = 1;
+        invasionStageKills = 0;
+        invasionStageGroups = 0;
+        invasionCurrentBoss = 0;
+        clearTimeout(invasionGroupSpawnTimer);
+        invasionGroupSpawnTimer = null;
         cancelAnimationFrame(invasionRafId);
         invasionRafId = null;
         invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });
@@ -2031,6 +2162,12 @@
         if (invasionRafId !== null) { cancelAnimationFrame(invasionRafId); invasionRafId = null; }
         invasionRunning = true;
         invasionBossPhase = false;
+        invasionStage = 1;
+        invasionStageKills = 0;
+        invasionStageGroups = 0;
+        invasionCurrentBoss = 0;
+        clearTimeout(invasionGroupSpawnTimer);
+        invasionGroupSpawnTimer = null;
         invasionHp = INVASION_BASE_HP;
         invasionKills = 0;
         invasionCombo = 0;
@@ -2050,7 +2187,7 @@
         invasionOverlayEl.classList.remove('show');
         invasionStartBtn.style.display = 'none';
         invasionStopBtn.style.display = 'inline-flex';
-        invasionFeedback(t('js.learn.invasion_go'), 'ok');
+        invasionFeedback(t('js.learn.invasion_stage1'), 'ok');
         invasionRafId = requestAnimationFrame(invasionFrame);
         topUpInvasionEnemies();
     }

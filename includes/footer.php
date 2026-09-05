@@ -4,6 +4,8 @@
     <div class="container site-footer-inner">
         <span>© <?= date('Y') ?> MorseWave</span>
         <span class="dot">·</span>
+        <span class="footer-version" title="<?= t('footer.version_title') ?>"><?= MW_VERSION ?> · <?= MW_VERSION_DATE ?></span>
+        <span class="dot">·</span>
         <span><?= t('footer.license') ?></span>
         <span class="dot">·</span>
         <span><?= t('footer.author') ?></span>
