@@ -706,7 +706,7 @@
             if (pairsWpmEl) activeWpm = parseInt(pairsWpmEl.value, 10);
             const pairsCountEl = document.getElementById('pairs-count');
             if (pairsCountEl) activeCount = parseInt(pairsCountEl.value, 10);
-            activeGroupLen = 4;
+            activeGroupLen = pairsGroupLen;
         }
 
         const isBufferMode = (currentSubmode === 'training') && bufferCheckbox && bufferCheckbox.checked;
@@ -744,6 +744,7 @@
         session = {
             groups: generatedGroups,
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
+            groupLen: activeGroupLen,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: xpRateForSession(isPairs ? 'letters' : activeCharsetKey, 26, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
@@ -1545,7 +1546,8 @@
             }
             
             const g = [];
-            const targetLen = Math.max(groupLen, charsToInsert.length);
+            const curLen = session?.groupLen || groupLen || 5;
+            const targetLen = Math.max(curLen, charsToInsert.length);
             const randomCount = targetLen - charsToInsert.length;
             
             // Заполняем остаток группы случайными символами
@@ -1694,6 +1696,21 @@
             if (stage) setPairStage(stage);
         });
     });
+
+    let pairsGroupLen = parseInt(localStorage.getItem('morse_pairs_len'), 10) || 5;
+    const pairsLenChips = document.querySelectorAll('#pairs-length-chips .chip');
+    if (pairsLenChips.length) {
+        pairsLenChips.forEach(chip => {
+            const l = parseInt(chip.dataset.len, 10);
+            chip.classList.toggle('active', l === pairsGroupLen);
+            chip.addEventListener('click', () => {
+                pairsLenChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                pairsGroupLen = parseInt(chip.dataset.len, 10);
+                localStorage.setItem('morse_pairs_len', pairsGroupLen);
+            });
+        });
+    }
 
     const pairsWpmSlider = document.getElementById('pairs-wpm');
     const pairsWpmValue = document.getElementById('pairs-wpm-value');

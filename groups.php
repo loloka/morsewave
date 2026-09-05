@@ -184,6 +184,15 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <div class="mt-3">
+            <div class="muted" style="font-size:13px; margin-bottom:6px;"><?= t('groups.length_label') ?></div>
+            <div class="chip-row" id="pairs-length-chips">
+                <div class="chip" data-len="3">3</div>
+                <div class="chip" data-len="4">4</div>
+                <div class="chip active" data-len="5">5</div>
+            </div>
+        </div>
+
         <div class="flex-wrap gap-2 mt-3" style="align-items:center;">
             <div class="speed-control">
                 <?= t('groups.speed') ?>
