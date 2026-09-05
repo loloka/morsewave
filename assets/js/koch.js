@@ -60,6 +60,7 @@
 
     let session = null;
     let isPlaying = false;
+    let currentAudio = null;
     const replayBtn = document.getElementById('replay-btn');
 
     function currentCharset() {
@@ -158,6 +159,7 @@
                 key.className = 'vkb-key';
                 key.textContent = ch;
                 key.addEventListener('click', () => {
+                    if (answerInput.disabled) return;
                     const start = answerInput.selectionStart ?? answerInput.value.length;
                     const end = answerInput.selectionEnd ?? answerInput.value.length;
                     const val = answerInput.value;
@@ -181,6 +183,7 @@
         back.className = 'vkb-key vkb-backspace';
         back.innerHTML = t('js.koch.erase');
         back.addEventListener('click', () => {
+            if (answerInput.disabled) return;
             const start = answerInput.selectionStart ?? answerInput.value.length;
             const end = answerInput.selectionEnd ?? answerInput.value.length;
             const val = answerInput.value;
@@ -254,11 +257,70 @@
     });
 
 
-    document.getElementById('koch-farnsworth-info').addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const box = document.getElementById('koch-farnsworth-tooltip');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    const fwInfo = document.getElementById('koch-farnsworth-info');
+    const fwTooltip = document.getElementById('koch-farnsworth-tooltip');
+    if (fwInfo && fwTooltip) {
+        fwInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            fwTooltip.style.display = fwTooltip.style.display === 'none' ? 'block' : 'none';
+        });
+        fwTooltip.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    const bufferCheckbox = document.getElementById('koch-buffer-enabled');
+    const bufferPanel = document.getElementById('koch-buffer-panel');
+    const bufferInfo = document.getElementById('koch-buffer-info');
+    const bufferTooltip = document.getElementById('koch-buffer-tooltip');
+    let selectedBufferDepth = localStorage.getItem('morse_koch_buffer_depth') || 'all';
+
+    function updateBufferPanelVisibility() {
+        if (bufferPanel) {
+            bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
+        }
+    }
+
+    if (bufferCheckbox) {
+        const savedBufferEnabled = localStorage.getItem('morse_koch_buffer_enabled');
+        if (savedBufferEnabled !== null) {
+            bufferCheckbox.checked = (savedBufferEnabled === 'true');
+        }
+        updateBufferPanelVisibility();
+        bufferCheckbox.addEventListener('change', () => {
+            localStorage.setItem('morse_koch_buffer_enabled', bufferCheckbox.checked);
+            updateBufferPanelVisibility();
+        });
+    }
+
+    document.querySelectorAll('#koch-buffer-depth-chips .chip').forEach(chip => {
+        if (chip.dataset.depth === selectedBufferDepth) {
+            document.querySelectorAll('#koch-buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        }
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#koch-buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedBufferDepth = chip.dataset.depth;
+            localStorage.setItem('morse_koch_buffer_depth', selectedBufferDepth);
+        });
+    });
+
+    if (bufferInfo && bufferTooltip) {
+        bufferInfo.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            bufferTooltip.style.display = bufferTooltip.style.display === 'none' ? 'block' : 'none';
+        });
+        bufferTooltip.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    }
+
+    document.addEventListener('click', () => {
+        if (fwTooltip) fwTooltip.style.display = 'none';
+        if (bufferTooltip) bufferTooltip.style.display = 'none';
     });
 
     /**
@@ -292,13 +354,50 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        answerInput.focus();
+
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+
+        const isBuffer = !!session?.isBufferMode;
+        const bufferDepth = session?.bufferDepth || 'all';
+        let bufferUnlocked = false;
+
+        const setBufferLockedState = (locked) => {
+            if (answerInput) {
+                answerInput.disabled = locked;
+                answerInput.placeholder = locked ? t('groups.buffer_listening') : t('koch.answer_placeholder');
+            }
+            if (vkbEl) {
+                vkbEl.style.opacity = locked ? '0.5' : '1';
+                vkbEl.style.pointerEvents = locked ? 'none' : 'auto';
+            }
+        };
+
+        if (isBuffer) {
+            setBufferLockedState(true);
+        } else {
+            setBufferLockedState(false);
+            if (answerInput) answerInput.focus();
+        }
+
         try {
-            const audio = new MorseAudio({
+            currentAudio = new MorseAudio({
                 wpm: session.wpm,
                 farnsworthWpm: session.farnsworth || null,
             });
-            await audio.play(session.groups[session.index], {
+            await currentAudio.play(session.groups[session.index], {
+                onCharStart: ({ index }) => {
+                    if (isBuffer && !bufferUnlocked) {
+                        const targetDepth = parseInt(bufferDepth, 10);
+                        if (!isNaN(targetDepth) && index >= targetDepth) {
+                            bufferUnlocked = true;
+                            setBufferLockedState(false);
+                            if (answerInput) answerInput.focus();
+                        }
+                    }
+                },
                 onSymbol: ({ symbol, durationMs }) => {
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
@@ -307,13 +406,20 @@
         } catch (e) {
             console.error('Ошибка воспроизведения группы:', e);
         } finally {
+            currentAudio = null;
             isPlaying = false;
             replayBtn.disabled = false;
-            answerInput.focus();
+            setBufferLockedState(false);
+            if (answerInput) answerInput.focus();
         }
     }
 
     function abortCurrentSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         if (session && !session.finished && session.dbXpEarned > 0) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             Progress.logXp(session.dbXpEarned, 'koch', {
@@ -334,16 +440,24 @@
 
     function startSession() {
         abortCurrentSession();
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         
         const wpm = parseInt(wpmSlider.value, 10);
         const farnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
         const count = parseInt(document.getElementById('koch-count').value, 10);
         const charset = currentCharset();
+        const isBufferMode = bufferCheckbox ? bufferCheckbox.checked : false;
 
         session = {
             groups: Array.from({ length: count }, () => weightedRandomGroup(charset, GROUP_LEN)),
             index: 0,
             wpm, farnsworth, count,
+            isBufferMode,
+            bufferDepth: selectedBufferDepth,
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
@@ -379,6 +493,11 @@
 
     function submitAnswer() {
         if (!session) return;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         const expected = session.groups[session.index];
         const typed = answerInput.value.trim();
         const correct = scoreAnswer(expected, typed);
@@ -469,14 +588,20 @@
     }
 
     async function finishSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
 
+        const isFullyCompleted = session.index >= session.count;
         const accuracy = session.totalChars ? session.correctChars / session.totalChars : 0;
         let xpEarned = session.xpEarned;
         let baseXP = Math.round(xpEarned);
         let passBonus = 0;
-        if (accuracy >= PASS_THRESHOLD) {
+        if (accuracy >= PASS_THRESHOLD && isFullyCompleted) {
             passBonus = Math.min(50, Math.max(0, Math.round(session.count) || 0));
             xpEarned += passBonus;
             session.dbXpEarned += passBonus;
@@ -492,7 +617,14 @@
         if (params.get('daily') === '1') {
             const req = DailyChallenge.forToday();
             if (req.type === 'koch') {
-                if (accuracy < 0.6) {
+                if (!isFullyCompleted) {
+                    dailyBonusFail = true;
+                    dailyBonusMsg = t('js.groups.daily_mismatch', {
+                        '{count}': req.count || 10,
+                        '{len}': 5,
+                        '{wpm}': req.wpm || 12
+                    });
+                } else if (accuracy < 0.6) {
                     dailyBonusFail = true;
                     dailyBonusMsg = t('js.groups.daily_low_accuracy', {
                         '{min}': 60,
@@ -528,9 +660,8 @@
         brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
         grid.insertAdjacentElement('afterend', brBox);
 
-        // Clean up previous daily note if any
-        const oldNote = document.getElementById('koch-daily-note');
-        if (oldNote) oldNote.remove();
+        // Clean up previous result note if any
+        document.querySelectorAll('#result-panel .js-result-note').forEach(n => n.remove());
 
         if (dailyBonusMsg) {
             const note = document.createElement('div');
@@ -540,33 +671,38 @@
             document.querySelector('.grid.grid-3').insertAdjacentElement('afterend', note);
         }
 
-        Progress.incrementStat('sessionsCompleted', 1);
+        if (isFullyCompleted) {
+            Progress.incrementStat('sessionsCompleted', 1);
+            postStat('total_sessions', 1);
+        }
         Progress.markDailyActivity();
-        postStat('total_sessions', 1);
 
         const msg = document.getElementById('result-message');
         const state = Progress.load();
-        if (accuracy >= PASS_THRESHOLD) {
+        if (accuracy >= PASS_THRESHOLD && isFullyCompleted) {
             // Человек реально принял набор из state.kochLevel символов на ≥90% —
             // это и есть честно заработанный уровень (ачивки считаются по нему).
             // Бегунок «Перейти к уровню» сюда не попадает, поэтому протащить
             // его до конца и получить ачивку «все символы» больше нельзя.
             Progress.markKochLevelEarned(state.kochLevel);
-        }
-        if (accuracy >= PASS_THRESHOLD && state.kochLevel < KOCH_ORDER.length) {
-            Progress.setKochLevel(state.kochLevel + 1);
-            msg.textContent = t('js.koch.new_symbol_unlocked', { '{ch}': KOCH_ORDER[state.kochLevel] });
-            msg.className = 'feedback show ok';
-        } else if (accuracy >= PASS_THRESHOLD) {
-            msg.textContent = t('js.koch.all_unlocked');
-            msg.className = 'feedback show ok';
+            if (state.kochLevel < KOCH_ORDER.length) {
+                Progress.setKochLevel(state.kochLevel + 1);
+                msg.textContent = t('js.koch.new_symbol_unlocked', { '{ch}': KOCH_ORDER[state.kochLevel] });
+                msg.className = 'feedback show ok mt-2';
+            } else {
+                msg.textContent = t('js.koch.all_unlocked');
+                msg.className = 'feedback show ok mt-2';
+            }
+        } else if (!isFullyCompleted) {
+            msg.textContent = t('js.koch.stopped_early', { '{played}': session.index, '{total}': session.count });
+            msg.className = 'feedback show ok mt-2';
         } else {
             if (state.kochLevel === KOCH_ORDER.length) {
                 msg.textContent = t('js.koch.below_threshold_max', { '{pct}': Math.round(accuracy * 100) });
             } else {
                 msg.textContent = t('js.koch.below_threshold', { '{pct}': Math.round(accuracy * 100) });
             }
-            msg.className = 'feedback show bad';
+            msg.className = 'feedback show bad mt-2';
         }
         const mistakesBlock = document.getElementById('mistakes-block');
         const hasMistakes = session.wrongPairs && session.wrongPairs.length > 0;
@@ -594,6 +730,11 @@
 
     function retrainMistakes() {
         if (!session || !session.wrongPairs || !session.wrongPairs.length) return;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         
         const uniquePairs = [];
         const seenPairs = new Set();
@@ -638,6 +779,8 @@
             groups: newGroups,
             count: session.count, // for bonus computation
             index: 0, wpm: session.wpm,
+            isBufferMode: session.isBufferMode,
+            bufferDepth: session.bufferDepth,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: retryXpRate,
             isRetrain: true, isAbuse: isAbuse,
@@ -658,6 +801,29 @@
         answerInput.focus();
         playCurrentGroup();
     }
+
+    function stopKochSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
+        if (!session) {
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+            return;
+        }
+        if (session.totalChars > 0) {
+            finishSession();
+        } else {
+            abortCurrentSession();
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+        }
+    }
+
+    const kochStopBtn = document.getElementById('koch-stop-btn');
+    if (kochStopBtn) kochStopBtn.addEventListener('click', stopKochSession);
 
     document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 

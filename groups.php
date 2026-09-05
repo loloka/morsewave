@@ -105,6 +105,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
                 </div>
                 <div class="chip-row" id="buffer-depth-chips">
+                    <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
                     <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
                     <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
                     <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
@@ -123,6 +124,16 @@ include __DIR__ . '/includes/header.php';
             <?= t('groups.pairs_intro') ?>
         </p>
 
+        <div id="pairs-smart-info" class="card mt-2" style="background:var(--surface-2); border:1px dashed var(--border); padding:12px 16px;">
+            <div class="flex gap-2" style="align-items:center;">
+                <span style="font-size:22px;">🧠</span>
+                <div style="font-size:12px; line-height:1.4;">
+                    <b style="color:var(--text);"><?= t('groups.pairs_smart_active_title') ?>:</b> 
+                    <span class="muted"><?= t('groups.pairs_smart_active_desc') ?></span>
+                </div>
+            </div>
+        </div>
+
         <div id="pairs-smart-recommendation" class="card mt-2" style="display:none; background:var(--surface-2); border:1px solid var(--accent); padding:12px 16px;">
             <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                 <div>
@@ -131,16 +142,6 @@ include __DIR__ . '/includes/header.php';
                     <span class="muted" style="font-size:12px; margin-left:8px;" id="pairs-rec-reason">(<?= t('groups.pairs_recommendation_reason') ?>)</span>
                 </div>
                 <button class="btn btn-sm btn-primary" id="pairs-apply-rec-btn" type="button"><?= t('groups.pairs_recommendation_btn') ?></button>
-            </div>
-        </div>
-
-        <div id="pairs-smart-info" class="card mt-2" style="background:var(--surface-2); border:1px dashed var(--border); padding:12px 16px;">
-            <div class="flex gap-2" style="align-items:center;">
-                <span style="font-size:22px;">🧠</span>
-                <div style="font-size:12px; line-height:1.4;">
-                    <b style="color:var(--text);"><?= t('groups.pairs_smart_active_title') ?>:</b> 
-                    <span class="muted"><?= t('groups.pairs_smart_active_desc') ?></span>
-                </div>
             </div>
         </div>
 
@@ -264,6 +265,7 @@ include __DIR__ . '/includes/header.php';
     <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.answer_placeholder')) ?>" autocomplete="off">
     <div class="btn-row mt-2" id="groups-submit-row">
         <button class="btn btn-primary" id="submit-answer"><?= t('groups.check') ?></button>
+        <button class="btn" id="groups-stop-btn" type="button">⏹ <?= t('groups.words_stop') ?></button>
     </div>
 
     <textarea id="exam-answer" class="answer-input mt-2" style="display:none; min-height:180px; resize:vertical;"

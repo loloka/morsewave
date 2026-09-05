@@ -114,11 +114,31 @@
         });
     }
 
-    document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
-        if (chip.dataset.depth === selectedBufferDepth) {
-            document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
+    function updateBufferDepthOptions(len) {
+        const maxNumericDepth = Math.max(1, len - 1);
+        document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
+            const d = chip.dataset.depth;
+            if (d === 'all') {
+                chip.style.display = 'inline-flex';
+            } else {
+                const num = parseInt(d, 10);
+                chip.style.display = (num <= maxNumericDepth) ? 'inline-flex' : 'none';
+            }
+        });
+
+        if (selectedBufferDepth !== 'all') {
+            const currentNum = parseInt(selectedBufferDepth, 10);
+            if (isNaN(currentNum) || currentNum > maxNumericDepth) {
+                selectedBufferDepth = 'all';
+                localStorage.setItem('morse_groups_buffer_depth', 'all');
+            }
         }
+        document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.depth === selectedBufferDepth);
+        });
+    }
+
+    document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
@@ -126,6 +146,8 @@
             localStorage.setItem('morse_groups_buffer_depth', selectedBufferDepth);
         });
     });
+
+    updateBufferDepthOptions(groupLen);
 
     if (bufferInfo && bufferTooltip) {
         bufferInfo.addEventListener('click', (e) => {
@@ -230,6 +252,7 @@
             groupLen = parseInt(chip.dataset.len, 10);
             localStorage.setItem('morse_groups_len', groupLen);
             updateDailyBanner();
+            updateBufferDepthOptions(groupLen);
         });
     });
     const customInput = document.getElementById('custom-charset-input');
@@ -440,6 +463,7 @@
     function checkPairRecommendation() {
         const recBox = document.getElementById('pairs-smart-recommendation');
         const infoBox = document.getElementById('pairs-smart-info');
+        if (infoBox) infoBox.style.display = 'block';
         if (typeof Progress.getRecommendedPair !== 'function') return;
         const rec = Progress.getRecommendedPair();
         if (rec) {
@@ -460,10 +484,8 @@
                     };
                 }
             }
-            if (infoBox) infoBox.style.display = 'none';
         } else {
             if (recBox) recBox.style.display = 'none';
-            if (infoBox) infoBox.style.display = 'block';
         }
     }
 
@@ -1264,7 +1286,7 @@
         let dailyBonusFail = false;
         if (isDailyChallenge && !session.skipDailyCheck) {
             const matchesRequirement = dailyRequired
-                && session.groups.length === dailyRequired.count
+                && session.index >= dailyRequired.count
                 && groupLen === dailyRequired.len
                 && session.wpm === dailyRequired.wpm;
 
@@ -1304,6 +1326,17 @@
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
         document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
         document.getElementById('result-xp').textContent = xpEarned;
+
+        if (session.index < session.groups.length && !session.isExam && !session.isQrq) {
+            const stopNote = document.createElement('div');
+            stopNote.className = 'feedback show ok mt-2 js-result-note';
+            stopNote.textContent = t('js.groups.stopped_early', {
+                '{played}': session.index,
+                '{total}': session.groups.length
+            });
+            const grid = document.querySelector('#result-panel .grid') || document.getElementById('standard-stat-grid');
+            if (grid) grid.insertAdjacentElement('beforebegin', stopNote);
+        }
 
         const stdGrid = document.getElementById('standard-stat-grid');
         const mistakesBlockEl = document.getElementById('mistakes-block');
@@ -1771,6 +1804,27 @@
 
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
+    function stopGroupsSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
+        if (!session) {
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+            return;
+        }
+        if (session.totalChars > 0) {
+            finishSession();
+        } else {
+            abortCurrentSession();
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+        }
+    }
+    const groupsStopBtn = document.getElementById('groups-stop-btn');
+    if (groupsStopBtn) groupsStopBtn.addEventListener('click', stopGroupsSession);
     examSubmitBtn.addEventListener('click', () => finishExamSession());
     replayBtn.addEventListener('click', playCurrentGroup);
     document.getElementById('restart-btn').addEventListener('click', () => {

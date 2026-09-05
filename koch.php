@@ -42,16 +42,22 @@ include __DIR__ . '/includes/header.php';
             <span class="muted cpm-hint" id="koch-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
-        <label class="chip" style="gap:8px;">
-            <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
-            <span class="info-icon" id="koch-farnsworth-info">?</span>
-        </label>
-        <div class="tooltip-box" id="koch-farnsworth-tooltip" style="display:none;">
-            <?= t('koch.farnsworth_tooltip') ?>
+        <div class="flex gap-1" style="align-items:center;">
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
+            </label>
+            <span class="info-icon" id="koch-farnsworth-info" style="cursor:pointer;" title="Подробнее">?</span>
         </div>
         <div class="speed-control" id="koch-farnsworth-wrap" style="display:none;">
             <input type="range" id="koch-farnsworth" min="5" max="30" step="1" value="10">
             <span class="speed-value" id="koch-farnsworth-value">10</span> wpm
+        </div>
+
+        <div class="flex gap-1" style="align-items:center;">
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="koch-buffer-enabled"> <?= t('groups.buffer_input') ?>
+            </label>
+            <span class="info-icon" id="koch-buffer-info" style="cursor:pointer;" title="Подробнее">?</span>
         </div>
 
         <label class="chip"><?= t('koch.groups_per_session') ?>
@@ -60,6 +66,35 @@ include __DIR__ . '/includes/header.php';
             </select>
         </label>
     </div>
+
+    <div class="tooltip-box" id="koch-farnsworth-tooltip" style="display:none;">
+        <?= t('koch.farnsworth_tooltip') ?>
+    </div>
+    <div class="tooltip-box" id="koch-buffer-tooltip" style="display:none;">
+        <?= t('groups.buffer_tooltip') ?>
+        <div class="muted mt-1" style="font-size:11px;"><?= t('groups.buffer_hint') ?></div>
+    </div>
+
+    <!-- Панель настройки буфера памяти в Кохе -->
+    <div id="koch-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+            </div>
+            <div class="chip-row" id="koch-buffer-depth-chips">
+                <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+            </div>
+        </div>
+        <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            💡 <?= t('groups.buffer_tooltip') ?>
+        </div>
+    </div>
+
     <button class="btn btn-primary mt-2" id="start-session"><?= t('koch.start_session') ?></button>
 </div>
 
@@ -86,6 +121,7 @@ include __DIR__ . '/includes/header.php';
 
     <div class="btn-row mt-2">
         <button class="btn btn-primary" id="submit-answer"><?= t('koch.check') ?></button>
+        <button class="btn" id="koch-stop-btn" type="button">⏹ <?= t('groups.words_stop') ?></button>
     </div>
     <div class="feedback mt-2" id="koch-feedback"></div>
 </div>
