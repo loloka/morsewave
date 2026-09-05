@@ -1202,10 +1202,10 @@
     }
 
     // Время на прослушивание одного символа босса + ввод человеком на клавиатуре:
-    // ~12.5 юнитов звука (с паузой) + ~9.5 юнитов на реакцию и нажатие клавиши.
+    // ~12.5 юнитов звука (с паузой) + ~12.5 юнитов на реакцию и нажатие клавиши (с запасом для новичков).
     function invasionBossSymbolTime(wpm) {
         const unit = 1200 / wpm;
-        return unit * 22;
+        return unit * 25;
     }
 
     function invasionConcurrency() {
@@ -1506,19 +1506,19 @@
         if (bossNum === 1) {
             ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
             bossTotalHits = 10;
-            // Ровно время на 10 символов + 1 право на ошибку
-            duration = (10 + 1) * invasionBossSymbolTime(wpm);
+            // 10 символов + запас на 2-3 ошибки с комфортным временем для новичков
+            duration = (10 + 3) * invasionBossSymbolTime(wpm);
         } else if (bossNum === 2) {
             ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
             bossTotalHits = 20;
-            // 20 символов подряд + допуск на 2-3 ошибки (2.5)
-            duration = (20 + 2.5) * invasionBossSymbolTime(wpm);
+            // 20 символов подряд + допуск на 5-6 ошибок
+            duration = (20 + 6) * invasionBossSymbolTime(wpm);
         } else {
             bossQuote = INVASION_QUOTES[Math.floor(Math.random() * INVASION_QUOTES.length)].replace(/\s/g, '');
             ch = bossQuote[0];
             bossTotalHits = bossQuote.length;
-            // Фраза на латыни + 1 ошибка на каждые 10 символов
-            const extraErrors = Math.max(1, Math.round(bossTotalHits / 10));
+            // Фраза на латыни + допуск 1 ошибка на каждые 4 символа
+            const extraErrors = Math.max(3, Math.round(bossTotalHits / 4));
             duration = (bossTotalHits + extraErrors) * invasionBossSymbolTime(wpm);
         }
 
@@ -1809,6 +1809,7 @@
 
             // На боссе повторяем звук текущего символа, чтобы использовать право на ошибку
             if (enemy.isBoss) {
+                if (enemy.audio) enemy.audio.stop();
                 queueInvasionAudio(enemy);
             }
         }
@@ -1887,6 +1888,7 @@
                 } else {
                     enemy.ch = pickInvasionLetterWeighted(ALL_LEARNABLE);
                 }
+                if (enemy.audio) enemy.audio.stop();
                 queueInvasionAudio(enemy);
                 syncInvasionKeyHighlights();
                 return;
