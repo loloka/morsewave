@@ -23,22 +23,10 @@ include __DIR__ . '/includes/header.php';
     <h3><?= t('groups.settings') ?></h3>
 
     <div class="segmented-nav mt-1" id="groups-exam-toggle">
-        <button type="button" class="segmented-tab active" data-type="training">
-            <span class="tab-icon">🏋️</span>
-            <span class="tab-label"><?= t('groups.mode_training') ?></span>
-        </button>
-        <button type="button" class="segmented-tab" data-type="pairs">
-            <span class="tab-icon">🥊</span>
-            <span class="tab-label"><?= t('groups.mode_pairs') ?></span>
-        </button>
-        <button type="button" class="segmented-tab" data-type="qrq">
-            <span class="tab-icon">🚀</span>
-            <span class="tab-label"><?= t('groups.mode_qrq') ?></span>
-        </button>
-        <button type="button" class="segmented-tab" data-type="exam">
-            <span class="tab-icon">🎓</span>
-            <span class="tab-label"><?= t('groups.mode_exam') ?></span>
-        </button>
+        <button type="button" class="segmented-tab active" data-type="training"><?= t('groups.mode_training') ?></button>
+        <button type="button" class="segmented-tab" data-type="pairs"><?= t('groups.mode_pairs') ?></button>
+        <button type="button" class="segmented-tab" data-type="qrq"><?= t('groups.mode_qrq') ?></button>
+        <button type="button" class="segmented-tab" data-type="exam"><?= t('groups.mode_exam') ?></button>
     </div>
 
     <div id="groups-training-config">
