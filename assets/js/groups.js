@@ -21,6 +21,10 @@
                 abbrevStopBtn.style.display = 'none';
             }
             if (mode !== 'words') haltWords();
+            if (mode !== 'groups') {
+                qrqStopRequested = true;
+                if (qrqAudio) { qrqAudio.stop(); qrqAudio = null; }
+            }
         });
     });
 
@@ -77,7 +81,24 @@
         }
     }
 
+    let currentSubmode = 'training'; // 'training' | 'pairs' | 'qrq' | 'exam'
     let pendingExamMode = false;
+    let selectedPairKey = 'SH';
+    let selectedPairStage = 1;
+    let qrqStopRequested = false;
+    let qrqSessionActive = false;
+    let qrqAudio = null;
+
+    const bufferCheckbox = document.getElementById('groups-buffer-enabled');
+    const bufferInfo = document.getElementById('groups-buffer-info');
+    const bufferTooltip = document.getElementById('groups-buffer-tooltip');
+    if (bufferInfo && bufferTooltip) {
+        bufferInfo.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bufferTooltip.style.display = bufferTooltip.style.display === 'none' ? 'block' : 'none';
+        });
+        document.addEventListener('click', () => { bufferTooltip.style.display = 'none'; });
+    }
     
     const vkbEl = document.getElementById('groups-vkb');
     let vkb = null;
@@ -137,6 +158,7 @@
         wpmCpm.textContent = cpmHintText(wpmSlider.value); 
         localStorage.setItem('morse_groups_wpm', wpmSlider.value);
         updateDailyBanner();
+        updateQrqUI();
     });
     fwSlider.addEventListener('input', () => { 
         fwValue.textContent = fwSlider.value; 
@@ -253,6 +275,151 @@
     }
 
     /**
+     * Генератор групп для режима «Лечение пар» (по методике R8OA):
+     * - Этап 1: знак pairA частый (40-50%), знак pairB СТРОГО ИСКЛЮЧЕН.
+     * - Этап 2: знак pairB частый, знак pairA СТРОГО ИСКЛЮЧЕН.
+     * - Этап 3: знаки pairA и pairB оба присутствуют с повышенной частотой (дуэль).
+     */
+    function generatePairGroups(pairA, pairB, stage, count, len) {
+        const isDigits = '0123456789'.includes(pairA) || '0123456789'.includes(pairB);
+        const baseAlphabet = (isDigits ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+            .split('')
+            .filter(c => c !== pairA && c !== pairB);
+
+        const groups = [];
+        for (let g = 0; g < count; g++) {
+            const chars = [];
+            const pairTargetCount = Math.min(len - 1, Math.random() < 0.65 ? 2 : 1);
+
+            for (let i = 0; i < len; i++) {
+                chars.push(baseAlphabet[Math.floor(Math.random() * baseAlphabet.length)]);
+            }
+
+            const positions = [];
+            while (positions.length < pairTargetCount) {
+                const p = Math.floor(Math.random() * len);
+                if (!positions.includes(p)) positions.push(p);
+            }
+
+            for (const p of positions) {
+                if (stage === 1) {
+                    chars[p] = pairA; // B нет вообще
+                } else if (stage === 2) {
+                    chars[p] = pairB; // A нет вообще
+                } else {
+                    chars[p] = Math.random() < 0.5 ? pairA : pairB;
+                }
+            }
+            groups.push(chars.join(''));
+        }
+        return groups;
+    }
+
+    function getSelectedPairChars() {
+        if (selectedPairKey === 'custom') {
+            const customVal = document.getElementById('custom-pair-input')?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
+            if (customVal.length >= 2) {
+                return { a: customVal[0], b: customVal[1] };
+            }
+            return { a: 'S', b: 'H' };
+        }
+        const mapping = {
+            'SH': { a: 'S', b: 'H' },
+            'BD': { a: 'B', b: 'D' },
+            'UV': { a: 'U', b: 'V' },
+            'H5': { a: 'H', b: '5' },
+            '78': { a: '7', b: '8' },
+            'B6': { a: 'B', b: '6' },
+            'FL': { a: 'F', b: 'L' },
+            'PJ': { a: 'P', b: 'J' },
+        };
+        return mapping[selectedPairKey] || { a: 'S', b: 'H' };
+    }
+
+    function updatePairStageUI() {
+        const chars = getSelectedPairChars();
+        const stage1 = document.getElementById('pairs-stage-1-chip');
+        const stage2 = document.getElementById('pairs-stage-2-chip');
+        const stage3 = document.getElementById('pairs-stage-3-chip');
+        const desc = document.getElementById('pairs-stage-desc');
+
+        if (stage1) stage1.textContent = t('groups.pairs_stage_1', { '{A}': chars.a });
+        if (stage2) stage2.textContent = t('groups.pairs_stage_2', { '{B}': chars.b });
+        if (stage3) stage3.textContent = t('groups.pairs_stage_3', { '{A}': chars.a, '{B}': chars.b });
+
+        document.querySelectorAll('#pairs-stage-chips .chip').forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.stage, 10) === selectedPairStage);
+        });
+
+        if (desc) {
+            if (selectedPairStage === 1) {
+                desc.textContent = t('groups.pairs_stage_1_desc', { '{A}': chars.a, '{B}': chars.b });
+            } else if (selectedPairStage === 2) {
+                desc.textContent = t('groups.pairs_stage_2_desc', { '{A}': chars.a, '{B}': chars.b });
+            } else {
+                desc.textContent = t('groups.pairs_stage_3_desc', { '{A}': chars.a, '{B}': chars.b });
+            }
+        }
+    }
+
+    function setPairStage(stage) {
+        selectedPairStage = stage;
+        updatePairStageUI();
+    }
+
+    function selectPair(pairKey, a, b) {
+        selectedPairKey = pairKey;
+        document.querySelectorAll('#pairs-chips .chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.pair === pairKey);
+        });
+        const customInput = document.getElementById('custom-pair-input');
+        if (customInput) {
+            customInput.style.display = (pairKey === 'custom') ? 'block' : 'none';
+            if (pairKey === 'custom' && a && b) customInput.value = `${a}${b}`;
+        }
+        const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
+        selectedPairStage = pt[pairKey]?.stage || 1;
+        updatePairStageUI();
+    }
+
+    function checkPairRecommendation() {
+        const recBox = document.getElementById('pairs-smart-recommendation');
+        if (!recBox || typeof Progress.getRecommendedPair !== 'function') return;
+        const rec = Progress.getRecommendedPair();
+        if (rec) {
+            document.getElementById('pairs-rec-name').textContent = `${rec.a} / ${rec.b}`;
+            const reasonEl = document.getElementById('pairs-rec-reason');
+            if (reasonEl) {
+                reasonEl.textContent = rec.reason === 'confusion'
+                    ? `(${t('groups.pairs_recommendation_reason')}: ${rec.count} ${rec.count === 1 ? 'ошибка' : 'ошибок'})`
+                    : `(${t('groups.pairs_recommendation_reason')})`;
+            }
+            recBox.style.display = 'block';
+
+            const applyBtn = document.getElementById('pairs-apply-rec-btn');
+            if (applyBtn) {
+                applyBtn.onclick = () => {
+                    selectPair(rec.pair, rec.a, rec.b);
+                };
+            }
+        } else {
+            recBox.style.display = 'none';
+        }
+    }
+
+    function updateQrqUI() {
+        const baseWpm = parseInt(wpmSlider.value, 10);
+        const boostWpm = Math.min(60, baseWpm + 6);
+        const baseVal = document.getElementById('qrq-base-wpm-val');
+        const boostVal = document.getElementById('qrq-boost-wpm-val');
+        const diffText = document.getElementById('qrq-speed-diff-text');
+
+        if (baseVal) baseVal.textContent = baseWpm;
+        if (boostVal) boostVal.textContent = boostWpm;
+        if (diffText) diffText.textContent = t('groups.qrq_speed_diff', { '{base}': baseWpm });
+    }
+
+    /**
      * Ставка XP за один верный символ. Маленький кастомный набор (например,
      * 5 лёгких букв) — это существенно проще полного алфавита, поэтому
      * даёт меньше опыта: иначе можно было бы фармить XP почти бесплатно.
@@ -298,7 +465,16 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        if (session && session.isExam) examAnswerEl.focus(); else answerInput.focus();
+
+        const isBuffer = !!session?.isBufferMode;
+        if (isBuffer && answerInput) {
+            answerInput.disabled = true;
+            answerInput.placeholder = t('groups.buffer_listening');
+        }
+
+        if (session && session.isExam) examAnswerEl.focus();
+        else if (!isBuffer && answerInput) answerInput.focus();
+
         try {
             // В экзамене — фиксированный тайминг эталонной записи, а не
             // wpm-слайдер (см. EXAM_CHAR_WPM выше).
@@ -316,7 +492,15 @@
         } finally {
             isPlaying = false;
             replayBtn.disabled = false;
-            if (session && session.isExam) examAnswerEl.focus(); else answerInput.focus();
+            if (isBuffer && answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('groups.answer_placeholder');
+                answerInput.focus();
+            } else if (session && session.isExam) {
+                examAnswerEl.focus();
+            } else if (answerInput) {
+                answerInput.focus();
+            }
         }
     }
 
@@ -349,6 +533,14 @@
     const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
     function abortCurrentSession() {
+        if (qrqSessionActive) {
+            qrqStopRequested = true;
+            if (qrqAudio) {
+                qrqAudio.stop();
+                qrqAudio = null;
+            }
+            qrqSessionActive = false;
+        }
         if (session && !session.finished && session.dbXpEarned > 0) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             const isAbbrev = !!session.abbrevActive;
@@ -382,33 +574,75 @@
 
     function startSession() {
         abortCurrentSession();
-        
-        const isExam = pendingExamMode;
-        
+
+        if (currentSubmode === 'qrq') {
+            const activeWpm = parseInt(wpmSlider.value, 10);
+            startQrqSession(activeWpm);
+            return;
+        }
+
+        const isExam = (currentSubmode === 'exam');
+        const isPairs = (currentSubmode === 'pairs');
+
         let activeWpm = parseInt(wpmSlider.value, 10);
         let activeFarnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
         let activeCount = parseInt(document.getElementById('groups-count').value, 10);
         let activeGroupLen = groupLen;
         let activeCharsetKey = charsetKey;
-        
+
         if (isExam) {
             activeGroupLen = 5;
             activeCharsetKey = 'mixed';
             activeCount = 50;
+        } else if (isPairs) {
+            const pairsWpmEl = document.getElementById('pairs-wpm');
+            if (pairsWpmEl) activeWpm = parseInt(pairsWpmEl.value, 10);
+            const pairsCountEl = document.getElementById('pairs-count');
+            if (pairsCountEl) activeCount = parseInt(pairsCountEl.value, 10);
+            activeGroupLen = 4;
         }
 
-        const state = Progress.load();
-        const learnedTooFew = activeCharsetKey === 'learned' && state.learnedLetters.length < MIN_LEARNED_FOR_FILTER;
-        const customTooFew = activeCharsetKey === 'custom' && parseCustomCharset().length < MIN_LEARNED_FOR_FILTER;
-        const charset = getCharset(activeCharsetKey);
+        const isBufferMode = (currentSubmode === 'training') && bufferCheckbox && bufferCheckbox.checked;
+
+        let pairData = null;
+        let generatedGroups = null;
+
+        if (isPairs) {
+            const pairChars = getSelectedPairChars();
+            const pairA = pairChars.a;
+            const pairB = pairChars.b;
+            const stage = selectedPairStage;
+            const isStage1 = (stage === 1);
+            const isStage2 = (stage === 2);
+            const activeChar = isStage1 ? pairA : (isStage2 ? pairB : null);
+            const disabledChar = isStage1 ? pairB : (isStage2 ? pairA : null);
+
+            generatedGroups = generatePairGroups(pairA, pairB, stage, activeCount, activeGroupLen);
+            pairData = {
+                pairKey: selectedPairKey,
+                pairA,
+                pairB,
+                pairStage: stage,
+                activeChar,
+                disabledChar,
+                pairStats: { aTotal: 0, aCorrect: 0, bTotal: 0, bCorrect: 0 }
+            };
+        } else {
+            const state = Progress.load();
+            const charset = getCharset(activeCharsetKey);
+            generatedGroups = Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen));
+        }
 
         session = {
-            groups: Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen)),
+            groups: generatedGroups,
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
-            xpRate: xpRateForSession(activeCharsetKey, charset.length, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
+            xpRate: xpRateForSession(isPairs ? 'letters' : activeCharsetKey, 26, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
-            wrongGroups: [], startTime: Date.now(), history: []
+            wrongGroups: [], startTime: Date.now(), history: [],
+            isBufferMode,
+            isPairs,
+            ...(pairData || {})
         };
 
         setupPanel.style.display = 'none';
@@ -416,15 +650,24 @@
         sessionPanel.style.display = 'block';
         groupTotalEl.textContent = activeCount;
         groupIndexEl.textContent = 1;
-        if (learnedTooFew) {
-            feedbackEl.textContent = t('js.groups.filter_learned_too_few', { '{min}': MIN_LEARNED_FOR_FILTER });
-            feedbackEl.className = 'feedback show bad';
-        } else if (customTooFew) {
-            feedbackEl.textContent = t('js.groups.filter_custom_too_few', { '{min}': MIN_LEARNED_FOR_FILTER });
-            feedbackEl.className = 'feedback show bad';
-        } else {
-            feedbackEl.className = 'feedback';
+
+        const pairsBanner = document.getElementById('pairs-disabled-banner');
+        if (isPairs && pairData.disabledChar && pairsBanner) {
+            pairsBanner.textContent = t('groups.pairs_banner_disabled', {
+                '{DISABLED}': pairData.disabledChar,
+                '{ACTIVE}': pairData.activeChar
+            });
+            pairsBanner.style.display = 'block';
+        } else if (pairsBanner) {
+            pairsBanner.style.display = 'none';
         }
+
+        const qrqDisplay = document.getElementById('qrq-session-display');
+        if (qrqDisplay) qrqDisplay.style.display = 'none';
+        const qrqStopBtn = document.getElementById('qrq-stop-btn');
+        if (qrqStopBtn) qrqStopBtn.style.display = 'none';
+
+        feedbackEl.className = 'feedback';
 
         if (isExam) {
             answerInput.style.display = 'none';
@@ -432,8 +675,6 @@
             examAnswerEl.style.display = 'block';
             examSubmitRow.style.display = 'flex';
             examAnswerEl.value = '';
-            // Заблокированы до конца runExamAttentionSequence() — иначе можно
-            // случайно начать печатать ещё во время VVV/отсчёта.
             examAnswerEl.disabled = true;
             examSubmitBtn.disabled = true;
             examSubmitBtn.textContent = t('js.groups.exam_stop_check');
@@ -451,6 +692,144 @@
             answerInput.focus();
             playCurrentGroup();
         }
+    }
+
+    const QRQ_VOCABULARY = [
+        'RADIO', 'MORSE', 'SPEED', 'WAVE', 'POWER', 'SOLAR', 'SPACE',
+        'BEAT', 'SOUND', 'LIGHT', 'WORLD', 'FLASH', 'AUDIO', 'MUSIC',
+        'TEMPO', 'FOCUS', 'NIGHT', 'STARS', 'EARTH', 'WATER', 'RHYTHM',
+        'SIGNAL', 'ANTENNA', 'KEYER', 'PULSE', 'HEART', 'DREAM', 'FLIGHT',
+        'OCEAN', 'STORM', 'BRAIN', 'ENERGY', 'ECHO', 'FORCE', 'HERTZ',
+        'TOWER', 'VOICE', 'POINT', 'SHARP', 'MAGIC', 'LEVEL', 'TRAIN',
+        'QSO', 'QTH', '73', '599', 'RST', 'TEST', 'CQ', 'DX',
+        'FB', 'TNX', 'SK', 'GM', 'GA', 'RIG', 'CW'
+    ];
+
+    async function startQrqSession(baseWpm) {
+        abortCurrentSession();
+        const boostWpm = Math.min(60, baseWpm + 6);
+        const count = 10;
+        const shuffled = [...QRQ_VOCABULARY].sort(() => Math.random() - 0.5);
+        const qrqGroups = shuffled.slice(0, count);
+
+        qrqStopRequested = false;
+        qrqSessionActive = true;
+
+        setupPanel.style.display = 'none';
+        resultPanel.style.display = 'none';
+        sessionPanel.style.display = 'block';
+
+        answerInput.style.display = 'none';
+        groupsSubmitRow.style.display = 'none';
+        examAnswerEl.style.display = 'none';
+        examSubmitRow.style.display = 'none';
+        replayBtn.style.display = 'none';
+
+        const pairsBanner = document.getElementById('pairs-disabled-banner');
+        if (pairsBanner) pairsBanner.style.display = 'none';
+
+        const qrqStopBtn = document.getElementById('qrq-stop-btn');
+        const qrqDisplay = document.getElementById('qrq-session-display');
+        const qrqStatus = document.getElementById('qrq-status-msg');
+        const qrqTip = document.getElementById('qrq-tip-msg');
+        const qrqRevealed = document.getElementById('qrq-revealed-group');
+
+        if (qrqStopBtn) qrqStopBtn.style.display = 'inline-flex';
+        if (qrqDisplay) qrqDisplay.style.display = 'block';
+
+        groupTotalEl.textContent = count;
+        const hints = [
+            t('groups.qrq_hint_1'),
+            t('groups.qrq_hint_2'),
+            t('groups.qrq_hint_3'),
+        ];
+
+        session = {
+            isQrq: true,
+            wpm: boostWpm,
+            baseWpm: baseWpm,
+            groups: qrqGroups,
+            index: 0,
+            startTime: Date.now(),
+            totalChars: qrqGroups.join('').length,
+            correctChars: 0,
+            xpEarned: 0,
+            dbXpEarned: 0,
+        };
+
+        qrqAudio = new MorseAudio({ wpm: boostWpm });
+        const audio = qrqAudio;
+
+        for (let i = 0; i < count; i++) {
+            if (qrqStopRequested) break;
+            session.index = i;
+            groupIndexEl.textContent = i + 1;
+            if (qrqStatus) qrqStatus.textContent = `🎧 ${t('js.groups.qrq_active_listening')} (${i + 1}/${count})`;
+            if (qrqTip) qrqTip.textContent = hints[i % hints.length];
+            if (qrqRevealed) qrqRevealed.textContent = '· · ·';
+
+            signalLine.clear();
+            try {
+                await audio.play(qrqGroups[i], {
+                    onSymbol: ({ symbol, durationMs }) => {
+                        signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                        lamp.flash(durationMs);
+                    },
+                });
+            } catch (e) {
+                console.error(e);
+            }
+
+            if (qrqStopRequested) break;
+
+            if (qrqRevealed) {
+                qrqRevealed.textContent = qrqGroups[i].split('').join(' ');
+            }
+
+            await new Promise(r => setTimeout(r, 1400));
+        }
+
+        if (qrqStopBtn) qrqStopBtn.style.display = 'none';
+        if (qrqDisplay) qrqDisplay.style.display = 'none';
+        qrqSessionActive = false;
+        qrqAudio = null;
+
+        finishQrqSession();
+    }
+
+    function finishQrqSession() {
+        if (qrqAudio) {
+            qrqAudio.stop();
+            qrqAudio = null;
+        }
+        signalLine.clear();
+        lamp.off();
+
+        sessionPanel.style.display = 'none';
+        resultPanel.style.display = 'block';
+
+        const stdGrid = document.getElementById('standard-stat-grid');
+        if (stdGrid) stdGrid.style.display = 'none';
+        const mistakesBlock = document.getElementById('mistakes-block');
+        if (mistakesBlock) mistakesBlock.style.display = 'none';
+        const pairsRes = document.getElementById('pairs-result-block');
+        if (pairsRes) pairsRes.style.display = 'none';
+        const diffBlock = document.getElementById('exam-diff-block');
+        if (diffBlock) diffBlock.style.display = 'none';
+        const oldBr = document.getElementById('groups-xp-breakdown');
+        if (oldBr) oldBr.style.display = 'none';
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) restartBtn.style.display = 'none';
+
+        document.querySelectorAll('#result-panel .js-result-note').forEach(n => n.remove());
+
+        const qrqRes = document.getElementById('qrq-result-block');
+        if (qrqRes) qrqRes.style.display = 'block';
+
+        const completedCount = session ? session.index + 1 : 1;
+        Progress.incrementStat('groupsCompleted', completedCount);
+        postStat('total_groups', completedCount);
+        Progress.markDailyActivity();
     }
 
     // «ЖЖЖ=» — русский вариант общепринятого настроечного сигнала (у Ж и
@@ -618,7 +997,11 @@
                 const e = alignExp[k];
                 const t = alignTyp[k];
                 if (e !== t && e !== ' ' && e !== '_') {
-                    session.wrongPairs.push({ expected: e, typed: (t === '_' || t === ' ') ? '' : t });
+                    const typedChar = (t === '_' || t === ' ') ? '' : t;
+                    session.wrongPairs.push({ expected: e, typed: typedChar });
+                    if (typedChar && typeof Progress.recordPairConfusion === 'function') {
+                        Progress.recordPairConfusion(e, typedChar);
+                    }
                 }
             }
 
@@ -668,6 +1051,23 @@
             const tChar = typedUpper[i] || '';
             if (e !== tChar && e) {
                 session.wrongPairs.push({ expected: e, typed: tChar });
+                if (tChar && typeof Progress.recordPairConfusion === 'function') {
+                    Progress.recordPairConfusion(e, tChar);
+                }
+            }
+        }
+
+        if (session.isPairs && session.pairStats) {
+            for (let i = 0; i < expected.length; i++) {
+                const expChar = expected[i];
+                const typChar = typedUpper[i];
+                if (expChar === session.pairA) {
+                    session.pairStats.aTotal++;
+                    if (typChar === expChar) session.pairStats.aCorrect++;
+                } else if (expChar === session.pairB) {
+                    session.pairStats.bTotal++;
+                    if (typChar === expChar) session.pairStats.bCorrect++;
+                }
             }
         }
 
@@ -812,6 +1212,77 @@
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
         document.getElementById('result-correct').textContent = `${session.correctChars}/${session.totalChars}`;
         document.getElementById('result-xp').textContent = xpEarned;
+
+        const stdGrid = document.getElementById('standard-stat-grid');
+        const mistakesBlockEl = document.getElementById('mistakes-block');
+        const pairsBlock = document.getElementById('pairs-result-block');
+        const qrqBlock = document.getElementById('qrq-result-block');
+
+        if (session.isPairs && pairsBlock) {
+            if (stdGrid) stdGrid.style.display = 'none';
+            if (mistakesBlockEl) mistakesBlockEl.style.display = 'none';
+            if (qrqBlock) qrqBlock.style.display = 'none';
+            pairsBlock.style.display = 'block';
+
+            const pStats = session.pairStats || { aTotal: 0, aCorrect: 0, bTotal: 0, bCorrect: 0 };
+            const aAcc = pStats.aTotal ? Math.round((pStats.aCorrect / pStats.aTotal) * 100) : 100;
+            const bAcc = pStats.bTotal ? Math.round((pStats.bCorrect / pStats.bTotal) * 100) : 100;
+            const pTotal = pStats.aTotal + pStats.bTotal;
+            const pCorrect = pStats.aCorrect + pStats.bCorrect;
+            const pairAcc = pTotal ? Math.round((pCorrect / pTotal) * 100) : Math.round(accuracy * 100);
+
+            const resPairAcc = document.getElementById('pairs-res-pair-acc');
+            if (resPairAcc) resPairAcc.textContent = `${pairAcc}%`;
+            const resPairLabel = document.getElementById('pairs-res-pair-label');
+            if (resPairLabel) resPairLabel.textContent = t('groups.pairs_accuracy_pair', { '{PAIR}': `${session.pairA} / ${session.pairB}` });
+
+            const resAAcc = document.getElementById('pairs-res-a-acc');
+            if (resAAcc) resAAcc.textContent = `${aAcc}% (${pStats.aCorrect}/${pStats.aTotal})`;
+            const resALabel = document.getElementById('pairs-res-a-label');
+            if (resALabel) resALabel.textContent = `Символ ${session.pairA}`;
+
+            const resBAcc = document.getElementById('pairs-res-b-acc');
+            if (resBAcc) resBAcc.textContent = `${bAcc}% (${pStats.bCorrect}/${pStats.bTotal})`;
+            const resBLabel = document.getElementById('pairs-res-b-label');
+            if (resBLabel) resBLabel.textContent = `Символ ${session.pairB}`;
+
+            if (typeof Progress.savePairStage === 'function') {
+                Progress.savePairStage(session.pairKey, session.pairStage, pairAcc);
+            }
+
+            const nextBtn = document.getElementById('pairs-next-stage-btn');
+            if (nextBtn) {
+                if (session.pairStage < 3) {
+                    nextBtn.style.display = 'inline-flex';
+                    nextBtn.textContent = t('groups.pairs_next_stage', { '{next}': session.pairStage + 1 });
+                    nextBtn.onclick = () => {
+                        setPairStage(session.pairStage + 1);
+                        startSession();
+                    };
+                } else {
+                    nextBtn.style.display = 'inline-flex';
+                    nextBtn.textContent = t('groups.pairs_finish_course');
+                    nextBtn.onclick = () => {
+                        resultPanel.style.display = 'none';
+                        setupPanel.style.display = 'block';
+                    };
+                }
+            }
+
+            const repBtn = document.getElementById('pairs-repeat-stage-btn');
+            if (repBtn) {
+                repBtn.onclick = () => {
+                    startSession();
+                };
+            }
+        } else {
+            if (stdGrid) stdGrid.style.display = 'grid';
+            if (pairsBlock) pairsBlock.style.display = 'none';
+            if (qrqBlock) qrqBlock.style.display = 'none';
+        }
+
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) restartBtn.style.display = 'inline-block';
 
         // XP Breakdown
         const grid = document.querySelector('#result-panel .grid');
@@ -1016,38 +1487,173 @@
 
     document.querySelectorAll('#groups-exam-toggle .chip').forEach(chip => {
         chip.addEventListener('click', (e) => {
-            const target = e.target;
+            const target = e.currentTarget || e.target;
             if (target.classList.contains('active')) return;
 
             document.querySelectorAll('#groups-exam-toggle .chip').forEach(c => c.classList.remove('active'));
             target.classList.add('active');
             
-            const isExam = target.dataset.type === 'exam';
-            pendingExamMode = isExam;
+            const type = target.dataset.type; // 'training' | 'pairs' | 'qrq' | 'exam'
+            currentSubmode = type;
+            pendingExamMode = (type === 'exam');
             
             const trainingConfig = document.getElementById('groups-training-config');
+            const pairsConfig = document.getElementById('groups-pairs-config');
+            const qrqConfig = document.getElementById('groups-qrq-config');
             const examHint = document.getElementById('groups-exam-hint-text');
             const startBtn = document.getElementById('start-session');
             
-            if (isExam) {
-                trainingConfig.style.display = 'none';
-                examHint.style.display = 'block';
+            if (trainingConfig) trainingConfig.style.display = (type === 'training') ? 'block' : 'none';
+            if (pairsConfig) pairsConfig.style.display = (type === 'pairs') ? 'block' : 'none';
+            if (qrqConfig) qrqConfig.style.display = (type === 'qrq') ? 'block' : 'none';
+            if (examHint) examHint.style.display = (type === 'exam') ? 'block' : 'none';
+
+            if (type === 'exam') {
                 startBtn.textContent = '▶ ' + t('groups.mode_exam');
-                
-                // Классический тон экзамена — 550 Гц
                 const audioSettings = AudioSettings.load();
                 audioSettings.freq = 550;
                 AudioSettings.save(audioSettings);
-            } else {
-                trainingConfig.style.display = 'block';
-                examHint.style.display = 'none';
+            } else if (type === 'pairs') {
                 startBtn.textContent = t('groups.start_session');
-                
-                // Возвращаем настройки тона на стандартные (850 Гц) или оставляем 550, если пользователь захочет поменять в профиле,
-                // но лучше просто оставить как есть, профиль глобален. Экзамен просто временно перезаписывает тон.
+                checkPairRecommendation();
+                updatePairStageUI();
+            } else if (type === 'qrq') {
+                startBtn.textContent = t('groups.qrq_start');
+                updateQrqUI();
+            } else { // training
+                startBtn.textContent = t('groups.start_session');
             }
         });
     });
+
+    document.querySelectorAll('#pairs-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            selectPair(chip.dataset.pair);
+        });
+    });
+
+    const customPairInput = document.getElementById('custom-pair-input');
+    if (customPairInput) {
+        customPairInput.addEventListener('input', () => {
+            const cleaned = customPairInput.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 2);
+            if (cleaned !== customPairInput.value) customPairInput.value = cleaned;
+            updatePairStageUI();
+        });
+    }
+
+    document.querySelectorAll('#pairs-stage-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const stage = parseInt(chip.dataset.stage, 10);
+            if (stage) setPairStage(stage);
+        });
+    });
+
+    const pairsWpmSlider = document.getElementById('pairs-wpm');
+    const pairsWpmValue = document.getElementById('pairs-wpm-value');
+    const pairsWpmCpm = document.getElementById('pairs-wpm-cpm');
+    if (pairsWpmSlider) {
+        const savedPairsWpm = localStorage.getItem('morse_pairs_wpm') || wpmSlider.value;
+        pairsWpmSlider.value = savedPairsWpm;
+        if (pairsWpmValue) pairsWpmValue.textContent = savedPairsWpm;
+        if (pairsWpmCpm) pairsWpmCpm.textContent = cpmHintText(savedPairsWpm);
+
+        pairsWpmSlider.addEventListener('input', () => {
+            if (pairsWpmValue) pairsWpmValue.textContent = pairsWpmSlider.value;
+            if (pairsWpmCpm) pairsWpmCpm.textContent = cpmHintText(pairsWpmSlider.value);
+            localStorage.setItem('morse_pairs_wpm', pairsWpmSlider.value);
+        });
+    }
+
+    const KEY_RU_TO_EN = {
+        'Й':'Q','Ц':'W','У':'E','К':'R','Е':'T','Н':'Y','Г':'U','Ш':'I','Щ':'O','З':'P',
+        'Ф':'A','Ы':'S','В':'D','А':'F','П':'G','Р':'H','О':'J','Л':'K','Д':'L',
+        'Я':'Z','Ч':'X','С':'C','М':'V','И':'B','Т':'N','Ь':'M'
+    };
+
+    function getForbiddenChars(disChar) {
+        const forbidden = new Set();
+        if (!disChar) return forbidden;
+        const up = disChar.toUpperCase();
+        forbidden.add(up);
+        // Cyrillic Morse sound equivalent
+        if (typeof MORSE_CODE !== 'undefined' && MORSE_CODE[up] && typeof CYRILLIC_TO_CHAR !== 'undefined') {
+            const cyr = CYRILLIC_TO_CHAR[MORSE_CODE[up]];
+            if (cyr) forbidden.add(cyr.toUpperCase());
+        }
+        // Keyboard mapping (RU key for this Latin char)
+        Object.entries(KEY_RU_TO_EN).forEach(([ru, en]) => {
+            if (en === up) forbidden.add(ru);
+        });
+        return forbidden;
+    }
+
+    answerInput.addEventListener('input', () => {
+        if (session && session.isPairs && session.disabledChar) {
+            const forbidden = getForbiddenChars(session.disabledChar);
+            let hasForbidden = false;
+            const currentVal = answerInput.value;
+            for (let i = 0; i < currentVal.length; i++) {
+                if (forbidden.has(currentVal[i].toUpperCase())) {
+                    hasForbidden = true;
+                    break;
+                }
+            }
+            if (hasForbidden) {
+                // Strip all forbidden characters
+                answerInput.value = currentVal.split('').filter(c => !forbidden.has(c.toUpperCase())).join('');
+                
+                // Trigger shake animation
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth; // force reflow
+                answerInput.classList.add('pairs-shake');
+
+                // Visual feedback
+                if (feedbackEl) {
+                    feedbackEl.textContent = t('groups.pairs_banner_disabled', {
+                        '{DISABLED}': session.disabledChar,
+                        '{ACTIVE}': session.activeChar || ''
+                    });
+                    feedbackEl.className = 'feedback show bad';
+                }
+            }
+        }
+    });
+
+    const qrqStopBtn = document.getElementById('qrq-stop-btn');
+    if (qrqStopBtn) {
+        qrqStopBtn.addEventListener('click', () => {
+            qrqStopRequested = true;
+            if (qrqAudio) {
+                qrqAudio.stop();
+                qrqAudio = null;
+            }
+            signalLine.clear();
+            lamp.off();
+            qrqStopBtn.style.display = 'none';
+            const qrqDisplay = document.getElementById('qrq-session-display');
+            if (qrqDisplay) qrqDisplay.style.display = 'none';
+            qrqSessionActive = false;
+            finishQrqSession();
+        });
+    }
+
+    const qrqReturnBtn = document.getElementById('qrq-return-btn');
+    if (qrqReturnBtn) {
+        qrqReturnBtn.addEventListener('click', () => {
+            resultPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+            const trainingChip = document.querySelector('#groups-exam-toggle .chip[data-type="training"]');
+            if (trainingChip) trainingChip.click();
+        });
+    }
+
+    const tipsToggle = document.getElementById('method-tips-toggle');
+    const tipsBox = document.getElementById('method-tips-box');
+    if (tipsToggle && tipsBox) {
+        tipsToggle.addEventListener('click', () => {
+            tipsBox.style.display = tipsBox.style.display === 'none' ? 'block' : 'none';
+        });
+    }
 
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
@@ -1056,6 +1662,14 @@
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
+        const pairsBlock = document.getElementById('pairs-result-block');
+        if (pairsBlock) pairsBlock.style.display = 'none';
+        const qrqBlock = document.getElementById('qrq-result-block');
+        if (qrqBlock) qrqBlock.style.display = 'none';
+        const stdGrid = document.getElementById('standard-stat-grid');
+        if (stdGrid) stdGrid.style.display = 'grid';
+        const oldBr = document.getElementById('groups-xp-breakdown');
+        if (oldBr) oldBr.style.display = 'block';
     });
     answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
 

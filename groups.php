@@ -24,6 +24,8 @@ include __DIR__ . '/includes/header.php';
 
     <div class="chip-row mt-1" id="groups-exam-toggle" style="margin-bottom: 15px;">
         <div class="chip active" data-type="training"><?= t('groups.mode_training') ?></div>
+        <div class="chip" data-type="pairs"><?= t('groups.mode_pairs') ?></div>
+        <div class="chip" data-type="qrq"><?= t('groups.mode_qrq') ?></div>
         <div class="chip" data-type="exam"><?= t('groups.mode_exam') ?></div>
     </div>
 
@@ -70,6 +72,11 @@ include __DIR__ . '/includes/header.php';
                 <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
             </div>
 
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
+                <span class="info-icon" id="groups-buffer-info">?</span>
+            </label>
+
             <label class="chip"><?= t('groups.groups_per_session') ?>
                 <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
                     <option value="10" selected>10</option><option value="20">20</option>
@@ -80,27 +87,137 @@ include __DIR__ . '/includes/header.php';
         <div class="tooltip-box" id="groups-farnsworth-tooltip" style="display:none;">
             <?= t('groups.farnsworth_tooltip') ?>
         </div>
+        <div class="tooltip-box" id="groups-buffer-tooltip" style="display:none;">
+            <?= t('groups.buffer_tooltip') ?>
+            <div class="muted mt-1" style="font-size:11px;"><?= t('groups.buffer_hint') ?></div>
+        </div>
+    </div>
+
+    <!-- ======================= РЕЖИМ: ЛЕЧЕНИЕ ПАР ======================= -->
+    <div id="groups-pairs-config" style="display:none;">
+        <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
+            <?= t('groups.pairs_intro') ?>
+        </p>
+
+        <div id="pairs-smart-recommendation" class="card mt-2" style="display:none; background:var(--surface-2); border:1px solid var(--accent); padding:12px 16px;">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <span style="font-weight:700; color:var(--accent);"><?= t('groups.pairs_recommendation') ?></span>
+                    <span id="pairs-rec-name" class="mono" style="font-size:16px; font-weight:bold; margin-left:6px;">S / H</span>
+                    <span class="muted" style="font-size:12px; margin-left:8px;" id="pairs-rec-reason">(<?= t('groups.pairs_recommendation_reason') ?>)</span>
+                </div>
+                <button class="btn btn-sm btn-primary" id="pairs-apply-rec-btn"><?= t('groups.pairs_recommendation_btn') ?></button>
+            </div>
+        </div>
+
+        <div class="mt-2">
+            <div class="muted" style="font-size:13px; margin-bottom:6px;"><?= t('groups.pairs_choose_pair') ?></div>
+            <div class="chip-row" id="pairs-chips">
+                <div class="chip active" data-pair="SH">S / H</div>
+                <div class="chip" data-pair="BD">B / D</div>
+                <div class="chip" data-pair="UV">U / V</div>
+                <div class="chip" data-pair="H5">H / 5</div>
+                <div class="chip" data-pair="78">7 / 8</div>
+                <div class="chip" data-pair="B6">B / 6</div>
+                <div class="chip" data-pair="FL">F / L</div>
+                <div class="chip" data-pair="PJ">P / J</div>
+                <div class="chip" data-pair="custom"><?= t('groups.pairs_custom') ?></div>
+            </div>
+            <input type="text" id="custom-pair-input" class="answer-input mt-1"
+                   placeholder="<?= htmlspecialchars(t('groups.pairs_custom_placeholder')) ?>"
+                   style="display:none; text-transform:uppercase; max-width:200px;" maxlength="4" autocomplete="off">
+        </div>
+
+        <div class="mt-3">
+            <div class="muted" style="font-size:13px; margin-bottom:6px;"><?= t('groups.pairs_stage_label') ?></div>
+            <div class="chip-row" id="pairs-stage-chips">
+                <div class="chip active" data-stage="1" id="pairs-stage-1-chip">1. <?= t('groups.pairs_stage_1', ['{A}' => 'S']) ?></div>
+                <div class="chip" data-stage="2" id="pairs-stage-2-chip">2. <?= t('groups.pairs_stage_2', ['{B}' => 'H']) ?></div>
+                <div class="chip" data-stage="3" id="pairs-stage-3-chip">3. <?= t('groups.pairs_stage_3', ['{A}' => 'S', '{B}' => 'H']) ?></div>
+            </div>
+            <div class="muted mt-1" id="pairs-stage-desc" style="font-size:12px; line-height:1.4;">
+                <?= t('groups.pairs_stage_1_desc', ['{A}' => 'S', '{B}' => 'H']) ?>
+            </div>
+        </div>
+
+        <div class="flex-wrap gap-2 mt-3" style="align-items:center;">
+            <div class="speed-control">
+                <?= t('groups.speed') ?>
+                <input type="range" id="pairs-wpm" min="5" max="60" step="1" value="12">
+                <span class="speed-value" id="pairs-wpm-value">12</span> wpm
+                <span class="muted cpm-hint" id="pairs-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
+            </div>
+
+            <label class="chip"><?= t('groups.groups_per_session') ?>
+                <select id="pairs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
+                    <option value="10" selected>10</option><option value="20">20</option>
+                    <option value="30">30</option><option value="50">50</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
+    <!-- ======================= РЕЖИМ: QRQ РАЗМИНКА ======================= -->
+    <div id="groups-qrq-config" style="display:none;">
+        <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
+            <?= t('groups.qrq_intro', ['{wpm}' => 12]) ?>
+        </p>
+
+        <div class="card mt-2" style="background:var(--surface-2); padding:16px; border:1px solid var(--border);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div class="muted" style="font-size:12px;"><?= t('groups.qrq_speed_label') ?></div>
+                    <div style="font-size:22px; font-weight:800; color:var(--accent);">
+                        <span id="qrq-base-wpm-val">12</span> wpm ➔ <span id="qrq-boost-wpm-val">18</span> wpm
+                    </div>
+                </div>
+                <div class="muted" style="font-size:12px;" id="qrq-speed-diff-text">
+                    <?= t('groups.qrq_speed_diff', ['{base}' => 12]) ?>
+                </div>
+            </div>
+        </div>
     </div>
 
     <p class="muted mt-1" id="groups-exam-hint-text" style="display:none; font-size:12px; margin-bottom: 15px;">
         <?= t('groups.exam_hint') ?>
     </p>
 
-    <div class="btn-row mt-2">
+    <div class="btn-row mt-2" style="align-items:center;">
         <button class="btn btn-primary" id="start-session"><?= t('groups.start_session') ?></button>
+        <button class="btn btn-sm" id="method-tips-toggle" type="button"><?= t('groups.method_tips_btn') ?></button>
+    </div>
+
+    <div id="method-tips-box" class="card mt-2" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent);"><?= t('groups.method_tips_title') ?></h4>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:13px; line-height:1.5;">
+            <div><b><?= t('groups.tip_1_title') ?>:</b> <?= t('groups.tip_1_text') ?></div>
+            <div><b><?= t('groups.tip_2_title') ?>:</b> <?= t('groups.tip_2_text') ?></div>
+            <div><b><?= t('groups.tip_3_title') ?>:</b> <?= t('groups.tip_3_text') ?></div>
+            <div><b><?= t('groups.tip_4_title') ?>:</b> <?= t('groups.tip_4_text') ?></div>
+        </div>
     </div>
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">
+    <div id="pairs-disabled-banner" class="alert-banner mb-2" style="display:none; background:rgba(226, 88, 79, 0.15); border:1px solid var(--danger); color:var(--text); padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; text-align:center;"></div>
+
     <div class="flex-between">
         <div class="muted mono"><?= t('groups.group_label') ?> <span id="group-index">1</span> / <span id="group-total">10</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="groups-lamp"></div>
             <button class="btn btn-sm" id="groups-signal-toggle"></button>
             <button class="btn btn-sm" id="replay-btn" title="F7"><?= t('groups.replay') ?> <span style="opacity: 0.6; font-size: 0.9em; margin-left: 4px;">[F7]</span></button>
+            <button class="btn btn-sm" id="qrq-stop-btn" style="display:none;">⏹ <?= t('groups.words_stop') ?></button>
         </div>
     </div>
     <div class="signal-line mt-2" id="groups-signal"></div>
+
+    <div id="qrq-session-display" style="display:none; text-align:center; padding:20px 0;">
+        <div id="qrq-status-msg" style="font-size:18px; color:var(--text); font-weight:700;">🎧 <?= t('js.groups.qrq_active_listening') ?></div>
+        <div id="qrq-tip-msg" class="muted mt-2" style="font-size:14px; min-height:42px; line-height:1.4;"></div>
+        <div id="qrq-revealed-group" class="mono mt-2" style="font-size:36px; letter-spacing:6px; color:var(--signal); min-height:50px; font-weight:bold;"></div>
+    </div>
+
     <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.answer_placeholder')) ?>" autocomplete="off">
     <div class="btn-row mt-2" id="groups-submit-row">
         <button class="btn btn-primary" id="submit-answer"><?= t('groups.check') ?></button>
@@ -119,13 +236,34 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card mt-3" id="result-panel" style="display:none;">
     <h3><?= t('groups.result_title') ?></h3>
-    <div class="grid grid-3 mt-1">
+    <div class="grid grid-3 mt-1" id="standard-stat-grid">
         <div class="stat"><span class="value" id="result-accuracy">0%</span><span class="label"><?= t('groups.result_accuracy') ?></span></div>
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('groups.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('groups.result_xp') ?></span></div>
     </div>
     
     <div id="exam-diff-block" class="mt-2" style="display:none; font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; color: var(--text); background: var(--surface-2); padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5; text-align: left;"></div>
+
+    <!-- Блок результатов для пар -->
+    <div class="card mt-2" id="pairs-result-block" style="display:none; background:var(--surface-2); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent);"><?= t('groups.pairs_title') ?></h4>
+        <div class="grid grid-3 mt-2">
+            <div class="stat"><span class="value" id="pairs-res-pair-acc">0%</span><span class="label" id="pairs-res-pair-label"><?= t('groups.pairs_accuracy_pair', ['{PAIR}' => '']) ?></span></div>
+            <div class="stat"><span class="value" id="pairs-res-a-acc">0%</span><span class="label" id="pairs-res-a-label">Символ A</span></div>
+            <div class="stat"><span class="value" id="pairs-res-b-acc">0%</span><span class="label" id="pairs-res-b-label">Символ B</span></div>
+        </div>
+        <div class="btn-row mt-3">
+            <button class="btn btn-primary" id="pairs-next-stage-btn"><?= t('groups.pairs_next_stage', ['{next}' => 2]) ?></button>
+            <button class="btn" id="pairs-repeat-stage-btn"><?= t('groups.pairs_repeat_stage') ?></button>
+        </div>
+    </div>
+
+    <!-- Блок результатов для QRQ -->
+    <div class="card mt-2" id="qrq-result-block" style="display:none; background:var(--surface-2); padding:16px; text-align:center;">
+        <h3 style="color:var(--success); margin-bottom:8px;"><?= t('groups.qrq_finished_title') ?></h3>
+        <p class="muted" style="margin-bottom:16px;"><?= t('groups.qrq_finished_desc') ?></p>
+        <button class="btn btn-primary" id="qrq-return-btn"><?= t('groups.qrq_back_to_training') ?></button>
+    </div>
 
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
         <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>

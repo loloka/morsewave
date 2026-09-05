@@ -2,7 +2,15 @@
     // Декоративная, но честная демонстрация сигнальной линии
     const heroEl = document.getElementById('hero-signal');
     const heroLine = new SignalLine(heroEl, 46);
-    const demoText = 'CQ CQ MORSEWAVE ';
+    const DEMO_PHRASES = [
+        'CQ CQ CQ DE MORSEWAVE PSE K ',
+        'GM UR RST 599 5NN FB 73 ES GL DE MORSEWAVE ',
+        'QRZ DE MORSEWAVE OP ALEX QTH MOSCOW HW CPY? ',
+        'CQ CONTEST MORSEWAVE TEST ',
+        'CW IS NOT DEAD IT IS ART ',
+        'RADIO WAVE CONNECTS THE WORLD 73 ',
+        'TNX FER QSO 73 SK DE MORSEWAVE EE '
+    ];
 
     // Предзаполняем ленту с самого старта, чтобы блок сразу был полон символов,
     // и пользователь видел поток, а не пустую коробку
@@ -31,26 +39,30 @@
     // Бесконечный цикл: новый символ рождается справа, ярко подсвечивается,
     // а предыдущие плавно уплывают влево.
     (async function visualOnlyLoop() {
-        let charIndex = 0;
+        let phraseIdx = 0;
         while (true) {
-            const ch = demoText[charIndex % demoText.length];
-            charIndex++;
-            if (ch === ' ') {
-                heroLine.gap('word-gap');
-                await new Promise((r) => setTimeout(r, 450));
-                continue;
-            }
-            const code = (typeof MORSE_CODE !== 'undefined') ? MORSE_CODE[ch] : null;
-            if (code) {
-                for (let s = 0; s < code.length; s++) {
-                    const sym = code[s];
-                    const dur = sym === '.' ? 130 : 270;
-                    heroLine.pulse(sym === '.' ? 'dot' : 'dash', dur);
-                    await new Promise((r) => setTimeout(r, dur + 90));
+            const phrase = DEMO_PHRASES[phraseIdx % DEMO_PHRASES.length];
+            phraseIdx++;
+            for (let i = 0; i < phrase.length; i++) {
+                const ch = phrase[i];
+                if (ch === ' ') {
+                    heroLine.gap('word-gap');
+                    await new Promise((r) => setTimeout(r, 450));
+                    continue;
                 }
-                heroLine.gap('char-gap');
-                await new Promise((r) => setTimeout(r, 260));
+                const code = (typeof MORSE_CODE !== 'undefined') ? MORSE_CODE[ch] : null;
+                if (code) {
+                    for (let s = 0; s < code.length; s++) {
+                        const sym = code[s];
+                        const dur = sym === '.' ? 130 : 270;
+                        heroLine.pulse(sym === '.' ? 'dot' : 'dash', dur);
+                        await new Promise((r) => setTimeout(r, dur + 90));
+                    }
+                    heroLine.gap('char-gap');
+                    await new Promise((r) => setTimeout(r, 260));
+                }
             }
+            await new Promise((r) => setTimeout(r, 1200));
         }
     })();
 

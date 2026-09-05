@@ -138,6 +138,8 @@ const Progress = (() => {
         unlockedAchievements: [],
         dailyChallengeDate: null,
         invasionDailyWinDate: null,
+        pairConfusion: {},
+        pairTrainer: {},
     });
 
     function load() {
@@ -377,6 +379,30 @@ const Progress = (() => {
             });
         }
 
+        // pairConfusion — статистика ошибок на парах (max по каждому ключу)
+        {
+            const localConfusion = (local.pairConfusion && typeof local.pairConfusion === 'object') ? local.pairConfusion : {};
+            const serverConfusion = (server.pairConfusion && typeof server.pairConfusion === 'object') ? server.pairConfusion : {};
+            merged.pairConfusion = {};
+            new Set([...Object.keys(localConfusion), ...Object.keys(serverConfusion)]).forEach((k) => {
+                merged.pairConfusion[k] = Math.max(Number(localConfusion[k]) || 0, Number(serverConfusion[k]) || 0);
+            });
+        }
+
+        // pairTrainer — прогресс по этапам лечения пар
+        {
+            const localTrainer = (local.pairTrainer && typeof local.pairTrainer === 'object') ? local.pairTrainer : {};
+            const serverTrainer = (server.pairTrainer && typeof server.pairTrainer === 'object') ? server.pairTrainer : {};
+            merged.pairTrainer = {};
+            new Set([...Object.keys(localTrainer), ...Object.keys(serverTrainer)]).forEach((k) => {
+                const lt = localTrainer[k] || {};
+                const st = serverTrainer[k] || {};
+                const stage = Math.max(Number(lt.stage) || 1, Number(st.stage) || 1);
+                const completed = { ...(lt.completed || {}), ...(st.completed || {}) };
+                merged.pairTrainer[k] = { stage, completed };
+            });
+        }
+
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
         const localStats = local.stats || {};
@@ -609,6 +635,81 @@ const Progress = (() => {
         save(state);
         pushFullProgress();
         return state;
+    }
+
+    const CLASSIC_PAIRS = [
+        { a: 'S', b: 'H', key: 'SH' },
+        { a: 'B', b: 'D', key: 'BD' },
+        { a: 'U', b: 'V', key: 'UV' },
+        { a: 'H', b: '5', key: 'H5' },
+        { a: '7', b: '8', key: '78' },
+        { a: 'B', b: '6', key: 'B6' },
+        { a: 'F', b: 'L', key: 'FL' },
+        { a: 'P', b: 'J', key: 'PJ' },
+    ];
+
+    /**
+     * Запоминает пару символов, на которой оператор ошибся (например, ожидался 'H', введен 'S').
+     */
+    function recordPairConfusion(ch1, ch2) {
+        if (!ch1 || !ch2 || ch1 === ch2) return;
+        const a = String(ch1).toUpperCase();
+        const b = String(ch2).toUpperCase();
+        if (!/^[A-Z0-9]$/.test(a) || !/^[A-Z0-9]$/.test(b)) return;
+        const key = [a, b].sort().join('-');
+        const state = load();
+        if (!state.pairConfusion || typeof state.pairConfusion !== 'object') {
+            state.pairConfusion = {};
+        }
+        state.pairConfusion[key] = (state.pairConfusion[key] || 0) + 1;
+        save(state);
+        pushFullProgress();
+    }
+
+    function getPairTrainer() {
+        const state = load();
+        return (state.pairTrainer && typeof state.pairTrainer === 'object') ? state.pairTrainer : {};
+    }
+
+    function savePairStage(pairKey, stage, accuracy) {
+        const state = load();
+        if (!state.pairTrainer || typeof state.pairTrainer !== 'object') {
+            state.pairTrainer = {};
+        }
+        if (!state.pairTrainer[pairKey]) {
+            state.pairTrainer[pairKey] = { stage: 1, completed: {} };
+        }
+        state.pairTrainer[pairKey].completed = state.pairTrainer[pairKey].completed || {};
+        state.pairTrainer[pairKey].completed[stage] = { accuracy: Math.round(accuracy), at: Date.now() };
+        if (stage < 3) {
+            state.pairTrainer[pairKey].stage = Math.max(state.pairTrainer[pairKey].stage || 1, stage + 1);
+        }
+        save(state);
+        pushFullProgress();
+    }
+
+    function getRecommendedPair() {
+        const state = load();
+        const conf = state.pairConfusion || {};
+        const scores = state.groupsLetterScores || {};
+        let best = null;
+        let highestConfusion = 0;
+
+        for (const p of CLASSIC_PAIRS) {
+            const pairKey = [p.a, p.b].sort().join('-');
+            const confusionCount = conf[pairKey] || 0;
+            const scoreA = (typeof scores[p.a] === 'number') ? scores[p.a] : 0.7;
+            const scoreB = (typeof scores[p.b] === 'number') ? scores[p.b] : 0.7;
+            const minScore = Math.min(scoreA, scoreB);
+
+            if (confusionCount > highestConfusion && confusionCount >= 2) {
+                highestConfusion = confusionCount;
+                best = { pair: p.key, a: p.a, b: p.b, count: confusionCount, reason: 'confusion' };
+            } else if (!best && minScore < 0.65) {
+                best = { pair: p.key, a: p.a, b: p.b, score: minScore, reason: 'score' };
+            }
+        }
+        return best;
     }
 
     /**
@@ -894,6 +995,7 @@ const Progress = (() => {
         invasionLetterScore, recordInvasionAttempt,
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,
+        recordPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, CLASSIC_PAIRS,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         completeInvasionDailyWin, isInvasionDailyWinDone,
