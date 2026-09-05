@@ -1340,7 +1340,44 @@
         }
     }
 
+    let invasionBossAudioTimer = null;
+
+    function playBossAudioNow(enemy) {
+        if (!invasionRunning || !enemy || enemy.state !== 'active') return;
+        if (enemy.audio) {
+            enemy.audio.stop();
+            enemy.audio = null;
+        }
+        clearTimeout(invasionBossAudioTimer);
+        invasionBossAudioTimer = setTimeout(() => {
+            if (!invasionRunning || !enemy || enemy.state !== 'active') return;
+            const wpm = parseInt(invasionWpmSlider.value, 10);
+            enemy.audio = new MorseAudio({ wpm });
+            enemy.audio.play(enemy.ch, {
+                onSymbol: ({ durationMs }) => {
+                    if (enemy.state === 'active') invasionLampEl.flash(durationMs);
+                },
+            }).then(() => {
+                // Если босс всё ещё жив на этой же букве и ответ ещё не дан — повторить через комфортную паузу
+                if (invasionRunning && enemy.state === 'active' && !enemy.audio?._stopped) {
+                    const unit = 1200 / wpm;
+                    const repeatDelay = Math.max(1200, unit * 7);
+                    clearTimeout(invasionBossAudioTimer);
+                    invasionBossAudioTimer = setTimeout(() => {
+                        if (invasionRunning && enemy.state === 'active') {
+                            playBossAudioNow(enemy);
+                        }
+                    }, repeatDelay);
+                }
+            }).catch((e) => { console.error('Ошибка воспроизведения (босс):', e); });
+        }, 40);
+    }
+
     async function playInvasionEnemyAudio(enemy) {
+        if (enemy.isBoss) {
+            playBossAudioNow(enemy);
+            return;
+        }
         // Пока ждали своей очереди в invasionAudioChain, пришельца уже могли
         // убить/пропустить — тогда озвучивать нечего, тихо выходим.
         if (!invasionRunning || enemy.state !== 'active') return;
@@ -1352,41 +1389,27 @@
             },
         }).catch((e) => { console.error('Ошибка воспроизведения (вторжение):', e); });
 
-        // Сторож: реальный баг с телефона (владелец, 2026-07-31) — звук
-        // молча пропадал после нескольких нажатий. Вероятная причина —
-        // общий AudioContext "засыпает" на мобильном браузере (свёрнута
-        // вкладка, звонок и т.п.), а его внутренние часы (currentTime) не
-        // движутся, пока он suspended — запланированный osc.stop() внутри
-        // MorseAudio никогда не срабатывает, await play() виснет НАВСЕГДА,
-        // а вместе с ним и вся очередь звука для ВСЕХ следующих пришельцев
-        // (см. invasionAudioChain — это цепочка промисов, один зависший
-        // навсегда блокирует всех, кто за ним). Сторож гарантирует, что
-        // очередь всё равно продвинется дальше, даже если этот конкретный
-        // звук так и не доиграл.
+        // Сторож: максимум 3.5 секунды на одну букву (ранее было enemy.duration + 2000,
+        // из-за чего на боссах очередь звука наглухо зависала на 30-40 секунд при сбое/раннем клике).
         await Promise.race([
             playPromise,
-            new Promise((resolve) => setTimeout(resolve, enemy.duration + 2000)),
+            new Promise((resolve) => setTimeout(resolve, 3500)),
         ]);
 
-        // Пауза ПОСЛЕ буквы, прежде чем очередь отпустит следующего пришельца
-        // на озвучку — реальный фидбек владельца (2026-07-31): без неё две
-        // подряд буквы звучали слитно, "будто накладываются друг на друга"
-        // (в реальности не одновременно, но без стандартного зазора между
-        // буквами на слух совершенно не разобрать, где кончилась одна и
-        // началась другая). Берём тот же зазор, что и MorseAudio.play() сам
-        // ставит МЕЖДУ буквами внутри одной строки (interCharGap = 3×unit) —
-        // ровно как в группах, где несколько символов звучат одной фразой.
-        if (invasionRunning) {
+        // Пауза ПОСЛЕ буквы, если звук не был прерван ответом
+        if (invasionRunning && !enemy.audio?._stopped) {
             const unit = 1200 / wpm;
             await new Promise((resolve) => setTimeout(resolve, unit * 3));
         }
     }
 
-    // Сериализуем звук через цепочку промисов — с 2-5 пришельцами их морзянки
-    // НЕ должны звучать одновременно (была бы каша, не разобрать ни одной
-    // буквы), поэтому каждая следующая буква ждёт своей очереди, даже если
-    // сам пришелец уже виден и летит к базе.
+    // Сериализуем звук через цепочку промисов для рядовых врагов в строю.
+    // Босс озвучивается напрямую через playBossAudioNow без очереди и задержек.
     function queueInvasionAudio(enemy) {
+        if (enemy.isBoss) {
+            playBossAudioNow(enemy);
+            return;
+        }
         invasionAudioChain = invasionAudioChain.then(() => playInvasionEnemyAudio(enemy)).catch(() => {});
     }
 
@@ -1583,6 +1606,9 @@
         invasionCurrentBoss = bossNum;
         clearTimeout(invasionGroupSpawnTimer);
         invasionGroupSpawnTimer = null;
+        clearTimeout(invasionBossAudioTimer);
+        invasionBossAudioTimer = null;
+        invasionAudioChain = Promise.resolve();
 
         invasionEnemies.forEach((e) => {
             if (e.audio) e.audio.stop();
@@ -1777,16 +1803,17 @@
         if (!active.length) {
             return invasionEnemies.filter((e) => e.state === 'active').sort((a, b) => a.startTime - b.startTime)[0] || null;
         }
-        active.sort((a, b) => b.progress - a.progress);
+        active.sort((a, b) => {
+            const pA = Math.min(1, Math.max(0, (now - a.startTime) / a.duration));
+            const pB = Math.min(1, Math.max(0, (now - b.startTime) / b.duration));
+            return pB - pA;
+        });
         return active[0];
     }
 
     function handleInvasionAnswer(ch, key) {
         if (!invasionRunning) return;
         getSharedAudioContext();
-
-        // Если лопата уже летит в эту букву — дубликат не штрафуем
-        if (invasionEnemies.some((e) => e.ch === ch && e.state === 'dying')) return;
 
         const enemy = getFrontActiveEnemy();
         if (!enemy) return;
@@ -1796,6 +1823,9 @@
             setTimeout(() => key.classList.remove('correct'), 400);
             resolveInvasionKill(enemy);
         } else {
+            // Если игрок повторно нажал клавишу уже убитого пришельца (пока летит лопата) — не штрафуем как ошибку
+            if (invasionEnemies.some((e) => e.ch === ch && e.state === 'dying')) return;
+
             key.classList.add('wrong');
             setTimeout(() => key.classList.remove('wrong'), 400);
             invasionCombo = 0;
@@ -1893,6 +1923,8 @@
                 syncInvasionKeyHighlights();
                 return;
             }
+            clearTimeout(invasionBossAudioTimer);
+            invasionBossAudioTimer = null;
             
             // Дополнительный опыт за добивание босса
             const bossBonus = enemy.bossTotalHits * 2;
@@ -2123,6 +2155,8 @@
         invasionCurrentBoss = 0;
         clearTimeout(invasionGroupSpawnTimer);
         invasionGroupSpawnTimer = null;
+        clearTimeout(invasionBossAudioTimer);
+        invasionBossAudioTimer = null;
         cancelAnimationFrame(invasionRafId);
         invasionRafId = null;
         invasionEnemies.forEach((e) => { if (e.audio) e.audio.stop(); });

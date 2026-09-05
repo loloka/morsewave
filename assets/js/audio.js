@@ -81,8 +81,13 @@ class MorseAudio {
     }
 
     _silence(durationMs) {
+        if (this._stopped) return Promise.resolve();
         return new Promise((resolve) => {
-            this._timer = setTimeout(resolve, durationMs);
+            this._silenceResolve = resolve;
+            this._timer = setTimeout(() => {
+                this._silenceResolve = null;
+                resolve();
+            }, durationMs);
         });
     }
 
@@ -175,6 +180,11 @@ class MorseAudio {
     stop() {
         this._stopped = true;
         clearTimeout(this._timer);
+        if (this._silenceResolve) {
+            const res = this._silenceResolve;
+            this._silenceResolve = null;
+            res();
+        }
         if (this._activeNodes && this.ctx) {
             const osc = this._activeNodes.osc;
             const gain = this._activeNodes.gain;
