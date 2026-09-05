@@ -232,6 +232,18 @@ class VirtualKeyboard {
     }
 
     insertText(ch) {
+        if (this.input.disabled) return;
+        if (typeof this.input.bufferMaxAllowed === 'number') {
+            const start = this.input.selectionStart ?? this.input.value.length;
+            const end = this.input.selectionEnd ?? this.input.value.length;
+            const selectedLen = end - start;
+            if (this.input.value.length - selectedLen + ch.length > this.input.bufferMaxAllowed) {
+                this.input.classList.remove('pairs-shake');
+                void this.input.offsetWidth;
+                this.input.classList.add('pairs-shake');
+                return;
+            }
+        }
         const start = this.input.selectionStart ?? this.input.value.length;
         const end = this.input.selectionEnd ?? this.input.value.length;
         const val = this.input.value;

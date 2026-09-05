@@ -160,6 +160,17 @@
                 key.textContent = ch;
                 key.addEventListener('click', () => {
                     if (answerInput.disabled) return;
+                    if (typeof answerInput.bufferMaxAllowed === 'number') {
+                        const start = answerInput.selectionStart ?? answerInput.value.length;
+                        const end = answerInput.selectionEnd ?? answerInput.value.length;
+                        const selectedLen = end - start;
+                        if (answerInput.value.length - selectedLen + ch.length > answerInput.bufferMaxAllowed) {
+                            answerInput.classList.remove('pairs-shake');
+                            void answerInput.offsetWidth;
+                            answerInput.classList.add('pairs-shake');
+                            return;
+                        }
+                    }
                     const start = answerInput.selectionStart ?? answerInput.value.length;
                     const end = answerInput.selectionEnd ?? answerInput.value.length;
                     const val = answerInput.value;
@@ -362,24 +373,39 @@
 
         const isBuffer = !!session?.isBufferMode;
         const bufferDepth = session?.bufferDepth || 'all';
-        let bufferUnlocked = false;
+        const targetDepth = parseInt(bufferDepth, 10);
 
-        const setBufferLockedState = (locked) => {
-            if (answerInput) {
-                answerInput.disabled = locked;
-                answerInput.placeholder = locked ? t('groups.buffer_listening') : t('koch.answer_placeholder');
-            }
-            if (vkbEl) {
-                vkbEl.style.opacity = locked ? '0.5' : '1';
-                vkbEl.style.pointerEvents = locked ? 'none' : 'auto';
+        const updateBufferAllowed = (maxAllowed) => {
+            if (!answerInput) return;
+            if (maxAllowed === 0) {
+                answerInput.disabled = true;
+                answerInput.placeholder = t('groups.buffer_listening');
+                answerInput.bufferMaxAllowed = 0;
+                answerInput.maxLength = 0;
+                if (vkbEl) { vkbEl.style.opacity = '0.5'; vkbEl.style.pointerEvents = 'none'; }
+            } else {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('koch.answer_placeholder');
+                answerInput.bufferMaxAllowed = maxAllowed;
+                answerInput.maxLength = maxAllowed;
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                if (document.activeElement !== answerInput) {
+                    answerInput.focus();
+                }
             }
         };
 
         if (isBuffer) {
-            setBufferLockedState(true);
+            updateBufferAllowed(0);
         } else {
-            setBufferLockedState(false);
-            if (answerInput) answerInput.focus();
+            if (answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('koch.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                answerInput.focus();
+            }
         }
 
         try {
@@ -389,12 +415,10 @@
             });
             await currentAudio.play(session.groups[session.index], {
                 onCharStart: ({ index }) => {
-                    if (isBuffer && !bufferUnlocked) {
-                        const targetDepth = parseInt(bufferDepth, 10);
-                        if (!isNaN(targetDepth) && index >= targetDepth) {
-                            bufferUnlocked = true;
-                            setBufferLockedState(false);
-                            if (answerInput) answerInput.focus();
+                    if (isBuffer && answerInput) {
+                        if (!isNaN(targetDepth)) {
+                            const maxAllowed = Math.max(0, index + 1 - targetDepth);
+                            updateBufferAllowed(maxAllowed);
                         }
                     }
                 },
@@ -409,8 +433,16 @@
             currentAudio = null;
             isPlaying = false;
             replayBtn.disabled = false;
-            setBufferLockedState(false);
-            if (answerInput) answerInput.focus();
+            if (isBuffer && answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('koch.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                answerInput.focus();
+            } else if (answerInput) {
+                answerInput.focus();
+            }
         }
     }
 
@@ -578,6 +610,8 @@
 
         session.index++;
         answerInput.value = '';
+        answerInput.bufferMaxAllowed = null;
+        answerInput.removeAttribute('maxlength');
         if (session.index >= session.groups.length) {
             setTimeout(finishSession, 600);
         } else {
@@ -808,6 +842,10 @@
             currentAudio = null;
             isPlaying = false;
         }
+        if (answerInput) {
+            answerInput.bufferMaxAllowed = null;
+            answerInput.removeAttribute('maxlength');
+        }
         if (!session) {
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
@@ -835,7 +873,29 @@
         setupPanel.style.display = 'block';
     });
     answerInput.addEventListener('keydown', (e) => {
+        if (typeof answerInput.bufferMaxAllowed === 'number' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const start = answerInput.selectionStart ?? answerInput.value.length;
+            const end = answerInput.selectionEnd ?? answerInput.value.length;
+            const selectedLen = end - start;
+            if (answerInput.value.length - selectedLen + 1 > answerInput.bufferMaxAllowed) {
+                e.preventDefault();
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+                return;
+            }
+        }
         if (e.key === 'Enter') submitAnswer();
+    });
+    answerInput.addEventListener('input', () => {
+        if (typeof answerInput.bufferMaxAllowed === 'number') {
+            if (answerInput.value.length > answerInput.bufferMaxAllowed) {
+                answerInput.value = answerInput.value.slice(0, answerInput.bufferMaxAllowed);
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+            }
+        }
     });
 
     renderHeader();

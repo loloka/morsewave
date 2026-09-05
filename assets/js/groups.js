@@ -555,15 +555,41 @@
 
         const isBuffer = !!session?.isBufferMode;
         const bufferDepth = session?.bufferDepth || 'all';
-        let bufferUnlocked = false;
+        const targetDepth = parseInt(bufferDepth, 10);
 
-        if (isBuffer && answerInput) {
-            answerInput.disabled = true;
-            answerInput.placeholder = t('groups.buffer_listening');
+        const updateBufferAllowed = (maxAllowed) => {
+            if (!answerInput) return;
+            if (maxAllowed === 0) {
+                answerInput.disabled = true;
+                answerInput.placeholder = t('groups.buffer_listening');
+                answerInput.bufferMaxAllowed = 0;
+                answerInput.maxLength = 0;
+                if (vkbEl) { vkbEl.style.opacity = '0.5'; vkbEl.style.pointerEvents = 'none'; }
+            } else {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('groups.answer_placeholder');
+                answerInput.bufferMaxAllowed = maxAllowed;
+                answerInput.maxLength = maxAllowed;
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                if (document.activeElement !== answerInput && !session?.isExam) {
+                    answerInput.focus();
+                }
+            }
+        };
+
+        if (isBuffer) {
+            updateBufferAllowed(0);
+        } else {
+            if (answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('groups.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+            }
+            if (session && session.isExam) examAnswerEl.focus();
+            else if (answerInput) answerInput.focus();
         }
-
-        if (session && session.isExam) examAnswerEl.focus();
-        else if (!isBuffer && answerInput) answerInput.focus();
 
         try {
             // В экзамене — фиксированный тайминг эталонной записи, а не
@@ -573,13 +599,10 @@
                 : new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
             await currentAudio.play(session.groups[session.index], {
                 onCharStart: ({ index }) => {
-                    if (isBuffer && answerInput && !bufferUnlocked) {
-                        const targetDepth = parseInt(bufferDepth, 10);
-                        if (!isNaN(targetDepth) && index >= targetDepth) {
-                            bufferUnlocked = true;
-                            answerInput.disabled = false;
-                            answerInput.placeholder = t('groups.answer_placeholder');
-                            answerInput.focus();
+                    if (isBuffer && answerInput) {
+                        if (!isNaN(targetDepth)) {
+                            const maxAllowed = Math.max(0, index + 1 - targetDepth);
+                            updateBufferAllowed(maxAllowed);
                         }
                     }
                 },
@@ -597,6 +620,9 @@
             if (isBuffer && answerInput) {
                 answerInput.disabled = false;
                 answerInput.placeholder = t('groups.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
                 answerInput.focus();
             } else if (session && session.isExam) {
                 examAnswerEl.focus();
@@ -1256,6 +1282,8 @@
 
         session.index++;
         answerInput.value = '';
+        answerInput.bufferMaxAllowed = null;
+        answerInput.removeAttribute('maxlength');
         if (session.index >= session.groups.length) {
             setTimeout(finishSession, 600);
         } else {
@@ -1752,6 +1780,14 @@
     }
 
     answerInput.addEventListener('input', () => {
+        if (typeof answerInput.bufferMaxAllowed === 'number') {
+            if (answerInput.value.length > answerInput.bufferMaxAllowed) {
+                answerInput.value = answerInput.value.slice(0, answerInput.bufferMaxAllowed);
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+            }
+        }
         if (session && session.isPairs && session.disabledChar) {
             const forbidden = getForbiddenChars(session.disabledChar);
             let hasForbidden = false;
@@ -1827,6 +1863,10 @@
             currentAudio = null;
             isPlaying = false;
         }
+        if (answerInput) {
+            answerInput.bufferMaxAllowed = null;
+            answerInput.removeAttribute('maxlength');
+        }
         if (!session) {
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
@@ -1856,7 +1896,21 @@
         const oldBr = document.getElementById('groups-xp-breakdown');
         if (oldBr) oldBr.style.display = 'block';
     });
-    answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
+    answerInput.addEventListener('keydown', (e) => {
+        if (typeof answerInput.bufferMaxAllowed === 'number' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const start = answerInput.selectionStart ?? answerInput.value.length;
+            const end = answerInput.selectionEnd ?? answerInput.value.length;
+            const selectedLen = end - start;
+            if (answerInput.value.length - selectedLen + 1 > answerInput.bufferMaxAllowed) {
+                e.preventDefault();
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+                return;
+            }
+        }
+        if (e.key === 'Enter') submitAnswer();
+    });
 
     /* ---------- Задание дня (пришли по ссылке с главной) ---------- */
 
