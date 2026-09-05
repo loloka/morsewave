@@ -15,13 +15,25 @@ class SignalLine {
 
     pulse(type, durationMs) {
         const bar = document.createElement('div');
-        bar.className = `signal-bar ${type} on`;
+        bar.className = (type === 'gap') ? 'signal-bar gap' : `signal-bar ${type} on`;
         this.el.appendChild(bar);
         while (this.el.children.length > this.maxBars) {
             this.el.removeChild(this.el.firstChild);
         }
-        const dur = durationMs ?? (type === 'dash' ? 260 : 120);
-        setTimeout(() => bar.classList.remove('on'), dur);
+        if (type !== 'gap') {
+            const dur = durationMs ?? (type === 'dash' ? 260 : 120);
+            setTimeout(() => bar.classList.remove('on'), Math.max(dur, 180));
+        }
+        return bar;
+    }
+
+    gap(subClass = 'char-gap') {
+        const bar = document.createElement('div');
+        bar.className = `signal-bar gap ${subClass}`;
+        this.el.appendChild(bar);
+        while (this.el.children.length > this.maxBars) {
+            this.el.removeChild(this.el.firstChild);
+        }
         return bar;
     }
 }

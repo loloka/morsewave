@@ -400,13 +400,13 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .signal-line {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    gap: 4px;
-    height: 48px;
+    justify-content: flex-end;
+    gap: 3px;
+    height: 40px;
     width: 100%;
     min-width: 0;
-    padding: 8px 14px;
-    background: linear-gradient(to bottom, transparent 48%, rgba(242, 201, 76, .06) 49%, rgba(242, 201, 76, .06) 51%, transparent 52%), var(--surface);
+    padding: 6px 14px;
+    background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     overflow: hidden;
@@ -417,16 +417,18 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .signal-bar {
     background: var(--signal-dim);
     width: 6px;
-    min-height: 12px;
-    height: 14px;
-    border-radius: 3px;
-    transition: background .12s, box-shadow .12s;
+    height: 6px;
+    min-height: 6px;
+    border-radius: 2px;
+    transition: background .35s ease, box-shadow .35s ease;
     flex-shrink: 0;
 }
-.signal-bar.dot   { width: 8px; flex: 0 0 8px; }
-.signal-bar.dash  { width: 22px; flex: 0 0 22px; }
+.signal-bar.dot   { width: 6px; flex: 0 0 6px; }
+.signal-bar.dash  { width: 18px; flex: 0 0 18px; }
 .signal-bar.gap   { background: transparent; }
-.signal-bar.on    { background: var(--signal); box-shadow: 0 0 10px var(--signal); }
+.signal-bar.gap.char-gap { width: 8px; flex: 0 0 8px; }
+.signal-bar.gap.word-gap { width: 20px; flex: 0 0 20px; }
+.signal-bar.on    { background: var(--signal); box-shadow: 0 0 10px var(--signal), 0 0 3px var(--signal); }
 
 /* Живая подсветка точности ритма ("Буквы" → "Ритм ключа") — цвет пульса
    зависит от того, насколько нажатие попало в идеальную длительность, а не
