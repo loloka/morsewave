@@ -158,7 +158,7 @@ return [
     'koch.title' => 'Koch method',
     'koch.eyebrow' => 'CW classic',
     'koch.h1' => 'Koch method',
-    'koch.intro' => 'Symbols are played at full target speed right away — instead of slowing the signal down, you gradually add new symbols. Complete a session of 5-symbol groups with ≥ 90% accuracy to unlock the next symbol.',
+    'koch.intro' => 'Characters are sent at target speed from day one — this trains your ear to recognize the melody as a whole rather than counting dots and dashes. You start with just two characters: pass a session with ≥ 90% accuracy to unlock the next one.',
     'koch.opened' => 'Symbols unlocked',
     'koch.current_charset_hint' => 'Current symbol set — tap to hear it',
     'koch.jump_hint' => 'Not a beginner anymore — or want to start over? Set the number of unlocked symbols (you can lower it too):',
