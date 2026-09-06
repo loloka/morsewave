@@ -199,6 +199,7 @@ return [
     'groups.custom_hint' => 'At least 5 characters, space-separated',
     'groups.speed' => 'Speed',
     'groups.farnsworth' => 'Farnsworth',
+    'groups.farnsworth_speed_desc' => 'Pause speed between characters (symbols are sent at main speed)',
     'groups.groups_per_session' => 'Groups per session:',
     'groups.farnsworth_tooltip' => 'The Farnsworth method is a popular way to learn Morse code where individual characters are sent at full speed, but the pauses between them and between words are stretched out. This lets you perceive a letter as a single sound pattern instead of counting dots and dashes in your head.',
     'groups.start_session' => '▶ Start session',

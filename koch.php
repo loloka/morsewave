@@ -42,23 +42,13 @@ include __DIR__ . '/includes/header.php';
             <span class="muted cpm-hint" id="koch-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
-        <div class="flex gap-1" style="align-items:center;">
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
-            </label>
-            <span class="info-icon" id="koch-farnsworth-info" style="cursor:pointer;" title="Подробнее">?</span>
-        </div>
-        <div class="speed-control" id="koch-farnsworth-wrap" style="display:none;">
-            <input type="range" id="koch-farnsworth" min="5" max="30" step="1" value="10">
-            <span class="speed-value" id="koch-farnsworth-value">10</span> wpm
-        </div>
+        <label class="chip" style="gap:8px;">
+            <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
+        </label>
 
-        <div class="flex gap-1" style="align-items:center;">
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="koch-buffer-enabled"> <?= t('groups.buffer_input') ?>
-            </label>
-            <span class="info-icon" id="koch-buffer-info" style="cursor:pointer;" title="Подробнее">?</span>
-        </div>
+        <label class="chip" style="gap:8px;">
+            <input type="checkbox" id="koch-buffer-enabled"> <?= t('groups.buffer_input') ?>
+        </label>
 
         <label class="chip"><?= t('koch.groups_per_session') ?>
             <select id="koch-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
@@ -67,12 +57,21 @@ include __DIR__ . '/includes/header.php';
         </label>
     </div>
 
-    <div class="tooltip-box" id="koch-farnsworth-tooltip" style="display:none;">
-        <?= t('koch.farnsworth_tooltip') ?>
-    </div>
-    <div class="tooltip-box" id="koch-buffer-tooltip" style="display:none;">
-        <?= t('groups.buffer_tooltip') ?>
-        <div class="muted mt-1" style="font-size:11px;"><?= t('groups.buffer_hint') ?></div>
+    <!-- Панель настройки Фарнсворта в Кохе -->
+    <div id="koch-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px;"><?= t('koch.farnsworth') ?></div>
+                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+            </div>
+            <div class="speed-control" id="koch-farnsworth-wrap">
+                <input type="range" id="koch-farnsworth" min="5" max="30" step="1" value="10">
+                <span class="speed-value" id="koch-farnsworth-value">10</span> wpm
+            </div>
+        </div>
+        <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            💡 <?= t('koch.farnsworth_tooltip') ?>
+        </div>
     </div>
 
     <!-- Панель настройки буфера памяти в Кохе -->
@@ -92,6 +91,9 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="muted mt-2" id="koch-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
             💡 <?= t('groups.buffer_tooltip') ?>
+        </div>
+        <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
+            <?= t('groups.buffer_hint') ?>
         </div>
     </div>
 

@@ -50,6 +50,12 @@
     const fwWrap = document.getElementById('groups-farnsworth-wrap');
     const fwSlider = document.getElementById('groups-farnsworth');
     const fwValue = document.getElementById('groups-farnsworth-value');
+    const fwPanel = document.getElementById('groups-farnsworth-panel');
+
+    function updateFarnsworthVisibility() {
+        const on = fwEnabled && fwEnabled.checked;
+        if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
+    }
 
     let groupLen = 3;
     const savedGroupLen = localStorage.getItem('morse_groups_len');
@@ -102,8 +108,6 @@
     let currentAudio = null;
 
     const bufferCheckbox = document.getElementById('groups-buffer-enabled');
-    const bufferInfo = document.getElementById('groups-buffer-info');
-    const bufferTooltip = document.getElementById('groups-buffer-tooltip');
     const bufferPanel = document.getElementById('groups-buffer-panel');
     let selectedBufferDepth = localStorage.getItem('morse_groups_buffer_depth') || 'all';
 
@@ -171,18 +175,6 @@
     });
 
     updateBufferDepthOptions(groupLen);
-
-    if (bufferInfo && bufferTooltip) {
-        bufferInfo.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            bufferTooltip.style.display = bufferTooltip.style.display === 'none' ? 'block' : 'none';
-        });
-        bufferTooltip.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-        document.addEventListener('click', () => { bufferTooltip.style.display = 'none'; });
-    }
     
     const vkbEl = document.getElementById('groups-vkb');
     let vkb = null;
@@ -215,12 +207,10 @@
     }
 
     const savedFwEnabled = localStorage.getItem('morse_groups_fw_enabled');
-    if (savedFwEnabled !== null) {
+    if (savedFwEnabled !== null && fwEnabled) {
         fwEnabled.checked = savedFwEnabled === 'true';
-        const on = fwEnabled.checked;
-        fwWrap.style.display = on ? 'inline-flex' : 'none';
-        fwValue.style.display = on ? 'inline-block' : 'none';
     }
+    updateFarnsworthVisibility();
 
     const savedFwWpm = localStorage.getItem('morse_groups_fw_wpm');
     if (savedFwWpm) {
@@ -239,24 +229,11 @@
         fwValue.textContent = fwSlider.value; 
         localStorage.setItem('morse_groups_fw_wpm', fwSlider.value);
     });
-    fwEnabled.addEventListener('change', () => {
-        const on = fwEnabled.checked;
-        fwWrap.style.display = on ? 'inline-flex' : 'none';
-        fwValue.style.display = on ? 'inline-block' : 'none';
-        localStorage.setItem('morse_groups_fw_enabled', on);
-    });
-    const fwInfo = document.getElementById('groups-farnsworth-info');
-    const fwTooltip = document.getElementById('groups-farnsworth-tooltip');
-    if (fwInfo && fwTooltip) {
-        fwInfo.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            fwTooltip.style.display = fwTooltip.style.display === 'none' ? 'block' : 'none';
+    if (fwEnabled) {
+        fwEnabled.addEventListener('change', () => {
+            updateFarnsworthVisibility();
+            localStorage.setItem('morse_groups_fw_enabled', fwEnabled.checked);
         });
-        fwTooltip.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-        document.addEventListener('click', () => { fwTooltip.style.display = 'none'; });
     }
 
     document.querySelectorAll('#length-chips .chip').forEach(chip => {

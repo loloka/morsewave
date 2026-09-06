@@ -45,6 +45,12 @@
     const fwWrap = document.getElementById('koch-farnsworth-wrap');
     const fwSlider = document.getElementById('koch-farnsworth');
     const fwValue = document.getElementById('koch-farnsworth-value');
+    const fwPanel = document.getElementById('koch-farnsworth-panel');
+
+    function updateKochFarnsworthVisibility() {
+        const on = fwEnabled && fwEnabled.checked;
+        if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
+    }
 
     const setupPanel = document.getElementById('setup-panel');
     const sessionPanel = document.getElementById('session-panel');
@@ -77,11 +83,10 @@
         wpmCpm.textContent = cpmHintText(savedWpm);
     }
     const savedFwEnabled = localStorage.getItem('morse_koch_fw_enabled');
-    if (savedFwEnabled === 'true') {
+    if (savedFwEnabled === 'true' && fwEnabled) {
         fwEnabled.checked = true;
-        fwWrap.style.display = 'inline-flex';
-        fwValue.style.display = 'inline-block';
     }
+    updateKochFarnsworthVisibility();
     const savedFwWpm = localStorage.getItem('morse_koch_fw_wpm');
     if (savedFwWpm) {
         fwSlider.value = savedFwWpm;
@@ -108,12 +113,12 @@
         fwValue.textContent = fwSlider.value; 
         localStorage.setItem('morse_koch_fw_wpm', fwSlider.value);
     });
-    fwEnabled.addEventListener('change', () => {
-        const on = fwEnabled.checked;
-        fwWrap.style.display = on ? 'inline-flex' : 'none';
-        fwValue.style.display = on ? 'inline-block' : 'none';
-        localStorage.setItem('morse_koch_fw_enabled', on);
-    });
+    if (fwEnabled) {
+        fwEnabled.addEventListener('change', () => {
+            updateKochFarnsworthVisibility();
+            localStorage.setItem('morse_koch_fw_enabled', fwEnabled.checked);
+        });
+    }
 
     /**
      * Экранная клавиатура — только для тач-устройств (см. koch.php). На
@@ -268,23 +273,8 @@
     });
 
 
-    const fwInfo = document.getElementById('koch-farnsworth-info');
-    const fwTooltip = document.getElementById('koch-farnsworth-tooltip');
-    if (fwInfo && fwTooltip) {
-        fwInfo.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            fwTooltip.style.display = fwTooltip.style.display === 'none' ? 'block' : 'none';
-        });
-        fwTooltip.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-
     const bufferCheckbox = document.getElementById('koch-buffer-enabled');
     const bufferPanel = document.getElementById('koch-buffer-panel');
-    const bufferInfo = document.getElementById('koch-buffer-info');
-    const bufferTooltip = document.getElementById('koch-buffer-tooltip');
     let selectedBufferDepth = localStorage.getItem('morse_koch_buffer_depth') || 'all';
 
     function updateKochBufferTip(depth) {
@@ -329,22 +319,6 @@
         });
     });
     updateKochBufferTip(selectedBufferDepth);
-
-    if (bufferInfo && bufferTooltip) {
-        bufferInfo.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            bufferTooltip.style.display = bufferTooltip.style.display === 'none' ? 'block' : 'none';
-        });
-        bufferTooltip.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    }
-
-    document.addEventListener('click', () => {
-        if (fwTooltip) fwTooltip.style.display = 'none';
-        if (bufferTooltip) bufferTooltip.style.display = 'none';
-    });
 
     /**
      * Тот же принцип, что и weightedRandomGroup в groups.js (2026-08-02) —

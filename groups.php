@@ -63,23 +63,13 @@ include __DIR__ . '/includes/header.php';
                 <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
 
-            <div class="flex gap-1" style="align-items:center;">
-                <label class="chip" style="gap:8px;">
-                    <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
-                </label>
-                <span class="info-icon" id="groups-farnsworth-info" style="cursor:pointer;" title="Подробнее">?</span>
-            </div>
-            <div class="speed-control" id="groups-farnsworth-wrap" style="display:none;">
-                <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
-                <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
-            </div>
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+            </label>
 
-            <div class="flex gap-1" style="align-items:center;">
-                <label class="chip" style="gap:8px;">
-                    <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
-                </label>
-                <span class="info-icon" id="groups-buffer-info" style="cursor:pointer;" title="Подробнее">?</span>
-            </div>
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
+            </label>
 
             <label class="chip"><?= t('groups.groups_per_session') ?>
                 <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
@@ -89,12 +79,21 @@ include __DIR__ . '/includes/header.php';
             </label>
         </div>
 
-        <div class="tooltip-box" id="groups-farnsworth-tooltip" style="display:none;">
-            <?= t('groups.farnsworth_tooltip') ?>
-        </div>
-        <div class="tooltip-box" id="groups-buffer-tooltip" style="display:none;">
-            <?= t('groups.buffer_tooltip') ?>
-            <div class="muted mt-1" style="font-size:11px;"><?= t('groups.buffer_hint') ?></div>
+        <!-- Панель настройки Фарнсворта -->
+        <div id="groups-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:700; font-size:13px;"><?= t('groups.farnsworth') ?></div>
+                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+                </div>
+                <div class="speed-control" id="groups-farnsworth-wrap">
+                    <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
+                    <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
+                </div>
+            </div>
+            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                💡 <?= t('groups.farnsworth_tooltip') ?>
+            </div>
         </div>
 
         <!-- Панель настройки буфера памяти -->
@@ -114,6 +113,9 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="muted mt-2" id="groups-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
                 💡 <?= t('groups.buffer_tooltip') ?>
+            </div>
+            <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
+                <?= t('groups.buffer_hint') ?>
             </div>
         </div>
     </div>
