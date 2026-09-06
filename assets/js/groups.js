@@ -24,6 +24,8 @@
             if (mode !== 'groups') {
                 qrqStopRequested = true;
                 if (qrqAudio) { qrqAudio.stop(); qrqAudio = null; }
+            } else {
+                if (typeof updateBufferDepthOptions === 'function') updateBufferDepthOptions(groupLen);
             }
         });
     });
@@ -50,6 +52,15 @@
     const fwValue = document.getElementById('groups-farnsworth-value');
 
     let groupLen = 3;
+    const savedGroupLen = localStorage.getItem('morse_groups_len');
+    if (savedGroupLen) {
+        const parsedLen = parseInt(savedGroupLen, 10);
+        if ([2, 3, 4, 5].includes(parsedLen)) groupLen = parsedLen;
+        document.querySelectorAll('#length-chips .chip').forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.len, 10) === groupLen);
+        });
+    }
+
     let charsetKey = 'letters';
     let session = null;
     let isDailyChallenge = false;
@@ -96,6 +107,16 @@
     const bufferPanel = document.getElementById('groups-buffer-panel');
     let selectedBufferDepth = localStorage.getItem('morse_groups_buffer_depth') || 'all';
 
+    function updateBufferTip(depth) {
+        const tipEl = document.getElementById('groups-buffer-tip-text');
+        if (!tipEl) return;
+        if (depth === 'all') {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_all');
+        } else {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_lag', { '{n}': depth });
+        }
+    }
+
     function updateBufferPanelVisibility() {
         if (bufferPanel) {
             bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
@@ -136,6 +157,7 @@
         document.querySelectorAll('#buffer-depth-chips .chip').forEach(c => {
             c.classList.toggle('active', c.dataset.depth === selectedBufferDepth);
         });
+        updateBufferTip(selectedBufferDepth);
     }
 
     document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
@@ -144,6 +166,7 @@
             chip.classList.add('active');
             selectedBufferDepth = chip.dataset.depth;
             localStorage.setItem('morse_groups_buffer_depth', selectedBufferDepth);
+            updateBufferTip(selectedBufferDepth);
         });
     });
 
@@ -171,16 +194,7 @@
     let isPlaying = false;
     const replayBtn = document.getElementById('replay-btn');
 
-    // Восстанавливаем сохраненные настройки
-    const savedGroupLen = localStorage.getItem('morse_groups_len');
-    if (savedGroupLen) {
-        document.querySelectorAll('#length-chips .chip').forEach(c => {
-            const match = c.dataset.len === savedGroupLen;
-            c.classList.toggle('active', match);
-            if (match) groupLen = parseInt(savedGroupLen, 10);
-        });
-    }
-
+    // Восстанавливаем сохраненную скорость и группы
     const savedWpm = localStorage.getItem('morse_groups_wpm');
     if (savedWpm) {
         wpmSlider.value = savedWpm;
@@ -561,7 +575,11 @@
             if (!answerInput) return;
             if (maxAllowed === 0) {
                 answerInput.disabled = true;
-                answerInput.placeholder = t('groups.buffer_listening');
+                if (bufferDepth === 'all') {
+                    answerInput.placeholder = t('groups.buffer_listening_all');
+                } else {
+                    answerInput.placeholder = t('groups.buffer_listening_lag', { '{n}': targetDepth });
+                }
                 answerInput.bufferMaxAllowed = 0;
                 answerInput.maxLength = 0;
                 if (vkbEl) { vkbEl.style.opacity = '0.5'; vkbEl.style.pointerEvents = 'none'; }
@@ -1677,6 +1695,7 @@
                 updateQrqUI();
             } else { // training
                 startBtn.textContent = t('groups.start_session');
+                updateBufferDepthOptions(groupLen);
             }
         });
     });
@@ -1934,6 +1953,7 @@
                 c.classList.toggle('active', match);
                 if (match) groupLen = len;
             });
+            updateBufferDepthOptions(groupLen);
         }
         if (count) {
             const countSelect = document.getElementById('groups-count');

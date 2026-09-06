@@ -112,7 +112,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
                 </div>
             </div>
-            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            <div class="muted mt-2" id="groups-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
                 💡 <?= t('groups.buffer_tooltip') ?>
             </div>
         </div>

@@ -287,6 +287,16 @@
     const bufferTooltip = document.getElementById('koch-buffer-tooltip');
     let selectedBufferDepth = localStorage.getItem('morse_koch_buffer_depth') || 'all';
 
+    function updateKochBufferTip(depth) {
+        const tipEl = document.getElementById('koch-buffer-tip-text');
+        if (!tipEl) return;
+        if (depth === 'all') {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_all');
+        } else {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_lag', { '{n}': depth });
+        }
+    }
+
     function updateBufferPanelVisibility() {
         if (bufferPanel) {
             bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
@@ -315,8 +325,10 @@
             chip.classList.add('active');
             selectedBufferDepth = chip.dataset.depth;
             localStorage.setItem('morse_koch_buffer_depth', selectedBufferDepth);
+            updateKochBufferTip(selectedBufferDepth);
         });
     });
+    updateKochBufferTip(selectedBufferDepth);
 
     if (bufferInfo && bufferTooltip) {
         bufferInfo.addEventListener('click', (e) => {
@@ -379,7 +391,11 @@
             if (!answerInput) return;
             if (maxAllowed === 0) {
                 answerInput.disabled = true;
-                answerInput.placeholder = t('groups.buffer_listening');
+                if (bufferDepth === 'all') {
+                    answerInput.placeholder = t('groups.buffer_listening_all');
+                } else {
+                    answerInput.placeholder = t('groups.buffer_listening_lag', { '{n}': targetDepth });
+                }
                 answerInput.bufferMaxAllowed = 0;
                 answerInput.maxLength = 0;
                 if (vkbEl) { vkbEl.style.opacity = '0.5'; vkbEl.style.pointerEvents = 'none'; }
