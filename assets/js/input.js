@@ -258,6 +258,7 @@ class VirtualKeyboard {
     }
 
     backspace() {
+        if (this.input.disabled) return;
         const start = this.input.selectionStart ?? this.input.value.length;
         const end = this.input.selectionEnd ?? this.input.value.length;
         const val = this.input.value;
