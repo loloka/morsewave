@@ -107,7 +107,7 @@ include __DIR__ . '/includes/header.php';
             <div class="stat"><span class="value" id="rec-total">0</span><span class="label"><?= mw_icon('check', 12) ?> <?= t('learn.stat_total') ?></span></div>
         </div>
 
-        <div class="tile-grid mt-2" id="recognize-grid"></div>
+        <div class="rec-kbd mt-2" id="recognize-grid"></div>
 
         <!-- Системные сообщения (например, "Остановлено") — короткие и
              разовые, для них старого поведения (появилось/исчезло) хватает. -->

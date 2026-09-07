@@ -32,8 +32,29 @@
     const recognizeModeEl = document.getElementById('recognize-mode');
     const rhythmModeEl = document.getElementById('rhythm-mode');
     const invasionModeEl = document.getElementById('invasion-mode');
+    let sendModeActive = true;
     let recognizeModeActive = false;
+    let rhythmModeActive = false;
     let invasionModeActive = false;
+
+    // Раскладки клавиатуры для прозрачной трансляции нажатий физической клавиатуры ПК
+    const LAYOUT_RU_TO_EN = {
+        'Й': 'Q', 'Ц': 'W', 'У': 'E', 'К': 'R', 'Е': 'T', 'Н': 'Y', 'Г': 'U', 'Ш': 'I', 'Щ': 'O', 'З': 'P', 'Х': '[', 'Ъ': ']',
+        'Ф': 'A', 'Ы': 'S', 'В': 'D', 'А': 'F', 'П': 'G', 'Р': 'H', 'О': 'J', 'Л': 'K', 'Д': 'L', 'Ж': ';', 'Э': "'",
+        'Я': 'Z', 'Ч': 'X', 'С': 'C', 'М': 'V', 'И': 'B', 'Т': 'N', 'Ь': 'M', 'Б': ',', 'Ю': '.', 'Ё': '`',
+        'й': 'Q', 'ц': 'W', 'у': 'E', 'к': 'R', 'е': 'T', 'н': 'Y', 'г': 'U', 'ш': 'I', 'щ': 'O', 'з': 'P', 'х': '[', 'ъ': ']',
+        'ф': 'A', 'ы': 'S', 'в': 'D', 'а': 'F', 'п': 'G', 'р': 'H', 'о': 'J', 'л': 'K', 'д': 'L', 'ж': ';', 'э': "'",
+        'я': 'Z', 'ч': 'X', 'с': 'C', 'м': 'V', 'и': 'B', 'т': 'N', 'ь': 'M', 'б': ',', 'ю': '.', 'ё': '`'
+    };
+
+    const LAYOUT_EN_TO_RU = {
+        'Q': 'Й', 'W': 'Ц', 'E': 'У', 'R': 'К', 'T': 'Е', 'Y': 'Н', 'U': 'Г', 'I': 'Ш', 'O': 'Щ', 'P': 'З', '[': 'Х', ']': 'Ъ',
+        'A': 'Ф', 'S': 'Ы', 'D': 'В', 'F': 'А', 'G': 'П', 'H': 'Р', 'J': 'О', 'K': 'Л', 'L': 'Д', ';': 'Ж', "'": 'Э',
+        'Z': 'Я', 'X': 'Ч', 'C': 'С', 'V': 'М', 'B': 'И', 'N': 'Т', 'M': 'Ь', ',': 'Б', '.': 'Ю', '`': 'Ё',
+        'q': 'Й', 'w': 'Ц', 'e': 'У', 'r': 'К', 't': 'Е', 'y': 'Н', 'u': 'Г', 'i': 'Ш', 'o': 'Щ', 'p': 'З', '{': 'Х', '}': 'Ъ',
+        'a': 'Ф', 's': 'Ы', 'd': 'В', 'f': 'А', 'g': 'П', 'h': 'Р', 'j': 'О', 'k': 'Л', 'l': 'Д', ':': 'Ж', '"': 'Э',
+        'z': 'Я', 'x': 'Ч', 'c': 'С', 'v': 'М', 'b': 'И', 'n': 'Т', 'm': 'Ь', '<': 'Б', '>': 'Ю', '~': 'Ё'
+    };
 
     document.querySelectorAll('.mode-switch .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -44,7 +65,9 @@
             recognizeModeEl.style.display = mode === 'recognize' ? 'block' : 'none';
             rhythmModeEl.style.display = mode === 'rhythm' ? 'block' : 'none';
             invasionModeEl.style.display = mode === 'invasion' ? 'block' : 'none';
+            sendModeActive = mode === 'send';
             recognizeModeActive = mode === 'recognize';
+            rhythmModeActive = mode === 'rhythm';
             if (recognizeModeActive) {
                 initRecognizeGrid();
                 startRecognizeSession();
@@ -54,7 +77,7 @@
                 recStartBtn.style.display = 'inline-flex';
                 recStopBtn.style.display = 'none';
             }
-            if (mode === 'rhythm') {
+            if (rhythmModeActive) {
                 renderRhythmTiles();
                 startRhythmSession();
             } else {
@@ -189,6 +212,28 @@
         key.setTable(isCyrillicOrder() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+
+    // Выбор буквы с физической клавиатуры в режиме "Отправка ключом" (без необходимости кликать мышкой)
+    window.addEventListener('keydown', (e) => {
+        if (!sendModeActive) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (e.code === 'Space' || e.key === 'Enter' || e.key === 'Tab') return; // Space зарезервирован под телеграфный ключ
+
+        let raw = e.key;
+        let ch = raw.toUpperCase();
+        if (isCyrillicOrder()) {
+            if (LAYOUT_EN_TO_RU[raw]) ch = LAYOUT_EN_TO_RU[raw];
+        } else {
+            if (LAYOUT_RU_TO_EN[raw]) ch = LAYOUT_RU_TO_EN[raw];
+        }
+
+        if (orderedLetters().includes(ch)) {
+            e.preventDefault();
+            selectLetter(ch);
+        }
+    });
 
     function currentWpm() {
         return parseInt(wpmSlider.value, 10);
@@ -370,6 +415,8 @@
     // строим по фактическому набору, иначе ответить будет нечем.
     function recGridLettersFor(key) {
         if (key === 'cyrillic') return CYRILLIC_LEARNABLE;
+        if (key === 'letters') return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+        if (key === 'digits') return '0123456789'.split('');
         if (key === 'custom') {
             const chars = parseRecCustomCharset();
             return chars.length >= MIN_REC_CUSTOM ? chars : ALL_LEARNABLE;
@@ -398,18 +445,65 @@
         if (recCharsetKey === 'custom') buildRecGrid(recGridLettersFor('custom'));
     });
 
+    const REC_KBD_QWERTY = [
+        '1234567890'.split(''),
+        'QWERTYUIOP'.split(''),
+        'ASDFGHJKL'.split(''),
+        'ZXCVBNM'.split(''),
+    ];
+
+    const REC_KBD_CYRILLIC = [
+        '1234567890'.split(''),
+        'ЙЦУКЕНГШЩЗХ'.split(''),
+        'ФЫВАПРОЛДЖЭ'.split(''),
+        'ЯЧСМИТЬБЮ'.split(''),
+    ];
+
     function buildRecGrid(letters) {
         recGridBuilt = true;
         recGridLetters = letters;
         recGrid.innerHTML = '';
-        letters.forEach((ch) => {
-            const tile = document.createElement('div');
-            tile.className = 'letter-tile';
-            tile.dataset.ch = ch;
-            tile.innerHTML = `<div class="ch">${ch}</div>`;
-            tile.addEventListener('click', () => handleRecognizeAnswer(ch, tile));
-            recGrid.appendChild(tile);
+        recGrid.className = 'rec-kbd mt-2';
+
+        const isCyr = letters.some(ch => /[А-Яа-яЁё]/.test(ch));
+        const kbdTemplate = isCyr ? REC_KBD_CYRILLIC : REC_KBD_QWERTY;
+
+        const letterSet = new Set(letters);
+        const placed = new Set();
+
+        kbdTemplate.forEach((rowChars) => {
+            const activeInRow = rowChars.filter(ch => letterSet.has(ch));
+            if (activeInRow.length === 0) return;
+
+            const rowEl = document.createElement('div');
+            rowEl.className = 'rec-kbd-row';
+            activeInRow.forEach((ch) => {
+                placed.add(ch);
+                const key = document.createElement('div');
+                key.className = 'rec-key';
+                key.dataset.ch = ch;
+                key.textContent = ch;
+                key.addEventListener('click', () => handleRecognizeAnswer(ch, key));
+                rowEl.appendChild(key);
+            });
+            recGrid.appendChild(rowEl);
         });
+
+        // Любые нестандартные символы (кастомный ввод, знаки препинания)
+        const leftovers = letters.filter(ch => !placed.has(ch));
+        if (leftovers.length > 0) {
+            const rowEl = document.createElement('div');
+            rowEl.className = 'rec-kbd-row';
+            leftovers.forEach((ch) => {
+                const key = document.createElement('div');
+                key.className = 'rec-key';
+                key.dataset.ch = ch;
+                key.textContent = ch;
+                key.addEventListener('click', () => handleRecognizeAnswer(ch, key));
+                rowEl.appendChild(key);
+            });
+            recGrid.appendChild(rowEl);
+        }
     }
 
     function initRecognizeGrid() {
@@ -570,27 +664,55 @@
         }
     }
 
-    // Ввод с физической клавиатуры — так же, как тап по плитке
+    // Ввод с физической клавиатуры — так же, как тап по клавише сетки
     window.addEventListener('keydown', (e) => {
-        if (!recognizeModeActive || recBusy || !recRunning) return;
+        if (!recognizeModeActive) return;
         const tag = document.activeElement?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA') return;
-        
-        // Если печатают на русской раскладке — выводим красивое сообщение
-        if (/[а-яё]/i.test(e.key)) {
-            e.preventDefault();
-            recFeedback.textContent = t('js.learn.wrong_layout');
-            recFeedback.className = 'feedback show bad';
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+
+        // Если тренировка ещё не запущена: Enter или Space запускают
+        if (!recRunning) {
+            if (e.key === 'Enter' || e.code === 'Space') {
+                e.preventDefault();
+                recStartBtn.click();
+                return;
+            }
+            if (/^[a-zA-Zа-яА-ЯёЁ0-9]$/.test(e.key)) {
+                recFeedback.textContent = t('js.learn.rec_press_start');
+                recFeedback.className = 'feedback show info';
+            }
             return;
         }
 
-        const ch = e.key.toUpperCase();
-        // Проверяем против фактически отрисованных тайлов, а не жёстко
-        // латиницы/кириллицы целиком — так работает и для смешанного набора
-        // "Свои символы".
+        if (recBusy) return;
+
+        const isCyr = recCharsetKey === 'cyrillic' || recGridLetters.some(c => /[А-Яа-яЁё]/.test(c));
+        let raw = e.key;
+        let ch = raw.toUpperCase();
+
+        if (isCyr) {
+            if (LAYOUT_EN_TO_RU[raw]) {
+                ch = LAYOUT_EN_TO_RU[raw];
+                if (window.showLayoutHint) window.showLayoutHint();
+            } else if (/[А-ЯЁа-яё]/.test(raw)) {
+                if (window.hideLayoutHint) window.hideLayoutHint();
+            }
+        } else {
+            if (LAYOUT_RU_TO_EN[raw]) {
+                ch = LAYOUT_RU_TO_EN[raw];
+                if (window.showLayoutHint) window.showLayoutHint();
+            } else if (/^[a-zA-Z]$/.test(raw)) {
+                if (window.hideLayoutHint) window.hideLayoutHint();
+            }
+        }
+
         if (!recGridLetters.includes(ch)) return;
-        const tile = recGrid.querySelector(`[data-ch="${ch}"]`);
-        if (tile) { e.preventDefault(); handleRecognizeAnswer(ch, tile); }
+        const key = recGrid.querySelector(`[data-ch="${ch}"]`);
+        if (key) {
+            e.preventDefault();
+            handleRecognizeAnswer(ch, key);
+        }
     });
 
     const savedRecWpm = localStorage.getItem('morse_rec_wpm');
@@ -755,6 +877,28 @@
         rhythmKey.setTable(isCyrillicOrderRhythm() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
         rhythmPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+
+    // Выбор буквы с физической клавиатуры в режиме "Ритм ключа" (без необходимости кликать мышкой)
+    window.addEventListener('keydown', (e) => {
+        if (!rhythmModeActive) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        if (e.code === 'Space' || e.key === 'Enter' || e.key === 'Tab') return; // Space зарезервирован под телеграфный ключ
+
+        let raw = e.key;
+        let ch = raw.toUpperCase();
+        if (isCyrillicOrderRhythm()) {
+            if (LAYOUT_EN_TO_RU[raw]) ch = LAYOUT_EN_TO_RU[raw];
+        } else {
+            if (LAYOUT_RU_TO_EN[raw]) ch = LAYOUT_RU_TO_EN[raw];
+        }
+
+        if (orderedRhythmLetters().includes(ch)) {
+            e.preventDefault();
+            selectRhythmLetter(ch);
+        }
+    });
 
     function currentRhythmWpm() {
         return parseInt(rhythmWpmSlider.value, 10);
@@ -2485,24 +2629,16 @@
             if (window.hideLayoutHint) window.hideLayoutHint();
         }
 
-        let ch = e.key.toUpperCase();
+        let raw = e.key;
+        let ch = raw.toUpperCase();
         
-        // Автозамена кириллицы
-        const RU_TO_EN = {
-            'Й': 'Q', 'Ц': 'W', 'У': 'E', 'К': 'R', 'Е': 'T', 'Н': 'Y', 'Г': 'U', 'Ш': 'I', 'Щ': 'O', 'З': 'P', 'Х': '{', 'Ъ': '}',
-            'Ф': 'A', 'Ы': 'S', 'В': 'D', 'А': 'F', 'П': 'G', 'Р': 'H', 'О': 'J', 'Л': 'K', 'Д': 'L', 'Ж': ':', 'Э': '"',
-            'Я': 'Z', 'Ч': 'X', 'С': 'C', 'М': 'V', 'И': 'B', 'Т': 'N', 'Ь': 'M', 'Б': '<', 'Ю': '>', 'Ё': '~'
-        };
-        
-        if (/[А-ЯЁ]/i.test(ch)) {
-            if (RU_TO_EN[ch]) {
-                ch = RU_TO_EN[ch];
-                if (window.showLayoutHint) window.showLayoutHint();
-            } else {
-                e.preventDefault();
-                invasionFeedback(t('js.learn.wrong_layout'), 'bad');
-                return;
-            }
+        if (LAYOUT_RU_TO_EN[raw]) {
+            ch = LAYOUT_RU_TO_EN[raw];
+            if (window.showLayoutHint) window.showLayoutHint();
+        } else if (/[а-яё]/i.test(raw)) {
+            e.preventDefault();
+            invasionFeedback(t('js.learn.wrong_layout'), 'bad');
+            return;
         }
 
         if (!ALL_LEARNABLE.includes(ch)) return;

@@ -650,6 +650,45 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .invasion-key.correct { border-color: var(--success); background: rgba(111,207,122,.15); }
 .invasion-key.wrong   { border-color: var(--danger); background: rgba(226,88,79,.15); }
 
+/* ---------- Recognize virtual keyboard ---------- */
+.rec-kbd {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 620px;
+    margin: 0 auto;
+}
+.rec-kbd-row {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+.rec-kbd-row:nth-child(2) { padding-left: 2%; padding-right: 2%; }
+.rec-kbd-row:nth-child(3) { padding-left: 4%; padding-right: 4%; }
+.rec-kbd-row:nth-child(4) { padding-left: 7%; padding-right: 7%; }
+.rec-key {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: clamp(13px, 4vw, 18px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background .1s, border-color .1s, transform .05s, color .1s;
+}
+.rec-key:hover { border-color: var(--signal); }
+.rec-key:active { transform: scale(0.92); }
+.rec-key.correct { border-color: var(--success); background: rgba(111,207,122,.2); color: var(--success); }
+.rec-key.wrong   { border-color: var(--danger); background: rgba(226,88,79,.2); color: var(--danger); }
+
 /* Кнопки "В бой"/"Остановить" в одной строке со статистикой (см. разметку в
    learn.php) — компактнее, чем отдельная строка сверху. */
 .invasion-controls-row {
@@ -700,8 +739,11 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
        сходство с настоящей QWERTY-раскладкой. */
     .invasion-kbd-row:nth-child(2),
     .invasion-kbd-row:nth-child(3),
-    .invasion-kbd-row:nth-child(4) { padding-left: 0; }
-    .invasion-key { height: 42px; }
+    .invasion-kbd-row:nth-child(4),
+    .rec-kbd-row:nth-child(2),
+    .rec-kbd-row:nth-child(3),
+    .rec-kbd-row:nth-child(4) { padding-left: 0; padding-right: 0; }
+    .invasion-key, .rec-key { height: 42px; font-size: clamp(12px, 3.6vw, 16px); }
 }
 
 /* ---------- Morse pattern display ---------- */
