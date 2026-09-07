@@ -25,7 +25,7 @@ include __DIR__ . '/includes/header.php';
             </select>
         </label>
     </div>
-    <button class="btn btn-primary mt-2" id="start-session"><?= t('cs.start_session') ?></button>
+    <button class="btn btn-primary mt-2" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('cs.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
     <div class="feedback mt-2" id="setup-error"></div>
 </div>
 
@@ -55,7 +55,7 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('cs.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('cs.result_xp') ?></span></div>
     </div>
-    <button class="btn btn-primary mt-2" id="restart-btn"><?= t('cs.new_session') ?></button>
+    <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('cs.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 
 <div class="card mt-3">

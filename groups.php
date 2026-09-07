@@ -238,7 +238,7 @@ include __DIR__ . '/includes/header.php';
     </p>
 
     <div class="btn-row mt-2" style="align-items:center;">
-        <button class="btn btn-primary" id="start-session"><?= t('groups.start_session') ?></button>
+        <button class="btn btn-primary" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
         <button class="btn btn-sm" id="method-tips-toggle" type="button"><?= t('groups.method_tips_btn') ?></button>
     </div>
 
@@ -326,7 +326,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
     </div>
 
-    <button class="btn btn-primary mt-2" id="restart-btn"><?= t('groups.new_session') ?></button>
+    <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 
 </div>
@@ -377,7 +377,7 @@ include __DIR__ . '/includes/header.php';
     </p>
 
     <div class="btn-row mt-2">
-        <button class="btn btn-primary" id="words-start-btn"><?= t('groups.start_session') ?></button>
+        <button class="btn btn-primary" id="words-start-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
     </div>
 </div>
 
@@ -408,7 +408,7 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="words-result-xp">0</span><span class="label"><?= t('groups.result_xp') ?></span></div>
     </div>
     <div class="mt-2" id="words-mistakes" style="display:none;"></div>
-    <button class="btn btn-primary mt-2" id="words-restart-btn"><?= t('groups.new_session') ?></button>
+    <button class="btn btn-primary mt-2" id="words-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 
 </div>
@@ -428,7 +428,7 @@ include __DIR__ . '/includes/header.php';
             <div class="lamp-row">
                 <div class="morse-lamp" id="abbrev-lamp"></div>
                 <button class="btn btn-sm" id="abbrev-signal-toggle"></button>
-                <button class="btn btn-primary btn-sm" id="abbrev-start-btn"><?= t('groups.abbrev_start') ?></button>
+                <button class="btn btn-primary btn-sm" id="abbrev-start-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.abbrev_start') ?> <kbd class="btn-kbd">Enter</kbd></button>
                 <button class="btn btn-sm" id="abbrev-stop-btn" style="display:none;"><?= t('groups.abbrev_stop') ?></button>
             </div>
         </div>

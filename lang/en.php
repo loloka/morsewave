@@ -4,6 +4,7 @@ return [
     // --- common ---
     'lang.switch_to' => 'RU',
     'lang.switch_title' => 'Переключить на русский',
+    'common.shortcut_enter' => 'Press Enter to start',
 
     // --- includes/header.php ---
     'site.title_suffix' => 'MorseWave',

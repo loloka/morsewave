@@ -270,6 +270,30 @@
     });
     answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
 
+    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов
+    window.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        if (setupPanel && setupPanel.style.display !== 'none') {
+            const startBtn = document.getElementById('start-session');
+            if (startBtn && startBtn.offsetParent !== null) {
+                e.preventDefault();
+                startBtn.click();
+                return;
+            }
+        } else if (resultPanel && resultPanel.style.display !== 'none') {
+            const restartBtn = document.getElementById('restart-btn');
+            if (restartBtn && restartBtn.offsetParent !== null) {
+                e.preventDefault();
+                restartBtn.click();
+                return;
+            }
+        }
+    });
+
     /* ---------- Добавить свой позывной ---------- */
     const newCallsignInput = document.getElementById('new-callsign-input');
     const newCallsignCountry = document.getElementById('new-callsign-country');

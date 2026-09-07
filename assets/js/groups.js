@@ -1659,19 +1659,19 @@
             if (examHint) examHint.style.display = (type === 'exam') ? 'block' : 'none';
 
             if (type === 'exam') {
-                startBtn.textContent = '▶ ' + t('groups.mode_exam');
+                startBtn.innerHTML = '▶ ' + t('groups.mode_exam') + ' <kbd class="btn-kbd">Enter</kbd>';
                 const audioSettings = AudioSettings.load();
                 audioSettings.freq = 550;
-                AudioSettings.save(audioSettings);
+                audioSettings.save(audioSettings);
             } else if (type === 'pairs') {
-                startBtn.textContent = t('groups.start_session');
+                startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
                 checkPairRecommendation();
                 updatePairStageUI();
             } else if (type === 'qrq') {
-                startBtn.textContent = t('groups.qrq_start');
+                startBtn.innerHTML = t('groups.qrq_start') + ' <kbd class="btn-kbd">Enter</kbd>';
                 updateQrqUI();
             } else { // training
-                startBtn.textContent = t('groups.start_session');
+                startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
                 updateBufferDepthOptions(groupLen);
             }
         });
@@ -2445,5 +2445,60 @@
     });
     wordsAnswerInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); submitWordAnswer(); }
+    });
+
+    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов
+    window.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        if (e.ctrlKey || e.altKey || e.metaKey) return;
+        const tag = document.activeElement?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+        // Режим «Группы символов»
+        if (groupsModeEl && groupsModeEl.style.display !== 'none') {
+            if (setupPanel && setupPanel.style.display !== 'none') {
+                const startBtn = document.getElementById('start-session');
+                if (startBtn && startBtn.offsetParent !== null) {
+                    e.preventDefault();
+                    startBtn.click();
+                    return;
+                }
+            } else if (resultPanel && resultPanel.style.display !== 'none') {
+                const restartBtn = document.getElementById('restart-btn');
+                if (restartBtn && restartBtn.offsetParent !== null) {
+                    e.preventDefault();
+                    restartBtn.click();
+                    return;
+                }
+            }
+        }
+
+        // Режим «Реальные слова»
+        if (wordsModeEl && wordsModeEl.style.display !== 'none') {
+            if (wordsSetup && wordsSetup.style.display !== 'none') {
+                const wordsStartBtn = document.getElementById('words-start-btn');
+                if (wordsStartBtn && wordsStartBtn.offsetParent !== null) {
+                    e.preventDefault();
+                    wordsStartBtn.click();
+                    return;
+                }
+            } else if (wordsResultPanel && wordsResultPanel.style.display !== 'none') {
+                const wordsRestartBtn = document.getElementById('words-restart-btn');
+                if (wordsRestartBtn && wordsRestartBtn.offsetParent !== null) {
+                    e.preventDefault();
+                    wordsRestartBtn.click();
+                    return;
+                }
+            }
+        }
+
+        // Режим «Радиолюбительские сокращения»
+        if (abbrevModeEl && abbrevModeEl.style.display !== 'none' && !abbrevRunning) {
+            if (abbrevStartBtn && abbrevStartBtn.offsetParent !== null) {
+                e.preventDefault();
+                abbrevStartBtn.click();
+                return;
+            }
+        }
     });
 })();

@@ -314,6 +314,39 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .btn-sm { padding: 8px 14px; font-size: 13px; }
 .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
+/* Клавишные подсказки на кнопках (Enter, Space и т.д.) */
+.btn-kbd,
+.btn kbd {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    line-height: 1.3;
+    border-radius: 4px;
+    vertical-align: middle;
+    letter-spacing: 0;
+    text-transform: none;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    color: inherit;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15);
+}
+.btn-primary .btn-kbd,
+.btn-primary kbd {
+    background: rgba(0, 0, 0, 0.14);
+    border-color: rgba(0, 0, 0, 0.28);
+    color: rgba(26, 18, 0, 0.9);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+@media (max-width: 640px) {
+    .btn-kbd,
+    .btn kbd {
+        display: none;
+    }
+}
+
 /* Второстепенное действие рядом с первичным CTA (например, герой на
    главной) — без рамки и заливки, просто текстовая ссылка потише, чтобы
    не спорить по весу с btn-primary (см. аудит: "оранжевый — только для

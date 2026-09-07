@@ -93,7 +93,7 @@ include __DIR__ . '/includes/header.php';
             <div class="lamp-row">
                 <div class="morse-lamp" id="rec-lamp"></div>
                 <button class="btn btn-sm" id="rec-signal-toggle"></button>
-                <button class="btn btn-primary btn-sm" id="rec-start-btn"><?= t('learn.rec_start') ?></button>
+                <button class="btn btn-primary btn-sm" id="rec-start-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.rec_start') ?> <kbd class="btn-kbd">Enter</kbd></button>
                 <button class="btn btn-sm" id="rec-stop-btn" style="display:none;"><?= t('learn.rec_stop') ?></button>
             </div>
         </div>
@@ -244,7 +244,7 @@ include __DIR__ . '/includes/header.php';
              компактнее отдельной строки над канвасом. -->
         <div class="invasion-controls-row mt-2">
             <div class="stat"><span class="value" id="invasion-best-combo">0</span><span class="label"><?= mw_icon('trophy', 12) ?> <?= t('learn.invasion_stat_best_combo') ?></span></div>
-            <button class="btn btn-primary btn-sm" id="invasion-start-btn"><?= t('learn.invasion_start') ?></button>
+            <button class="btn btn-primary btn-sm" id="invasion-start-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.invasion_start') ?> <kbd class="btn-kbd">Enter</kbd></button>
             <button class="btn btn-sm" id="invasion-stop-btn" style="display:none;"><?= t('learn.invasion_stop') ?></button>
         </div>
 
@@ -286,7 +286,7 @@ include __DIR__ . '/includes/header.php';
             <div id="invasion-daily-note" class="mt-2" style="display:none;"></div>
 
             <div class="text-center mt-2">
-                <button class="btn btn-primary btn-sm" id="invasion-restart-btn"><?= t('learn.invasion_restart_btn') ?></button>
+                <button class="btn btn-primary btn-sm" id="invasion-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.invasion_restart_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
             </div>
         </div>
 

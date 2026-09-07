@@ -2611,7 +2611,20 @@
     if (invasionPuNuke) invasionPuNuke.addEventListener('click', activateInvasionNuke);
 
     window.addEventListener('keydown', (e) => {
-        if (!invasionModeActive || !invasionRunning) return;
+        if (!invasionModeActive) return;
+        if (!invasionRunning) {
+            const tag = document.activeElement?.tagName;
+            if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+            if (e.key === 'Enter' || e.code === 'Space') {
+                e.preventDefault();
+                if (invasionResultPanelEl && invasionResultPanelEl.style.display !== 'none') {
+                    if (invasionRestartBtn) invasionRestartBtn.click();
+                } else {
+                    if (invasionStartBtn) invasionStartBtn.click();
+                }
+            }
+            return;
+        }
         if (e.code === 'Space' && invasionPowerups.slow) {
             e.preventDefault();
             activateInvasionSlow();

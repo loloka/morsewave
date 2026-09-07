@@ -97,7 +97,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <button class="btn btn-primary mt-2" id="start-session"><?= t('koch.start_session') ?></button>
+    <button class="btn btn-primary mt-2" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">
@@ -142,7 +142,7 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
     </div>
 
-    <button class="btn btn-primary mt-2" id="restart-btn"><?= t('koch.new_session') ?></button>
+    <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
