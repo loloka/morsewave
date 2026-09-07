@@ -215,7 +215,7 @@ return [
     'groups.buffer_listening_lag' => '🎧 Listen and type with a {n}-char lag…',
     'groups.buffer_tip_all' => 'Listen to the full group: input unlocks only after the entire group finishes playing. Type the group from memory.',
     'groups.buffer_tip_lag' => 'Listen and type with a {n}-char lag: input unlocks after {n} character(s). Type heard characters lagging behind the audio — this trains your short-term buffer.',
-    'groups.buffer_hint' => '💡 Recommended: start with 2 characters, then advance to 3, 4, and 5.',
+    'groups.buffer_hint' => '💡 Recommended: start with 1 character, then advance to 2 and 3.',
     'groups.pairs_title' => 'Curing Confused Pairs (Isolation Method)',
     'groups.pairs_intro' => 'Freezing on similar characters (S/H, B/D, U/V, etc.) happens when the brain panics trying to guess. This method uses isolation: one character is completely removed from the text to eliminate anxiety, followed by a final duel.',
     'groups.pairs_recommendation' => '🔥 Recommended for you:',
