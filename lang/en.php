@@ -411,6 +411,8 @@ return [
     'acc.wave_triangle' => 'Triangle (warm)',
     'acc.wave_square' => 'Square (sharp)',
     'acc.wave_sawtooth' => 'Sawtooth (buzzy)',
+    'acc.pseudo_stereo_label' => '🎧 Pseudo-stereo (spatial depth in headphones)',
+    'acc.pseudo_stereo_note' => 'Applies a subtle phase shift and Haas delay between left and right ears. The signal detaches from the center of your head, creating a natural open-air sensation and reducing ear fatigue.',
     'acc.test_tone_btn' => '▶ Test sound',
     'acc.reset_tone_btn' => 'Reset to default',
     'acc.tone_note' => 'A 600 Hz sine wave is the classic CW radio tone, closest to real airwaves. Square/sawtooth sound sharper and buzzier — some people find dots/dashes easier to tell apart with those.',

@@ -665,21 +665,34 @@
     const freqSlider = document.getElementById('tone-freq');
     const freqValue = document.getElementById('tone-freq-value');
     const waveChips = document.querySelectorAll('#waveform-chips .chip');
+    const pseudoStereoToggle = document.getElementById('pseudo-stereo-toggle');
 
     let current = AudioSettings.load();
-    freqSlider.value = current.freq;
-    freqValue.textContent = current.freq;
+    if (freqSlider) {
+        freqSlider.value = current.freq;
+        freqValue.textContent = current.freq;
+    }
+    if (pseudoStereoToggle) {
+        pseudoStereoToggle.checked = current.pseudoStereo !== false;
+    }
+
     waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
 
     function save() {
         AudioSettings.save(current);
+        if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
+            const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
+            bus.configure({ pseudoStereo: current.pseudoStereo });
+        }
     }
 
-    freqSlider.addEventListener('input', () => {
-        current.freq = parseInt(freqSlider.value, 10);
-        freqValue.textContent = current.freq;
-        save();
-    });
+    if (freqSlider) {
+        freqSlider.addEventListener('input', () => {
+            current.freq = parseInt(freqSlider.value, 10);
+            freqValue.textContent = current.freq;
+            save();
+        });
+    }
 
     waveChips.forEach(chip => {
         chip.addEventListener('click', () => {
@@ -690,18 +703,54 @@
         });
     });
 
-    document.getElementById('test-tone-btn').addEventListener('click', () => {
-        const audio = new MorseAudio({ wpm: 15 });
-        audio.play('MORSE', {});
-    });
+    if (pseudoStereoToggle) {
+        pseudoStereoToggle.addEventListener('change', () => {
+            current.pseudoStereo = pseudoStereoToggle.checked;
+            save();
+        });
+    }
 
-    document.getElementById('reset-tone-btn').addEventListener('click', () => {
-        current = AudioSettings.defaults();
-        save();
-        freqSlider.value = current.freq;
-        freqValue.textContent = current.freq;
-        waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
-    });
+    let testAudio = null;
+    const testBtn = document.getElementById('test-tone-btn');
+    if (testBtn) {
+        testBtn.addEventListener('click', () => {
+            if (testAudio) {
+                testAudio.stop();
+                testAudio = null;
+                testBtn.textContent = t('acc.test_tone_btn');
+                return;
+            }
+            testAudio = new MorseAudio({ wpm: 15, freq: current.freq, waveform: current.waveform });
+            testBtn.textContent = '⏹ ' + (window.MW_LANG === 'en' ? 'Stop' : 'Остановить');
+            testAudio.play('MORSE', {
+                onDone: () => {
+                    testAudio = null;
+                    testBtn.textContent = t('acc.test_tone_btn');
+                }
+            });
+        });
+    }
+
+    const resetBtn = document.getElementById('reset-tone-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+            if (testAudio) {
+                testAudio.stop();
+                testAudio = null;
+                testBtn.textContent = t('acc.test_tone_btn');
+            }
+            current = AudioSettings.defaults();
+            save();
+            if (freqSlider) {
+                freqSlider.value = current.freq;
+                freqValue.textContent = current.freq;
+            }
+            waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
+            if (pseudoStereoToggle) {
+                pseudoStereoToggle.checked = current.pseudoStereo !== false;
+            }
+        });
+    }
 
     /* ---------- Отображение сигнальной линии ---------- */
     const signalToggle = document.getElementById('show-signal-line-toggle');

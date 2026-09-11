@@ -6,13 +6,18 @@
 const AudioSettings = (() => {
     const KEY = 'morsewave_audio_settings_v1';
 
-    const defaults = () => ({ freq: 600, waveform: 'sine' });
+    const defaults = () => ({ freq: 600, waveform: 'sine', pseudoStereo: true });
 
     function load() {
         try {
             const raw = localStorage.getItem(KEY);
             if (!raw) return defaults();
-            return { ...defaults(), ...JSON.parse(raw) };
+            const parsed = JSON.parse(raw);
+            // Если остался временный bell или transceiver — возвращаем на sine
+            if (parsed.waveform === 'bell' || parsed.waveform === 'transceiver') {
+                parsed.waveform = 'sine';
+            }
+            return { ...defaults(), ...parsed };
         } catch {
             return defaults();
         }

@@ -209,6 +209,16 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <div class="mt-3">
+            <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+                <input type="checkbox" id="pseudo-stereo-toggle" checked>
+                <span style="font-weight:500;"><?= t('acc.pseudo_stereo_label') ?></span>
+            </label>
+            <p class="muted mt-1" style="font-size:12px;margin-left:24px;margin-top:4px;">
+                <?= t('acc.pseudo_stereo_note') ?>
+            </p>
+        </div>
+
         <div class="btn-row mt-3">
             <button class="btn btn-primary" id="test-tone-btn"><?= t('acc.test_tone_btn') ?></button>
             <button class="btn" id="reset-tone-btn"><?= t('acc.reset_tone_btn') ?></button>

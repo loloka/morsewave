@@ -44,13 +44,21 @@ class TelegraphKey {
         this._ensureAudio();
         const ctx = this.audioCtx;
         const now = ctx.currentTime;
+        const bus = (typeof getSharedMorseAudioBus === 'function') ? getSharedMorseAudioBus(ctx) : null;
+        if (bus) bus.configure();
+
         this.osc = ctx.createOscillator();
         this.gain = ctx.createGain();
         this.osc.frequency.value = this.freq;
         this.osc.type = this.waveform || 'sine';
         this.gain.gain.setValueAtTime(0, now);
         this.gain.gain.linearRampToValueAtTime(0.3, now + 0.006);
-        this.osc.connect(this.gain).connect(ctx.destination);
+
+        if (bus) {
+            this.osc.connect(this.gain).connect(bus.input);
+        } else {
+            this.osc.connect(this.gain).connect(ctx.destination);
+        }
         this.osc.start(now);
     }
 

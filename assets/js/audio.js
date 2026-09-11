@@ -18,6 +18,86 @@ function getSharedAudioContext() {
 }
 
 /**
+ * MorseAudioBus — мастер-шина вывода звука с поддержкой псевдостерео.
+ * Если псевдостерео включено, добавляет микрозадержку Хааса (~9 мс) в правый канал,
+ * создавая комфортный объёмный звук в наушниках и снимая утомление слуха.
+ */
+class MorseAudioBus {
+    constructor(ctx) {
+        this.ctx = ctx;
+
+        this.input = ctx.createGain();
+        this.input.gain.value = 1.0;
+
+        // Блок псевдостерео (бинауральная микрозадержка Хааса ~9 мс)
+        this.splitter = ctx.createChannelSplitter(2);
+        this.merger = ctx.createChannelMerger(2);
+
+        this.leftGain = ctx.createGain();
+        this.leftGain.gain.value = 1.0;
+
+        this.delayRight = ctx.createDelay();
+        this.delayRight.delayTime.value = 0.009; // 9 мс задержка Хааса для правого уха
+        this.rightGain = ctx.createGain();
+        this.rightGain.gain.value = 1.0;
+
+        // Переключатели режимов Стерео / Моно
+        this.stereoBus = ctx.createGain();
+        this.monoBus = ctx.createGain();
+
+        // Мастер-выход
+        this.masterGain = ctx.createGain();
+        this.masterGain.gain.value = 1.0;
+
+        this._connect();
+        this.configure();
+    }
+
+    _connect() {
+        // Моно тракт: напрямую в masterGain
+        this.input.connect(this.monoBus);
+        this.monoBus.connect(this.masterGain);
+
+        // Стерео тракт (псевдостерео):
+        this.input.connect(this.splitter);
+        // Левый канал: напрямую
+        this.splitter.connect(this.leftGain, 0);
+        this.leftGain.connect(this.merger, 0, 0);
+
+        // Правый канал: задержка 9 мс
+        this.splitter.connect(this.delayRight, 0);
+        this.delayRight.connect(this.rightGain);
+        this.rightGain.connect(this.merger, 0, 1);
+
+        this.merger.connect(this.stereoBus);
+        this.stereoBus.connect(this.masterGain);
+
+        this.masterGain.connect(this.ctx.destination);
+    }
+
+    configure(overrides = {}) {
+        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true };
+        const pseudoStereo = overrides.pseudoStereo ?? settings.pseudoStereo ?? true;
+        const now = this.ctx.currentTime;
+
+        if (pseudoStereo) {
+            this.monoBus.gain.setTargetAtTime(0, now, 0.01);
+            this.stereoBus.gain.setTargetAtTime(1.0, now, 0.01);
+        } else {
+            this.monoBus.gain.setTargetAtTime(1.0, now, 0.01);
+            this.stereoBus.gain.setTargetAtTime(0, now, 0.01);
+        }
+    }
+}
+
+function getSharedMorseAudioBus(ctx) {
+    if (!window.__morseSharedAudioBus || window.__morseSharedAudioBus.ctx !== ctx) {
+        window.__morseSharedAudioBus = new MorseAudioBus(ctx);
+    }
+    return window.__morseSharedAudioBus;
+}
+
+/**
  * MorseAudio — проигрывает текст азбукой Морзе через Web Audio API.
  * Поддерживает интервалы Фарнсворта (Farnsworth spacing): символы звучат
  * на "скорости символа" (wpm), а паузы между буквами/словами растянуты
@@ -56,6 +136,9 @@ class MorseAudio {
 
     _tone(durationMs) {
         return new Promise((resolve) => {
+            const bus = getSharedMorseAudioBus(this.ctx);
+            bus.configure();
+
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
             osc.frequency.value = this.freq;
@@ -63,13 +146,13 @@ class MorseAudio {
 
             const now = this.ctx.currentTime;
             const dur = durationMs / 1000;
-            // мягкая атака/затухание, чтобы не было щелчков
+            // Мягкая атака/затухание, чтобы не было щелчков
             gain.gain.setValueAtTime(0, now);
             gain.gain.linearRampToValueAtTime(0.35, now + 0.005);
             gain.gain.setValueAtTime(0.35, now + dur - 0.005 > now ? now + dur - 0.005 : now);
             gain.gain.linearRampToValueAtTime(0, now + dur);
 
-            osc.connect(gain).connect(this.ctx.destination);
+            osc.connect(gain).connect(bus.input);
             osc.start(now);
             osc.stop(now + dur);
             this._activeNodes = { osc, gain };
@@ -192,11 +275,13 @@ class MorseAudio {
             try {
                 const now = this.ctx.currentTime;
                 gain.gain.cancelScheduledValues(now);
-                gain.gain.setValueAtTime(gain.gain.value, now);
+                const cur = gain.gain.value || 0.35;
+                gain.gain.setValueAtTime(cur, now);
                 gain.gain.linearRampToValueAtTime(0, now + 0.01);
                 osc.stop(now + 0.02);
             } catch (e) {
-                // осциллятор мог уже закончиться сам — это нормально
+                try { gain.disconnect(); } catch (_) {}
+                try { osc.stop(); } catch (_) {}
             }
         }
     }
