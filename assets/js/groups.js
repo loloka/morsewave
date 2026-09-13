@@ -2209,7 +2209,18 @@
     const PHRASES_XP_RATE = 1.5;
     const WORDS_MIN_ACCURACY = 0.6;
 
-    let wordsSet = 'words';
+    function escapeHtml(str) {
+        return String(str ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    let wordsSet = localStorage.getItem('morse_words_set') || 'words';
+    if (!['words', 'phrases', 'mixed'].includes(wordsSet)) wordsSet = 'words';
+
     let wordsSession = null;
     let wordsAudio = null;
     let wordsPlaying = false;
@@ -2219,16 +2230,28 @@
     let vkbWords = null;
     function renderWordsVkb() {
         if (!vkbWords && typeof VirtualKeyboard !== 'undefined' && vkbWordsEl) {
-            vkbWords = new VirtualKeyboard(vkbWordsEl, wordsAnswerInput, { showSpace: false });
+            vkbWords = new VirtualKeyboard(vkbWordsEl, wordsAnswerInput, { showSpace: true });
         }
     }
 
-    document.querySelectorAll('#words-set-chips .chip').forEach(chip => {
+    const wordsResultSetHint = document.getElementById('words-result-set-hint');
+
+    function setWordsMode(newSet) {
+        if (!['words', 'phrases', 'mixed'].includes(newSet)) return;
+        wordsSet = newSet;
+        try { localStorage.setItem('morse_words_set', wordsSet); } catch (e) {}
+        document.querySelectorAll('#words-set-chips .chip, #words-result-set-chips .chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.wset === wordsSet);
+        });
+        if (wordsSetHint) wordsSetHint.textContent = WORDS_SET_HINTS[wordsSet] || '';
+        if (wordsResultSetHint) wordsResultSetHint.textContent = WORDS_SET_HINTS[wordsSet] || '';
+    }
+
+    setWordsMode(wordsSet);
+
+    document.querySelectorAll('#words-set-chips .chip, #words-result-set-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
-            document.querySelectorAll('#words-set-chips .chip').forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            wordsSet = chip.dataset.wset;
-            wordsSetHint.textContent = WORDS_SET_HINTS[wordsSet] || '';
+            setWordsMode(chip.dataset.wset);
         });
     });
 
@@ -2333,6 +2356,7 @@
         wordsIndexEl.textContent = '1';
         wordsAnswerInput.value = '';
         wordsFeedback.className = 'feedback';
+        wordsFeedback.innerHTML = '';
         if (typeof renderWordsVkb !== 'undefined') renderWordsVkb();
         wordsAnswerInput.focus();
         playCurrentWord();
@@ -2379,12 +2403,36 @@
 
         if (correct === scorable && typed.length === expected.length) {
             wordsSession.fullyCorrect++;
-            wordsFeedback.textContent = t('js.groups.correct', { '{expected}': expected }) + (xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : '');
+            const xpText = xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : '';
+            wordsFeedback.textContent = t('js.groups.correct', { '{expected}': expected }) + xpText;
             wordsFeedback.className = 'feedback show ok';
         } else {
-            wordsSession.missed.push({ expected, typed: typed || t('js.groups.empty_placeholder') });
-            wordsFeedback.textContent = t('js.groups.wrong', { '{expected}': expected, '{typed}': typed || t('js.groups.empty_placeholder') })
-                + (xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : t('js.groups.words_xp_none'));
+            const placeholder = t('js.groups.empty_placeholder');
+            wordsSession.missed.push({ expected, typed: typed || placeholder });
+            const xpText = xpGain ? t('js.groups.words_xp_suffix', { '{xp}': xpGain }) : t('js.groups.words_xp_none');
+
+            const len = Math.max(expected.length, typed.length);
+            let expectedHTML = '';
+            let typedHTML = '';
+            for (let i = 0; i < len; i++) {
+                const e = expected[i] || '';
+                const tChar = typed[i] || '';
+                if (e && e === tChar) {
+                    expectedHTML += e === ' ' ? '&nbsp;' : `<span style="color: var(--success);">${escapeHtml(e)}</span>`;
+                    typedHTML += tChar === ' ' ? '&nbsp;' : `<span style="color: var(--success);">${escapeHtml(tChar)}</span>`;
+                } else {
+                    const eDisplay = e || '_';
+                    const tDisplay = tChar || '_';
+                    expectedHTML += `<span style="color: var(--text); font-weight: bold; text-decoration: underline;">${eDisplay === ' ' ? '&nbsp;' : escapeHtml(eDisplay)}</span>`;
+                    typedHTML += `<span style="color: var(--danger); font-weight: bold; text-decoration: underline;">${tDisplay === ' ' ? '&nbsp;' : escapeHtml(tDisplay)}</span>`;
+                }
+            }
+
+            const rawText = t('js.groups.wrong', {
+                '{expected}': expectedHTML,
+                '{typed}': (typed ? typedHTML : escapeHtml(placeholder))
+            });
+            wordsFeedback.innerHTML = `<span style="font-family: var(--font-mono); font-size: 15px; letter-spacing: 1px; color: var(--text);">${rawText}</span><span style="font-size: 13px; margin-left: 6px;" class="muted">${escapeHtml(xpText)}</span>`;
             wordsFeedback.className = 'feedback show bad';
         }
 
@@ -2430,6 +2478,7 @@
             Progress.incrementStat('sessionsCompleted', 1);
         }
 
+        setWordsMode(wordsSet);
         wordsSessionPanel.style.display = 'none';
         wordsResultPanel.style.display = 'block';
         wordsSession = null;
@@ -2439,10 +2488,14 @@
     document.getElementById('words-submit-btn').addEventListener('click', submitWordAnswer);
     wordsReplayBtn.addEventListener('click', playCurrentWord);
     document.getElementById('words-stop-btn').addEventListener('click', finishWordsSession);
-    document.getElementById('words-restart-btn').addEventListener('click', () => {
-        wordsResultPanel.style.display = 'none';
-        wordsSetup.style.display = 'block';
-    });
+    document.getElementById('words-restart-btn').addEventListener('click', startWordsSession);
+    const wordsSettingsBtn = document.getElementById('words-settings-btn');
+    if (wordsSettingsBtn) {
+        wordsSettingsBtn.addEventListener('click', () => {
+            wordsResultPanel.style.display = 'none';
+            wordsSetup.style.display = 'block';
+        });
+    }
     wordsAnswerInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') { e.preventDefault(); submitWordAnswer(); }
     });

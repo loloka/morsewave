@@ -8,6 +8,7 @@ return [
     'lang.switch_to' => 'EN',
     'lang.switch_title' => 'Switch to English',
     'common.shortcut_enter' => 'Нажмите Enter, чтобы начать',
+    'common.space' => 'Пробел',
 
     // --- includes/header.php ---
     'site.title_suffix' => 'MorseWave',

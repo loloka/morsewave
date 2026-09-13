@@ -223,7 +223,7 @@ class VirtualKeyboard {
         if (this.options.showSpace) {
             const space = document.createElement('div');
             space.className = 'vkb-key vkb-space';
-            space.textContent = 'Space';
+            space.textContent = typeof t !== 'undefined' ? t('common.space') : 'Space';
             space.style.flex = '2';
             space.addEventListener('click', (e) => { e.preventDefault(); this.insertText(' '); });
             bottomRow.appendChild(space);

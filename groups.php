@@ -408,7 +408,23 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="words-result-xp">0</span><span class="label"><?= t('groups.result_xp') ?></span></div>
     </div>
     <div class="mt-2" id="words-mistakes" style="display:none;"></div>
-    <button class="btn btn-primary mt-2" id="words-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
+
+    <div class="mt-3">
+        <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.words_what') ?></div>
+        <div class="chip-row" id="words-result-set-chips">
+            <div class="chip active" data-wset="words"><?= t('groups.wset_words') ?></div>
+            <div class="chip" data-wset="phrases"><?= t('groups.wset_phrases') ?></div>
+            <div class="chip" data-wset="mixed"><?= t('groups.wset_mixed') ?></div>
+        </div>
+        <div class="muted mt-1" style="font-size:12px;" id="words-result-set-hint">
+            <?= t('groups.wset_hint_words') ?>
+        </div>
+    </div>
+
+    <div class="btn-row mt-3">
+        <button class="btn btn-primary" id="words-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn" id="words-settings-btn"><?= t('groups.settings') ?></button>
+    </div>
 </div>
 
 </div>
