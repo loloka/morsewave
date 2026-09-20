@@ -122,10 +122,10 @@ include __DIR__ . '/includes/header.php';
     <div class="vkb mt-2" id="koch-vkb" style="display:none;"></div>
 
     <div class="btn-row mt-2">
-        <button class="btn btn-primary" id="submit-answer"><?= t('koch.check') ?></button>
-        <button class="btn" id="koch-stop-btn" type="button">⏹ <?= t('groups.words_stop') ?></button>
+        <button class="btn btn-primary" id="submit-answer"><?= t('koch.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn" id="koch-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
-    <div class="feedback mt-2" id="koch-feedback"></div>
+    <div class="feedback mt-3" id="koch-feedback" style="margin-top:24px;"></div>
 </div>
 
 <div class="card mt-3" id="result-panel" style="display:none;">
@@ -140,6 +140,10 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
         <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
+    </div>
+
+    <div class="card mt-2" id="koch-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
+        <span id="koch-daily-time-text"></span>
     </div>
 
     <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>

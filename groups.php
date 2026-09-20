@@ -262,7 +262,7 @@ include __DIR__ . '/includes/header.php';
             <div class="morse-lamp" id="groups-lamp"></div>
             <button class="btn btn-sm" id="groups-signal-toggle"></button>
             <button class="btn btn-sm" id="replay-btn" title="F7"><?= t('groups.replay') ?> <span style="opacity: 0.6; font-size: 0.9em; margin-left: 4px;">[F7]</span></button>
-            <button class="btn btn-sm" id="qrq-stop-btn" style="display:none;">⏹ <?= t('groups.words_stop') ?></button>
+            <button class="btn btn-sm" id="qrq-stop-btn" style="display:none;"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
         </div>
     </div>
     <div class="signal-line mt-2" id="groups-signal"></div>
@@ -275,8 +275,8 @@ include __DIR__ . '/includes/header.php';
 
     <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.answer_placeholder')) ?>" autocomplete="off">
     <div class="btn-row mt-2" id="groups-submit-row">
-        <button class="btn btn-primary" id="submit-answer"><?= t('groups.check') ?></button>
-        <button class="btn" id="groups-stop-btn" type="button">⏹ <?= t('groups.words_stop') ?></button>
+        <button class="btn btn-primary" id="submit-answer"><?= t('groups.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn" id="groups-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
 
     <textarea id="exam-answer" class="answer-input mt-2" style="display:none; min-height:180px; resize:vertical;"
@@ -287,7 +287,7 @@ include __DIR__ . '/includes/header.php';
 
     <div class="vkb mt-2" id="groups-vkb" style="display:none;"></div>
 
-    <div class="feedback mt-2" id="groups-feedback"></div>
+    <div class="feedback mt-3" id="groups-feedback" style="margin-top:24px;"></div>
 </div>
 
 <div class="card mt-3" id="result-panel" style="display:none;">
@@ -324,6 +324,10 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
         <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
+    </div>
+
+    <div class="card mt-2" id="groups-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
+        <span id="groups-daily-time-text"></span>
     </div>
 
     <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
@@ -394,10 +398,10 @@ include __DIR__ . '/includes/header.php';
     <input type="text" id="words-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.words_answer_placeholder')) ?>" autocomplete="off">
     <div class="vkb mt-2" id="words-vkb" style="display:none;"></div>
     <div class="btn-row mt-2">
-        <button class="btn btn-primary" id="words-submit-btn"><?= t('groups.check') ?></button>
-        <button class="btn" id="words-stop-btn"><?= t('groups.words_stop') ?></button>
+        <button class="btn btn-primary" id="words-submit-btn"><?= t('groups.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn" id="words-stop-btn"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
-    <div class="feedback mt-2" id="words-feedback"></div>
+    <div class="feedback mt-3" id="words-feedback" style="margin-top:24px;"></div>
 </div>
 
 <div class="card mt-3" id="words-result" style="display:none;">
@@ -419,6 +423,10 @@ include __DIR__ . '/includes/header.php';
         <div class="muted mt-1" style="font-size:12px;" id="words-result-set-hint">
             <?= t('groups.wset_hint_words') ?>
         </div>
+    </div>
+
+    <div class="card mt-2" id="words-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
+        <span id="words-daily-time-text"></span>
     </div>
 
     <div class="btn-row mt-3">

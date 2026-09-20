@@ -24,7 +24,54 @@ include __DIR__ . '/includes/header.php';
                 <option value="5" selected>5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option>
             </select>
         </label>
+        <label class="chip">
+            <input type="checkbox" id="cs-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+        </label>
+        <label class="chip">
+            <input type="checkbox" id="cs-buffer-enabled"> <?= t('groups.buffer_input') ?>
+        </label>
     </div>
+
+    <!-- Панель настройки Фарнсворта в Позывных -->
+    <div id="cs-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px;"><?= t('koch.farnsworth') ?></div>
+                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+            </div>
+            <div class="speed-control" id="cs-farnsworth-wrap">
+                <input type="range" id="cs-farnsworth" min="5" max="30" step="1" value="10">
+                <span class="speed-value" id="cs-farnsworth-value">10</span> wpm
+            </div>
+        </div>
+        <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            💡 <?= t('koch.farnsworth_tooltip') ?>
+        </div>
+    </div>
+
+    <!-- Панель настройки буфера памяти в Позывных -->
+    <div id="cs-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+            </div>
+            <div class="chip-row" id="cs-buffer-depth-chips">
+                <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                <div class="chip active" data-depth="all"><?= t('cs.buffer_depth_all') ?></div>
+            </div>
+        </div>
+        <div class="muted mt-2" id="cs-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            💡 <?= t('groups.buffer_tooltip') ?>
+        </div>
+        <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
+            <?= t('groups.buffer_hint') ?>
+        </div>
+    </div>
+
     <button class="btn btn-primary mt-2" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('cs.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
     <div class="feedback mt-2" id="setup-error"></div>
 </div>
@@ -41,11 +88,12 @@ include __DIR__ . '/includes/header.php';
     <div class="signal-line mt-2" id="cs-signal"></div>
     <input type="text" id="cs-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('cs.answer_placeholder')) ?>" autocomplete="off">
     <div class="btn-row mt-2">
-        <button class="btn btn-primary" id="submit-answer"><?= t('cs.check') ?></button>
+        <button class="btn btn-primary" id="submit-answer"><?= t('cs.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn" id="cs-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
 
     <div class="vkb mt-2" id="cs-vkb" style="display:none;"></div>
-    <div class="feedback mt-2" id="cs-feedback"></div>
+    <div class="feedback mt-3" id="cs-feedback" style="margin-top:24px;"></div>
 </div>
 
 <div class="card mt-3" id="result-panel" style="display:none;">
@@ -55,6 +103,11 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('cs.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('cs.result_xp') ?></span></div>
     </div>
+
+    <div class="card mt-2" id="cs-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
+        <span id="cs-daily-time-text"></span>
+    </div>
+
     <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('cs.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
 </div>
 

@@ -701,6 +701,25 @@
         }
         Progress.markDailyActivity();
 
+        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.addTrainingTime(dur);
+            const todaySecs = Progress.getTodayTrainingSeconds();
+            const todayMins = Math.floor(todaySecs / 60);
+            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+            const dailyBlock = document.getElementById('koch-daily-time-block');
+            const dailyText = document.getElementById('koch-daily-time-text');
+            if (dailyBlock && dailyText) {
+                dailyBlock.style.display = 'block';
+                if (todayMins >= goalMins) {
+                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+                } else {
+                    const leftMins = Math.max(1, goalMins - todayMins);
+                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+                }
+            }
+        }
+
         const msg = document.getElementById('result-message');
         const state = Progress.load();
         if (accuracy >= PASS_THRESHOLD && isFullyCompleted) {
@@ -904,8 +923,17 @@
         }
     }
 
-    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов
+    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов,
+    // а также завершение активной сессии по Escape
     window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (sessionPanel && sessionPanel.style.display !== 'none') {
+                e.preventDefault();
+                stopKochSession();
+                return;
+            }
+        }
+
         if (e.key !== 'Enter') return;
         if (e.ctrlKey || e.altKey || e.metaKey) return;
         const tag = document.activeElement?.tagName;

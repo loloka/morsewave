@@ -1398,6 +1398,11 @@
             if (typeof Progress.savePairStage === 'function') {
                 Progress.savePairStage(session.pairKey, session.pairStage, pairAcc);
             }
+            if (session.pairStage === 3 && pairAcc >= 90) {
+                if (typeof Progress.clearPairConfusion === 'function') {
+                    Progress.clearPairConfusion(session.pairA, session.pairB);
+                }
+            }
 
             const nextBtn = document.getElementById('pairs-next-stage-btn');
             if (nextBtn) {
@@ -1458,6 +1463,25 @@
         Progress.incrementStat('sessionsCompleted', 1);
         Progress.markDailyActivity();
         postStat('total_sessions', 1);
+
+        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.addTrainingTime(dur);
+            const todaySecs = Progress.getTodayTrainingSeconds();
+            const todayMins = Math.floor(todaySecs / 60);
+            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+            const dailyBlock = document.getElementById('groups-daily-time-block');
+            const dailyText = document.getElementById('groups-daily-time-text');
+            if (dailyBlock && dailyText) {
+                dailyBlock.style.display = 'block';
+                if (todayMins >= goalMins) {
+                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+                } else {
+                    const leftMins = Math.max(1, goalMins - todayMins);
+                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+                }
+            }
+        }
 
         if (dailyBonusMsg) {
             const note = document.createElement('div');
@@ -2478,6 +2502,25 @@
             Progress.incrementStat('sessionsCompleted', 1);
         }
 
+        if (typeof Progress.addTrainingTime === 'function' && wordsSession.startTime) {
+            const dur = Math.round((Date.now() - wordsSession.startTime) / 1000);
+            Progress.addTrainingTime(dur);
+            const todaySecs = Progress.getTodayTrainingSeconds();
+            const todayMins = Math.floor(todaySecs / 60);
+            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+            const dailyBlock = document.getElementById('words-daily-time-block');
+            const dailyText = document.getElementById('words-daily-time-text');
+            if (dailyBlock && dailyText) {
+                dailyBlock.style.display = 'block';
+                if (todayMins >= goalMins) {
+                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+                } else {
+                    const leftMins = Math.max(1, goalMins - todayMins);
+                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+                }
+            }
+        }
+
         setWordsMode(wordsSet);
         wordsSessionPanel.style.display = 'none';
         wordsResultPanel.style.display = 'block';
@@ -2500,8 +2543,30 @@
         if (e.key === 'Enter') { e.preventDefault(); submitWordAnswer(); }
     });
 
-    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов
+    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов,
+    // а также завершение активной сессии по Escape
     window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (groupsModeEl && groupsModeEl.style.display !== 'none') {
+                if (sessionPanel && sessionPanel.style.display !== 'none') {
+                    e.preventDefault();
+                    if (typeof qrqSessionActive !== 'undefined' && qrqSessionActive && typeof qrqStopBtn !== 'undefined' && qrqStopBtn) {
+                        qrqStopBtn.click();
+                    } else {
+                        stopGroupsSession();
+                    }
+                    return;
+                }
+            }
+            if (wordsModeEl && wordsModeEl.style.display !== 'none') {
+                if (wordsSessionPanel && wordsSessionPanel.style.display !== 'none') {
+                    e.preventDefault();
+                    finishWordsSession();
+                    return;
+                }
+            }
+        }
+
         if (e.key !== 'Enter') return;
         if (e.ctrlKey || e.altKey || e.metaKey) return;
         const tag = document.activeElement?.tagName;

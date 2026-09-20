@@ -140,6 +140,7 @@ const Progress = (() => {
         invasionDailyWinDate: null,
         pairConfusion: {},
         pairTrainer: {},
+        dailyTraining: { date: null, seconds: 0 },
     });
 
     function load() {
@@ -403,6 +404,26 @@ const Progress = (() => {
             });
         }
 
+        // dailyTraining — суммарное время тренировок за день
+        {
+            const lDt = (local.dailyTraining && typeof local.dailyTraining === 'object') ? local.dailyTraining : {};
+            const sDt = (server.dailyTraining && typeof server.dailyTraining === 'object') ? server.dailyTraining : {};
+            if (sDt.date && lDt.date) {
+                if (sDt.date > lDt.date) {
+                    merged.dailyTraining = { date: sDt.date, seconds: Number(sDt.seconds) || 0 };
+                } else if (sDt.date === lDt.date) {
+                    merged.dailyTraining = {
+                        date: sDt.date,
+                        seconds: Math.max(Number(lDt.seconds) || 0, Number(sDt.seconds) || 0)
+                    };
+                } else {
+                    merged.dailyTraining = { date: lDt.date, seconds: Number(lDt.seconds) || 0 };
+                }
+            } else {
+                merged.dailyTraining = sDt.date ? { date: sDt.date, seconds: Number(sDt.seconds) || 0 } : (lDt.date ? { date: lDt.date, seconds: Number(lDt.seconds) || 0 } : { date: null, seconds: 0 });
+            }
+        }
+
         // Числовые счётчики stats — max по каждому полю (включая поля,
         // которых нет в defaults — на случай, если одна из сторон новее)
         const localStats = local.stats || {};
@@ -664,6 +685,57 @@ const Progress = (() => {
         state.pairConfusion[key] = (state.pairConfusion[key] || 0) + 1;
         save(state);
         pushFullProgress();
+    }
+
+    /**
+     * Сбрасывает счетчик ошибок на паре при её успешном лечении (дуэль 3 этапа ≥ 90%).
+     */
+    function clearPairConfusion(ch1, ch2) {
+        if (!ch1 || !ch2) return;
+        const a = String(ch1).toUpperCase();
+        const b = String(ch2).toUpperCase();
+        const key = [a, b].sort().join('-');
+        const state = load();
+        if (state.pairConfusion && typeof state.pairConfusion === 'object' && state.pairConfusion[key] !== undefined) {
+            delete state.pairConfusion[key];
+            save(state);
+            pushFullProgress();
+        }
+    }
+
+    function getDailyGoalMinutes() {
+        const saved = parseInt(localStorage.getItem('morsewave_daily_goal_mins'), 10);
+        return [10, 15, 20, 30, 45, 60].includes(saved) ? saved : 30;
+    }
+
+    function setDailyGoalMinutes(mins) {
+        const val = parseInt(mins, 10);
+        if ([10, 15, 20, 30, 45, 60].includes(val)) {
+            localStorage.setItem('morsewave_daily_goal_mins', val);
+        }
+    }
+
+    function addTrainingTime(seconds) {
+        if (!seconds || seconds <= 0) return getTodayTrainingSeconds();
+        const capped = Math.min(seconds, 1800);
+        const state = load();
+        const todayStr = today();
+        if (!state.dailyTraining || typeof state.dailyTraining !== 'object' || state.dailyTraining.date !== todayStr) {
+            state.dailyTraining = { date: todayStr, seconds: 0 };
+        }
+        state.dailyTraining.seconds = (state.dailyTraining.seconds || 0) + capped;
+        save(state);
+        pushFullProgress();
+        return state.dailyTraining.seconds;
+    }
+
+    function getTodayTrainingSeconds() {
+        const state = load();
+        const todayStr = today();
+        if (state.dailyTraining && state.dailyTraining.date === todayStr) {
+            return Number(state.dailyTraining.seconds) || 0;
+        }
+        return 0;
     }
 
     function getPairTrainer() {
@@ -995,7 +1067,8 @@ const Progress = (() => {
         invasionLetterScore, recordInvasionAttempt,
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,
-        recordPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, CLASSIC_PAIRS,
+        recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, CLASSIC_PAIRS,
+        addTrainingTime, getTodayTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         completeInvasionDailyWin, isInvasionDailyWinDone,

@@ -760,4 +760,21 @@
         settings.showSignalLine = signalToggle.checked;
         DisplaySettings.save(settings);
     });
+
+    /* ---------- Дневная норма тренировки ---------- */
+    const dailyGoalChips = document.querySelectorAll('#daily-goal-chips .chip');
+    if (dailyGoalChips.length && typeof Progress !== 'undefined') {
+        const currentGoal = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+        dailyGoalChips.forEach(chip => {
+            const mins = parseInt(chip.dataset.mins, 10);
+            chip.classList.toggle('active', mins === currentGoal);
+            chip.addEventListener('click', () => {
+                dailyGoalChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                if (typeof Progress.setDailyGoalMinutes === 'function') {
+                    Progress.setDailyGoalMinutes(mins);
+                }
+            });
+        });
+    }
 })();

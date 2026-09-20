@@ -242,6 +242,21 @@ include __DIR__ . '/includes/header.php';
             <?= t('acc.signal_line_note') ?>
         </p>
     </div>
+
+    <div class="card mt-2">
+        <h3 class="mt-0"><?= t('acc.daily_goal_title') ?></h3>
+        <p class="muted mt-1" style="font-size:12px;">
+            <?= t('acc.daily_goal_desc') ?>
+        </p>
+        <div class="chip-row mt-2" id="daily-goal-chips">
+            <div class="chip" data-mins="10">10 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="15">15 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="20">20 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="30">30 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="45">45 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="60">60 <?= t('acc.mins') ?></div>
+        </div>
+    </div>
 </div>
 
 <!-- ======================= ВКЛАДКА: БЭКАП ======================= -->

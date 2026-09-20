@@ -26,6 +26,89 @@
         localStorage.setItem('morse_cs_wpm', wpmSlider.value);
     });
 
+    // Farnsworth controls
+    const fwEnabled = document.getElementById('cs-farnsworth-enabled');
+    const fwSlider = document.getElementById('cs-farnsworth');
+    const fwValue = document.getElementById('cs-farnsworth-value');
+    const fwPanel = document.getElementById('cs-farnsworth-panel');
+
+    function updateCsFarnsworthVisibility() {
+        const on = fwEnabled && fwEnabled.checked;
+        if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
+    }
+
+    const savedFwEnabled = localStorage.getItem('morse_cs_fw_enabled');
+    if (savedFwEnabled === 'true' && fwEnabled) {
+        fwEnabled.checked = true;
+    }
+    updateCsFarnsworthVisibility();
+
+    const savedFwWpm = localStorage.getItem('morse_cs_fw_wpm');
+    if (savedFwWpm && fwSlider) {
+        fwSlider.value = savedFwWpm;
+        if (fwValue) fwValue.textContent = savedFwWpm;
+    }
+    if (fwSlider) {
+        fwSlider.addEventListener('input', () => {
+            if (fwValue) fwValue.textContent = fwSlider.value;
+            localStorage.setItem('morse_cs_fw_wpm', fwSlider.value);
+        });
+    }
+    if (fwEnabled) {
+        fwEnabled.addEventListener('change', () => {
+            updateCsFarnsworthVisibility();
+            localStorage.setItem('morse_cs_fw_enabled', fwEnabled.checked);
+        });
+    }
+
+    // Buffer input controls
+    const bufferCheckbox = document.getElementById('cs-buffer-enabled');
+    const bufferPanel = document.getElementById('cs-buffer-panel');
+    let selectedBufferDepth = localStorage.getItem('morse_cs_buffer_depth') || 'all';
+
+    function updateCsBufferTip(depth) {
+        const tipEl = document.getElementById('cs-buffer-tip-text');
+        if (!tipEl) return;
+        if (depth === 'all') {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_all');
+        } else {
+            tipEl.textContent = '💡 ' + t('groups.buffer_tip_lag', { '{n}': depth });
+        }
+    }
+
+    function updateCsBufferPanelVisibility() {
+        if (bufferPanel) {
+            bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
+        }
+    }
+
+    if (bufferCheckbox) {
+        const savedBufferEnabled = localStorage.getItem('morse_cs_buffer_enabled');
+        if (savedBufferEnabled !== null) {
+            bufferCheckbox.checked = (savedBufferEnabled === 'true');
+        }
+        updateCsBufferPanelVisibility();
+        bufferCheckbox.addEventListener('change', () => {
+            localStorage.setItem('morse_cs_buffer_enabled', bufferCheckbox.checked);
+            updateCsBufferPanelVisibility();
+        });
+    }
+
+    document.querySelectorAll('#cs-buffer-depth-chips .chip').forEach(chip => {
+        if (chip.dataset.depth === selectedBufferDepth) {
+            document.querySelectorAll('#cs-buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+        }
+        chip.addEventListener('click', () => {
+            document.querySelectorAll('#cs-buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedBufferDepth = chip.dataset.depth;
+            localStorage.setItem('morse_cs_buffer_depth', selectedBufferDepth);
+            updateCsBufferTip(selectedBufferDepth);
+        });
+    });
+    updateCsBufferTip(selectedBufferDepth);
+
     const csCountEl = document.getElementById('cs-count');
     const savedCount = localStorage.getItem('morse_cs_count');
     if (savedCount && csCountEl) {
@@ -38,6 +121,9 @@
     }
 
     let session = null;
+    let isPlaying = false;
+    let currentAudio = null;
+    const replayBtn = document.getElementById('replay-btn');
     
     const vkbEl = document.getElementById('cs-vkb');
     let vkb = null;
@@ -46,8 +132,6 @@
             vkb = new VirtualKeyboard(vkbEl, answerInput, { showSpace: false, showSlash: true });
         }
     }
-    let isPlaying = false;
-    const replayBtn = document.getElementById('replay-btn');
 
     async function fetchCallsigns(count) {
         const res = await fetch(`api/callsigns.php?count=${count}`);
@@ -60,10 +144,67 @@
         isPlaying = true;
         replayBtn.disabled = true;
         signalLine.clear();
-        answerInput.focus();
+
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+
+        const isBuffer = !!session?.isBufferMode;
+        const bufferDepth = session?.bufferDepth || 'all';
+        const targetDepth = parseInt(bufferDepth, 10);
+
+        const updateBufferAllowed = (maxAllowed) => {
+            if (!answerInput) return;
+            if (maxAllowed === 0) {
+                answerInput.disabled = true;
+                if (bufferDepth === 'all') {
+                    answerInput.placeholder = t('cs.buffer_listening_all');
+                } else {
+                    answerInput.placeholder = t('groups.buffer_listening_lag', { '{n}': targetDepth });
+                }
+                answerInput.bufferMaxAllowed = 0;
+                answerInput.maxLength = 0;
+                if (vkbEl) { vkbEl.style.opacity = '0.5'; vkbEl.style.pointerEvents = 'none'; }
+            } else {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('cs.answer_placeholder');
+                answerInput.bufferMaxAllowed = maxAllowed;
+                answerInput.maxLength = maxAllowed;
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                if (document.activeElement !== answerInput) {
+                    answerInput.focus();
+                }
+            }
+        };
+
+        if (isBuffer) {
+            updateBufferAllowed(0);
+        } else {
+            if (answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('cs.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                answerInput.focus();
+            }
+        }
+
         try {
-            const audio = new MorseAudio({ wpm: session.wpm });
-            await audio.play(session.items[session.index].callsign, {
+            currentAudio = new MorseAudio({
+                wpm: session.wpm,
+                farnsworthWpm: session.farnsworth || null,
+            });
+            await currentAudio.play(session.items[session.index].callsign, {
+                onCharStart: ({ index }) => {
+                    if (isBuffer && answerInput) {
+                        if (!isNaN(targetDepth)) {
+                            const maxAllowed = Math.max(0, index + 1 - targetDepth);
+                            updateBufferAllowed(maxAllowed);
+                        }
+                    }
+                },
                 onSymbol: ({ symbol, durationMs }) => {
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
@@ -72,13 +213,28 @@
         } catch (e) {
             console.error('Ошибка воспроизведения позывного:', e);
         } finally {
+            currentAudio = null;
             isPlaying = false;
             replayBtn.disabled = false;
-            answerInput.focus();
+            if (isBuffer && answerInput) {
+                answerInput.disabled = false;
+                answerInput.placeholder = t('cs.answer_placeholder');
+                answerInput.bufferMaxAllowed = null;
+                answerInput.removeAttribute('maxlength');
+                if (vkbEl) { vkbEl.style.opacity = '1'; vkbEl.style.pointerEvents = 'auto'; }
+                answerInput.focus();
+            } else if (answerInput) {
+                answerInput.focus();
+            }
         }
     }
 
     function abortCurrentSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         if (session && !session.finished && session.dbXpEarned > 0) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             const total = session.index || 1; // estimate
@@ -101,6 +257,8 @@
     async function startSession() {
         abortCurrentSession();
         const wpm = parseInt(wpmSlider.value, 10);
+        const farnsworth = fwEnabled && fwEnabled.checked ? parseInt(fwSlider.value, 10) : null;
+        const isBufferMode = bufferCheckbox ? bufferCheckbox.checked : false;
         const count = parseInt(document.getElementById('cs-count').value, 10);
         setupError.className = 'feedback';
 
@@ -118,7 +276,12 @@
         let speedMult = isDaily ? speedXpFactor(wpm) : 1;
         let xpPerCallsign = Math.round(20 * speedMult);
 
-        session = { items, index: 0, wpm, correct: 0, dbXpEarned: 0, startTime: Date.now(), history: [], xpPerCallsign, isDaily };
+        session = {
+            items, index: 0, wpm, farnsworth,
+            isBufferMode, bufferDepth: selectedBufferDepth,
+            correct: 0, dbXpEarned: 0,
+            startTime: Date.now(), history: [], xpPerCallsign, isDaily
+        };
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -154,6 +317,8 @@
 
         session.index++;
         answerInput.value = '';
+        answerInput.bufferMaxAllowed = null;
+        answerInput.removeAttribute('maxlength');
         if (session.index >= session.items.length) {
             setTimeout(finishSession, 700);
         } else {
@@ -164,8 +329,16 @@
     }
 
     async function finishSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
+
+        // Clean up previous result notes
+        resultPanel.querySelectorAll('.js-result-note').forEach(n => n.remove());
 
         const total = session.items.length;
         const accuracy = total ? session.correct / total : 0;
@@ -215,6 +388,17 @@
         document.getElementById('result-xp').textContent = xpEarned;
 
         const grid = resultPanel.querySelector('.grid');
+
+        if (session.index < total) {
+            const stopNote = document.createElement('div');
+            stopNote.className = 'feedback show ok mt-2 js-result-note';
+            stopNote.textContent = t('js.groups.stopped_early', {
+                '{played}': session.index,
+                '{total}': total
+            });
+            grid.insertAdjacentElement('beforebegin', stopNote);
+        }
+
         let oldBr = document.getElementById('cs-xp-breakdown');
         if (oldBr) oldBr.remove();
         let brBox = document.createElement('div');
@@ -245,10 +429,58 @@
             brBox.insertAdjacentElement('afterend', note);
         }
 
-        Progress.incrementStat('sessionsCompleted', 1);
+        if (session.index >= total) {
+            Progress.incrementStat('sessionsCompleted', 1);
+        }
         Progress.markDailyActivity();
         postStat('total_sessions', 1);
+
+        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            Progress.addTrainingTime(dur);
+            const todaySecs = Progress.getTodayTrainingSeconds();
+            const todayMins = Math.floor(todaySecs / 60);
+            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+            const dailyBlock = document.getElementById('cs-daily-time-block');
+            const dailyText = document.getElementById('cs-daily-time-text');
+            if (dailyBlock && dailyText) {
+                dailyBlock.style.display = 'block';
+                if (todayMins >= goalMins) {
+                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+                } else {
+                    const leftMins = Math.max(1, goalMins - todayMins);
+                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+                }
+            }
+        }
     }
+
+    function stopCallsignsSession() {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
+        if (answerInput) {
+            answerInput.bufferMaxAllowed = null;
+            answerInput.removeAttribute('maxlength');
+        }
+        if (!session) {
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+            return;
+        }
+        if (session.index > 0) {
+            finishSession();
+        } else {
+            abortCurrentSession();
+            sessionPanel.style.display = 'none';
+            setupPanel.style.display = 'block';
+        }
+    }
+
+    const csStopBtn = document.getElementById('cs-stop-btn');
+    if (csStopBtn) csStopBtn.addEventListener('click', stopCallsignsSession);
 
     async function postStat(field, amount) {
         if (amount <= 0) return;
@@ -268,10 +500,43 @@
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
     });
-    answerInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') submitAnswer(); });
+    answerInput.addEventListener('keydown', (e) => {
+        if (typeof answerInput.bufferMaxAllowed === 'number' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            const start = answerInput.selectionStart ?? answerInput.value.length;
+            const end = answerInput.selectionEnd ?? answerInput.value.length;
+            const selectedLen = end - start;
+            if (answerInput.value.length - selectedLen + 1 > answerInput.bufferMaxAllowed) {
+                e.preventDefault();
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+                return;
+            }
+        }
+        if (e.key === 'Enter') submitAnswer();
+    });
+    answerInput.addEventListener('input', () => {
+        if (typeof answerInput.bufferMaxAllowed === 'number') {
+            if (answerInput.value.length > answerInput.bufferMaxAllowed) {
+                answerInput.value = answerInput.value.slice(0, answerInput.bufferMaxAllowed);
+                answerInput.classList.remove('pairs-shake');
+                void answerInput.offsetWidth;
+                answerInput.classList.add('pairs-shake');
+            }
+        }
+    });
 
-    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов
+    // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов,
+    // а также завершение активной сессии по Escape
     window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (sessionPanel && sessionPanel.style.display !== 'none') {
+                e.preventDefault();
+                stopCallsignsSession();
+                return;
+            }
+        }
+
         if (e.key !== 'Enter') return;
         if (e.ctrlKey || e.altKey || e.metaKey) return;
         const tag = document.activeElement?.tagName;
