@@ -56,6 +56,29 @@ function ensure_donation_tables(PDO $pdo): void {
 
     // 4. Добавляем ачивку project_supporter в справочник
     try {
+        $pdo->exec("
+            ALTER TABLE achievements MODIFY COLUMN condition_type ENUM(
+                'letters_learned_count',
+                'letters_learned_count_any',
+                'xp_total',
+                'streak_days',
+                'koch_level',
+                'groups_completed',
+                'callsigns_completed',
+                'recognized_count',
+                'recognize_best_streak',
+                'exam_passed_count',
+                'cyrillic_learned_count',
+                'cyrillic_recognized_count',
+                'invasion_waves_count',
+                'rhythm_mastered_count',
+                'rhythm_mastered_count_any',
+                'project_supporter'
+            ) NOT NULL
+        ");
+    } catch (Throwable $e) {}
+
+    try {
         $stmt = $pdo->prepare("SELECT id FROM achievements WHERE code = 'project_supporter'");
         $stmt->execute();
         if (!$stmt->fetch()) {

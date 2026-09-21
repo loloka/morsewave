@@ -1430,6 +1430,8 @@ input[type="range"] {
 .mt-1 { margin-top: 8px; }
 .mt-2 { margin-top: 16px; }
 .mt-3 { margin-top: 24px; }
+.mt-4 { margin-top: 36px; }
+.mt-5 { margin-top: 52px; }
 .mb-2 { margin-bottom: 16px; }
 .flex { display: flex; }
 .flex-between { display: flex; align-items: center; justify-content: space-between; }

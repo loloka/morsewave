@@ -42,6 +42,11 @@ session_write_close();
 // HTTP-статус pull_progress.php (401 vs ok:true), тут его больше нет.
 $out = ['loggedIn' => (bool) $userId];
 
+if (isset($want['achievements']) || isset($want['leaderboard'])) {
+    require_once __DIR__ . '/../includes/donation_service.php';
+    ensure_donation_tables($pdo);
+}
+
 if (isset($want['achievements'])) {
     $stmt = $pdo->query('SELECT code, title, description, icon, condition_type, condition_value FROM achievements ORDER BY sort_order ASC');
     $rows = $stmt->fetchAll();
@@ -68,8 +73,6 @@ if (isset($want['stats'])) {
 }
 
 if (isset($want['leaderboard'])) {
-    require_once __DIR__ . '/../includes/donation_service.php';
-    ensure_donation_tables($pdo);
     $limit = isset($_GET['limit']) ? max(1, min((int) $_GET['limit'], 50)) : 10;
 
     $byXp = $pdo->prepare('

@@ -22,7 +22,7 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Appreciation Tiers -->
-<div class="mt-4">
+<div class="mt-5" id="tiers-section">
     <div class="card-eyebrow">CW SUPPORT TIERS</div>
     <h2><?= t('donate.cards_title') ?></h2>
 
@@ -88,7 +88,7 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- SBP Payment Box -->
-<div class="sbp-card mt-4" id="sbp-block">
+<div class="sbp-card mt-5" id="sbp-block">
     <div class="card-eyebrow" style="color:var(--accent);">СБП · БЫСТРЫЙ ПЛАТЁЖ</div>
     <h2 class="mt-1 mb-2"><?= t('donate.sbp_title') ?></h2>
     <p class="muted" style="max-width:550px; margin:0 auto 16px;">
@@ -120,7 +120,7 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- Report / Send Thanks Form -->
-<div class="card mt-4" id="donate-report-form-card">
+<div class="card mt-5" id="donate-report-form-card">
     <h3 class="mt-0 mb-2">💬 <?= t('donate.form_title') ?></h3>
     <p class="muted" style="font-size:13px; margin-bottom:16px;">
         Если вы сделали перевод или просто хотите отправить автору добрые пожелания (0 ₽) — заполните форму ниже. Сообщение появится на Стене признания, а вам откроется памятное достижение «Друг MorseWave» 💖!
