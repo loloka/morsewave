@@ -194,8 +194,92 @@
         document.getElementById('profile-email').textContent = user.email;
         renderAdminLink(user);
         renderVerifyStatus(user);
+        renderSponsorState(user);
         updateLocalStats();
         renderSyncIndicator();
+    }
+
+    function renderSponsorState(user) {
+        const badge = document.getElementById('profile-sponsor-badge');
+        const chatCard = document.getElementById('supporter-chat-card');
+        const promoCard = document.getElementById('become-supporter-card');
+        const isSponsor = !!(Number(user.is_sponsor) || user.is_sponsor === true);
+
+        if (badge) badge.style.display = isSponsor ? 'inline-block' : 'none';
+        if (chatCard) chatCard.style.display = isSponsor ? 'block' : 'none';
+        if (promoCard) promoCard.style.display = isSponsor ? 'none' : 'block';
+
+        if (isSponsor) {
+            initUserSupportChat();
+        }
+    }
+
+    let userChatInitialized = false;
+    function initUserSupportChat() {
+        if (userChatInitialized) return;
+        userChatInitialized = true;
+
+        const messagesEl = document.getElementById('user-chat-messages');
+        const formEl = document.getElementById('user-chat-form');
+        const inputEl = document.getElementById('user-chat-input');
+        if (!messagesEl) return;
+
+        function escapeChatHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function renderUserMessages(messages) {
+            if (!messages || !messages.length) {
+                messagesEl.innerHTML = '<p class="muted" style="text-align:center; font-size:13px; margin:auto 0;">Диалог пуст. Напишите разработчику, если есть вопрос или предложение!</p>';
+                return;
+            }
+            messagesEl.innerHTML = messages.map(m => {
+                const isMe = m.sender_type === 'user';
+                const bubbleClass = isMe ? 'chat-bubble-user' : 'chat-bubble-admin';
+                const timeStr = (m.created_at || '').slice(11, 16);
+                return `
+                    <div class="chat-bubble ${bubbleClass}">
+                        <div>${escapeChatHtml(m.message)}</div>
+                        <span class="chat-bubble-time">${escapeChatHtml(timeStr)}</span>
+                    </div>
+                `;
+            }).join('');
+            messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+
+        async function loadUserMessages() {
+            try {
+                const res = await fetch('api/support_chat.php');
+                const data = await res.json();
+                renderUserMessages(data.messages || []);
+            } catch {
+                messagesEl.innerHTML = '<p class="muted" style="text-align:center;">Не удалось загрузить сообщения.</p>';
+            }
+        }
+
+        if (formEl) {
+            formEl.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const text = inputEl.value.trim();
+                if (!text) return;
+                inputEl.value = '';
+
+                try {
+                    const res = await fetch('api/support_chat.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: text }),
+                    });
+                    if (res.ok) {
+                        loadUserMessages();
+                    }
+                } catch {}
+            });
+        }
+
+        loadUserMessages();
     }
 
     function showGuest() {

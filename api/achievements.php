@@ -2,6 +2,8 @@
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/i18n.php';
+require_once __DIR__ . '/../includes/donation_service.php';
+ensure_donation_tables($pdo);
 
 $stmt = $pdo->query('SELECT code, title, description, icon, condition_type, condition_value FROM achievements ORDER BY sort_order ASC');
 $rows = $stmt->fetchAll();

@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS achievements (
         -- равен размеру полного латинского набора, так что кириллицу
         -- смешивать с латиницей безопасно (v2.60, реальный баг: "Ровная
         -- рука" не засчитывала кириллицу).
-        'rhythm_mastered_count_any'
+        'rhythm_mastered_count_any',
+        'project_supporter'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -109,7 +110,8 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('invasion_first',  'База под защитой',  'Отбейте первую волну вторжения в мини-игре',  '👾', 'invasion_waves_count', 1,  23),
 ('invasion_10',     'Защитник эфира',    'Отбейте 10 волн вторжения в мини-игре',       '🛸', 'invasion_waves_count', 10, 24),
 ('rhythm_10',       'Ровная рука',       'Отточите ритм ключа для 10 символов',         '🎵', 'rhythm_mastered_count_any', 10, 25),
-('rhythm_full',     'Метроном',          'Отточите ритм ключа для всех букв и цифр',    '🎼', 'rhythm_mastered_count', 36, 26);
+('rhythm_full',     'Метроном',          'Отточите ритм ключа для всех букв и цифр',    '🎼', 'rhythm_mastered_count', 36, 26),
+('project_supporter','Друг MorseWave',    'Поддержал развитие проекта словом или делом! 73!', '💖', 'project_supporter', 1, 27);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)
@@ -147,6 +149,8 @@ CREATE TABLE IF NOT EXISTS users (
     email_verified_at      DATETIME DEFAULT NULL,
     verification_token     VARCHAR(64) DEFAULT NULL,
     is_admin               TINYINT(1) NOT NULL DEFAULT 0,
+    is_sponsor             TINYINT(1) NOT NULL DEFAULT 0,
+    sponsor_at             DATETIME DEFAULT NULL,
     failed_login_attempts  INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until           DATETIME DEFAULT NULL,
     reset_token            VARCHAR(64) DEFAULT NULL,
@@ -186,5 +190,38 @@ CREATE TABLE IF NOT EXISTS xp_log (
     details       JSON NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     INDEX (user_id, created_at),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
+-- Пожертвования, благодарности и сообщения со страницы donate.php
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS donations (
+    id             INT PRIMARY KEY AUTO_INCREMENT,
+    user_id        INT DEFAULT NULL,
+    callsign       VARCHAR(64) NOT NULL,
+    amount         INT NOT NULL DEFAULT 0,
+    tier_title     VARCHAR(128) DEFAULT NULL,
+    message        TEXT DEFAULT NULL,
+    is_anonymous   TINYINT(1) NOT NULL DEFAULT 0,
+    status         ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+    created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_user_id (user_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------
+-- Прямой чат поддержки спонсоров с администратором
+-- ---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS support_messages (
+    id           INT PRIMARY KEY AUTO_INCREMENT,
+    user_id      INT NOT NULL,
+    sender_type  ENUM('user', 'admin') NOT NULL,
+    message      TEXT NOT NULL,
+    is_read      TINYINT(1) NOT NULL DEFAULT 0,
+    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_is_read (is_read),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;

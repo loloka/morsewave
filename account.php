@@ -108,7 +108,10 @@ include __DIR__ . '/includes/header.php';
             <div class="flex-between flex-wrap gap-2">
                 <div>
                     <div class="card-eyebrow"><?= t('acc.logged_in_as') ?></div>
-                    <h2 class="mt-0" id="profile-name" style="margin-bottom:0;"></h2>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <h2 class="mt-0" id="profile-name" style="margin-bottom:0;"></h2>
+                        <span id="profile-sponsor-badge" style="display:none;" class="wall-badge">👑 <?= t('account.sponsor_badge') ?></span>
+                    </div>
                     <p class="muted mt-0" id="profile-email" style="font-size:13px;"></p>
                 </div>
                 <div class="btn-row" id="profile-actions">
@@ -125,6 +128,42 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="feedback mt-1" id="manual-sync-feedback"></div>
             <div class="mt-2" id="verify-status"></div>
+        </div>
+
+        <!-- VIP Supporter Chat (for Sponsors) -->
+        <div class="card mt-3" id="supporter-chat-card" style="display:none;">
+            <div class="card-eyebrow" style="color:var(--accent);">VIP SUPPORT · DIRECT LINE</div>
+            <h3 class="mt-1 mb-1"><?= t('account.chat_title') ?></h3>
+            <p class="muted" style="font-size:13px; margin-bottom:14px;">
+                <?= t('account.chat_desc') ?>
+            </p>
+
+            <div class="chat-window" style="height:360px;">
+                <div class="chat-messages" id="user-chat-messages">
+                    <p class="muted" style="text-align:center;"><?= t('index.loading') ?></p>
+                </div>
+                <form id="user-chat-form" class="chat-input-bar">
+                    <input type="text" id="user-chat-input" placeholder="<?= htmlspecialchars(t('account.chat_placeholder')) ?>" autocomplete="off" />
+                    <button type="submit" class="btn" style="background:var(--accent); color:#111; font-weight:700;"><?= t('account.chat_send') ?></button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Become Supporter Promo (for Non-sponsors) -->
+        <div class="card mt-3" id="become-supporter-card" style="display:none; background: linear-gradient(135deg, rgba(230,168,56,0.06), transparent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <h4 class="mt-0 mb-1" style="display:flex; align-items:center; gap:6px;">
+                        <span>👑 Золотая коронка в лидерборде и закрытый чат</span>
+                    </h4>
+                    <p class="muted" style="font-size:13px; margin:0;">
+                        Поддержите развитие некоммерческого проекта MorseWave и откройте прямую линию связи с R9OGL!
+                    </p>
+                </div>
+                <a href="donate.php" class="footer-donate-btn" style="font-size:14px; padding:6px 14px;">
+                    💖 Поддержать проект
+                </a>
+            </div>
         </div>
 
         <div class="card mt-2">

@@ -6,6 +6,78 @@
 Здесь — записи с **v2.49** и новее. Всё, что старше (v2.48 → v1), вынесено
 в [CHANGELOG-archive.md](CHANGELOG-archive.md) — целиком, без сокращений.
 
+## v2.93 — Страница добровольной поддержки, СБП, Стена признания, VIP-чат и коронка спонсора в лидерборде (2026-09-21)
+
+- **Страница добровольной поддержки (`donate.php`)**:
+  - Создан стильный раздел поддержки некоммерческого проекта MorseWave со ссылкой в подвале сайта (`includes/footer.php`).
+  - Радиолюбительские карточки благодарности с юмором: «Чашка кофе радисту» (150 ₽), «Горсть кварцев и диодов» (350 ₽), «Транзистор в выходной каскад» (750 ₽), «Катушка медного провода и кольца для дросселей» (1 500 ₽), «Тёплый ламповый киловатт» (3 000 ₽), а также бесплатный «Тёплый привет и лучи добра» (0 ₽).
+  - Блок перевода по СБП (Ozon Банк, Александр А., 0% комиссии) с чистым QR-кодом (`assets/img/ozon_sbp_qr.png`), кнопкой перехода в приложение банка и быстрым копированием ссылки.
+  - Форма отправки сообщения с автозаполнением позывного/аккаунта, звуковым подтверждением морзянкой `TNX 73` и моментальной выдачей ачивки «Друг MorseWave» 💖.
+- **Публичная Стена признания спонсоров и друзей проекта**:
+  - Блок ленты отзывов на странице донатов с позывными, суммами и тёплыми словами.
+  - Поддержка анонимных донатов («Анонимный радист») и премодерации администратором.
+- **Геймификация и знаки отличия**:
+  - Золотая коронка `👑` рядом с именем спонсора в таблице лидеров (`leaderboard.php` и блок лидеров на главной) с интерактивным тултипом признательности.
+  - Почётный бейдж спонсора в профиле пользователя (`account.php`).
+  - Новое открываемое достижение `project_supporter` («Друг MorseWave») в справочнике ачивок.
+- **VIP-чат со спонсорами и обновлённая панель администратора (`admin.php`)**:
+  - В профиле залогиненного спонсора доступен виджет прямой линии связи с разработчиком (R9OGL).
+  - В админке внедрена система из 3 вкладок (`.segmented-nav`): «👥 Пользователи», «💖 Донаты и Стена» (модерация и выдача статуса спонсора в 1 клик), «💬 Чат поддержки» (список обращений и окно ответов).
+- **Миграция базы данных для боевого сервера (выполнить после `git pull`)**:
+  ```sql
+  ALTER TABLE users ADD COLUMN IF NOT EXISTS is_sponsor TINYINT(1) NOT NULL DEFAULT 0,
+                     ADD COLUMN IF NOT EXISTS sponsor_at DATETIME NULL;
+
+  CREATE TABLE IF NOT EXISTS donations (
+      id             INT PRIMARY KEY AUTO_INCREMENT,
+      user_id        INT DEFAULT NULL,
+      callsign       VARCHAR(64) NOT NULL,
+      amount         INT NOT NULL DEFAULT 0,
+      tier_title     VARCHAR(128) DEFAULT NULL,
+      message        TEXT DEFAULT NULL,
+      is_anonymous   TINYINT(1) NOT NULL DEFAULT 0,
+      status         ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+      created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_status (status),
+      INDEX idx_user_id (user_id),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+  CREATE TABLE IF NOT EXISTS support_messages (
+      id           INT PRIMARY KEY AUTO_INCREMENT,
+      user_id      INT NOT NULL,
+      sender_type  ENUM('user', 'admin') NOT NULL,
+      message      TEXT NOT NULL,
+      is_read      TINYINT(1) NOT NULL DEFAULT 0,
+      created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_user_id (user_id),
+      INDEX idx_is_read (is_read),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+  ALTER TABLE achievements MODIFY COLUMN condition_type ENUM(
+      'letters_learned_count',
+      'letters_learned_count_any',
+      'xp_total',
+      'streak_days',
+      'koch_level',
+      'groups_completed',
+      'callsigns_completed',
+      'recognized_count',
+      'recognize_best_streak',
+      'exam_passed_count',
+      'cyrillic_learned_count',
+      'cyrillic_recognized_count',
+      'invasion_waves_count',
+      'rhythm_mastered_count',
+      'rhythm_mastered_count_any',
+      'project_supporter'
+  ) NOT NULL;
+
+  INSERT IGNORE INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order)
+  VALUES ('project_supporter', 'Друг MorseWave', 'Поддержал развитие проекта словом или делом! 73!', '💖', 'project_supporter', 1, 27);
+  ```
+
 ## v2.92 — Горячие клавиши Enter/Esc, остановка сессий, Фарнсворт/буфер в позывных, дневная норма тренировок (2026-09-21)
 
 - **Отступ плашки обратной связи и визуальные бейджи Enter / Esc на кнопках**:

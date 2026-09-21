@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 require __DIR__ . '/../includes/auth.php';
+require_once __DIR__ . '/../includes/donation_service.php';
+ensure_donation_tables($pdo);
 
 require_admin_json($pdo);
 
@@ -14,7 +16,7 @@ try {
         }
 
         $stmt = $pdo->query("
-            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin,
+            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at,
                    s.xp, s.streak_count,
                    (SELECT MAX(created_at) FROM xp_log WHERE user_id = u.id) as last_active_at,
                    EXISTS(
@@ -40,7 +42,7 @@ try {
         }
 
         $stmt = $pdo->query("
-            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin,
+            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at,
                    s.xp, s.streak_count,
                    u.created_at as last_active_at,
                    0 as recent_anomalies

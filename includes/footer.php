@@ -15,6 +15,8 @@
         <a href="privacy.php"><?= t('footer.privacy') ?></a>
         <span class="dot">·</span>
         <a href="keyhardware.php"><?= t('footer.key_hardware') ?></a>
+        <span class="dot">·</span>
+        <a href="donate.php" class="footer-donate-btn">💖 <?= t('footer.donate') ?></a>
     </div>
 </footer>
 <script src="<?= asset_v('assets/js/i18n.js') ?>"></script>

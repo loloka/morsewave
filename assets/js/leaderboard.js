@@ -20,7 +20,7 @@
             return `
                 <div class="leaderboard-row${isMe ? ' leaderboard-row-me' : ''}">
                     <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
-                    <span class="leaderboard-name">${escapeHtml(row.name)}${isMe ? ' <span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}</span>
+                    <span class="leaderboard-name">${escapeHtml(row.name)}${row.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''}${isMe ? ' <span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}</span>
                     <span class="leaderboard-value">${row[valueKey]}</span>
                 </div>
             `;

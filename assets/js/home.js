@@ -130,7 +130,7 @@
         let html = rows.map((row, i) => `
             <div class="leaderboard-row">
                 <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
-                <span class="leaderboard-name">${escapeHtml(row.name)}</span>
+                <span class="leaderboard-name">${escapeHtml(row.name)}${row.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''}</span>
                 <span class="leaderboard-value">${row[valueKey]}</span>
             </div>
         `).join('');
@@ -142,7 +142,7 @@
             html += `
                 <div class="leaderboard-row leaderboard-row-me">
                     <span class="leaderboard-rank">${me[rankKey]}</span>
-                    <span class="leaderboard-name">${escapeHtml(me.name)} <span class="leaderboard-you-badge">${t('leaderboard.you_badge')}</span></span>
+                    <span class="leaderboard-name">${escapeHtml(me.name)}${me.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''} <span class="leaderboard-you-badge">${t('leaderboard.you_badge')}</span></span>
                     <span class="leaderboard-value">${me[valueKey]}</span>
                 </div>
             `;

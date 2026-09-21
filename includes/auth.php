@@ -62,10 +62,14 @@ function current_user_id() {
 function current_user($pdo) {
     $id = current_user_id();
     if (!$id) return null;
-    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin FROM users WHERE id = :id');
+    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin, is_sponsor, sponsor_at FROM users WHERE id = :id');
     $stmt->execute(['id' => $id]);
     $user = $stmt->fetch();
     return $user ?: null;
+}
+
+function is_sponsor_user($user) {
+    return $user && !empty($user['is_sponsor']);
 }
 
 function require_login_json() {

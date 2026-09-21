@@ -1788,3 +1788,276 @@ input[type="range"] {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px rgba(230, 168, 56, 0.25);
 }
+
+/* ---------- Sponsor Crown & Badge ---------- */
+.sponsor-crown {
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 5px;
+    vertical-align: middle;
+    cursor: help;
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.65));
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sponsor-crown:hover {
+    transform: scale(1.3) rotate(8deg);
+}
+
+.footer-donate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #ff6b8b !important;
+    font-weight: 700;
+    text-decoration: none;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255, 107, 139, 0.12);
+    border: 1px solid rgba(255, 107, 139, 0.3);
+    transition: all 0.2s ease;
+}
+.footer-donate-btn:hover {
+    background: rgba(255, 107, 139, 0.22);
+    border-color: rgba(255, 107, 139, 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(255, 107, 139, 0.25);
+}
+
+/* ---------- Donation Page & Tiers ---------- */
+.donate-tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+.donate-tier-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    user-select: none;
+}
+.donate-tier-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.donate-tier-card.active {
+    border-color: var(--accent);
+    background: var(--surface-2);
+    box-shadow: 0 0 0 2px var(--accent);
+}
+.donate-tier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+.donate-tier-amount {
+    font-size: 20px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: var(--accent);
+}
+.donate-tier-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+}
+.donate-tier-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    flex: 1;
+}
+
+/* ---------- SBP Box ---------- */
+.sbp-card {
+    background: linear-gradient(145deg, var(--surface), var(--surface-2));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    text-align: center;
+}
+.sbp-qr-wrap {
+    background: #fff;
+    padding: 16px;
+    border-radius: 16px;
+    display: inline-block;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    margin: 16px 0;
+}
+.sbp-qr-img {
+    display: block;
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+}
+
+/* ---------- Wall of Fame ---------- */
+.wall-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+.wall-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.wall-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.wall-callsign {
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.wall-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(230, 168, 56, 0.15);
+    color: var(--accent);
+    border: 1px solid rgba(230, 168, 56, 0.3);
+}
+.wall-message {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    font-style: italic;
+    line-height: 1.4;
+    word-break: break-word;
+}
+.wall-date {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-top: auto;
+}
+
+/* ---------- Support Chat ---------- */
+.chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 480px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.chat-bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14px;
+    line-height: 1.45;
+    word-break: break-word;
+}
+.chat-bubble-user {
+    align-self: flex-start;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-left-radius: 4px;
+}
+.chat-bubble-admin {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #111;
+    font-weight: 500;
+    border-bottom-right-radius: 4px;
+}
+.chat-bubble-time {
+    font-size: 10.5px;
+    opacity: 0.7;
+    margin-top: 4px;
+    display: block;
+    text-align: right;
+}
+.chat-input-bar {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-2);
+}
+.chat-input-bar input {
+    flex: 1;
+}
+
+/* Admin Chat Threads */
+.admin-chat-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    height: 520px;
+}
+@media (max-width: 768px) {
+    .admin-chat-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+}
+.admin-threads-list {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    overflow-y: auto;
+}
+.admin-thread-item {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.admin-thread-item:hover, .admin-thread-item.active {
+    background: var(--surface-2);
+}
+.admin-thread-name {
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-thread-preview {
+    font-size: 12px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 4px;
+}
+.unread-badge {
+    background: var(--danger);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 999px;
+}

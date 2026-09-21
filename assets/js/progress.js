@@ -134,6 +134,7 @@ const Progress = (() => {
             abbrBestStreak: 0,
             wordsCompleted: 0,
             invasionWavesCompleted: 0,
+            projectSupporter: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -897,6 +898,16 @@ const Progress = (() => {
         return state;
     }
 
+    function markProjectSupporter() {
+        const state = load();
+        state.stats = state.stats || {};
+        state.stats.projectSupporter = 1;
+        save(state);
+        checkAchievements();
+        pushFullProgress();
+        return state;
+    }
+
     // Вызывать явно только за реальную тренировку (завершённая сессия
     // Коха/групп/позывных или задание дня) — просто зайти на сайт
     // или потыкать буквы недостаточно, чтобы засчитать день в серию.
@@ -995,6 +1006,8 @@ const Progress = (() => {
                 // вместе.
                 case 'rhythm_mastered_count_any':
                     return (state.rhythmMasteredLetters || []).length;
+                case 'project_supporter':
+                    return (state.stats && state.stats.projectSupporter) ? 1 : 0;
                 default: return 0;
             }
         };
@@ -1071,7 +1084,7 @@ const Progress = (() => {
         addTrainingTime, getTodayTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
-        completeInvasionDailyWin, isInvasionDailyWinDone,
+        completeInvasionDailyWin, isInvasionDailyWinDone, markProjectSupporter,
         mergeFromServer, syncWithServer, pushNow,
         lastSyncAt, exportBackup, importBackup,
         fetchDashboard,
