@@ -23,8 +23,16 @@ const Progress = (() => {
     // чтобы переходы по сайту не дёргали БД заново. progress — ВСЕГДА
     // свежий (нужен для merge при каждой загрузке) и в кэш не попадает.
     const DASH_CACHE_TTL_MS = 60 * 1000;
-    const DASH_CACHE_KEY = 'morsewave_dash_cache_v2';
+    const DASH_CACHE_KEY = 'morsewave_dash_cache_v3';
     let dashInFlight = null; // {key, promise} — дедуп одновременных вызовов с одинаковым набором частей
+
+    function clearDashCache() {
+        try {
+            sessionStorage.removeItem(DASH_CACHE_KEY);
+            sessionStorage.removeItem('morsewave_dash_cache_v1');
+            sessionStorage.removeItem('morsewave_dash_cache_v2');
+        } catch {}
+    }
 
     function readDashCache() {
         try { return JSON.parse(sessionStorage.getItem(DASH_CACHE_KEY)) || {}; }
@@ -1087,6 +1095,6 @@ const Progress = (() => {
         completeInvasionDailyWin, isInvasionDailyWinDone, markProjectSupporter,
         mergeFromServer, syncWithServer, pushNow,
         lastSyncAt, exportBackup, importBackup,
-        fetchDashboard,
+        fetchDashboard, clearDashCache,
     };
 })();

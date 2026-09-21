@@ -1135,7 +1135,7 @@ HTML,
     'auth.admin_only' => 'Access is for administrators only',
 
     // --- donate.php & Support & Wall ---
-    'leaderboard.sponsor_tooltip' => 'MorseWave Supporter — thank you for supporting the project! 73! 💖',
+    'leaderboard.sponsor_tooltip' => 'MorseWave Project Supporter',
     'donate.eyebrow' => 'Voluntary support',
     'donate.h1' => 'Support MorseWave',
     'donate.intro' => 'MorseWave is a completely non-commercial, open-source and free Morse code trainer. There are no ads, paid subscriptions or paywalls. If this project helps you learn CW and sharpen your ears, you can support server hosting and development of new features!',

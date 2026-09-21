@@ -128,9 +128,14 @@
         }
         function getSponsorBadgeHtml(item) {
             if (!item || !item.is_sponsor) return '';
-            const b = (item.sponsor_badge && item.sponsor_badge !== 'none') ? item.sponsor_badge : (item.sponsor_badge === 'none' ? '' : '👑');
-            if (!b) return '';
-            return ` <span class="sponsor-crown" title="${t('leaderboard.sponsor_tooltip')}">${b}</span>`;
+            const BADGE_MAP = {
+                crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '',
+                '👑': '👑', '💖': '💖', '⚡': '⚡', '📻': '📻', '⭐': '⭐', '✨': '✨'
+            };
+            const icon = item.sponsor_badge_icon || BADGE_MAP[item.sponsor_badge] || (item.sponsor_badge === 'none' ? '' : '👑');
+            if (!icon) return '';
+            const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
+            return ` <span class="sponsor-crown" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${icon}</span>`;
         }
 
         const medals = ['🥇', '🥈', '🥉'];

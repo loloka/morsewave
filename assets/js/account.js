@@ -199,19 +199,30 @@
         renderSyncIndicator();
     }
 
+    const SPONSOR_BADGE_MAP = {
+        crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '',
+        '👑': '👑', '💖': '💖', '⚡': '⚡', '📻': '📻', '⭐': '⭐', '✨': '✨'
+    };
+    const SPONSOR_SLUG_MAP = {
+        '👑': 'crown', '💖': 'heart', '⚡': 'lightning', '📻': 'radio', '⭐': 'star', '✨': 'sparkles',
+        crown: 'crown', heart: 'heart', lightning: 'lightning', radio: 'radio', star: 'star', sparkles: 'sparkles',
+        none: 'none'
+    };
+
     function renderSponsorState(user) {
         const badge = document.getElementById('profile-sponsor-badge');
         const chatCard = document.getElementById('supporter-chat-card');
         const promoCard = document.getElementById('become-supporter-card');
         const badgePickerCard = document.getElementById('sponsor-badge-picker-card');
         const isSponsor = !!(Number(user.is_sponsor) || user.is_sponsor === true);
-        const currentBadge = user.sponsor_badge || '👑';
+        const rawBadge = user.sponsor_badge_slug || user.sponsor_badge || 'crown';
+        const currentSlug = SPONSOR_SLUG_MAP[rawBadge] || 'crown';
 
         if (badge) {
             badge.style.display = isSponsor ? 'inline-block' : 'none';
             if (isSponsor) {
-                const icon = (currentBadge && currentBadge !== 'none') ? currentBadge : '💖';
-                badge.innerHTML = `${icon} ${t('account.sponsor_badge')}`;
+                const icon = SPONSOR_BADGE_MAP[currentSlug] || '👑';
+                badge.innerHTML = `${icon ? icon + ' ' : ''}${t('account.sponsor_badge')}`;
             }
         }
         if (chatCard) chatCard.style.display = isSponsor ? 'block' : 'none';
@@ -219,7 +230,7 @@
         if (badgePickerCard) {
             badgePickerCard.style.display = isSponsor ? 'block' : 'none';
             if (isSponsor) {
-                initSponsorBadgePicker(currentBadge);
+                initSponsorBadgePicker(currentSlug);
             }
         }
 
@@ -229,14 +240,15 @@
     }
 
     let badgePickerInitialized = false;
-    function initSponsorBadgePicker(currentBadge) {
+    function initSponsorBadgePicker(currentSlug) {
         const container = document.getElementById('sponsor-badge-options');
         const feedback = document.getElementById('sponsor-badge-feedback');
         if (!container) return;
 
-        const updateActiveButton = (badgeVal) => {
+        const updateActiveButton = (slugVal) => {
+            const norm = SPONSOR_SLUG_MAP[slugVal] || 'crown';
             container.querySelectorAll('.sponsor-badge-btn').forEach(btn => {
-                if (btn.dataset.badge === badgeVal) {
+                if (btn.dataset.badge === norm) {
                     btn.classList.add('active');
                 } else {
                     btn.classList.remove('active');
@@ -244,25 +256,31 @@
             });
         };
 
-        updateActiveButton(currentBadge);
+        updateActiveButton(currentSlug);
 
         if (badgePickerInitialized) return;
         badgePickerInitialized = true;
 
         container.querySelectorAll('.sponsor-badge-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
-                const newBadge = btn.dataset.badge;
-                updateActiveButton(newBadge);
+                const newSlug = btn.dataset.badge;
+                updateActiveButton(newSlug);
                 if (feedback) feedback.textContent = '';
 
                 try {
                     const res = await fetch('api/update_sponsor_badge.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ badge: newBadge })
+                        body: JSON.stringify({ badge: newSlug })
                     });
                     const data = await res.json();
                     if (data.ok) {
+                        // Сбрасываем кэш дашборда и лидерборда в браузере, чтобы изменения применились сразу
+                        try {
+                            sessionStorage.removeItem('morsewave_dash_cache_v1');
+                            sessionStorage.removeItem('morsewave_dash_cache_v2');
+                        } catch {}
+
                         if (feedback) {
                             feedback.style.color = 'var(--signal)';
                             feedback.textContent = '✅ ' + (window.t ? t('account.badge_saved') : 'Значок сохранён!');
@@ -270,8 +288,8 @@
                         }
                         const badgeEl = document.getElementById('profile-sponsor-badge');
                         if (badgeEl) {
-                            const icon = (newBadge && newBadge !== 'none') ? newBadge : '💖';
-                            badgeEl.innerHTML = `${icon} ${t('account.sponsor_badge')}`;
+                            const icon = SPONSOR_BADGE_MAP[newSlug] || '';
+                            badgeEl.innerHTML = `${icon ? icon + ' ' : ''}${t('account.sponsor_badge')}`;
                         }
                     } else {
                         if (feedback) {

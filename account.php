@@ -139,12 +139,12 @@ include __DIR__ . '/includes/header.php';
             </p>
 
             <div class="sponsor-badge-selector" id="sponsor-badge-options">
-                <button type="button" class="sponsor-badge-btn" data-badge="👑" title="Корона">👑 Корона</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="💖" title="Сердечко">💖 Сердечко</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="⚡" title="Молния">⚡ Молния</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="📻" title="Трансивер">📻 Трансивер</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="⭐" title="Звезда">⭐ Звезда</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="✨" title="Сияние">✨ Сияние</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="crown" title="Корона">👑 Корона</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="heart" title="Сердечко">💖 Сердечко</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="lightning" title="Молния">⚡ Молния</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="radio" title="Трансивер">📻 Трансивер</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="star" title="Звезда">⭐ Звезда</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="sparkles" title="Сияние">✨ Сияние</button>
                 <button type="button" class="sponsor-badge-btn" data-badge="none" title="Скрыть значок">🚫 Без значка</button>
             </div>
             <div id="sponsor-badge-feedback" class="feedback mt-2" style="font-size:13px; min-height:18px;"></div>

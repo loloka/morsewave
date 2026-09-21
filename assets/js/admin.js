@@ -38,7 +38,7 @@
                             ${escapeHtml(u.name)}
                             ${u.email_verified_at ? `<span title="${t('js.admin.email_verified_title')}">✅</span>` : `<span title="${t('js.admin.email_not_verified_title')}" style="opacity:.5;">✉️</span>`}
                             ${Number(u.is_admin) ? `<span title="${t('js.admin.admin_title')}" style="color:var(--accent);">🛠 ${t('js.admin.admin_label')}</span>` : ''}
-                            ${Number(u.is_sponsor) ? `<span title="Спонсор проекта" style="color:var(--accent);">${(u.sponsor_badge && u.sponsor_badge !== 'none') ? u.sponsor_badge : '👑'} Спонсор</span>` : ''}
+                            ${Number(u.is_sponsor) ? `<span title="Спонсор проекта" style="color:var(--accent);">${({crown:'👑',heart:'💖',lightning:'⚡',radio:'📻',star:'⭐',sparkles:'✨',none:''}[u.sponsor_badge] || u.sponsor_badge || '👑')} Спонсор</span>` : ''}
                             ${Number(u.recent_anomalies) ? `<span title="Подозрительная активность" style="color:var(--danger);">🚩</span>` : ''}
                         </div>
                         <div class="muted" style="font-size:12px;">${escapeHtml(u.email)} · ${t('js.admin.registered_on')} ${escapeHtml((u.created_at || '').slice(0, 10))}</div>
@@ -316,7 +316,7 @@
                                 <div style="font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px;">
                                     <span>${escapeHtml(d.callsign)}</span>
                                     ${d.is_anonymous ? '<span class="muted" style="font-size:11px;">(Анонимно)</span>' : ''}
-                                    ${d.is_sponsor ? `<span title="Спонсор проекта" style="color:var(--accent);">${(d.sponsor_badge && d.sponsor_badge !== 'none') ? d.sponsor_badge : '👑'} Спонсор</span>` : ''}
+                                    ${d.is_sponsor ? `<span title="Спонсор проекта" style="color:var(--accent);">${({crown:'👑',heart:'💖',lightning:'⚡',radio:'📻',star:'⭐',sparkles:'✨',none:''}[d.sponsor_badge] || d.sponsor_badge || '👑')} Спонсор</span>` : ''}
                                     ${statusBadge}
                                 </div>
                                 <div class="muted" style="font-size:12px; margin-top:3px;">
@@ -415,7 +415,7 @@
             threadsListEl.innerHTML = threads.map(th => `
                 <div class="admin-thread-item ${activeChatUserId === th.user_id ? 'active' : ''}" data-user-id="${th.user_id}" data-user-name="${escapeHtml(th.name)}" data-is-sponsor="${th.is_sponsor ? '1' : '0'}">
                     <div class="admin-thread-name">
-                        <span>${escapeHtml(th.name)} ${th.is_sponsor ? ((th.sponsor_badge && th.sponsor_badge !== 'none') ? th.sponsor_badge : '👑') : ''}</span>
+                        <span>${escapeHtml(th.name)} ${th.is_sponsor ? ({crown:'👑',heart:'💖',lightning:'⚡',radio:'📻',star:'⭐',sparkles:'✨',none:''}[th.sponsor_badge] || th.sponsor_badge || '👑') : ''}</span>
                         ${th.unread_count > 0 ? `<span class="unread-badge">${th.unread_count}</span>` : ''}
                     </div>
                     <div class="admin-thread-preview">

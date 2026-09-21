@@ -20,8 +20,17 @@ function ensure_donation_tables(PDO $pdo): void {
     try {
         $cols = $pdo->query("SHOW COLUMNS FROM users LIKE 'sponsor_badge'")->fetchAll();
         if (empty($cols)) {
-            $pdo->exec("ALTER TABLE users ADD COLUMN sponsor_badge VARCHAR(16) NOT NULL DEFAULT '👑' AFTER sponsor_at");
+            $pdo->exec("ALTER TABLE users ADD COLUMN sponsor_badge VARCHAR(32) NOT NULL DEFAULT 'crown' AFTER sponsor_at");
+        } else {
+            $pdo->exec("ALTER TABLE users MODIFY COLUMN sponsor_badge VARCHAR(32) NOT NULL DEFAULT 'crown'");
         }
+        // Нормализуем существующие значения в ASCII-слаги, исключая сбои кодировок
+        $pdo->exec("UPDATE users SET sponsor_badge = 'crown' WHERE sponsor_badge = '👑' OR sponsor_badge IS NULL OR sponsor_badge = '' OR sponsor_badge = '?'");
+        $pdo->exec("UPDATE users SET sponsor_badge = 'heart' WHERE sponsor_badge = '💖'");
+        $pdo->exec("UPDATE users SET sponsor_badge = 'lightning' WHERE sponsor_badge = '⚡'");
+        $pdo->exec("UPDATE users SET sponsor_badge = 'radio' WHERE sponsor_badge = '📻'");
+        $pdo->exec("UPDATE users SET sponsor_badge = 'star' WHERE sponsor_badge = '⭐'");
+        $pdo->exec("UPDATE users SET sponsor_badge = 'sparkles' WHERE sponsor_badge = '✨'");
     } catch (Throwable $e) {}
 
     // 2. Создаём таблицу пожертвований и тёплых слов (donations)
@@ -153,12 +162,50 @@ function update_donation_status(PDO $pdo, int $id, string $status): bool {
     return $stmt->execute(['status' => $status, 'id' => $id]);
 }
 
+function sponsor_badge_slug(?string $badge): string {
+    $map = [
+        'crown'     => 'crown',
+        '👑'        => 'crown',
+        'heart'     => 'heart',
+        '💖'        => 'heart',
+        'lightning' => 'lightning',
+        '⚡'        => 'lightning',
+        'radio'     => 'radio',
+        '📻'        => 'radio',
+        'star'      => 'star',
+        '⭐'        => 'star',
+        'sparkles'  => 'sparkles',
+        '✨'        => 'sparkles',
+        'none'      => 'none',
+        ''          => 'none',
+    ];
+    return $map[$badge] ?? 'crown';
+}
+
+function sponsor_badge_icon(?string $badge): string {
+    $slug = sponsor_badge_slug($badge);
+    $map = [
+        'crown'     => '👑',
+        'heart'     => '💖',
+        'lightning' => '⚡',
+        'radio'     => '📻',
+        'star'      => '⭐',
+        'sparkles'  => '✨',
+        'none'      => '',
+    ];
+    return $map[$slug] ?? '👑';
+}
+
 function set_user_sponsor(PDO $pdo, int $userId, bool $isSponsor): bool {
     ensure_donation_tables($pdo);
     $stmt = $pdo->prepare("
         UPDATE users
         SET is_sponsor = :is_sponsor,
-            sponsor_at = CASE WHEN :is_sponsor = 1 THEN NOW() ELSE NULL END
+            sponsor_at = CASE WHEN :is_sponsor = 1 THEN NOW() ELSE NULL END,
+            sponsor_badge = CASE 
+                WHEN :is_sponsor = 1 AND (sponsor_badge IS NULL OR sponsor_badge = '' OR sponsor_badge = 'none' OR sponsor_badge = '?') THEN 'crown'
+                ELSE sponsor_badge 
+            END
         WHERE id = :id
     ");
     return $stmt->execute([
@@ -218,12 +265,9 @@ function mark_messages_read(PDO $pdo, int $userId, string $readerType): void {
 
 function update_user_sponsor_badge(PDO $pdo, int $userId, string $badge): bool {
     ensure_donation_tables($pdo);
-    $validBadges = ['👑', '💖', '⚡', '📻', '⭐', '✨', 'none'];
-    if (!in_array($badge, $validBadges, true)) {
-        return false;
-    }
+    $slug = sponsor_badge_slug($badge);
     $stmt = $pdo->prepare("UPDATE users SET sponsor_badge = :badge WHERE id = :id AND is_sponsor = 1");
-    return $stmt->execute(['badge' => $badge, 'id' => $userId]);
+    return $stmt->execute(['badge' => $slug, 'id' => $userId]);
 }
 
 function get_admin_support_threads(PDO $pdo): array {

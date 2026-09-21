@@ -109,8 +109,9 @@ if (isset($want['leaderboard'])) {
             $me = [
                 'user_id'       => (int) $meRow['user_id'],
                 'name'          => $meRow['name'],
-                'is_sponsor'    => !empty($meRow['is_sponsor']),
-                'sponsor_badge' => $meRow['sponsor_badge'] ?? '👑',
+                'is_sponsor'         => !empty($meRow['is_sponsor']),
+                'sponsor_badge'      => sponsor_badge_slug($meRow['sponsor_badge'] ?? 'crown'),
+                'sponsor_badge_icon' => sponsor_badge_icon($meRow['sponsor_badge'] ?? 'crown'),
             ];
 
             if ((int) $meRow['xp'] > 0) {
@@ -133,7 +134,8 @@ if (isset($want['leaderboard'])) {
         foreach ($rows as &$r) {
             $r['user_id'] = (int) $r['user_id'];
             $r['is_sponsor'] = !empty($r['is_sponsor']);
-            $r['sponsor_badge'] = $r['sponsor_badge'] ?? '👑';
+            $r['sponsor_badge'] = sponsor_badge_slug($r['sponsor_badge'] ?? 'crown');
+            $r['sponsor_badge_icon'] = sponsor_badge_icon($r['sponsor_badge'] ?? 'crown');
         }
         unset($r);
         return $rows;

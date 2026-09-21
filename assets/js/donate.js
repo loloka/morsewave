@@ -129,7 +129,8 @@
                 const isSponsor = Number(d.is_sponsor) || d.amount >= 150;
                 const badgeText = d.amount > 0 ? `${d.amount} ₽` : '💌 0 ₽';
                 const dateStr = (d.created_at || '').slice(0, 10);
-                const sponsorIcon = (d.sponsor_badge && d.sponsor_badge !== 'none') ? d.sponsor_badge : (d.sponsor_badge === 'none' ? '' : '👑');
+                const BADGE_MAP = { crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '' };
+                const sponsorIcon = BADGE_MAP[d.sponsor_badge] !== undefined ? BADGE_MAP[d.sponsor_badge] : (d.sponsor_badge || '👑');
 
                 return `
                     <div class="wall-card">

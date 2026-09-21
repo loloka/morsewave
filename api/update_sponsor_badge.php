@@ -20,23 +20,26 @@ if (!$user || !is_sponsor_user($user)) {
 }
 
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
-$badge = trim($input['badge'] ?? '');
+$badgeRaw = trim($input['badge'] ?? '');
 
-$validBadges = ['👑', '💖', '⚡', '📻', '⭐', '✨', 'none'];
-if (!in_array($badge, $validBadges, true)) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Недопустимый значок спонсора']);
-    exit;
-}
+$slug = sponsor_badge_slug($badgeRaw);
+$icon = sponsor_badge_icon($slug);
 
-$updated = update_user_sponsor_badge($pdo, (int) $user['id'], $badge);
-if (!$updated) {
+try {
+    $updated = update_user_sponsor_badge($pdo, (int) $user['id'], $slug);
+    if (!$updated) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Не удалось обновить значок в базе данных']);
+        exit;
+    }
+
+    echo json_encode([
+        'ok'    => true,
+        'slug'  => $slug,
+        'badge' => $slug,
+        'icon'  => $icon,
+    ], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'Не удалось обновить значок в базе данных']);
-    exit;
+    echo json_encode(['error' => 'Ошибка базы данных: ' . $e->getMessage()]);
 }
-
-echo json_encode([
-    'ok'    => true,
-    'badge' => $badge,
-], JSON_UNESCAPED_UNICODE);
