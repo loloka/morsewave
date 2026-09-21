@@ -277,8 +277,12 @@
                     if (data.ok) {
                         // Сбрасываем кэш дашборда и лидерборда в браузере, чтобы изменения применились сразу
                         try {
+                            if (window.Progress && typeof window.Progress.clearDashCache === 'function') {
+                                window.Progress.clearDashCache();
+                            }
                             sessionStorage.removeItem('morsewave_dash_cache_v1');
                             sessionStorage.removeItem('morsewave_dash_cache_v2');
+                            sessionStorage.removeItem('morsewave_dash_cache_v3');
                         } catch {}
 
                         if (feedback) {

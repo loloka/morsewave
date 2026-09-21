@@ -1486,13 +1486,23 @@ input[type="range"] {
     font-weight: 700;
     text-align: center;
 }
-.leaderboard-name {
+.leaderboard-user {
     flex: 1;
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+}
+.leaderboard-name {
     min-width: 0;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.leaderboard-row > .leaderboard-name {
+    flex: 1;
 }
 .leaderboard-value {
     font-family: var(--font-mono);
@@ -1792,18 +1802,115 @@ input[type="range"] {
 }
 
 /* ---------- Sponsor Crown & Badge ---------- */
-.sponsor-crown {
-    display: inline-block;
-    font-size: 14px;
-    margin-left: 5px;
+.sponsor-badge-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     vertical-align: middle;
+    cursor: pointer;
+    flex-shrink: 0;
+    line-height: 1;
+    margin-left: 3px;
+    user-select: none;
+}
+.sponsor-crown {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    line-height: 1;
+    padding: 1px 2px;
     cursor: pointer;
     filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.65));
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     user-select: none;
+    overflow: visible;
 }
-.sponsor-crown:hover {
-    transform: scale(1.3) rotate(8deg);
+.sponsor-badge-wrap:hover .sponsor-crown,
+.sponsor-badge-wrap:focus-within .sponsor-crown {
+    transform: scale(1.25) rotate(6deg);
+}
+
+/* Персональные мягкие свечения под разные типы значков */
+.sponsor-badge-wrap[data-badge="heart"] .sponsor-crown {
+    filter: drop-shadow(0 0 5px rgba(255, 107, 139, 0.85)) drop-shadow(0 0 2px rgba(255, 215, 0, 0.35));
+}
+.sponsor-badge-wrap[data-badge="lightning"] .sponsor-crown {
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.85));
+}
+.sponsor-badge-wrap[data-badge="radio"] .sponsor-crown {
+    filter: drop-shadow(0 0 5px rgba(79, 216, 196, 0.75));
+}
+.sponsor-badge-wrap[data-badge="crown"] .sponsor-crown,
+.sponsor-badge-wrap[data-badge="star"] .sponsor-crown,
+.sponsor-badge-wrap[data-badge="sparkles"] .sponsor-crown {
+    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+}
+
+/* Красивая стилизованная плашка-тултип спонсора */
+.sponsor-tooltip {
+    position: absolute;
+    bottom: calc(100% + 9px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: linear-gradient(145deg, #1d2126 0%, #15181b 100%);
+    border: 1px solid rgba(232, 163, 61, 0.45);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(232, 163, 61, 0.18);
+    border-radius: 8px;
+    color: #f7f3eb;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.18s;
+    z-index: 1000;
+}
+.sponsor-tooltip::before {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0 6px;
+    border-style: solid;
+    border-color: rgba(232, 163, 61, 0.45) transparent transparent transparent;
+}
+.sponsor-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px 5px 0 5px;
+    border-style: solid;
+    border-color: #15181b transparent transparent transparent;
+}
+.sponsor-tooltip-spark {
+    font-size: 12px;
+    line-height: 1;
+    filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
+}
+.sponsor-badge-wrap:hover .sponsor-tooltip,
+.sponsor-badge-wrap:focus-within .sponsor-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+.sponsor-badge-wrap:hover,
+.sponsor-badge-wrap:focus-within {
+    z-index: 1001;
 }
 
 .footer-donate-btn {

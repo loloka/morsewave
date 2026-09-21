@@ -20,10 +20,12 @@
                 crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '',
                 '👑': '👑', '💖': '💖', '⚡': '⚡', '📻': '📻', '⭐': '⭐', '✨': '✨'
             };
-            const icon = item.sponsor_badge_icon || BADGE_MAP[item.sponsor_badge] || (item.sponsor_badge === 'none' ? '' : '👑');
+            const slug = item.sponsor_badge || 'crown';
+            const icon = item.sponsor_badge_icon || BADGE_MAP[slug] || (slug === 'none' ? '' : '👑');
             if (!icon) return '';
             const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
-            return ` <span class="sponsor-crown" title="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}">${icon}</span>`;
+            const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
+            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" tabindex="0" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
         }
 
         const medals = ['🥇', '🥈', '🥉'];
@@ -32,7 +34,11 @@
             return `
                 <div class="leaderboard-row${isMe ? ' leaderboard-row-me' : ''}">
                     <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
-                    <span class="leaderboard-name">${escapeHtml(row.name)}${getSponsorBadgeHtml(row)}${isMe ? ' <span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}</span>
+                    <div class="leaderboard-user">
+                        <span class="leaderboard-name" title="${escapeHtml(row.name)}">${escapeHtml(row.name)}</span>
+                        ${getSponsorBadgeHtml(row)}
+                        ${isMe ? '<span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}
+                    </div>
                     <span class="leaderboard-value">${row[valueKey]}</span>
                 </div>
             `;

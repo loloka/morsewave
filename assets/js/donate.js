@@ -130,14 +130,21 @@
                 const badgeText = d.amount > 0 ? `${d.amount} ₽` : '💌 0 ₽';
                 const dateStr = (d.created_at || '').slice(0, 10);
                 const BADGE_MAP = { crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '' };
-                const sponsorIcon = BADGE_MAP[d.sponsor_badge] !== undefined ? BADGE_MAP[d.sponsor_badge] : (d.sponsor_badge || '👑');
+                const slug = d.sponsor_badge || 'crown';
+                const sponsorIcon = BADGE_MAP[slug] !== undefined ? BADGE_MAP[slug] : (d.sponsor_badge || '👑');
+                const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
+                const sponsorBadgeHtml = isSponsor && sponsorIcon ? `
+                    <span class="sponsor-badge-wrap" data-badge="${cleanSlug}" tabindex="0" role="img" aria-label="Спонсор проекта MorseWave">
+                        <span class="sponsor-crown">${sponsorIcon}</span>
+                        <span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">Спонсор проекта MorseWave</span></span>
+                    </span>` : '';
 
                 return `
                     <div class="wall-card">
                         <div class="wall-card-header">
                             <span class="wall-callsign">
                                 ${escapeHtml(d.callsign)}
-                                ${isSponsor && sponsorIcon ? `<span class="sponsor-crown" title="Спонсор MorseWave">${sponsorIcon}</span>` : ''}
+                                ${sponsorBadgeHtml}
                             </span>
                             <span class="wall-badge">${escapeHtml(badgeText)}</span>
                         </div>
