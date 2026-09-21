@@ -62,9 +62,19 @@ function current_user_id() {
 function current_user($pdo) {
     $id = current_user_id();
     if (!$id) return null;
-    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin, is_sponsor, sponsor_at FROM users WHERE id = :id');
-    $stmt->execute(['id' => $id]);
-    $user = $stmt->fetch();
+    try {
+        $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin, is_sponsor, sponsor_at, sponsor_badge FROM users WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $user = $stmt->fetch();
+    } catch (Throwable $e) {
+        $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at, created_at, is_admin, is_sponsor, sponsor_at FROM users WHERE id = :id');
+        $stmt->execute(['id' => $id]);
+        $user = $stmt->fetch();
+        if ($user) $user['sponsor_badge'] = '👑';
+    }
+    if ($user && !isset($user['sponsor_badge'])) {
+        $user['sponsor_badge'] = '👑';
+    }
     return $user ?: null;
 }
 

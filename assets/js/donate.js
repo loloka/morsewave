@@ -129,13 +129,14 @@
                 const isSponsor = Number(d.is_sponsor) || d.amount >= 150;
                 const badgeText = d.amount > 0 ? `${d.amount} ₽` : '💌 0 ₽';
                 const dateStr = (d.created_at || '').slice(0, 10);
+                const sponsorIcon = (d.sponsor_badge && d.sponsor_badge !== 'none') ? d.sponsor_badge : (d.sponsor_badge === 'none' ? '' : '👑');
 
                 return `
                     <div class="wall-card">
                         <div class="wall-card-header">
                             <span class="wall-callsign">
                                 ${escapeHtml(d.callsign)}
-                                ${isSponsor ? '<span class="sponsor-crown" title="Спонсор MorseWave">👑</span>' : ''}
+                                ${isSponsor && sponsorIcon ? `<span class="sponsor-crown" title="Спонсор MorseWave">${sponsorIcon}</span>` : ''}
                             </span>
                             <span class="wall-badge">${escapeHtml(badgeText)}</span>
                         </div>

@@ -20,6 +20,7 @@ if ($method === 'GET') {
         $d['id'] = (int) $d['id'];
         $d['amount'] = (int) $d['amount'];
         $d['is_sponsor'] = !empty($d['is_sponsor']);
+        $d['sponsor_badge'] = $d['sponsor_badge'] ?? '👑';
     }
     unset($d);
 

@@ -126,11 +126,18 @@
             el.innerHTML = '<p class="muted" style="font-size:13px;">' + t('js.home.leaderboard_empty') + '</p>';
             return;
         }
+        function getSponsorBadgeHtml(item) {
+            if (!item || !item.is_sponsor) return '';
+            const b = (item.sponsor_badge && item.sponsor_badge !== 'none') ? item.sponsor_badge : (item.sponsor_badge === 'none' ? '' : '👑');
+            if (!b) return '';
+            return ` <span class="sponsor-crown" title="${t('leaderboard.sponsor_tooltip')}">${b}</span>`;
+        }
+
         const medals = ['🥇', '🥈', '🥉'];
         let html = rows.map((row, i) => `
             <div class="leaderboard-row">
                 <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
-                <span class="leaderboard-name">${escapeHtml(row.name)}${row.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''}</span>
+                <span class="leaderboard-name">${escapeHtml(row.name)}${getSponsorBadgeHtml(row)}</span>
                 <span class="leaderboard-value">${row[valueKey]}</span>
             </div>
         `).join('');
@@ -142,7 +149,7 @@
             html += `
                 <div class="leaderboard-row leaderboard-row-me">
                     <span class="leaderboard-rank">${me[rankKey]}</span>
-                    <span class="leaderboard-name">${escapeHtml(me.name)}${me.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''} <span class="leaderboard-you-badge">${t('leaderboard.you_badge')}</span></span>
+                    <span class="leaderboard-name">${escapeHtml(me.name)}${getSponsorBadgeHtml(me)} <span class="leaderboard-you-badge">${t('leaderboard.you_badge')}</span></span>
                     <span class="leaderboard-value">${me[valueKey]}</span>
                 </div>
             `;

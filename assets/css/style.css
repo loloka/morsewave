@@ -2062,4 +2062,38 @@ input[type="range"] {
     font-weight: 700;
     padding: 1px 6px;
     border-radius: 999px;
+}
+
+/* Sponsor Badge Picker */
+.sponsor-badge-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+.sponsor-badge-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+.sponsor-badge-btn:hover {
+    border-color: var(--accent);
+    background: var(--surface);
+    transform: translateY(-1px);
+}
+.sponsor-badge-btn.active {
+    border-color: var(--accent);
+    background: rgba(230, 168, 56, 0.15);
+    color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
 }

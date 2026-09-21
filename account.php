@@ -130,6 +130,26 @@ include __DIR__ . '/includes/header.php';
             <div class="mt-2" id="verify-status"></div>
         </div>
 
+        <!-- Sponsor Badge Picker (for Sponsors) -->
+        <div class="card mt-3" id="sponsor-badge-picker-card" style="display:none; border-color: rgba(230,168,56,0.35);">
+            <div class="card-eyebrow" style="color:var(--accent);"><?= t('account.badge_picker_eyebrow') ?></div>
+            <h3 class="mt-1 mb-1"><?= t('account.badge_picker_title') ?></h3>
+            <p class="muted" style="font-size:13px; margin-bottom:14px; line-height:1.5;">
+                <?= t('account.badge_picker_desc') ?>
+            </p>
+
+            <div class="sponsor-badge-selector" id="sponsor-badge-options">
+                <button type="button" class="sponsor-badge-btn" data-badge="👑" title="Корона">👑 Корона</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="💖" title="Сердечко">💖 Сердечко</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="⚡" title="Молния">⚡ Молния</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="📻" title="Трансивер">📻 Трансивер</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="⭐" title="Звезда">⭐ Звезда</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="✨" title="Сияние">✨ Сияние</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="none" title="Скрыть значок">🚫 Без значка</button>
+            </div>
+            <div id="sponsor-badge-feedback" class="feedback mt-2" style="font-size:13px; min-height:18px;"></div>
+        </div>
+
         <!-- VIP Supporter Chat (for Sponsors) -->
         <div class="card mt-3" id="supporter-chat-card" style="display:none;">
             <div class="card-eyebrow" style="color:var(--accent);">VIP SUPPORT · DIRECT LINE</div>
@@ -150,18 +170,18 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- Become Supporter Promo (for Non-sponsors) -->
-        <div class="card mt-3" id="become-supporter-card" style="display:none; background: linear-gradient(135deg, rgba(230,168,56,0.06), transparent);">
+        <div class="card mt-3" id="become-supporter-card" style="display:none; background: linear-gradient(135deg, rgba(230,168,56,0.06), transparent); border-color: rgba(230,168,56,0.25);">
             <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                 <div>
-                    <h4 class="mt-0 mb-1" style="display:flex; align-items:center; gap:6px;">
-                        <span>👑 Золотая коронка в лидерборде и закрытый чат</span>
+                    <h4 class="mt-0 mb-1" style="display:flex; align-items:center; gap:8px;">
+                        <span>✨ <?= t('account.sponsor_promo_title') ?></span>
                     </h4>
-                    <p class="muted" style="font-size:13px; margin:0;">
-                        Поддержите развитие некоммерческого проекта MorseWave и откройте прямую линию связи с R9OGL!
+                    <p class="muted" style="font-size:13px; margin:0; line-height:1.5;">
+                        <?= t('account.sponsor_promo_desc') ?>
                     </p>
                 </div>
-                <a href="donate.php" class="footer-donate-btn" style="font-size:14px; padding:6px 14px;">
-                    💖 Поддержать проект
+                <a href="donate.php" class="footer-donate-btn" style="font-size:14px; padding:8px 16px;">
+                    💖 <?= t('footer.donate') ?>
                 </a>
             </div>
         </div>

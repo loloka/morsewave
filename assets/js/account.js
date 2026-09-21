@@ -203,15 +203,90 @@
         const badge = document.getElementById('profile-sponsor-badge');
         const chatCard = document.getElementById('supporter-chat-card');
         const promoCard = document.getElementById('become-supporter-card');
+        const badgePickerCard = document.getElementById('sponsor-badge-picker-card');
         const isSponsor = !!(Number(user.is_sponsor) || user.is_sponsor === true);
+        const currentBadge = user.sponsor_badge || '👑';
 
-        if (badge) badge.style.display = isSponsor ? 'inline-block' : 'none';
+        if (badge) {
+            badge.style.display = isSponsor ? 'inline-block' : 'none';
+            if (isSponsor) {
+                const icon = (currentBadge && currentBadge !== 'none') ? currentBadge : '💖';
+                badge.innerHTML = `${icon} ${t('account.sponsor_badge')}`;
+            }
+        }
         if (chatCard) chatCard.style.display = isSponsor ? 'block' : 'none';
         if (promoCard) promoCard.style.display = isSponsor ? 'none' : 'block';
+        if (badgePickerCard) {
+            badgePickerCard.style.display = isSponsor ? 'block' : 'none';
+            if (isSponsor) {
+                initSponsorBadgePicker(currentBadge);
+            }
+        }
 
         if (isSponsor) {
             initUserSupportChat();
         }
+    }
+
+    let badgePickerInitialized = false;
+    function initSponsorBadgePicker(currentBadge) {
+        const container = document.getElementById('sponsor-badge-options');
+        const feedback = document.getElementById('sponsor-badge-feedback');
+        if (!container) return;
+
+        const updateActiveButton = (badgeVal) => {
+            container.querySelectorAll('.sponsor-badge-btn').forEach(btn => {
+                if (btn.dataset.badge === badgeVal) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        };
+
+        updateActiveButton(currentBadge);
+
+        if (badgePickerInitialized) return;
+        badgePickerInitialized = true;
+
+        container.querySelectorAll('.sponsor-badge-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const newBadge = btn.dataset.badge;
+                updateActiveButton(newBadge);
+                if (feedback) feedback.textContent = '';
+
+                try {
+                    const res = await fetch('api/update_sponsor_badge.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ badge: newBadge })
+                    });
+                    const data = await res.json();
+                    if (data.ok) {
+                        if (feedback) {
+                            feedback.style.color = 'var(--signal)';
+                            feedback.textContent = '✅ ' + (window.t ? t('account.badge_saved') : 'Значок сохранён!');
+                            setTimeout(() => { if (feedback) feedback.textContent = ''; }, 3000);
+                        }
+                        const badgeEl = document.getElementById('profile-sponsor-badge');
+                        if (badgeEl) {
+                            const icon = (newBadge && newBadge !== 'none') ? newBadge : '💖';
+                            badgeEl.innerHTML = `${icon} ${t('account.sponsor_badge')}`;
+                        }
+                    } else {
+                        if (feedback) {
+                            feedback.style.color = 'var(--danger)';
+                            feedback.textContent = '❌ ' + (data.error || (window.t ? t('account.badge_error') : 'Ошибка'));
+                        }
+                    }
+                } catch {
+                    if (feedback) {
+                        feedback.style.color = 'var(--danger)';
+                        feedback.textContent = '❌ Ошибка сети';
+                    }
+                }
+            });
+        });
     }
 
     let userChatInitialized = false;

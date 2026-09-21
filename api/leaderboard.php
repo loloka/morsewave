@@ -10,7 +10,7 @@ $full = isset($_GET['full']) && $_GET['full'] === '1';
 $limit = $full ? 500 : (isset($_GET['limit']) ? max(1, min((int) $_GET['limit'], 50)) : 10);
 
 $byXp = $pdo->prepare('
-    SELECT u.id AS user_id, u.name, u.is_sponsor, s.xp
+    SELECT u.id AS user_id, u.name, u.is_sponsor, u.sponsor_badge, s.xp
     FROM user_stats s JOIN users u ON u.id = s.user_id
     WHERE s.xp > 0
     ORDER BY s.xp DESC, u.id ASC
@@ -20,7 +20,7 @@ $byXp->bindValue(':limit', $limit, PDO::PARAM_INT);
 $byXp->execute();
 
 $byStreak = $pdo->prepare('
-    SELECT u.id AS user_id, u.name, u.is_sponsor, s.streak_count
+    SELECT u.id AS user_id, u.name, u.is_sponsor, u.sponsor_badge, s.streak_count
     FROM user_stats s JOIN users u ON u.id = s.user_id
     WHERE s.streak_count > 0
     ORDER BY s.streak_count DESC, u.id ASC
@@ -38,7 +38,7 @@ $me = null;
 $userId = current_user_id();
 if ($userId) {
     $meStmt = $pdo->prepare('
-        SELECT u.id AS user_id, u.name, u.is_sponsor, s.xp, s.streak_count
+        SELECT u.id AS user_id, u.name, u.is_sponsor, u.sponsor_badge, s.xp, s.streak_count
         FROM user_stats s JOIN users u ON u.id = s.user_id
         WHERE s.user_id = :id
     ');
@@ -47,9 +47,10 @@ if ($userId) {
 
     if ($meRow) {
         $me = [
-            'user_id'    => (int) $meRow['user_id'],
-            'name'       => $meRow['name'],
-            'is_sponsor' => !empty($meRow['is_sponsor']),
+            'user_id'       => (int) $meRow['user_id'],
+            'name'          => $meRow['name'],
+            'is_sponsor'    => !empty($meRow['is_sponsor']),
+            'sponsor_badge' => $meRow['sponsor_badge'] ?? '👑',
         ];
 
         if ((int) $meRow['xp'] > 0) {
@@ -72,6 +73,7 @@ $formatRows = function($rows) {
     foreach ($rows as &$r) {
         $r['user_id'] = (int) $r['user_id'];
         $r['is_sponsor'] = !empty($r['is_sponsor']);
+        $r['sponsor_badge'] = $r['sponsor_badge'] ?? '👑';
     }
     unset($r);
     return $rows;

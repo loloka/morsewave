@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_admin               TINYINT(1) NOT NULL DEFAULT 0,
     is_sponsor             TINYINT(1) NOT NULL DEFAULT 0,
     sponsor_at             DATETIME DEFAULT NULL,
+    sponsor_badge          VARCHAR(16) NOT NULL DEFAULT '👑',
     failed_login_attempts  INT UNSIGNED NOT NULL DEFAULT 0,
     locked_until           DATETIME DEFAULT NULL,
     reset_token            VARCHAR(64) DEFAULT NULL,

@@ -7,7 +7,7 @@ function ensure_donation_tables(PDO $pdo): void {
     static $checked = false;
     if ($checked) return;
 
-    // 1. Проверяем поле is_sponsor в таблице users
+    // 1. Проверяем поле is_sponsor и sponsor_badge в таблице users
     try {
         $cols = $pdo->query("SHOW COLUMNS FROM users LIKE 'is_sponsor'")->fetchAll();
         if (empty($cols)) {
@@ -16,6 +16,13 @@ function ensure_donation_tables(PDO $pdo): void {
     } catch (Throwable $e) {
         // Ошибку логировать или игнорировать при отсутствии прав/таблицы
     }
+
+    try {
+        $cols = $pdo->query("SHOW COLUMNS FROM users LIKE 'sponsor_badge'")->fetchAll();
+        if (empty($cols)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN sponsor_badge VARCHAR(16) NOT NULL DEFAULT '👑' AFTER sponsor_at");
+        }
+    } catch (Throwable $e) {}
 
     // 2. Создаём таблицу пожертвований и тёплых слов (donations)
     try {
@@ -97,7 +104,7 @@ function get_approved_donations(PDO $pdo, int $limit = 50): array {
     ensure_donation_tables($pdo);
     $stmt = $pdo->prepare("
         SELECT d.id, d.callsign, d.amount, d.tier_title, d.message, d.is_anonymous, d.created_at,
-               u.is_sponsor, u.name AS user_name
+               u.is_sponsor, u.sponsor_badge, u.name AS user_name
         FROM donations d
         LEFT JOIN users u ON u.id = d.user_id
         WHERE d.status = 'approved'
@@ -112,7 +119,7 @@ function get_approved_donations(PDO $pdo, int $limit = 50): array {
 function get_admin_donations(PDO $pdo): array {
     ensure_donation_tables($pdo);
     $stmt = $pdo->query("
-        SELECT d.*, u.name AS user_name, u.email AS user_email, u.is_sponsor, u.is_admin
+        SELECT d.*, u.name AS user_name, u.email AS user_email, u.is_sponsor, u.sponsor_badge, u.is_admin
         FROM donations d
         LEFT JOIN users u ON u.id = d.user_id
         ORDER BY d.id DESC
@@ -209,10 +216,20 @@ function mark_messages_read(PDO $pdo, int $userId, string $readerType): void {
     ]);
 }
 
+function update_user_sponsor_badge(PDO $pdo, int $userId, string $badge): bool {
+    ensure_donation_tables($pdo);
+    $validBadges = ['👑', '💖', '⚡', '📻', '⭐', '✨', 'none'];
+    if (!in_array($badge, $validBadges, true)) {
+        return false;
+    }
+    $stmt = $pdo->prepare("UPDATE users SET sponsor_badge = :badge WHERE id = :id AND is_sponsor = 1");
+    return $stmt->execute(['badge' => $badge, 'id' => $userId]);
+}
+
 function get_admin_support_threads(PDO $pdo): array {
     ensure_donation_tables($pdo);
     $stmt = $pdo->query("
-        SELECT u.id AS user_id, u.name, u.email, u.is_sponsor,
+        SELECT u.id AS user_id, u.name, u.email, u.is_sponsor, u.sponsor_badge,
                COUNT(CASE WHEN sm.is_read = 0 AND sm.sender_type = 'user' THEN 1 END) AS unread_count,
                MAX(sm.created_at) AS last_message_at,
                (
@@ -231,7 +248,7 @@ function get_admin_support_threads(PDO $pdo): array {
                ) AS last_sender_type
         FROM users u
         INNER JOIN support_messages sm ON sm.user_id = u.id
-        GROUP BY u.id, u.name, u.email, u.is_sponsor
+        GROUP BY u.id, u.name, u.email, u.is_sponsor, u.sponsor_badge
         ORDER BY last_message_at DESC
     ");
     return $stmt->fetchAll();

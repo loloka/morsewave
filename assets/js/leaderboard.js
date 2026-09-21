@@ -14,13 +14,20 @@
             el.innerHTML = '<p class="muted" style="font-size:13px;">' + t('js.leaderboard.empty') + '</p>';
             return;
         }
+        function getSponsorBadgeHtml(item) {
+            if (!item || !item.is_sponsor) return '';
+            const b = (item.sponsor_badge && item.sponsor_badge !== 'none') ? item.sponsor_badge : (item.sponsor_badge === 'none' ? '' : '👑');
+            if (!b) return '';
+            return ` <span class="sponsor-crown" title="${t('leaderboard.sponsor_tooltip')}">${b}</span>`;
+        }
+
         const medals = ['🥇', '🥈', '🥉'];
         el.innerHTML = rows.map((row, i) => {
             const isMe = me && me.user_id === row.user_id;
             return `
                 <div class="leaderboard-row${isMe ? ' leaderboard-row-me' : ''}">
                     <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
-                    <span class="leaderboard-name">${escapeHtml(row.name)}${row.is_sponsor ? ' <span class="sponsor-crown" title="' + t('leaderboard.sponsor_tooltip') + '">👑</span>' : ''}${isMe ? ' <span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}</span>
+                    <span class="leaderboard-name">${escapeHtml(row.name)}${getSponsorBadgeHtml(row)}${isMe ? ' <span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}</span>
                     <span class="leaderboard-value">${row[valueKey]}</span>
                 </div>
             `;

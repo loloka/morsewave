@@ -16,7 +16,7 @@ try {
         }
 
         $stmt = $pdo->query("
-            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at,
+            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at, u.sponsor_badge,
                    s.xp, s.streak_count,
                    (SELECT MAX(created_at) FROM xp_log WHERE user_id = u.id) as last_active_at,
                    EXISTS(
@@ -42,7 +42,7 @@ try {
         }
 
         $stmt = $pdo->query("
-            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at,
+            SELECT u.id, u.name, u.email, u.email_verified_at, u.created_at, u.is_admin, u.is_sponsor, u.sponsor_at, u.sponsor_badge,
                    s.xp, s.streak_count,
                    u.created_at as last_active_at,
                    0 as recent_anomalies
