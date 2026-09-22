@@ -134,7 +134,7 @@
                 const sponsorIcon = BADGE_MAP[slug] !== undefined ? BADGE_MAP[slug] : (d.sponsor_badge || '👑');
                 const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
                 const sponsorBadgeHtml = isSponsor && sponsorIcon ? `
-                    <span class="sponsor-badge-wrap" data-badge="${cleanSlug}" tabindex="0" role="img" aria-label="Спонсор проекта MorseWave">
+                    <span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="Спонсор проекта MorseWave">
                         <span class="sponsor-crown">${sponsorIcon}</span>
                         <span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">Спонсор проекта MorseWave</span></span>
                     </span>` : '';

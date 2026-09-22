@@ -136,21 +136,24 @@
             const icon = item.sponsor_badge_icon || BADGE_MAP[slug] || (slug === 'none' ? '' : '👑');
             if (!icon) return '';
             const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
-            const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
-            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" tabindex="0" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
+            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
         }
 
         const medals = ['🥇', '🥈', '🥉'];
-        let html = rows.map((row, i) => `
-            <div class="leaderboard-row">
+        let html = rows.map((row, i) => {
+            const isMe = me && me.user_id === row.user_id;
+            return `
+            <div class="leaderboard-row${isMe ? ' leaderboard-row-me' : ''}">
                 <span class="leaderboard-rank">${medals[i] || (i + 1)}</span>
                 <div class="leaderboard-user">
                     <span class="leaderboard-name" title="${escapeHtml(row.name)}">${escapeHtml(row.name)}</span>
                     ${getSponsorBadgeHtml(row)}
+                    ${isMe ? '<span class="leaderboard-you-badge">' + t('leaderboard.you_badge') + '</span>' : ''}
                 </div>
                 <span class="leaderboard-value">${row[valueKey]}</span>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         if (me && me[rankKey] && me[rankKey] > rows.length) {
             if (me[rankKey] > rows.length + 1) {

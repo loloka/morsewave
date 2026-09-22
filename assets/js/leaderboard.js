@@ -25,7 +25,7 @@
             if (!icon) return '';
             const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
             const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
-            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" tabindex="0" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
+            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
         }
 
         const medals = ['🥇', '🥈', '🥉'];

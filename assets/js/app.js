@@ -137,3 +137,28 @@ document.addEventListener('keydown', (e) => {
         if (window.showLayoutHint) window.showLayoutHint();
     }
 });
+
+// Интерактивное управление всплывающим тултипом спонсора (особенно для мобильных экранов)
+document.addEventListener('click', (e) => {
+    const wrap = e.target.closest('.sponsor-badge-wrap');
+    if (wrap) {
+        const wasActive = wrap.classList.contains('active');
+        document.querySelectorAll('.sponsor-badge-wrap.active').forEach(el => {
+            clearTimeout(el._hideTimer);
+            el.classList.remove('active');
+        });
+        if (!wasActive) {
+            wrap.classList.add('active');
+            // Автоматически скрываем через 3 секунды, если пользователь больше не тапает
+            wrap._hideTimer = setTimeout(() => {
+                wrap.classList.remove('active');
+            }, 3000);
+        }
+    } else {
+        // Клик в любое другое место страницы сразу закрывает плашку
+        document.querySelectorAll('.sponsor-badge-wrap.active').forEach(el => {
+            clearTimeout(el._hideTimer);
+            el.classList.remove('active');
+        });
+    }
+});

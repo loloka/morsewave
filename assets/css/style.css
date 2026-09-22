@@ -1827,8 +1827,12 @@ input[type="range"] {
     user-select: none;
     overflow: visible;
 }
-.sponsor-badge-wrap:hover .sponsor-crown,
-.sponsor-badge-wrap:focus-within .sponsor-crown {
+@media (hover: hover) and (pointer: fine) {
+    .sponsor-badge-wrap:hover .sponsor-crown {
+        transform: scale(1.25) rotate(6deg);
+    }
+}
+.sponsor-badge-wrap.active .sponsor-crown {
     transform: scale(1.25) rotate(6deg);
 }
 
@@ -1902,14 +1906,22 @@ input[type="range"] {
     line-height: 1;
     filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
 }
-.sponsor-badge-wrap:hover .sponsor-tooltip,
-.sponsor-badge-wrap:focus-within .sponsor-tooltip {
+@media (hover: hover) and (pointer: fine) {
+    .sponsor-badge-wrap:hover .sponsor-tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+    }
+    .sponsor-badge-wrap:hover {
+        z-index: 1001;
+    }
+}
+.sponsor-badge-wrap.active .sponsor-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
-.sponsor-badge-wrap:hover,
-.sponsor-badge-wrap:focus-within {
+.sponsor-badge-wrap.active {
     z-index: 1001;
 }
 
