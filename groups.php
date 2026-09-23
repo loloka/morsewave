@@ -203,12 +203,57 @@ include __DIR__ . '/includes/header.php';
                 <span class="muted cpm-hint" id="pairs-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
 
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="pairs-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+            </label>
+
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="pairs-buffer-enabled"> <?= t('groups.buffer_input') ?>
+            </label>
+
             <label class="chip"><?= t('groups.groups_per_session') ?>
                 <select id="pairs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
                     <option value="10" selected>10</option><option value="20">20</option>
                     <option value="30">30</option><option value="50">50</option>
                 </select>
             </label>
+        </div>
+
+        <!-- Панель настройки Фарнсворта для пар -->
+        <div id="pairs-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:700; font-size:13px;"><?= t('groups.farnsworth') ?></div>
+                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+                </div>
+                <div class="speed-control" id="pairs-farnsworth-wrap">
+                    <input type="range" id="pairs-farnsworth" min="5" max="30" step="1" value="10">
+                    <span class="speed-value" id="pairs-farnsworth-value">10</span> wpm
+                </div>
+            </div>
+            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                💡 <?= t('groups.farnsworth_tooltip') ?>
+            </div>
+        </div>
+
+        <!-- Панель настройки буфера памяти для пар -->
+        <div id="pairs-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+                </div>
+                <div class="chip-row" id="pairs-buffer-depth-chips">
+                    <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
+                    <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                    <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                    <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                    <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+                </div>
+            </div>
+            <div class="muted mt-2" id="pairs-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                💡 <?= t('groups.buffer_tooltip') ?>
+            </div>
         </div>
     </div>
 
@@ -326,8 +371,20 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
     </div>
 
+    <!-- Деликатная рекомендация тренировки проблемной пары -->
+    <div class="card mt-2" id="pair-prompt-block" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:12px 16px;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px; color:var(--accent);">🥊 <?= t('groups.pair_prompt_title') ?></div>
+                <div class="muted mt-1" style="font-size:12px;" id="pair-prompt-text"></div>
+            </div>
+            <button class="btn btn-sm btn-primary" id="pair-prompt-btn" type="button"><?= t('groups.pair_prompt_btn') ?></button>
+        </div>
+    </div>
+
     <div class="card mt-2" id="groups-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
         <span id="groups-daily-time-text"></span>
+        <div class="muted mt-1" style="font-size:11px;"><?= t('groups.daily_time_change_hint') ?></div>
     </div>
 
     <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
@@ -427,6 +484,7 @@ include __DIR__ . '/includes/header.php';
 
     <div class="card mt-2" id="words-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
         <span id="words-daily-time-text"></span>
+        <div class="muted mt-1" style="font-size:11px;"><?= t('groups.daily_time_change_hint') ?></div>
     </div>
 
     <div class="btn-row mt-3">

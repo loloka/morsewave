@@ -1134,8 +1134,13 @@
     const INVASION_BOSS_BREACH_DAMAGE = 30;
 
     const INVASION_QUOTES = [
-        "VENI VIDI VICI", "MEMENTO MORI", "CARPE DIEM", "PER ASPERA AD ASTRA",
-        "COGITO ERGO SUM", "DUM SPIRO SPERO", "AUDENTES FORTUNA IUVAT"
+        { text: "VENI VIDI VICI", ru: "Пришёл, увидел, победил", en: "I came, I saw, I conquered" },
+        { text: "MEMENTO MORI", ru: "Помни о смерти", en: "Remember you must die" },
+        { text: "CARPE DIEM", ru: "Лови момент", en: "Seize the day" },
+        { text: "PER ASPERA AD ASTRA", ru: "Через тернии к звёздам", en: "Through hardships to the stars" },
+        { text: "COGITO ERGO SUM", ru: "Я мыслю, следовательно, существую", en: "I think, therefore I am" },
+        { text: "DUM SPIRO SPERO", ru: "Пока дышу, надеюсь", en: "While I breathe, I hope" },
+        { text: "AUDENTES FORTUNA IUVAT", ru: "Смелым помогает судьба", en: "Fortune favors the bold" }
     ];
     // Было только 👽/🦎 — по фидбеку владельца 2026-08-01 "скучно, добавь
     // монстриков" расширили зверинец, не выходя за тему "инопланетное или
@@ -1183,6 +1188,13 @@
     const invasionXpBreakdownEl = document.getElementById('invasion-xp-breakdown');
     const invasionDailyNoteEl = document.getElementById('invasion-daily-note');
     const invasionRestartBtn = document.getElementById('invasion-restart-btn');
+    const invasionQuoteBoxEl = document.getElementById('invasion-quote-box');
+    const invasionQuoteProgressEl = document.getElementById('invasion-quote-progress');
+    const invasionQuoteDisplayEl = document.getElementById('invasion-quote-display');
+    const invasionQuoteTranslationEl = document.getElementById('invasion-quote-translation');
+    const invasionResultQuoteBoxEl = document.getElementById('invasion-result-quote-box');
+    const invasionResultQuoteTextEl = document.getElementById('invasion-result-quote-text');
+    const invasionResultQuoteTransEl = document.getElementById('invasion-result-quote-trans');
 
     // QWERTY, а не алфавитный порядок — специально (владелец 2026-07-31):
     // "к ней сразу привыкать" — те же клавиши, что и на физической клавиатуре
@@ -1233,6 +1245,57 @@
     let invasionSessionBossXp = 0;
     let invasionSessionCorrectHits = 0;
     let invasionSessionTotalHits = 0;
+    let invasionCurrentQuoteObj = null;
+
+    function renderInvasionQuoteDisplay(quoteObj, revealedCount) {
+        if (!invasionQuoteBoxEl || !quoteObj) return;
+        invasionQuoteBoxEl.style.display = 'block';
+
+        const rawText = quoteObj.text; // e.g. "VENI VIDI VICI"
+        const lettersOnly = rawText.replace(/\s/g, '');
+        const total = lettersOnly.length;
+        if (invasionQuoteProgressEl) {
+            invasionQuoteProgressEl.textContent = `${Math.min(revealedCount, total)}/${total}`;
+        }
+
+        let letterIdx = 0;
+        let html = '';
+        const words = rawText.split(' ');
+        words.forEach(word => {
+            html += '<div class="invasion-quote-word">';
+            for (let i = 0; i < word.length; i++) {
+                const ch = word[i];
+                let cls = 'invasion-quote-char';
+                let displayChar = ch;
+                if (letterIdx < revealedCount) {
+                    cls += ' received';
+                } else if (letterIdx === revealedCount) {
+                    cls += ' current';
+                    displayChar = '_';
+                } else {
+                    cls += ' placeholder';
+                    displayChar = '_';
+                }
+                html += `<span class="${cls}">${displayChar}</span>`;
+                letterIdx++;
+            }
+            html += '</div>';
+        });
+        if (invasionQuoteDisplayEl) {
+            invasionQuoteDisplayEl.innerHTML = html;
+        }
+
+        const isRussian = (document.documentElement.lang === 'ru' || !document.documentElement.lang);
+        const trans = isRussian ? quoteObj.ru : quoteObj.en;
+        if (invasionQuoteTranslationEl) {
+            if (revealedCount >= total) {
+                invasionQuoteTranslationEl.textContent = `«${trans}»`;
+                invasionQuoteTranslationEl.style.display = 'block';
+            } else {
+                invasionQuoteTranslationEl.style.display = 'none';
+            }
+        }
+    }
 
     function initInvasionGrid() {
         if (invasionGridBuilt) return;
@@ -1696,12 +1759,14 @@
             // 20 символов подряд + допуск на 5-6 ошибок
             duration = (20 + 6) * invasionBossSymbolTime(wpm);
         } else {
-            bossQuote = INVASION_QUOTES[Math.floor(Math.random() * INVASION_QUOTES.length)].replace(/\s/g, '');
+            invasionCurrentQuoteObj = INVASION_QUOTES[Math.floor(Math.random() * INVASION_QUOTES.length)];
+            bossQuote = invasionCurrentQuoteObj.text.replace(/\s/g, '');
             ch = bossQuote[0];
             bossTotalHits = bossQuote.length;
             // Фраза на латыни + допуск 1 ошибка на каждые 4 символа
             const extraErrors = Math.max(3, Math.round(bossTotalHits / 4));
             duration = (bossTotalHits + extraErrors) * invasionBossSymbolTime(wpm);
+            renderInvasionQuoteDisplay(invasionCurrentQuoteObj, 0);
         }
 
         const enemy = {
@@ -1830,9 +1895,6 @@
         invasionCanvasWrapEl.className = 'invasion-canvas-wrap zone-' + invasionStage;
         
         if (invasionBossPhase) {
-            if (invasionEnemies.length === 0) {
-                spawnInvasionBoss(invasionCurrentBoss || 1);
-            }
             return;
         }
 
@@ -2073,6 +2135,9 @@
         if (enemy.isBoss) {
             enemy.bossHits++;
             updateInvasionStatsUI();
+            if (enemy.isMegaBoss && invasionCurrentQuoteObj) {
+                renderInvasionQuoteDisplay(invasionCurrentQuoteObj, enemy.bossHits);
+            }
             if (enemy.bossHits < enemy.bossTotalHits) {
                 invasionFeedback(t('js.learn.invasion_boss_hit', { '{hits}': enemy.bossHits, '{total}': enemy.bossTotalHits }), 'ok');
                 
@@ -2098,6 +2163,9 @@
             if (enemy.isMegaBoss || enemy.bossNum === 3) {
                 invasionKills++;
                 updateInvasionStatsUI();
+                if (invasionCurrentQuoteObj) {
+                    renderInvasionQuoteDisplay(invasionCurrentQuoteObj, enemy.bossTotalHits);
+                }
                 invasionFeedback(t('js.learn.invasion_boss3_kill'), 'ok');
                 setTimeout(() => finishInvasion(true), INVASION_SHOVEL_MS + 300);
             } else if (enemy.bossNum === 1) {
@@ -2425,6 +2493,18 @@
             }
         }
 
+        if (invasionResultQuoteBoxEl) {
+            if (invasionCurrentQuoteObj && (won || invasionStage === 3)) {
+                const isRussian = (document.documentElement.lang === 'ru' || !document.documentElement.lang);
+                const trans = isRussian ? invasionCurrentQuoteObj.ru : invasionCurrentQuoteObj.en;
+                if (invasionResultQuoteTextEl) invasionResultQuoteTextEl.textContent = invasionCurrentQuoteObj.text;
+                if (invasionResultQuoteTransEl) invasionResultQuoteTransEl.textContent = `«${trans}»`;
+                invasionResultQuoteBoxEl.style.display = 'block';
+            } else {
+                invasionResultQuoteBoxEl.style.display = 'none';
+            }
+        }
+
         invasionResultPanelEl.style.display = 'block';
         invasionResultPanelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
@@ -2476,6 +2556,9 @@
         invasionStartBtn.style.display = 'inline-flex';
         invasionStopBtn.style.display = 'none';
         if (invasionResultPanelEl) invasionResultPanelEl.style.display = 'none';
+        if (invasionQuoteBoxEl) invasionQuoteBoxEl.style.display = 'none';
+        if (invasionResultQuoteBoxEl) invasionResultQuoteBoxEl.style.display = 'none';
+        invasionCurrentQuoteObj = null;
         syncInvasionKeyHighlights();
         
         logInvasionXp();
@@ -2534,6 +2617,9 @@
         updateInvasionStatsUI();
         invasionOverlayEl.classList.remove('show');
         if (invasionResultPanelEl) invasionResultPanelEl.style.display = 'none';
+        if (invasionQuoteBoxEl) invasionQuoteBoxEl.style.display = 'none';
+        if (invasionResultQuoteBoxEl) invasionResultQuoteBoxEl.style.display = 'none';
+        invasionCurrentQuoteObj = null;
         invasionStartBtn.style.display = 'none';
         invasionStopBtn.style.display = 'inline-flex';
         invasionFeedback(t('js.learn.invasion_stage1'), 'ok');
@@ -2729,10 +2815,12 @@
         dailyCount++;
         if (dailyCount >= dailyTask.target) {
             const granted = Progress.completeDailyChallenge();
-            dailyBannerEl.textContent = granted
-                ? t('js.learn.daily_done_bonus')
-                : t('js.learn.daily_done_norebonus');
-            dailyBannerEl.className = 'feedback show ok mt-2';
+            if (dailyBannerEl) {
+                dailyBannerEl.textContent = granted
+                    ? t('js.learn.daily_done_bonus')
+                    : t('js.learn.daily_done_norebonus');
+                dailyBannerEl.className = 'feedback show ok mt-2';
+            }
             dailyTask = null; // больше не тикаем в этом заходе
         } else {
             renderDailyBanner();
@@ -2791,6 +2879,7 @@
             dailyTask = task;
             const chip = document.querySelector('.mode-switch .chip[data-mode="invasion"]');
             if (chip) chip.click();
+            dailyBannerEl = document.getElementById('invasion-daily-banner');
         } else {
             return;
         }

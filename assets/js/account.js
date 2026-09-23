@@ -22,7 +22,12 @@
         tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.tab)));
 
         let saved = null;
-        try { saved = localStorage.getItem(TAB_KEY); } catch { /* ignore */ }
+        try {
+            const urlTab = new URLSearchParams(location.search).get('tab');
+            if (urlTab === 'display' || urlTab === 'goal') saved = 'display';
+            else if (urlTab && tabs.some(t => t.dataset.tab === urlTab)) saved = urlTab;
+            else saved = localStorage.getItem(TAB_KEY);
+        } catch { /* ignore */ }
         show(tabs.some(t => t.dataset.tab === saved) ? saved : 'profile');
     })();
 
@@ -943,15 +948,14 @@
     });
 
     /* ---------- Дневная норма тренировки ---------- */
-    const dailyGoalChips = document.querySelectorAll('#daily-goal-chips .chip');
+    const dailyGoalChips = document.querySelectorAll('.daily-goal-chips .chip, #daily-goal-chips .chip');
     if (dailyGoalChips.length && typeof Progress !== 'undefined') {
         const currentGoal = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
         dailyGoalChips.forEach(chip => {
             const mins = parseInt(chip.dataset.mins, 10);
             chip.classList.toggle('active', mins === currentGoal);
             chip.addEventListener('click', () => {
-                dailyGoalChips.forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
+                dailyGoalChips.forEach(c => c.classList.toggle('active', parseInt(c.dataset.mins, 10) === mins));
                 if (typeof Progress.setDailyGoalMinutes === 'function') {
                     Progress.setDailyGoalMinutes(mins);
                 }

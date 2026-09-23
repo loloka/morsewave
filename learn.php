@@ -282,12 +282,29 @@ include __DIR__ . '/includes/header.php';
                 <div id="invasion-xp-breakdown" class="mono text-center" style="font-size:13px; line-height:1.4;"></div>
             </div>
 
+            <!-- Расшифрованная радиограмма финального босса -->
+            <div class="mt-2 p-2" id="invasion-result-quote-box" style="display:none; background:var(--bg); border-radius:6px; border:1px solid rgba(86, 204, 242, 0.4); text-align:center;">
+                <div class="muted mono" style="font-size:11px; margin-bottom:4px; letter-spacing:0.5px;">📻 <?= t('learn.invasion_quote_intercept') ?></div>
+                <div id="invasion-result-quote-text" class="mono" style="font-size:15px; font-weight:bold; color:var(--accent);"></div>
+                <div id="invasion-result-quote-trans" class="muted" style="font-size:12px; margin-top:3px; font-style:italic;"></div>
+            </div>
+
             <!-- Блок задания дня -->
             <div id="invasion-daily-note" class="mt-2" style="display:none;"></div>
 
             <div class="text-center mt-2">
                 <button class="btn btn-primary btn-sm" id="invasion-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.invasion_restart_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
             </div>
+        </div>
+
+        <!-- Блок живого перехвата латинской фразы (Финальный босс) -->
+        <div class="invasion-quote-box mt-2" id="invasion-quote-box" style="display:none;">
+            <div class="invasion-quote-header">
+                <span>📻 <?= t('learn.invasion_quote_intercept') ?></span>
+                <span class="invasion-quote-progress" id="invasion-quote-progress">0/0</span>
+            </div>
+            <div class="invasion-quote-display mono" id="invasion-quote-display"></div>
+            <div class="invasion-quote-translation" id="invasion-quote-translation" style="display:none;"></div>
         </div>
 
         <div class="invasion-keyboard mt-2" id="invasion-grid"></div>

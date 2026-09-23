@@ -644,6 +644,84 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
    тоже узкие, но высокие, а не квадратные) — так ширина ряда всегда точно
    равна ширине контейнера (flex сам подгоняет), а высота — комфортный
    тап-таргет независимо от того, сколько клавиш в ряду. */
+/* Виджет радиоперехвата шифрограммы босса */
+.invasion-quote-box {
+    background: rgba(14, 22, 33, 0.85);
+    border: 1px solid rgba(86, 204, 242, 0.45);
+    box-shadow: 0 0 15px rgba(86, 204, 242, 0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    max-width: 480px;
+    margin: 0 auto;
+    text-align: center;
+    box-sizing: border-box;
+}
+.invasion-quote-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #56ccf2;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed rgba(86, 204, 242, 0.25);
+    padding-bottom: 4px;
+}
+.invasion-quote-progress {
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+}
+.invasion-quote-display {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 12px;
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    line-height: 1.4;
+}
+.invasion-quote-word {
+    display: inline-flex;
+    gap: 4px;
+}
+.invasion-quote-char {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 26px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+.invasion-quote-char.received {
+    color: #38ef7d;
+    border-bottom-color: #38ef7d;
+    text-shadow: 0 0 8px rgba(56, 239, 125, 0.6);
+}
+.invasion-quote-char.current {
+    color: #56ccf2;
+    border-bottom-color: #56ccf2;
+    animation: invasion-quote-pulse 1s infinite alternate;
+}
+.invasion-quote-char.placeholder {
+    color: rgba(255, 255, 255, 0.15);
+}
+.invasion-quote-translation {
+    font-size: 13px;
+    font-style: italic;
+    color: var(--accent);
+    margin-top: 6px;
+}
+@keyframes invasion-quote-pulse {
+    from { border-bottom-color: rgba(86, 204, 242, 0.4); }
+    to { border-bottom-color: #56ccf2; box-shadow: 0 2px 6px rgba(86, 204, 242, 0.4); }
+}
+
 .invasion-keyboard {
     display: flex;
     flex-direction: column;

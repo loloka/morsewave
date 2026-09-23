@@ -793,6 +793,38 @@ const Progress = (() => {
         return best;
     }
 
+    function getMostConfusedPair(minMistakes = 10) {
+        const state = load();
+        const conf = state.pairConfusion || {};
+        let best = null;
+        let highest = 0;
+
+        for (const p of CLASSIC_PAIRS) {
+            const pairKey = [p.a, p.b].sort().join('-');
+            const count = conf[pairKey] || 0;
+            if (count >= minMistakes && count > highest) {
+                highest = count;
+                best = { pair: p.key, a: p.a, b: p.b, count };
+            }
+        }
+        for (const [key, count] of Object.entries(conf)) {
+            if (count >= minMistakes && count > highest) {
+                const parts = key.split('-');
+                if (parts.length === 2) {
+                    const classic = CLASSIC_PAIRS.find(cp => (cp.a === parts[0] && cp.b === parts[1]) || (cp.a === parts[1] && cp.b === parts[0]));
+                    highest = count;
+                    best = {
+                        pair: classic ? classic.key : 'custom',
+                        a: parts[0],
+                        b: parts[1],
+                        count
+                    };
+                }
+            }
+        }
+        return best;
+    }
+
     /**
      * Отмечает символ как хоть раз правильно опознанный на слух — отдельный
      * счётчик от markLetterLearned() (тот про отправку ключом). Нужен для
@@ -1088,7 +1120,7 @@ const Progress = (() => {
         invasionLetterScore, recordInvasionAttempt,
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,
-        recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, CLASSIC_PAIRS,
+        recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, getMostConfusedPair, CLASSIC_PAIRS,
         addTrainingTime, getTodayTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,

@@ -142,8 +142,20 @@ include __DIR__ . '/includes/header.php';
         <button class="btn btn-primary" id="retrain-mistakes-btn"><?= t('groups.retrain_mistakes') ?><span id="mistake-count">0</span>)</button>
     </div>
 
+    <!-- Деликатная рекомендация тренировки проблемной пары -->
+    <div class="card mt-2" id="pair-prompt-block" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:12px 16px;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px; color:var(--accent);">🥊 <?= t('groups.pair_prompt_title') ?></div>
+                <div class="muted mt-1" style="font-size:12px;" id="pair-prompt-text"></div>
+            </div>
+            <button class="btn btn-sm btn-primary" id="pair-prompt-btn" type="button"><?= t('groups.pair_prompt_btn') ?></button>
+        </div>
+    </div>
+
     <div class="card mt-2" id="koch-daily-time-block" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);">
         <span id="koch-daily-time-text"></span>
+        <div class="muted mt-1" style="font-size:11px;"><?= t('groups.daily_time_change_hint') ?></div>
     </div>
 
     <button class="btn btn-primary mt-2" id="restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.new_session') ?> <kbd class="btn-kbd">Enter</kbd></button>

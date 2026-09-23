@@ -531,6 +531,9 @@
             const tChar = typedUpper[i] || '';
             if (e !== tChar && e) {
                 session.wrongPairs.push({ expected: e, typed: tChar });
+                if (tChar && typeof Progress.recordPairConfusion === 'function') {
+                    Progress.recordPairConfusion(e, tChar);
+                }
             }
         }
 
@@ -757,6 +760,37 @@
         } else {
             mistakesBlock.style.display = 'none';
         }
+
+        const pairPromptBlock = document.getElementById('pair-prompt-block');
+        if (pairPromptBlock) {
+            let promptCount = parseInt(localStorage.getItem('morse_pair_prompt_count') || '0', 10) + 1;
+            localStorage.setItem('morse_pair_prompt_count', promptCount);
+            const recPair = typeof Progress.getMostConfusedPair === 'function' ? Progress.getMostConfusedPair(10) : null;
+            if (recPair && promptCount >= 3) {
+                const textEl = document.getElementById('pair-prompt-text');
+                const btnEl = document.getElementById('pair-prompt-btn');
+                if (textEl) {
+                    textEl.textContent = t('groups.pair_prompt_msg', {
+                        '{A}': recPair.a,
+                        '{B}': recPair.b,
+                        '{count}': recPair.count
+                    });
+                }
+                if (btnEl) {
+                    btnEl.textContent = t('groups.pair_prompt_btn', {
+                        '{A}': recPair.a,
+                        '{B}': recPair.b
+                    });
+                    btnEl.onclick = () => {
+                        window.location.href = `groups.php?mode=pairs&pair=${recPair.pair}${recPair.pair === 'custom' ? `&a=${recPair.a}&b=${recPair.b}` : ''}`;
+                    };
+                }
+                pairPromptBlock.style.display = 'block';
+                localStorage.setItem('morse_pair_prompt_count', '0');
+            } else {
+                pairPromptBlock.style.display = 'none';
+            }
+        }
         
         renderHeader();
     }
@@ -822,8 +856,9 @@
             groups: newGroups,
             count: session.count, // for bonus computation
             index: 0, wpm: session.wpm,
-            isBufferMode: session.isBufferMode,
-            bufferDepth: session.bufferDepth,
+            farnsworth: session.farnsworth || (fwEnabled && fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0),
+            isBufferMode: session.isBufferMode !== undefined ? session.isBufferMode : (bufferCheckbox ? bufferCheckbox.checked : false),
+            bufferDepth: session.bufferDepth || selectedBufferDepth,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: retryXpRate,
             isRetrain: true, isAbuse: isAbuse,

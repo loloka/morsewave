@@ -227,6 +227,21 @@ include __DIR__ . '/includes/header.php';
             </div>
         </details>
 
+        <div class="card mt-2">
+            <h3 class="mt-0">🎯 <?= t('acc.daily_goal_title') ?></h3>
+            <p class="muted mt-1" style="font-size:12px;">
+                <?= t('acc.daily_goal_desc') ?>
+            </p>
+            <div class="chip-row mt-2 daily-goal-chips" id="profile-daily-goal-chips">
+                <div class="chip" data-mins="10">10 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="15">15 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="20">20 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="30">30 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="45">45 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="60">60 <?= t('acc.mins') ?></div>
+            </div>
+        </div>
+
         <!-- Опасная зона: удаление аккаунта. -->
         <div class="card mt-2" style="border-color:var(--danger);">
             <h3 class="mt-0" style="color:var(--danger);"><?= t('acc.delete_account_h3') ?></h3>
