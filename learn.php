@@ -220,6 +220,16 @@ include __DIR__ . '/includes/header.php';
                 <canvas id="invasion-canvas"></canvas>
                 <div class="invasion-hud invasion-hud-left"><?= mw_icon('check', 12) ?> <span id="invasion-kills">0</span></div>
                 <div class="invasion-hud invasion-hud-right"><?= mw_icon('flame', 12) ?> <span id="invasion-combo">0</span></div>
+                
+                <!-- Живой перехват шифрограммы 3-го босса прямо внутри экрана игры -->
+                <div class="invasion-screen-quote" id="invasion-quote-box" style="display:none;">
+                    <div class="invasion-screen-quote-inner">
+                        <span class="invasion-quote-badge">📻 <span id="invasion-quote-progress">0/0</span></span>
+                        <div class="invasion-quote-display mono" id="invasion-quote-display"></div>
+                        <div class="invasion-quote-translation" id="invasion-quote-translation" style="display:none;"></div>
+                    </div>
+                </div>
+
                 <div class="invasion-overlay" id="invasion-overlay"></div>
             </div>
         </div>
@@ -295,16 +305,6 @@ include __DIR__ . '/includes/header.php';
             <div class="text-center mt-2">
                 <button class="btn btn-primary btn-sm" id="invasion-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.invasion_restart_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
             </div>
-        </div>
-
-        <!-- Блок живого перехвата латинской фразы (Финальный босс) -->
-        <div class="invasion-quote-box mt-2" id="invasion-quote-box" style="display:none;">
-            <div class="invasion-quote-header">
-                <span>📻 <?= t('learn.invasion_quote_intercept') ?></span>
-                <span class="invasion-quote-progress" id="invasion-quote-progress">0/0</span>
-            </div>
-            <div class="invasion-quote-display mono" id="invasion-quote-display"></div>
-            <div class="invasion-quote-translation" id="invasion-quote-translation" style="display:none;"></div>
         </div>
 
         <div class="invasion-keyboard mt-2" id="invasion-grid"></div>

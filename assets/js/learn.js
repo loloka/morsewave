@@ -1249,7 +1249,7 @@
 
     function renderInvasionQuoteDisplay(quoteObj, revealedCount) {
         if (!invasionQuoteBoxEl || !quoteObj) return;
-        invasionQuoteBoxEl.style.display = 'block';
+        invasionQuoteBoxEl.style.display = 'flex';
 
         const rawText = quoteObj.text; // e.g. "VENI VIDI VICI"
         const lettersOnly = rawText.replace(/\s/g, '');
@@ -1274,7 +1274,7 @@
                     displayChar = '_';
                 } else {
                     cls += ' placeholder';
-                    displayChar = '_';
+                    displayChar = '·';
                 }
                 html += `<span class="${cls}">${displayChar}</span>`;
                 letterIdx++;
@@ -1290,7 +1290,7 @@
         if (invasionQuoteTranslationEl) {
             if (revealedCount >= total) {
                 invasionQuoteTranslationEl.textContent = `«${trans}»`;
-                invasionQuoteTranslationEl.style.display = 'block';
+                invasionQuoteTranslationEl.style.display = 'inline-block';
             } else {
                 invasionQuoteTranslationEl.style.display = 'none';
             }
@@ -1775,7 +1775,7 @@
             sprite: INVASION_BOSS_SPRITE,
             duration,
             startTime: performance.now(),
-            lane: acquireInvasionLane(),
+            lane: isMega ? 1 : acquireInvasionLane(),
             state: 'active',
             dieX: 0, dieY: 0,
             audio: null,
