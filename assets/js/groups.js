@@ -968,6 +968,7 @@
         Progress.incrementStat('groupsCompleted', completedCount);
         postStat('total_groups', completedCount);
         Progress.markDailyActivity();
+        flushStats();
     }
 
     // «ЖЖЖ=» — русский вариант общепринятого настроечного сигнала (у Ж и
@@ -1477,6 +1478,7 @@
         Progress.incrementStat('sessionsCompleted', 1);
         Progress.markDailyActivity();
         postStat('total_sessions', 1);
+        flushStats();
 
         if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
@@ -1707,15 +1709,39 @@
     }
     document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 
-    async function postStat(field, amount) {
+    let pendingStats = {};
+    let postStatTimer = null;
+
+    function flushStats() {
+        if (postStatTimer) {
+            clearTimeout(postStatTimer);
+            postStatTimer = null;
+        }
+        const statsToSend = { ...pendingStats };
+        pendingStats = {};
+        const keys = Object.keys(statsToSend);
+        if (!keys.length) return;
+
         try {
-            await fetch('api/stats.php', {
+            fetch('api/stats.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ field, amount }),
-            });
+                body: JSON.stringify({ stats: statsToSend }),
+                keepalive: true,
+            }).catch(() => {});
         } catch { /* игнорируем офлайн */ }
     }
+
+    function postStat(field, amount = 1) {
+        if (!amount || amount <= 0) return;
+        pendingStats[field] = (pendingStats[field] || 0) + amount;
+        if (!postStatTimer) {
+            postStatTimer = setTimeout(flushStats, 10000);
+        }
+    }
+
+    window.addEventListener('beforeunload', flushStats);
+    window.addEventListener('pagehide', flushStats);
 
     document.querySelectorAll('#groups-exam-toggle .segmented-tab, #groups-exam-toggle .chip').forEach(btn => {
         btn.addEventListener('click', (e) => {

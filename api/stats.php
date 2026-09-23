@@ -13,8 +13,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($input)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Invalid JSON']);
+        exit;
+    }
+
+    // Пакетное обновление (снижает число запросов и соединений с БД в разы):
+    // e.g. { "stats": { "total_groups": 15, "total_sessions": 1 } }
+    if (isset($input['stats']) && is_array($input['stats'])) {
+        $sets = [];
+        $params = [];
+        foreach ($input['stats'] as $f => $amt) {
+            if (in_array($f, $allowedFields, true)) {
+                $val = max(1, min((int) $amt, 1000));
+                $paramKey = 'amt_' . $f;
+                $sets[] = "{$f} = {$f} + :{$paramKey}";
+                $params[$paramKey] = $val;
+            }
+        }
+        if (!empty($sets)) {
+            $stmt = $pdo->prepare('UPDATE global_stats SET ' . implode(', ', $sets) . ' WHERE id = 1');
+            $stmt->execute($params);
+        }
+        echo json_encode(['ok' => true]);
+        exit;
+    }
+
+    // Одиночное обновление (обратная совместимость)
     $field = $input['field'] ?? '';
-    $amount = isset($input['amount']) ? max(1, min((int) $input['amount'], 100)) : 1;
+    $amount = isset($input['amount']) ? max(1, min((int) $input['amount'], 1000)) : 1;
 
     if (!in_array($field, $allowedFields, true)) {
         http_response_code(400);
