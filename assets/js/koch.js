@@ -770,11 +770,15 @@
             if (recPair && promptCount >= 3) {
                 const textEl = document.getElementById('pair-prompt-text');
                 const btnEl = document.getElementById('pair-prompt-btn');
+                const formattedMistakes = (typeof Progress.formatMistakes === 'function')
+                    ? Progress.formatMistakes(recPair.count)
+                    : `${recPair.count} ${recPair.count === 1 ? 'ошибка' : 'ошибок'}`;
                 if (textEl) {
                     textEl.textContent = t('groups.pair_prompt_msg', {
                         '{A}': recPair.a,
                         '{B}': recPair.b,
-                        '{count}': recPair.count
+                        '{count}': formattedMistakes,
+                        '{mistakes}': formattedMistakes
                     });
                 }
                 if (btnEl) {

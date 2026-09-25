@@ -225,7 +225,7 @@ return [
     'groups.pairs_recommendation_reason' => 'based on your practice mistakes',
     'groups.pairs_recommendation_btn' => 'Train this pair',
     'groups.pair_prompt_title' => 'Recommendation: Pair Training',
-    'groups.pair_prompt_msg' => 'Noticed you often confuse {A} and {B} ({count} mistakes). 3 minutes of focused pair training will help lock in the difference.',
+    'groups.pair_prompt_msg' => 'Noticed you often confuse {A} and {B} ({count}). 3 minutes of focused pair training will help lock in the difference.',
     'groups.pair_prompt_btn' => 'Train pair {A} / {B}',
     'groups.pairs_choose_pair' => 'Choose a character pair:',
     'groups.pairs_custom' => 'Custom pair',

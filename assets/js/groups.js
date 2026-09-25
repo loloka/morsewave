@@ -102,6 +102,7 @@
     let pendingExamMode = false;
     let selectedPairKey = 'SH';
     let selectedPairStage = 1;
+    let userHasChosenPair = false;
     let qrqStopRequested = false;
     let qrqSessionActive = false;
     let qrqAudio = null;
@@ -447,7 +448,10 @@
             }
         }
         const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
-        selectedPairStage = pt[pairKey]?.stage || 1;
+        const ptKey = (pairKey === 'custom')
+            ? `custom_${[(a || customA?.value || 'A'), (b || customB?.value || 'B')].map(s => s.toUpperCase()).sort().join('-')}`
+            : pairKey;
+        selectedPairStage = pt[ptKey]?.stage || pt[pairKey]?.stage || 1;
         updatePairStageUI();
     }
 
@@ -462,8 +466,11 @@
                 document.getElementById('pairs-rec-name').textContent = `${rec.a} / ${rec.b}`;
                 const reasonEl = document.getElementById('pairs-rec-reason');
                 if (reasonEl) {
+                    const formattedMistakes = (typeof Progress.formatMistakes === 'function')
+                        ? Progress.formatMistakes(rec.count)
+                        : `${rec.count} ${rec.count === 1 ? 'ошибка' : 'ошибок'}`;
                     reasonEl.textContent = rec.reason === 'confusion'
-                        ? `(${t('groups.pairs_recommendation_reason')}: ${rec.count} ${rec.count === 1 ? 'ошибка' : 'ошибок'})`
+                        ? `(${t('groups.pairs_recommendation_reason')}: ${formattedMistakes})`
                         : `(${t('groups.pairs_recommendation_reason')})`;
                 }
                 recBox.style.display = 'block';
@@ -471,6 +478,7 @@
                 const applyBtn = document.getElementById('pairs-apply-rec-btn');
                 if (applyBtn) {
                     applyBtn.onclick = () => {
+                        userHasChosenPair = true;
                         selectPair(rec.pair, rec.a, rec.b);
                     };
                 }
@@ -755,7 +763,8 @@
 
             generatedGroups = generatePairGroups(pairA, pairB, stage, activeCount, activeGroupLen);
             pairData = {
-                pairKey: selectedPairKey,
+                pairKey: (selectedPairKey === 'custom') ? `custom_${[pairA, pairB].sort().join('-')}` : selectedPairKey,
+                rawPairKey: selectedPairKey,
                 pairA,
                 pairB,
                 pairStage: stage,
@@ -1592,11 +1601,15 @@
                 if (recPair && promptCount >= 3) {
                     const textEl = document.getElementById('pair-prompt-text');
                     const btnEl = document.getElementById('pair-prompt-btn');
+                    const formattedMistakes = (typeof Progress.formatMistakes === 'function')
+                        ? Progress.formatMistakes(recPair.count)
+                        : `${recPair.count} ${recPair.count === 1 ? 'ошибка' : 'ошибок'}`;
                     if (textEl) {
                         textEl.textContent = t('groups.pair_prompt_msg', {
                             '{A}': recPair.a,
                             '{B}': recPair.b,
-                            '{count}': recPair.count
+                            '{count}': formattedMistakes,
+                            '{mistakes}': formattedMistakes
                         });
                     }
                     if (btnEl) {
@@ -1609,6 +1622,7 @@
                             setupPanel.style.display = 'block';
                             const pairTab = document.querySelector('#groups-exam-toggle [data-type="pairs"]');
                             if (pairTab) pairTab.click();
+                            userHasChosenPair = true;
                             selectPair(recPair.pair, recPair.a, recPair.b);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                         };
@@ -1774,6 +1788,12 @@
             } else if (type === 'pairs') {
                 startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
                 checkPairRecommendation();
+                if (!userHasChosenPair && typeof Progress.getRecommendedPair === 'function') {
+                    const rec = Progress.getRecommendedPair();
+                    if (rec && rec.reason === 'confusion') {
+                        selectPair(rec.pair, rec.a, rec.b);
+                    }
+                }
                 updatePairStageUI();
             } else if (type === 'qrq') {
                 startBtn.innerHTML = t('groups.qrq_start') + ' <kbd class="btn-kbd">Enter</kbd>';
@@ -1787,6 +1807,7 @@
 
     document.querySelectorAll('#pairs-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
+            userHasChosenPair = true;
             selectPair(chip.dataset.pair);
         });
     });
@@ -1795,17 +1816,27 @@
     const customPairB = document.getElementById('custom-pair-b');
     if (customPairA && customPairB) {
         customPairA.addEventListener('input', () => {
+            userHasChosenPair = true;
             const cleaned = customPairA.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             customPairA.value = cleaned.slice(0, 1);
             if (customPairA.value.length === 1) {
                 customPairB.focus();
                 customPairB.select();
             }
+            const chars = getSelectedPairChars();
+            const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
+            const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
+            selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
         });
         customPairB.addEventListener('input', () => {
+            userHasChosenPair = true;
             const cleaned = customPairB.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             customPairB.value = cleaned.slice(0, 1);
+            const chars = getSelectedPairChars();
+            const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
+            const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
+            selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
         });
         customPairA.addEventListener('keydown', (e) => {

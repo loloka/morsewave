@@ -776,53 +776,68 @@ const Progress = (() => {
         let best = null;
         let highestConfusion = 0;
 
-        for (const p of CLASSIC_PAIRS) {
-            const pairKey = [p.a, p.b].sort().join('-');
-            const confusionCount = conf[pairKey] || 0;
-            const scoreA = (typeof scores[p.a] === 'number') ? scores[p.a] : 0.7;
-            const scoreB = (typeof scores[p.b] === 'number') ? scores[p.b] : 0.7;
-            const minScore = Math.min(scoreA, scoreB);
-
-            if (confusionCount > highestConfusion && confusionCount >= 2) {
-                highestConfusion = confusionCount;
-                best = { pair: p.key, a: p.a, b: p.b, count: confusionCount, reason: 'confusion' };
-            } else if (!best && minScore < 0.65) {
-                best = { pair: p.key, a: p.a, b: p.b, score: minScore, reason: 'score' };
-            }
-        }
-        return best;
-    }
-
-    function getMostConfusedPair(minMistakes = 10) {
-        const state = load();
-        const conf = state.pairConfusion || {};
-        let best = null;
-        let highest = 0;
-
-        for (const p of CLASSIC_PAIRS) {
-            const pairKey = [p.a, p.b].sort().join('-');
-            const count = conf[pairKey] || 0;
-            if (count >= minMistakes && count > highest) {
-                highest = count;
-                best = { pair: p.key, a: p.a, b: p.b, count };
-            }
-        }
+        // 1. Поиск пары с наибольшим числом реальных ошибок (и среди классических, и среди кастомных)
         for (const [key, count] of Object.entries(conf)) {
-            if (count >= minMistakes && count > highest) {
+            const numCount = Number(count) || 0;
+            if (numCount > highestConfusion && numCount >= 2) {
                 const parts = key.split('-');
-                if (parts.length === 2) {
-                    const classic = CLASSIC_PAIRS.find(cp => (cp.a === parts[0] && cp.b === parts[1]) || (cp.a === parts[1] && cp.b === parts[0]));
-                    highest = count;
+                if (parts.length === 2 && parts[0] && parts[1]) {
+                    const classic = CLASSIC_PAIRS.find(cp =>
+                        (cp.a === parts[0] && cp.b === parts[1]) ||
+                        (cp.a === parts[1] && cp.b === parts[0])
+                    );
+                    highestConfusion = numCount;
                     best = {
                         pair: classic ? classic.key : 'custom',
-                        a: parts[0],
-                        b: parts[1],
-                        count
+                        a: classic ? classic.a : parts[0],
+                        b: classic ? classic.b : parts[1],
+                        count: numCount,
+                        reason: 'confusion'
                     };
                 }
             }
         }
+
+        // 2. Если явных частых путаниц в истории нет, рекомендуем классическую пару с наименьшим скором букв
+        if (!best) {
+            let lowestScore = 0.65;
+            for (const p of CLASSIC_PAIRS) {
+                const scoreA = (typeof scores[p.a] === 'number') ? scores[p.a] : 0.7;
+                const scoreB = (typeof scores[p.b] === 'number') ? scores[p.b] : 0.7;
+                const minScore = Math.min(scoreA, scoreB);
+                if (minScore < lowestScore) {
+                    lowestScore = minScore;
+                    best = { pair: p.key, a: p.a, b: p.b, score: minScore, reason: 'score' };
+                }
+            }
+        }
+
         return best;
+    }
+
+    function getMostConfusedPair(minMistakes = 10) {
+        const rec = getRecommendedPair();
+        if (rec && rec.reason === 'confusion' && rec.count >= minMistakes) {
+            return rec;
+        }
+        return null;
+    }
+
+    function formatMistakes(n) {
+        const count = Math.round(Number(n) || 0);
+        const abs = Math.abs(count);
+        const mod10 = abs % 10;
+        const mod100 = abs % 100;
+        const lang = (window.currentLang || document.documentElement.lang || 'ru');
+        if (lang === 'en') {
+            return `${count} ${count === 1 ? 'mistake' : 'mistakes'}`;
+        }
+        let word = 'ошибок';
+        if (mod100 < 11 || mod100 > 19) {
+            if (mod10 === 1) word = 'ошибка';
+            else if (mod10 >= 2 && mod10 <= 4) word = 'ошибки';
+        }
+        return `${count} ${word}`;
     }
 
     /**
@@ -1127,7 +1142,7 @@ const Progress = (() => {
         invasionLetterScore, recordInvasionAttempt,
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,
-        recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, getMostConfusedPair, CLASSIC_PAIRS,
+        recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, getMostConfusedPair, formatMistakes, CLASSIC_PAIRS,
         addTrainingTime, getTodayTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,

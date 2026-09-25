@@ -228,7 +228,7 @@ return [
     'groups.pairs_recommendation_reason' => 'на основе ваших ошибок в тренировках',
     'groups.pairs_recommendation_btn' => 'Выбрать эту пару',
     'groups.pair_prompt_title' => 'Рекомендация: лечение путающихся пар',
-    'groups.pair_prompt_msg' => 'Заметили, что у вас часто путаются {A} и {B} ({count} ошибок). 3 минуты изолированной тренировки помогут закрепить разницу на слух.',
+    'groups.pair_prompt_msg' => 'Заметили, что у вас часто путаются {A} и {B} ({count}). 3 минуты изолированной тренировки помогут закрепить разницу на слух.',
     'groups.pair_prompt_btn' => 'Тренировать пару {A} / {B}',
     'groups.pairs_choose_pair' => 'Выберите пару знаков:',
     'groups.pairs_custom' => 'Своя пара',
