@@ -938,13 +938,17 @@ const Progress = (() => {
         return state;
     }
 
-    function markProjectSupporter() {
+    async function markProjectSupporter() {
         const state = load();
         state.stats = state.stats || {};
         state.stats.projectSupporter = 1;
+        if (!state.unlockedAchievements.includes('project_supporter')) {
+            state.unlockedAchievements.push('project_supporter');
+        }
         save(state);
-        checkAchievements();
-        pushFullProgress();
+        window.dispatchEvent(new CustomEvent('progress:updated', { detail: state }));
+        await checkAchievements();
+        await pushNow();
         return state;
     }
 
@@ -1047,7 +1051,10 @@ const Progress = (() => {
                 case 'rhythm_mastered_count_any':
                     return (state.rhythmMasteredLetters || []).length;
                 case 'project_supporter':
-                    return (state.stats && state.stats.projectSupporter) ? 1 : 0;
+                    return (
+                        (state.stats && state.stats.projectSupporter) ||
+                        (state.unlockedAchievements && state.unlockedAchievements.includes('project_supporter'))
+                    ) ? 1 : 0;
                 default: return 0;
             }
         };

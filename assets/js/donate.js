@@ -85,7 +85,7 @@
 
                     // Разблокируем ачивку «Друг MorseWave»
                     if (window.Progress && typeof Progress.markProjectSupporter === 'function') {
-                        Progress.markProjectSupporter();
+                        await Progress.markProjectSupporter();
                     }
 
                     // Проигрываем CW-звук «TNX 73»

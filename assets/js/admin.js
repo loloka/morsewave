@@ -335,6 +335,7 @@
                                         ? `<button class="btn btn-sm donation-sponsor-btn" data-make="0">${escapeHtml(t('admin.donations.remove_sponsor_btn'))}</button>`
                                         : `<button class="btn btn-sm donation-sponsor-btn" data-make="1" style="border-color:#f1c40f; color:#f1c40f;">${escapeHtml(t('admin.donations.make_sponsor_btn'))}</button>`
                                 ) : ''}
+                                <button class="btn btn-sm donation-delete-btn" style="border-color:rgba(231,76,60,0.5); color:#e74c3c;" title="${escapeHtml(t('admin.donations.delete_btn'))}">🗑️ ${escapeHtml(t('admin.donations.delete_btn'))}</button>
                             </div>
                         </div>
                     </div>
@@ -374,6 +375,25 @@
                         });
                         if (res.ok) loadDonations();
                         else alert('Ошибка назначения спонсора');
+                    } catch {
+                        alert(t('js.admin.network_error'));
+                    }
+                });
+            });
+
+            donationsListEl.querySelectorAll('.donation-delete-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const card = btn.closest('[data-donation-id]');
+                    const id = card.dataset.donationId;
+                    if (!confirm(t('admin.donations.delete_confirm'))) return;
+                    try {
+                        const res = await fetch('api/admin_donations.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'delete', id })
+                        });
+                        if (res.ok) loadDonations();
+                        else alert('Ошибка при удалении');
                     } catch {
                         alert(t('js.admin.network_error'));
                     }

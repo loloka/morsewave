@@ -4,27 +4,35 @@
     // живее и лучше держат характер страницы. Вернули как было — иконка
     // берётся прямо из БД (a.icon), без маппинга по коду.
     const grid = document.getElementById('achievements-grid');
-    const state = Progress.load();
 
     let defs = [];
     try {
         defs = await Progress.fetchAchievementDefs();
+        await Progress.checkAchievements();
     } catch { /* пусто */ }
 
-    if (!defs.length) {
-        grid.innerHTML = '<p>' + t('js.ach.load_failed') + '</p>';
-        return;
+    function renderGrid() {
+        const state = Progress.load();
+        if (!defs.length) {
+            grid.innerHTML = '<p>' + t('js.ach.load_failed') + '</p>';
+            return;
+        }
+
+        grid.innerHTML = defs.map(a => `
+            <div class="badge ${state.unlockedAchievements.includes(a.code) ? 'unlocked' : ''}">
+                <div class="icon">${a.icon}</div>
+                <div class="badge-text">
+                    <div class="title">${a.title}</div>
+                    <div class="desc">${a.description}</div>
+                </div>
+            </div>
+        `).join('');
     }
 
-    grid.innerHTML = defs.map(a => `
-        <div class="badge ${state.unlockedAchievements.includes(a.code) ? 'unlocked' : ''}">
-            <div class="icon">${a.icon}</div>
-            <div class="badge-text">
-                <div class="title">${a.title}</div>
-                <div class="desc">${a.description}</div>
-            </div>
-        </div>
-    `).join('');
+    renderGrid();
+
+    window.addEventListener('progress:updated', renderGrid);
+    window.addEventListener('achievements:unlocked', renderGrid);
 
     document.getElementById('reset-progress-btn').addEventListener('click', async () => {
         const sure = confirm(t('js.ach.reset_confirm'));

@@ -42,7 +42,7 @@ session_write_close();
 // HTTP-статус pull_progress.php (401 vs ok:true), тут его больше нет.
 $out = ['loggedIn' => (bool) $userId];
 
-if (isset($want['achievements']) || isset($want['leaderboard'])) {
+if (isset($want['achievements']) || isset($want['leaderboard']) || isset($want['progress'])) {
     require_once __DIR__ . '/../includes/donation_service.php';
     ensure_donation_tables($pdo);
 }
@@ -158,7 +158,44 @@ if (isset($want['progress'])) {
         $stmt = $pdo->prepare('SELECT progress_json, updated_at FROM user_progress WHERE user_id = :id');
         $stmt->execute(['id' => $userId]);
         $row = $stmt->fetch();
-        $out['progress'] = $row ? json_decode($row['progress_json'], true) : null;
+        $progress = $row ? json_decode($row['progress_json'], true) : null;
+        if (!is_array($progress) && $progress !== null) $progress = null;
+
+        // Автоматически синхронизируем статус спонсора/донатера с ачивкой «Друг MorseWave»
+        $suppCheck = $pdo->prepare('
+            SELECT 1 FROM users WHERE id = :id AND is_sponsor = 1
+            UNION
+            SELECT 1 FROM donations WHERE user_id = :id2
+            LIMIT 1
+        ');
+        $suppCheck->execute(['id' => $userId, 'id2' => $userId]);
+        if ($suppCheck->fetch()) {
+            if (!$progress) {
+                $progress = ['stats' => ['projectSupporter' => 1], 'unlockedAchievements' => ['project_supporter']];
+                grant_supporter_progress($pdo, $userId);
+            } else {
+                $needsSave = false;
+                if (!isset($progress['stats']) || !is_array($progress['stats'])) {
+                    $progress['stats'] = [];
+                }
+                if (empty($progress['stats']['projectSupporter'])) {
+                    $progress['stats']['projectSupporter'] = 1;
+                    $needsSave = true;
+                }
+                if (!isset($progress['unlockedAchievements']) || !is_array($progress['unlockedAchievements'])) {
+                    $progress['unlockedAchievements'] = [];
+                }
+                if (!in_array('project_supporter', $progress['unlockedAchievements'], true)) {
+                    $progress['unlockedAchievements'][] = 'project_supporter';
+                    $needsSave = true;
+                }
+                if ($needsSave) {
+                    grant_supporter_progress($pdo, $userId);
+                }
+            }
+        }
+
+        $out['progress'] = $progress;
         $out['progress_updated_at'] = $row['updated_at'] ?? null;
     }
 }

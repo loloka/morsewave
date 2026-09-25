@@ -162,6 +162,39 @@ function update_donation_status(PDO $pdo, int $id, string $status): bool {
     return $stmt->execute(['status' => $status, 'id' => $id]);
 }
 
+function delete_donation(PDO $pdo, int $id): bool {
+    ensure_donation_tables($pdo);
+    $stmt = $pdo->prepare("DELETE FROM donations WHERE id = :id");
+    return $stmt->execute(['id' => $id]);
+}
+
+function grant_supporter_progress(PDO $pdo, int $userId): void {
+    ensure_donation_tables($pdo);
+    try {
+        $stmt = $pdo->prepare('SELECT progress_json FROM user_progress WHERE user_id = :id');
+        $stmt->execute(['id' => $userId]);
+        $row = $stmt->fetch();
+
+        $state = $row ? json_decode($row['progress_json'], true) : [];
+        if (!is_array($state)) $state = [];
+        if (!isset($state['stats']) || !is_array($state['stats'])) $state['stats'] = [];
+        if (!isset($state['unlockedAchievements']) || !is_array($state['unlockedAchievements'])) $state['unlockedAchievements'] = [];
+
+        $state['stats']['projectSupporter'] = 1;
+        if (!in_array('project_supporter', $state['unlockedAchievements'], true)) {
+            $state['unlockedAchievements'][] = 'project_supporter';
+        }
+
+        $json = json_encode($state, JSON_UNESCAPED_UNICODE);
+        $up = $pdo->prepare('
+            INSERT INTO user_progress (user_id, progress_json, updated_at)
+            VALUES (:id, :json, NOW())
+            ON DUPLICATE KEY UPDATE progress_json = :json2, updated_at = NOW()
+        ');
+        $up->execute(['id' => $userId, 'json' => $json, 'json2' => $json]);
+    } catch (Throwable $e) {}
+}
+
 function sponsor_badge_slug(?string $badge): string {
     $map = [
         'crown'     => 'crown',
@@ -208,10 +241,14 @@ function set_user_sponsor(PDO $pdo, int $userId, bool $isSponsor): bool {
             END
         WHERE id = :id
     ");
-    return $stmt->execute([
+    $ok = $stmt->execute([
         'is_sponsor' => $isSponsor ? 1 : 0,
         'id'         => $userId,
     ]);
+    if ($ok && $isSponsor) {
+        grant_supporter_progress($pdo, $userId);
+    }
+    return $ok;
 }
 
 function get_user_support_messages(PDO $pdo, int $userId): array {

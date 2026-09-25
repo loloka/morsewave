@@ -59,6 +59,9 @@ if ($method === 'POST') {
         $userId = (int) $row['user_id'];
         $makeSponsor = !empty($input['is_sponsor']);
         set_user_sponsor($pdo, $userId, $makeSponsor);
+        if ($makeSponsor) {
+            grant_supporter_progress($pdo, $userId);
+        }
 
         echo json_encode([
             'ok'         => true,
@@ -66,6 +69,12 @@ if ($method === 'POST') {
             'user_id'    => $userId,
             'is_sponsor' => $makeSponsor,
         ]);
+        exit;
+    }
+
+    if ($action === 'delete') {
+        delete_donation($pdo, $id);
+        echo json_encode(['ok' => true, 'id' => $id]);
         exit;
     }
 

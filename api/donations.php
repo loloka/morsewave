@@ -50,6 +50,10 @@ if ($method === 'POST') {
 
     $donationId = create_donation($pdo, $userId, $callsign, $amount, $tierTitle, $message, $isAnonymous);
 
+    if ($userId) {
+        grant_supporter_progress($pdo, $userId);
+    }
+
     echo json_encode([
         'ok'                   => true,
         'donation_id'          => $donationId,
