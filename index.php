@@ -67,7 +67,7 @@ include __DIR__ . '/includes/header.php';
 
                 <div class="promo-card-body">
                     <div class="promo-card-top">
-                        <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span> <span class="badge-v">v2.86</span></div>
+                        <div class="card-eyebrow"><?= t('index.invasion_eyebrow') ?> <span class="badge-beta">BETA</span> <span class="badge-v"><?= MW_VERSION ?></span></div>
                         <span class="promo-card-stages-badge"><?= t('index.invasion_badge_stages') ?></span>
                     </div>
                     <h3 class="promo-card-title"><?= t('index.invasion_title') ?></h3>

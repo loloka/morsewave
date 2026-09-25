@@ -12,7 +12,8 @@ $mwLang = mw_current_lang();
 function asset_v($relPath) {
     $full = __DIR__ . '/../' . $relPath;
     $v = @filemtime($full);
-    return $relPath . '?v=' . ($v ?: time());
+    $ver = defined('MW_VERSION') ? MW_VERSION : 'v2.94.0';
+    return $relPath . '?v=' . $ver . ($v ? '.' . $v : '');
 }
 ?>
 <!DOCTYPE html>
