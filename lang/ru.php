@@ -896,7 +896,7 @@ HTML,
     'abbrev.wx' => 'Погода',
 
     // --- assets/js/callsigns.js ---
-    'js.cs.fetch_error' => 'Не удалось получить позывные из базы данных. Проверь, что MySQL запущена и таблица callsigns заполнена (см. database/schema.sql).',
+    'js.cs.fetch_error' => 'Не удалось загрузить позывные. Проверьте интернет-соединение и нажмите «Начать сессию» ещё раз.',
     'js.cs.correct' => 'Верно: {expected} (+20 XP)',
     'js.cs.wrong' => 'Было: {expected} — введено: {typed}',
     'js.cs.empty_placeholder' => '(пусто)',

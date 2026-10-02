@@ -133,10 +133,105 @@
         }
     }
 
+    const FALLBACK_CALLSIGNS = [
+        { callsign: 'R1ABC', country: 'Россия' },
+        { callsign: 'UA3XYZ', country: 'Россия' },
+        { callsign: 'RA9F', country: 'Россия' },
+        { callsign: 'RZ6D', country: 'Россия' },
+        { callsign: 'RK4W', country: 'Россия' },
+        { callsign: 'R7ABC', country: 'Россия' },
+        { callsign: 'R2XY', country: 'Россия' },
+        { callsign: 'RA1XYZ', country: 'Россия' },
+        { callsign: 'RN6AB', country: 'Россия' },
+        { callsign: 'RU9CD', country: 'Россия' },
+        { callsign: 'RV3EF', country: 'Россия' },
+        { callsign: 'RW4GH', country: 'Россия' },
+        { callsign: 'RX2IJ', country: 'Россия' },
+        { callsign: 'RZ8KL', country: 'Россия' },
+        { callsign: 'RC5MN', country: 'Россия' },
+        { callsign: 'RD7OP', country: 'Россия' },
+        { callsign: 'RO1QR', country: 'Россия' },
+        { callsign: 'UA9XYZ', country: 'Россия' },
+        { callsign: 'UB4ABC', country: 'Россия' },
+        { callsign: 'UI8AB', country: 'Россия' },
+        { callsign: 'R9OGL', country: 'Россия' },
+        { callsign: 'RK3DJW', country: 'Россия' },
+        { callsign: 'W1AW', country: 'США' },
+        { callsign: 'K5ZZ', country: 'США' },
+        { callsign: 'N4XYZ', country: 'США' },
+        { callsign: 'AA7BC', country: 'США' },
+        { callsign: 'G0ABC', country: 'Великобритания' },
+        { callsign: 'M0XYZ', country: 'Великобритания' },
+        { callsign: 'DL1ABC', country: 'Германия' },
+        { callsign: 'DK5XYZ', country: 'Германия' },
+        { callsign: 'DJ9ZB', country: 'Германия' },
+        { callsign: 'JA1ABC', country: 'Япония' },
+        { callsign: 'JH3XYZ', country: 'Япония' },
+        { callsign: 'F5ABC', country: 'Франция' },
+        { callsign: 'F4XYZ', country: 'Франция' },
+        { callsign: 'EA1XYZ', country: 'Испания' },
+        { callsign: 'SP5ABC', country: 'Польша' },
+        { callsign: 'SM0XYZ', country: 'Швеция' },
+        { callsign: 'VE3ABC', country: 'Канада' },
+        { callsign: 'VK2ABC', country: 'Австралия' },
+        { callsign: 'ZL1ABC', country: 'Новая Зеландия' },
+        { callsign: 'HB9ABC', country: 'Швейцария' },
+        { callsign: 'PY2ABC', country: 'Бразилия' },
+        { callsign: 'LU1ABC', country: 'Аргентина' },
+        { callsign: 'OK1ABC', country: 'Чехия' },
+        { callsign: 'OE3XYZ', country: 'Австрия' },
+        { callsign: 'I2ABC', country: 'Италия' }
+    ];
+
+    function getLocalCachedCallsigns(count) {
+        try {
+            const raw = localStorage.getItem('morse_cached_callsigns');
+            const list = raw ? JSON.parse(raw) : [];
+            if (Array.isArray(list) && list.length >= 5) {
+                const shuffled = [...list].sort(() => Math.random() - 0.5);
+                return shuffled.slice(0, count);
+            }
+        } catch {}
+        const shuffled = [...FALLBACK_CALLSIGNS].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+    }
+
+    function saveCallsignsToCache(items) {
+        if (!Array.isArray(items) || !items.length) return;
+        try {
+            const raw = localStorage.getItem('morse_cached_callsigns');
+            const existing = (raw ? JSON.parse(raw) : []) || [];
+            const map = new Map();
+            for (const item of existing) {
+                if (item && item.callsign) map.set(item.callsign, item);
+            }
+            for (const item of items) {
+                if (item && item.callsign) map.set(item.callsign, item);
+            }
+            const merged = Array.from(map.values()).slice(-200);
+            localStorage.setItem('morse_cached_callsigns', JSON.stringify(merged));
+        } catch {}
+    }
+
     async function fetchCallsigns(count) {
-        const res = await fetch(`api/callsigns.php?count=${count}`);
-        if (!res.ok) throw new Error('network');
-        return res.json();
+        try {
+            const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+            const timer = controller ? setTimeout(() => controller.abort(), 4000) : null;
+            const res = await fetch(`api/callsigns.php?count=${count}`, controller ? { signal: controller.signal } : {});
+            if (timer) clearTimeout(timer);
+            if (!res.ok) throw new Error('status_' + res.status);
+            const data = await res.json();
+            if (Array.isArray(data) && data.length) {
+                saveCallsignsToCache(data);
+                return data;
+            }
+            throw new Error('empty');
+        } catch (e) {
+            console.warn('Network fetch callsigns failed, using offline cache/fallback:', e);
+            const cached = getLocalCachedCallsigns(count);
+            if (cached && cached.length) return cached;
+            throw e;
+        }
     }
 
     async function playCurrent() {

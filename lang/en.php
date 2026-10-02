@@ -895,7 +895,7 @@ HTML,
     'abbrev.wx' => 'Weather',
 
     // --- assets/js/callsigns.js ---
-    'js.cs.fetch_error' => 'Couldn\'t load callsigns from the database. Check that MySQL is running and the callsigns table is populated (see database/schema.sql).',
+    'js.cs.fetch_error' => 'Couldn\'t load callsigns. Please check your internet connection and click "Start session" again.',
     'js.cs.correct' => 'Correct: {expected} (+20 XP)',
     'js.cs.wrong' => 'Expected: {expected} — you typed: {typed}',
     'js.cs.empty_placeholder' => '(empty)',
