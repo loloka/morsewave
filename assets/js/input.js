@@ -203,6 +203,14 @@ class VirtualKeyboard {
         if (this.options.showSlash) {
             QWERTY_ROWS[3].push('/');
         }
+        if (this.options.showPunctuation) {
+            QWERTY_ROWS[3].push('.', '?');
+        }
+        if (Array.isArray(this.options.extraKeys)) {
+            this.options.extraKeys.forEach((k) => {
+                if (!QWERTY_ROWS[3].includes(k)) QWERTY_ROWS[3].push(k);
+            });
+        }
 
         QWERTY_ROWS.forEach((row) => {
             const rowEl = document.createElement('div');

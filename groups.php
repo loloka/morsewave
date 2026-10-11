@@ -47,7 +47,12 @@ include __DIR__ . '/includes/header.php';
                 <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
                 <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
                 <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
+                <div class="chip" data-set="koch" id="chip-set-koch"><?= t('groups.set_koch') ?></div>
                 <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
+            </div>
+            <div class="muted" id="koch-charset-hint" style="display:none; font-size:11px; margin-top:6px;">
+                <span id="koch-charset-text"></span>
+                <a href="koch.php" style="color:var(--accent);margin-left:6px;text-decoration:underline;"><?= t('groups.koch_open_mode') ?></a>
             </div>
             <input type="text" id="custom-charset-input" class="answer-input mt-1"
                    placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"

@@ -181,7 +181,11 @@
     let vkb = null;
     function renderVkb(inputEl, isExam) {
         if (typeof VirtualKeyboard !== 'undefined' && vkbEl) {
-            vkb = new VirtualKeyboard(vkbEl, inputEl, { showSpace: isExam });
+            const hasPunctuation = (charsetKey === 'koch') || (charsetKey === 'custom' && customInput && /[.?]/.test(customInput.value));
+            vkb = new VirtualKeyboard(vkbEl, inputEl, {
+                showSpace: isExam,
+                showPunctuation: hasPunctuation
+            });
         }
     }
     let isPlaying = false;
@@ -249,6 +253,24 @@
     });
     const customInput = document.getElementById('custom-charset-input');
     const customHint = document.getElementById('custom-charset-hint');
+    const kochHint = document.getElementById('koch-charset-hint');
+
+    function updateKochHint() {
+        const kochHintText = document.getElementById('koch-charset-text');
+        if (!kochHintText) return;
+        const state = Progress.load();
+        const level = Math.min(Math.max(2, state.kochLevel || 2), KOCH_ORDER.length);
+        const chars = KOCH_ORDER.slice(0, level).join(' ');
+        kochHintText.textContent = t('groups.koch_hint', { '{level}': level, '{chars}': chars });
+    }
+
+    const kochChip = document.querySelector('#charset-chips .chip[data-set="koch"]');
+    if (kochChip) {
+        const state = Progress.load();
+        const level = Math.min(Math.max(2, state.kochLevel || 2), KOCH_ORDER.length);
+        kochChip.textContent = `${t('groups.set_koch')} (${level})`;
+    }
+
     document.querySelectorAll('#charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.remove('active'));
@@ -256,8 +278,13 @@
             charsetKey = chip.dataset.set;
             localStorage.setItem('morse_groups_charset', charsetKey);
             const isCustom = charsetKey === 'custom';
+            const isKoch = charsetKey === 'koch';
             customInput.style.display = isCustom ? 'block' : 'none';
             customHint.style.display = isCustom ? 'block' : 'none';
+            if (kochHint) {
+                kochHint.style.display = isKoch ? 'block' : 'none';
+                if (isKoch) updateKochHint();
+            }
         });
     });
 
@@ -294,6 +321,11 @@
                 return state.learnedLetters.length >= MIN_LEARNED_FOR_FILTER
                     ? state.learnedLetters
                     : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            case 'koch': {
+                const level = Math.min(Math.max(2, state.kochLevel || 2), KOCH_ORDER.length);
+                const chars = KOCH_ORDER.slice(0, level);
+                return chars.length >= 2 ? chars : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            }
             case 'custom': {
                 const custom = parseCustomCharset();
                 return custom.length >= MIN_LEARNED_FOR_FILTER ? custom : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -750,6 +782,7 @@
 
         let pairData = null;
         let generatedGroups = null;
+        let activeCharset = null;
 
         if (isPairs) {
             const pairChars = getSelectedPairChars();
@@ -774,8 +807,8 @@
             };
         } else {
             const state = Progress.load();
-            const charset = getCharset(activeCharsetKey);
-            generatedGroups = Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(charset, activeGroupLen));
+            activeCharset = getCharset(activeCharsetKey);
+            generatedGroups = Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(activeCharset, activeGroupLen));
         }
 
         session = {
@@ -783,7 +816,7 @@
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
             groupLen: activeGroupLen,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
-            xpRate: xpRateForSession(isPairs ? 'letters' : activeCharsetKey, 26, activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
+            xpRate: xpRateForSession(isPairs ? 'letters' : activeCharsetKey, isPairs ? 2 : (activeCharset ? activeCharset.length : 26), activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], startTime: Date.now(), history: [],
             isBufferMode,
