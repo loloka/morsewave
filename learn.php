@@ -19,9 +19,11 @@ include __DIR__ . '/includes/header.php';
 
 <!-- ======================= РЕЖИМ: ОТПРАВКА ======================= -->
 <div id="send-mode">
-    <div class="chip-row mt-2" id="order-chips">
+    <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('learn.order_label') ?></div>
+    <div class="chip-row" id="order-chips">
         <div class="chip active" data-order="alphabet"><?= t('learn.order_alphabet') ?></div>
         <div class="chip" data-order="koch"><?= t('learn.order_koch') ?></div>
+        <div class="chip" data-order="dosaaf"><?= t('learn.order_dosaaf') ?></div>
         <div class="chip" data-order="cyrillic"><?= t('learn.order_cyrillic') ?></div>
     </div>
     <div class="tile-grid mt-2" id="letter-grid"></div>

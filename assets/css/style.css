@@ -1238,17 +1238,13 @@ input[type="range"] {
    "Реальные слова" / "Сокращения"), и на узких экранах они не помещаются
    в одну строку — без переноса ряд вылезал за экран и приходилось
    неудобно скроллить, чтобы дотянуться до "Сокращения" (было багом). */
-.mode-switch { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-@media (max-width: 480px) {
-    /* На телефоне чипы режимов ("Отправка"/"Приём"/"Ритм"/"Вторжение")
-       переносятся на несколько строк — без явной границы снизу контент
-       вкладки визуально "сливается" с самими чипами (реальный фидбек
-       владельца, 2026-07-31). Разделитель — тонкая линия и отступ. */
-    .mode-switch {
-        padding-bottom: 10px;
-        margin-bottom: 14px;
-        border-bottom: 1px solid var(--border);
-    }
+.mode-switch {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
 }
 
 /* ---------- Recognize mode keyboard tiles ---------- */

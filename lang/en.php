@@ -132,8 +132,10 @@ return [
 
     'learn.invasion_stat_best_combo' => 'Best combo',
     'learn.invasion_kbd_hint' => 'QWERTY layout — just like a real keyboard. You can also type directly on your computer keyboard, not just tap the keys.',
+    'learn.order_label' => 'Alphabet & order:',
     'learn.order_alphabet' => 'Latin + digits',
-    'learn.order_koch' => 'Koch order',
+    'learn.order_koch' => 'By Koch',
+    'learn.order_dosaaf' => 'DOSAAF method',
     'learn.order_cyrillic' => 'Cyrillic',
     'learn.practicing_symbol' => 'Practicing symbol',
     'learn.speed' => 'Speed',

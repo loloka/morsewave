@@ -135,8 +135,10 @@ return [
 
     'learn.invasion_stat_best_combo' => 'Лучшее комбо',
     'learn.invasion_kbd_hint' => 'Раскладка QWERTY — как на настоящей клавиатуре. Можно печатать прямо с клавиатуры компьютера, не только тапать по плиткам.',
+    'learn.order_label' => 'Порядок и алфавит:',
     'learn.order_alphabet' => 'Латиница + цифры',
-    'learn.order_koch' => 'Порядок Коха',
+    'learn.order_koch' => 'По Коху',
+    'learn.order_dosaaf' => 'По ДОСААФу',
     'learn.order_cyrillic' => 'Кириллица',
     'learn.practicing_symbol' => 'Тренируем символ',
     'learn.speed' => 'Скорость',

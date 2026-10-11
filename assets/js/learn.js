@@ -123,26 +123,28 @@
     const lamp = new MorseLamp(lampEl);
     let letterOrder = 'alphabet';
 
-    // "Буквы → отправка ключом": кириллица — третий набор наравне с
-    // «Алфавит» и «Порядок Коха» (см. CLAUDE.md, бэклог п.1).
+    // "Буквы → отправка ключом": кириллица и ДОСААФ — наборы с кириллическими символами
     function isCyrillicOrder() {
-        return letterOrder === 'cyrillic';
+        return letterOrder === 'cyrillic' || letterOrder === 'dosaaf';
     }
 
     // Кириллица хранится в Progress.learnedLetters с префиксом — латинская A
     // и кириллическая А обязаны быть разными записями, иначе разблокировка
     // "Полный алфавит" и прогресс между наборами перепутались бы.
     function progressKeyFor(ch) {
-        return isCyrillicOrder() ? CYRILLIC_PREFIX + ch : ch;
+        return (isCyrillicOrder() && (ch in CYRILLIC_CODE)) ? CYRILLIC_PREFIX + ch : ch;
     }
 
     function codeFor(ch) {
-        return isCyrillicOrder() ? CYRILLIC_CODE[ch] : MORSE_CODE[ch];
+        return isCyrillicOrder() ? (CYRILLIC_CODE[ch] || MORSE_CODE[ch]) : MORSE_CODE[ch];
     }
 
     function orderedLetters() {
         if (letterOrder === 'koch') {
             return KOCH_ORDER.filter(ch => ALL_LEARNABLE.includes(ch));
+        }
+        if (letterOrder === 'dosaaf') {
+            return (typeof DOSAAF_ORDER !== 'undefined') ? DOSAAF_ORDER : CYRILLIC_LEARNABLE;
         }
         if (letterOrder === 'cyrillic') {
             return CYRILLIC_LEARNABLE;
@@ -155,6 +157,7 @@
             document.querySelectorAll('#order-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             letterOrder = chip.dataset.order;
+            localStorage.setItem('morse_learn_order', letterOrder);
             // Прежде выбранный символ мог принадлежать другому набору (нет
             // смысла держать открытой панель практики латинской буквы, когда
             // сетка тайлов уже кириллическая) — прячем панель до нового выбора.
@@ -163,6 +166,12 @@
             renderTiles();
         });
     });
+
+    const savedLearnOrder = localStorage.getItem('morse_learn_order');
+    if (savedLearnOrder) {
+        const chip = document.querySelector(`#order-chips .chip[data-order="${savedLearnOrder}"]`);
+        if (chip) chip.click();
+    }
 
     function renderTiles() {
         const state = Progress.load();
@@ -188,8 +197,8 @@
 
         const napevEl = document.getElementById('practice-napev');
         // У кириллицы свой словарь напевов (CYRILLIC_MNEMONICS) — свои слоги
-        // под свои буквы, путать с латинским MORSE_MNEMONICS нельзя.
-        const mnemonic = isCyrillicOrder() ? CYRILLIC_MNEMONICS[ch] : MORSE_MNEMONICS[ch];
+        // под свои буквы, с фолбэком на MORSE_MNEMONICS для цифр в ДОСААФ.
+        const mnemonic = isCyrillicOrder() ? (CYRILLIC_MNEMONICS[ch] || MORSE_MNEMONICS[ch]) : MORSE_MNEMONICS[ch];
         napevEl.innerHTML = mnemonic
             ? t('js.learn.napev_prefix') + mnemonic.map(syl => `<span class="syl">${syl}</span>`).join('-')
             : '';
@@ -207,9 +216,8 @@
         feedbackEl.className = 'feedback';
         signalLine.clear();
         // Декодирование ключом — раздельные таблицы для латиницы и кириллицы
-        // (совпадающие коды дали бы непредсказуемый результат при смешении,
-        // см. morse-data.js), поэтому подсовываем нужную таблицу под текущий набор.
-        key.setTable(isCyrillicOrder() ? CYRILLIC_TO_CHAR : MORSE_TO_CHAR);
+        // (с поддержкой цифр в наборе ДОСААФ через слияние таблиц).
+        key.setTable(isCyrillicOrder() ? { ...MORSE_TO_CHAR, ...CYRILLIC_TO_CHAR } : MORSE_TO_CHAR);
         panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
