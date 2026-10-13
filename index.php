@@ -41,7 +41,7 @@ include __DIR__ . '/includes/header.php';
                     </div>
                     <div class="promo-badges">
                         <span class="promo-badge mono badge-beta">BETA</span>
-                        <span class="promo-badge mono badge-v">v<?= MW_VERSION ?></span>
+                        <span class="promo-badge mono badge-v"><?= MW_VERSION ?></span>
                     </div>
                 </div>
 
