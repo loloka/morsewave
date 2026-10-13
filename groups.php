@@ -72,8 +72,12 @@ include __DIR__ . '/includes/header.php';
                 <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
             </label>
 
-            <label class="chip" style="gap:8px;">
+            <label class="chip" style="gap:8px;" id="groups-buffer-label">
                 <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
+            </label>
+
+            <label class="chip" style="gap:8px;">
+                <input type="checkbox" id="groups-paper-enabled"> <?= t('groups.paper_mode') ?>
             </label>
 
             <label class="chip"><?= t('groups.groups_per_session') ?>
@@ -121,6 +125,23 @@ include __DIR__ . '/includes/header.php';
             </div>
             <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
                 <?= t('groups.buffer_hint') ?>
+            </div>
+        </div>
+
+        <!-- Панель настройки приёма на бумагу -->
+        <div id="groups-paper-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:700; font-size:13px;"><?= t('groups.paper_gap_label') ?></div>
+                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.paper_gap_desc') ?></div>
+                </div>
+                <div class="speed-control" id="groups-paper-gap-wrap">
+                    <input type="range" id="groups-paper-gap" min="1" max="10" step="0.5" value="3">
+                    <span class="speed-value" id="groups-paper-gap-value">3.0</span> <?= t('groups.seconds_short') ?>
+                </div>
+            </div>
+            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                💡 <?= t('groups.paper_tooltip') ?>
             </div>
         </div>
     </div>
@@ -323,10 +344,24 @@ include __DIR__ . '/includes/header.php';
         <div id="qrq-revealed-group" class="mono mt-2" style="font-size:36px; letter-spacing:6px; color:var(--signal); min-height:50px; font-weight:bold;"></div>
     </div>
 
+    <!-- Режим приёма на бумагу: индикатор воспроизведения / паузы -->
+    <div id="paper-session-display" style="display:none; text-align:center; padding:24px 0;">
+        <div style="font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;">📝 <?= t('groups.paper_mode') ?></div>
+        <div id="paper-status-msg" style="font-size:22px; color:var(--text); font-weight:700; margin-top:8px;">🎧 <?= t('groups.paper_listening') ?></div>
+        <div id="paper-sub-msg" class="muted mt-2" style="font-size:14px; min-height:24px;"></div>
+        <div id="paper-progress-wrap" style="max-width:320px; margin:16px auto 0; background:rgba(255,255,255,0.08); height:6px; border-radius:3px; overflow:hidden; display:none;">
+            <div id="paper-progress-bar" style="width:100%; height:100%; background:var(--accent); transition:width 0.1s linear;"></div>
+        </div>
+    </div>
+
     <input type="text" id="groups-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('groups.answer_placeholder')) ?>" autocomplete="off">
     <div class="btn-row mt-2" id="groups-submit-row">
         <button class="btn btn-primary" id="submit-answer"><?= t('groups.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
         <button class="btn" id="groups-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
+    </div>
+
+    <div class="btn-row mt-2" id="paper-controls-row" style="display:none;">
+        <button class="btn" id="paper-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
 
     <textarea id="exam-answer" class="answer-input mt-2" style="display:none; min-height:180px; resize:vertical;"
@@ -369,6 +404,16 @@ include __DIR__ . '/includes/header.php';
         <h3 style="color:var(--success); margin-bottom:8px;"><?= t('groups.qrq_finished_title') ?></h3>
         <p class="muted" style="margin-bottom:16px;"><?= t('groups.qrq_finished_desc') ?></p>
         <button class="btn btn-primary" id="qrq-return-btn"><?= t('groups.qrq_back_to_training') ?></button>
+    </div>
+
+    <!-- Блок результатов приёма на бумагу -->
+    <div class="card mt-2" id="paper-result-block" style="display:none; background:var(--surface-2); padding:16px;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <h4 class="mt-0" style="color:var(--accent);"><?= t('groups.paper_result_title') ?></h4>
+            <button class="btn btn-sm btn-primary" id="paper-copy-btn" type="button"><?= t('groups.paper_copy_btn') ?></button>
+        </div>
+        <p class="muted mt-1" style="font-size:13px;"><?= t('groups.paper_result_desc') ?></p>
+        <pre id="paper-radiogram-text" class="mono mt-2" style="font-size:15px; letter-spacing:1.5px; line-height:1.9; color:var(--text); background:rgba(0,0,0,0.3); padding:16px; border-radius:8px; border:1px solid var(--border); max-height:360px; overflow-y:auto; user-select:text; white-space:pre-wrap; margin:0;"></pre>
     </div>
 
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">

@@ -140,6 +140,82 @@
         });
     }
 
+    const paperCheckbox = document.getElementById('groups-paper-enabled');
+    const paperPanel = document.getElementById('groups-paper-panel');
+    const paperGapSlider = document.getElementById('groups-paper-gap');
+    const paperGapValue = document.getElementById('groups-paper-gap-value');
+    const bufferLabel = document.getElementById('groups-buffer-label');
+    const paperSessionDisplay = document.getElementById('paper-session-display');
+    const paperStatusMsg = document.getElementById('paper-status-msg');
+    const paperSubMsg = document.getElementById('paper-sub-msg');
+    const paperProgressWrap = document.getElementById('paper-progress-wrap');
+    const paperProgressBar = document.getElementById('paper-progress-bar');
+    const paperControlsRow = document.getElementById('paper-controls-row');
+    const paperStopBtn = document.getElementById('paper-stop-btn');
+    const paperResultBlock = document.getElementById('paper-result-block');
+    const paperRadiogramText = document.getElementById('paper-radiogram-text');
+    const paperCopyBtn = document.getElementById('paper-copy-btn');
+
+    let paperSleepResolve = null;
+    let paperSleepTimer = null;
+
+    function cancelPaperSleep() {
+        if (paperSleepTimer) {
+            clearInterval(paperSleepTimer);
+            paperSleepTimer = null;
+        }
+        if (paperSleepResolve) {
+            const r = paperSleepResolve;
+            paperSleepResolve = null;
+            r();
+        }
+        if (paperProgressWrap) {
+            paperProgressWrap.style.display = 'none';
+        }
+    }
+
+    function updatePaperPanelVisibility() {
+        const isPaper = paperCheckbox && paperCheckbox.checked;
+        if (paperPanel) {
+            paperPanel.style.display = isPaper ? 'block' : 'none';
+        }
+        if (bufferCheckbox) {
+            bufferCheckbox.disabled = isPaper;
+            if (bufferLabel) bufferLabel.style.opacity = isPaper ? '0.5' : '1';
+        }
+        if (isPaper && bufferPanel) {
+            bufferPanel.style.display = 'none';
+        } else if (!isPaper) {
+            updateBufferPanelVisibility();
+        }
+    }
+
+    if (paperCheckbox) {
+        const savedPaperEnabled = localStorage.getItem('morse_groups_paper_enabled');
+        if (savedPaperEnabled !== null) {
+            paperCheckbox.checked = (savedPaperEnabled === 'true');
+        }
+        updatePaperPanelVisibility();
+        paperCheckbox.addEventListener('change', () => {
+            localStorage.setItem('morse_groups_paper_enabled', paperCheckbox.checked);
+            updatePaperPanelVisibility();
+        });
+    }
+
+    if (paperGapSlider) {
+        const savedPaperGap = localStorage.getItem('morse_groups_paper_gap');
+        if (savedPaperGap) {
+            paperGapSlider.value = savedPaperGap;
+            if (paperGapValue) paperGapValue.textContent = parseFloat(savedPaperGap).toFixed(1);
+        }
+        paperGapSlider.addEventListener('input', () => {
+            if (paperGapValue) paperGapValue.textContent = parseFloat(paperGapSlider.value).toFixed(1);
+        });
+        paperGapSlider.addEventListener('change', () => {
+            localStorage.setItem('morse_groups_paper_gap', paperGapSlider.value);
+        });
+    }
+
     function updateBufferDepthOptions(len) {
         const maxNumericDepth = Math.max(1, len - 1);
         document.querySelectorAll('#buffer-depth-chips .chip').forEach(chip => {
@@ -701,6 +777,10 @@
             currentAudio = null;
             isPlaying = false;
         }
+        cancelPaperSleep();
+        if (session && session.isPaperMode) {
+            session.paperStopped = true;
+        }
         if (qrqSessionActive) {
             qrqStopRequested = true;
             if (qrqAudio) {
@@ -751,6 +831,7 @@
 
         const isExam = (currentSubmode === 'exam');
         const isPairs = (currentSubmode === 'pairs');
+        const isPaperMode = (currentSubmode === 'training' && paperCheckbox && paperCheckbox.checked);
 
         let activeWpm = parseInt(wpmSlider.value, 10);
         let activeFarnsworth = (fwEnabled && fwEnabled.checked) ? parseInt(fwSlider.value, 10) : 0;
@@ -822,6 +903,9 @@
             isBufferMode,
             bufferDepth,
             isPairs,
+            isPaperMode,
+            paperGap: paperGapSlider ? parseFloat(paperGapSlider.value) || 3.0 : 3.0,
+            paperStopped: false,
             ...(pairData || {})
         };
 
@@ -847,6 +931,9 @@
         const qrqStopBtn = document.getElementById('qrq-stop-btn');
         if (qrqStopBtn) qrqStopBtn.style.display = 'none';
 
+        if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
+        if (paperControlsRow) paperControlsRow.style.display = 'none';
+
         feedbackEl.className = 'feedback';
 
         if (isExam) {
@@ -861,6 +948,16 @@
             replayBtn.style.display = 'none';
             if (typeof renderVkb !== 'undefined') renderVkb(examAnswerEl, true);
             runExamAttentionSequence();
+        } else if (isPaperMode) {
+            answerInput.style.display = 'none';
+            groupsSubmitRow.style.display = 'none';
+            examAnswerEl.style.display = 'none';
+            examSubmitRow.style.display = 'none';
+            replayBtn.style.display = 'none';
+            if (vkbEl) vkbEl.style.display = 'none';
+            if (paperSessionDisplay) paperSessionDisplay.style.display = 'block';
+            if (paperControlsRow) paperControlsRow.style.display = 'flex';
+            runPaperPlayback();
         } else {
             answerInput.style.display = 'block';
             groupsSubmitRow.style.display = 'flex';
@@ -1011,6 +1108,200 @@
         postStat('total_groups', completedCount);
         Progress.markDailyActivity();
         flushStats();
+    }
+
+    async function runPaperPlayback() {
+        if (!session || !session.isPaperMode) return;
+        const total = session.groups.length;
+
+        for (let i = 0; i < total; i++) {
+            if (session.paperStopped || session.finished) break;
+
+            session.index = i;
+            if (groupIndexEl) groupIndexEl.textContent = i + 1;
+
+            if (paperStatusMsg) {
+                paperStatusMsg.textContent = '🎧 ' + t('groups.paper_listening');
+            }
+            if (paperSubMsg) {
+                paperSubMsg.textContent = t('js.groups.paper_status_playing', {
+                    '{current}': i + 1,
+                    '{total}': total
+                });
+            }
+            if (paperProgressWrap) paperProgressWrap.style.display = 'none';
+            signalLine.clear();
+
+            try {
+                if (currentAudio) {
+                    currentAudio.stop();
+                    currentAudio = null;
+                }
+                currentAudio = new MorseAudio({
+                    wpm: session.wpm,
+                    farnsworthWpm: session.farnsworth || null
+                });
+                await currentAudio.play(session.groups[i], {
+                    onSymbol: ({ symbol, durationMs }) => {
+                        signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                        lamp.flash(durationMs);
+                    }
+                });
+            } catch (err) {
+                console.error('Ошибка воспроизведения в режиме бумаги:', err);
+            } finally {
+                currentAudio = null;
+            }
+
+            if (session.paperStopped || session.finished) break;
+
+            session.playedCount = i + 1;
+            const groupChars = session.groups[i].length;
+            session.correctChars += groupChars;
+            session.totalChars += groupChars;
+
+            const xpGain = Math.round(groupChars * session.xpRate);
+            if (xpGain > 0) {
+                session.xpEarned += xpGain;
+                session.dbXpEarned += xpGain;
+                Progress.addXp(xpGain);
+            }
+            Progress.incrementStat('groupsCompleted', 1);
+            postStat('total_groups', 1);
+
+            // Пауза перед следующей группой
+            if (i < total - 1) {
+                const gapMs = Math.round(session.paperGap * 1000);
+                if (paperProgressWrap) paperProgressWrap.style.display = 'block';
+                if (paperProgressBar) paperProgressBar.style.width = '100%';
+
+                const startTime = Date.now();
+                const intervalMs = 50;
+
+                await new Promise(resolve => {
+                    paperSleepResolve = resolve;
+                    const updateCountdown = () => {
+                        if (session.paperStopped || session.finished) {
+                            cleanup();
+                            resolve();
+                            return;
+                        }
+                        const elapsed = Date.now() - startTime;
+                        const remaining = Math.max(0, gapMs - elapsed);
+                        const secText = (remaining / 1000).toFixed(1);
+                        if (paperStatusMsg) {
+                            paperStatusMsg.textContent = '⏸ ' + t('groups.paper_pause', { '{sec}': secText });
+                        }
+                        if (paperProgressBar) {
+                            const pct = Math.max(0, (remaining / gapMs) * 100);
+                            paperProgressBar.style.width = pct + '%';
+                        }
+                        if (remaining <= 0) {
+                            cleanup();
+                            resolve();
+                        }
+                    };
+
+                    const timerId = setInterval(updateCountdown, intervalMs);
+                    paperSleepTimer = timerId;
+
+                    function cleanup() {
+                        if (paperSleepTimer === timerId) {
+                            clearInterval(timerId);
+                            paperSleepTimer = null;
+                        }
+                        if (paperSleepResolve === resolve) {
+                            paperSleepResolve = null;
+                        }
+                        if (paperProgressWrap) paperProgressWrap.style.display = 'none';
+                    }
+                });
+
+                if (session.paperStopped || session.finished) break;
+            }
+        }
+
+        if (session.paperStopped) {
+            if (session.playedCount > 0) {
+                finishPaperSession();
+            } else {
+                abortCurrentSession();
+                sessionPanel.style.display = 'none';
+                setupPanel.style.display = 'block';
+            }
+        } else {
+            finishPaperSession();
+        }
+    }
+
+    function finishPaperSession() {
+        if (!session || session.finished) return;
+        session.finished = true;
+        cancelPaperSleep();
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        signalLine.clear();
+        lamp.off();
+
+        sessionPanel.style.display = 'none';
+        resultPanel.style.display = 'block';
+
+        resultPanel.querySelectorAll('.js-result-note').forEach(n => n.remove());
+
+        const playedGroups = session.groups.slice(0, session.playedCount);
+        const totalGroups = session.groups.length;
+
+        // Форматируем радиограмму: по 5 групп в строке, нумерация строк радиограммы:
+        const lines = [];
+        for (let i = 0; i < playedGroups.length; i += 5) {
+            const rowGroups = playedGroups.slice(i, i + 5).join('   ');
+            const rowNum = String(Math.floor(i / 5) + 1).padStart(2, '0');
+            lines.push(`${rowNum}:  ${rowGroups}`);
+        }
+        const radiogramText = lines.join('\n');
+
+        const radiogramEl = document.getElementById('paper-radiogram-text');
+        if (radiogramEl) radiogramEl.textContent = radiogramText;
+
+        const paperResBlock = document.getElementById('paper-result-block');
+        if (paperResBlock) paperResBlock.style.display = 'block';
+
+        // Скрываем блоки других режимов
+        const examDiffBlock = document.getElementById('exam-diff-block');
+        if (examDiffBlock) examDiffBlock.style.display = 'none';
+        const pairsBlock = document.getElementById('pairs-result-block');
+        if (pairsBlock) pairsBlock.style.display = 'none';
+        const qrqBlock = document.getElementById('qrq-result-block');
+        if (qrqBlock) qrqBlock.style.display = 'none';
+        const mistakesBlock = document.getElementById('mistakes-block');
+        if (mistakesBlock) mistakesBlock.style.display = 'none';
+        const pairPromptBlock = document.getElementById('pair-prompt-block');
+        if (pairPromptBlock) pairPromptBlock.style.display = 'none';
+
+        const stdGrid = document.getElementById('standard-stat-grid');
+        if (stdGrid) stdGrid.style.display = 'grid';
+        const restartBtn = document.getElementById('restart-btn');
+        if (restartBtn) restartBtn.style.display = 'inline-flex';
+
+        document.getElementById('result-accuracy').textContent = '100%';
+        document.getElementById('result-correct').textContent = `${session.playedCount}/${totalGroups}`;
+        document.getElementById('result-xp').textContent = session.xpEarned;
+
+        if (session.playedCount < totalGroups) {
+            const stopNote = document.createElement('div');
+            stopNote.className = 'feedback show ok mt-2 js-result-note';
+            stopNote.textContent = t('js.groups.paper_stopped_early', {
+                '{played}': session.playedCount,
+                '{total}': totalGroups
+            });
+            if (stdGrid) stdGrid.insertAdjacentElement('beforebegin', stopNote);
+        }
+
+        Progress.markDailyActivity();
+        flushStats();
+        abortCurrentSession();
     }
 
     // «ЖЖЖ=» — русский вариант общепринятого настроечного сигнала (у Ж и
@@ -2144,6 +2435,18 @@
             setupPanel.style.display = 'block';
             return;
         }
+        if (session.isPaperMode) {
+            session.paperStopped = true;
+            cancelPaperSleep();
+            if (session.playedCount > 0) {
+                finishPaperSession();
+            } else {
+                abortCurrentSession();
+                sessionPanel.style.display = 'none';
+                setupPanel.style.display = 'block';
+            }
+            return;
+        }
         if (session.totalChars > 0) {
             finishSession();
         } else {
@@ -2154,6 +2457,23 @@
     }
     const groupsStopBtn = document.getElementById('groups-stop-btn');
     if (groupsStopBtn) groupsStopBtn.addEventListener('click', stopGroupsSession);
+    if (paperStopBtn) paperStopBtn.addEventListener('click', stopGroupsSession);
+    if (paperCopyBtn) {
+        paperCopyBtn.addEventListener('click', async () => {
+            const radiogramEl = document.getElementById('paper-radiogram-text');
+            if (!radiogramEl) return;
+            try {
+                await navigator.clipboard.writeText(radiogramEl.textContent);
+                const originalText = paperCopyBtn.textContent;
+                paperCopyBtn.textContent = t('groups.paper_copied');
+                setTimeout(() => {
+                    paperCopyBtn.textContent = originalText;
+                }, 2000);
+            } catch (err) {
+                console.error('Clipboard copy error:', err);
+            }
+        });
+    }
     examSubmitBtn.addEventListener('click', () => finishExamSession());
     replayBtn.addEventListener('click', playCurrentGroup);
     document.getElementById('restart-btn').addEventListener('click', () => {
@@ -2163,6 +2483,8 @@
         if (pairsBlock) pairsBlock.style.display = 'none';
         const qrqBlock = document.getElementById('qrq-result-block');
         if (qrqBlock) qrqBlock.style.display = 'none';
+        const paperBlock = document.getElementById('paper-result-block');
+        if (paperBlock) paperBlock.style.display = 'none';
         const stdGrid = document.getElementById('standard-stat-grid');
         if (stdGrid) stdGrid.style.display = 'grid';
         const oldBr = document.getElementById('groups-xp-breakdown');
