@@ -379,7 +379,7 @@ include __DIR__ . '/includes/header.php';
     <h3><?= t('groups.result_title') ?></h3>
     <div class="grid grid-3 mt-1" id="standard-stat-grid">
         <div class="stat"><span class="value" id="result-accuracy">0%</span><span class="label"><?= t('groups.result_accuracy') ?></span></div>
-        <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('groups.result_correct') ?></span></div>
+        <div class="stat"><span class="value" id="result-correct">0</span><span class="label" id="result-correct-label"><?= t('groups.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('groups.result_xp') ?></span></div>
     </div>
     

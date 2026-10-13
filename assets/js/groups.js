@@ -780,6 +780,9 @@
         cancelPaperSleep();
         if (session && session.isPaperMode) {
             session.paperStopped = true;
+            if (!session.finished) {
+                session.dbXpEarned = 0;
+            }
         }
         if (qrqSessionActive) {
             qrqStopRequested = true;
@@ -1156,18 +1159,6 @@
             if (session.paperStopped || session.finished) break;
 
             session.playedCount = i + 1;
-            const groupChars = session.groups[i].length;
-            session.correctChars += groupChars;
-            session.totalChars += groupChars;
-
-            const xpGain = Math.round(groupChars * session.xpRate);
-            if (xpGain > 0) {
-                session.xpEarned += xpGain;
-                session.dbXpEarned += xpGain;
-                Progress.addXp(xpGain);
-            }
-            Progress.incrementStat('groupsCompleted', 1);
-            postStat('total_groups', 1);
 
             // Пауза перед следующей группой
             if (i < total - 1) {
@@ -1252,13 +1243,13 @@
 
         const playedGroups = session.groups.slice(0, session.playedCount);
         const totalGroups = session.groups.length;
+        const fullyCompleted = (session.playedCount >= totalGroups);
 
-        // Форматируем радиограмму: по 5 групп в строке, нумерация строк радиограммы:
+        // Форматируем радиограмму: ровно по 5 групп в строке, без номеров строк (01:)
         const lines = [];
         for (let i = 0; i < playedGroups.length; i += 5) {
             const rowGroups = playedGroups.slice(i, i + 5).join('   ');
-            const rowNum = String(Math.floor(i / 5) + 1).padStart(2, '0');
-            lines.push(`${rowNum}:  ${rowGroups}`);
+            lines.push(rowGroups);
         }
         const radiogramText = lines.join('\n');
 
@@ -1285,13 +1276,37 @@
         const restartBtn = document.getElementById('restart-btn');
         if (restartBtn) restartBtn.style.display = 'inline-flex';
 
-        document.getElementById('result-accuracy').textContent = '100%';
-        document.getElementById('result-correct').textContent = `${session.playedCount}/${totalGroups}`;
-        document.getElementById('result-xp').textContent = session.xpEarned;
+        let earnedXp = 0;
+        if (fullyCompleted) {
+            // Начисляем строго по 1 XP за символ только за полностью завершённую сессию (5 знаков в группе = 5 XP)
+            const totalChars = playedGroups.reduce((acc, g) => acc + g.length, 0);
+            earnedXp = totalChars;
+            session.xpEarned = earnedXp;
+            session.dbXpEarned = earnedXp;
+            session.correctChars = totalChars;
+            session.totalChars = totalChars;
+            Progress.addXp(earnedXp);
+            Progress.incrementStat('groupsCompleted', totalGroups);
+            postStat('total_groups', totalGroups);
+            Progress.markDailyActivity();
+            flushStats();
+        } else {
+            // При досрочном завершении опыт не начисляем для защиты от абуза
+            session.xpEarned = 0;
+            session.dbXpEarned = 0;
+            session.correctChars = 0;
+            session.totalChars = 0;
+        }
 
-        if (session.playedCount < totalGroups) {
+        document.getElementById('result-accuracy').textContent = fullyCompleted ? '100%' : '—';
+        document.getElementById('result-correct').textContent = `${session.playedCount}/${totalGroups}`;
+        const correctLabel = document.getElementById('result-correct-label');
+        if (correctLabel) correctLabel.textContent = t('groups.paper_groups_received');
+        document.getElementById('result-xp').textContent = earnedXp;
+
+        if (!fullyCompleted) {
             const stopNote = document.createElement('div');
-            stopNote.className = 'feedback show ok mt-2 js-result-note';
+            stopNote.className = 'feedback show bad mt-2 js-result-note';
             stopNote.textContent = t('js.groups.paper_stopped_early', {
                 '{played}': session.playedCount,
                 '{total}': totalGroups
@@ -1299,8 +1314,6 @@
             if (stdGrid) stdGrid.insertAdjacentElement('beforebegin', stopNote);
         }
 
-        Progress.markDailyActivity();
-        flushStats();
         abortCurrentSession();
     }
 
@@ -2487,6 +2500,8 @@
         if (paperBlock) paperBlock.style.display = 'none';
         const stdGrid = document.getElementById('standard-stat-grid');
         if (stdGrid) stdGrid.style.display = 'grid';
+        const correctLabel = document.getElementById('result-correct-label');
+        if (correctLabel) correctLabel.textContent = t('groups.result_correct');
         const oldBr = document.getElementById('groups-xp-breakdown');
         if (oldBr) oldBr.style.display = 'block';
     });
