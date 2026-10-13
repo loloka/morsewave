@@ -792,29 +792,35 @@
             }
             qrqSessionActive = false;
         }
-        if (session && !session.finished && session.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            const isAbbrev = !!session.abbrevActive;
-            const isWords = !!session.wordsActive;
-            const isExam = !!session.isExam;
-            const isExamAbort = isExam && session.examErrors === undefined; // if not finished fully
-            
-            let source = 'groups';
-            if (isExam) source = isExamAbort ? 'groups_exam_abort' : 'groups_exam';
-            else if (isAbbrev) source = 'groups_abbrev';
-            else if (isWords) source = 'groups_words';
-            
-            const err = isExam ? (session.examErrors || (session.totalChars - session.correctChars)) : (session.totalChars - session.correctChars);
+        if (session && !session.finished) {
+            const dur = session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0;
+            if (dur >= 5 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+                Progress.addTrainingTime(dur);
+                session.timeLogged = true;
+            }
+            if (session.dbXpEarned > 0) {
+                const isAbbrev = !!session.abbrevActive;
+                const isWords = !!session.wordsActive;
+                const isExam = !!session.isExam;
+                const isExamAbort = isExam && session.examErrors === undefined; // if not finished fully
+                
+                let source = 'groups';
+                if (isExam) source = isExamAbort ? 'groups_exam_abort' : 'groups_exam';
+                else if (isAbbrev) source = 'groups_abbrev';
+                else if (isWords) source = 'groups_words';
+                
+                const err = isExam ? (session.examErrors || (session.totalChars - session.correctChars)) : (session.totalChars - session.correctChars);
 
-            Progress.logXp(session.dbXpEarned, source, {
-                wpm: session.wpm,
-                fw: session.farnsworth,
-                dur,
-                err,
-                acc: session.totalChars > 0 ? Math.round((session.correctChars / session.totalChars) * 100) : 0,
-                history: session.history || []
-            });
-            session.dbXpEarned = 0;
+                Progress.logXp(session.dbXpEarned, source, {
+                    wpm: session.wpm,
+                    fw: session.farnsworth,
+                    dur,
+                    err,
+                    acc: session.totalChars > 0 ? Math.round((session.correctChars / session.totalChars) * 100) : 0,
+                    history: session.history || []
+                });
+                session.dbXpEarned = 0;
+            }
             session.finished = true;
         }
     }
@@ -1314,6 +1320,28 @@
             if (stdGrid) stdGrid.insertAdjacentElement('beforebegin', stopNote);
         }
 
+        if (typeof Progress.addTrainingTime === 'function' && session.startTime && !session.timeLogged) {
+            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            if (dur > 0) {
+                Progress.addTrainingTime(dur);
+                session.timeLogged = true;
+                const todaySecs = Progress.getTodayTrainingSeconds();
+                const todayMins = Math.floor(todaySecs / 60);
+                const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+                const dailyBlock = document.getElementById('groups-daily-time-block');
+                const dailyText = document.getElementById('groups-daily-time-text');
+                if (dailyBlock && dailyText) {
+                    dailyBlock.style.display = 'block';
+                    if (todayMins >= goalMins) {
+                        dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+                    } else {
+                        const leftMins = Math.max(1, goalMins - todayMins);
+                        dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+                    }
+                }
+            }
+        }
+
         abortCurrentSession();
     }
 
@@ -1797,7 +1825,7 @@
         }
 
         const restartBtn = document.getElementById('restart-btn');
-        if (restartBtn) restartBtn.style.display = 'inline-block';
+        if (restartBtn) restartBtn.style.display = session.isPairs ? 'none' : 'inline-block';
 
         // XP Breakdown
         const grid = document.querySelector('#result-panel .grid');
@@ -1826,9 +1854,10 @@
         postStat('total_sessions', 1);
         flushStats();
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
+        if (typeof Progress.addTrainingTime === 'function' && session.startTime && !session.timeLogged) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             Progress.addTrainingTime(dur);
+            session.timeLogged = true;
             const todaySecs = Progress.getTodayTrainingSeconds();
             const todayMins = Math.floor(todaySecs / 60);
             const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;

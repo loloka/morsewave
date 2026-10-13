@@ -304,6 +304,11 @@ include __DIR__ . '/includes/header.php';
             <!-- Блок задания дня -->
             <div id="invasion-daily-note" class="mt-2" style="display:none;"></div>
 
+            <div class="card mt-2" id="invasion-daily-time-block" style="display:none; background:var(--surface); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted); border:1px solid var(--border);">
+                <span id="invasion-daily-time-text"></span>
+                <div class="muted mt-1" style="font-size:11px;"><?= t('groups.daily_time_change_hint') ?></div>
+            </div>
+
             <div class="text-center mt-2">
                 <button class="btn btn-primary btn-sm" id="invasion-restart-btn" title="<?= t('common.shortcut_enter') ?>"><?= t('learn.invasion_restart_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
             </div>

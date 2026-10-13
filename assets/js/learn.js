@@ -2513,13 +2513,32 @@
             }
         }
 
+        const todaySecs = (typeof Progress.getTodayTrainingSeconds === 'function') ? Progress.getTodayTrainingSeconds() : 0;
+        const todayMins = Math.floor(todaySecs / 60);
+        const goalMins = (typeof Progress.getDailyGoalMinutes === 'function') ? Progress.getDailyGoalMinutes() : 30;
+        const dailyBlock = document.getElementById('invasion-daily-time-block');
+        const dailyText = document.getElementById('invasion-daily-time-text');
+        if (dailyBlock && dailyText) {
+            dailyBlock.style.display = 'block';
+            if (todayMins >= goalMins) {
+                dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
+            } else {
+                const leftMins = Math.max(1, goalMins - todayMins);
+                dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
+            }
+        }
+
         invasionResultPanelEl.style.display = 'block';
         invasionResultPanelEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function logInvasionXp() {
+        const dur = invasionSessionStartTime ? Math.round((Date.now() - invasionSessionStartTime) / 1000) : 0;
+        if (dur >= 3 && typeof Progress.addTrainingTime === 'function') {
+            Progress.addTrainingTime(dur);
+            invasionSessionStartTime = 0;
+        }
         if (invasionDbXpEarned > 0) {
-            const dur = Math.round((Date.now() - invasionSessionStartTime) / 1000);
             const acc = invasionSessionTotalHits > 0
                 ? Math.round((invasionSessionCorrectHits / invasionSessionTotalHits) * 100)
                 : 100;

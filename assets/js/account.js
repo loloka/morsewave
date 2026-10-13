@@ -949,15 +949,83 @@
 
     /* ---------- Дневная норма тренировки ---------- */
     const dailyGoalChips = document.querySelectorAll('.daily-goal-chips .chip, #daily-goal-chips .chip');
+    const customWraps = document.querySelectorAll('.daily-goal-custom-wrap');
+    const customInputs = document.querySelectorAll('.daily-goal-custom-input');
+    const customBtns = document.querySelectorAll('.daily-goal-custom-btn');
+
     if (dailyGoalChips.length && typeof Progress !== 'undefined') {
-        const currentGoal = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+        const PRESETS = [10, 15, 20, 30, 45, 60];
+        let currentGoal = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
+
+        function updateGoalUI(val) {
+            currentGoal = val;
+            const isPreset = PRESETS.includes(val);
+            dailyGoalChips.forEach(chip => {
+                if (chip.dataset.mins === 'custom') {
+                    chip.classList.toggle('active', !isPreset);
+                    if (!isPreset) {
+                        const minsWord = (typeof t === 'function' && t('acc.mins')) ? t('acc.mins') : 'мин';
+                        chip.textContent = `${val} ${minsWord} (своё)`;
+                    } else {
+                        chip.textContent = (typeof t === 'function' && t('acc.daily_goal_custom')) ? t('acc.daily_goal_custom') : 'Своё время…';
+                    }
+                } else {
+                    const mins = parseInt(chip.dataset.mins, 10);
+                    chip.classList.toggle('active', mins === val);
+                }
+            });
+            customWraps.forEach(wrap => {
+                wrap.style.display = isPreset ? 'none' : 'flex';
+            });
+            customInputs.forEach(input => {
+                input.value = val;
+            });
+        }
+
+        updateGoalUI(currentGoal);
+
         dailyGoalChips.forEach(chip => {
-            const mins = parseInt(chip.dataset.mins, 10);
-            chip.classList.toggle('active', mins === currentGoal);
             chip.addEventListener('click', () => {
-                dailyGoalChips.forEach(c => c.classList.toggle('active', parseInt(c.dataset.mins, 10) === mins));
+                if (chip.dataset.mins === 'custom') {
+                    customWraps.forEach(wrap => { wrap.style.display = 'flex'; });
+                    dailyGoalChips.forEach(c => c.classList.toggle('active', c.dataset.mins === 'custom'));
+                    const firstInput = document.querySelector('.daily-goal-custom-input');
+                    if (firstInput) {
+                        firstInput.focus();
+                        firstInput.select();
+                    }
+                } else {
+                    const mins = parseInt(chip.dataset.mins, 10);
+                    if (typeof Progress.setDailyGoalMinutes === 'function') {
+                        Progress.setDailyGoalMinutes(mins);
+                    }
+                    updateGoalUI(mins);
+                }
+            });
+        });
+
+        function handleCustomSubmit(inputEl) {
+            const val = parseInt(inputEl.value, 10);
+            if (!isNaN(val) && val >= 1 && val <= 720) {
                 if (typeof Progress.setDailyGoalMinutes === 'function') {
-                    Progress.setDailyGoalMinutes(mins);
+                    Progress.setDailyGoalMinutes(val);
+                }
+                updateGoalUI(val);
+            }
+        }
+
+        customBtns.forEach((btn, idx) => {
+            btn.addEventListener('click', () => {
+                const inp = customInputs[idx] || customInputs[0];
+                if (inp) handleCustomSubmit(inp);
+            });
+        });
+
+        customInputs.forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleCustomSubmit(input);
                 }
             });
         });

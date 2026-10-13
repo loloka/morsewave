@@ -239,6 +239,12 @@ include __DIR__ . '/includes/header.php';
                 <div class="chip" data-mins="30">30 <?= t('acc.mins') ?></div>
                 <div class="chip" data-mins="45">45 <?= t('acc.mins') ?></div>
                 <div class="chip" data-mins="60">60 <?= t('acc.mins') ?></div>
+                <div class="chip" data-mins="custom"><?= t('acc.daily_goal_custom') ?></div>
+            </div>
+            <div class="daily-goal-custom-wrap mt-2 flex gap-2" style="display:none; align-items:center; flex-wrap:wrap;">
+                <input type="number" class="daily-goal-custom-input mono" min="1" max="720" placeholder="30" style="width:90px; padding:6px 10px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); color:var(--text);">
+                <button type="button" class="btn btn-sm btn-primary daily-goal-custom-btn"><?= t('common.save') ?></button>
+                <span class="muted" style="font-size:12px;"><?= t('acc.mins') ?> (1–720)</span>
             </div>
         </div>
 
@@ -322,13 +328,19 @@ include __DIR__ . '/includes/header.php';
         <p class="muted mt-1" style="font-size:12px;">
             <?= t('acc.daily_goal_desc') ?>
         </p>
-        <div class="chip-row mt-2" id="daily-goal-chips">
+        <div class="chip-row mt-2 daily-goal-chips" id="daily-goal-chips">
             <div class="chip" data-mins="10">10 <?= t('acc.mins') ?></div>
             <div class="chip" data-mins="15">15 <?= t('acc.mins') ?></div>
             <div class="chip" data-mins="20">20 <?= t('acc.mins') ?></div>
             <div class="chip" data-mins="30">30 <?= t('acc.mins') ?></div>
             <div class="chip" data-mins="45">45 <?= t('acc.mins') ?></div>
             <div class="chip" data-mins="60">60 <?= t('acc.mins') ?></div>
+            <div class="chip" data-mins="custom"><?= t('acc.daily_goal_custom') ?></div>
+        </div>
+        <div class="daily-goal-custom-wrap mt-2 flex gap-2" style="display:none; align-items:center; flex-wrap:wrap;">
+            <input type="number" class="daily-goal-custom-input mono" min="1" max="720" placeholder="30" style="width:90px; padding:6px 10px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); color:var(--text);">
+            <button type="button" class="btn btn-sm btn-primary daily-goal-custom-btn"><?= t('common.save') ?></button>
+            <span class="muted" style="font-size:12px;"><?= t('acc.mins') ?> (1–720)</span>
         </div>
     </div>
 </div>

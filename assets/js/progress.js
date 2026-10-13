@@ -714,12 +714,12 @@ const Progress = (() => {
 
     function getDailyGoalMinutes() {
         const saved = parseInt(localStorage.getItem('morsewave_daily_goal_mins'), 10);
-        return [10, 15, 20, 30, 45, 60].includes(saved) ? saved : 30;
+        return (!isNaN(saved) && saved >= 1 && saved <= 720) ? saved : 30;
     }
 
     function setDailyGoalMinutes(mins) {
         const val = parseInt(mins, 10);
-        if ([10, 15, 20, 30, 45, 60].includes(val)) {
+        if (!isNaN(val) && val >= 1 && val <= 720) {
             localStorage.setItem('morsewave_daily_goal_mins', val);
         }
     }
