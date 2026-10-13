@@ -9,6 +9,7 @@ return [
     'lang.switch_title' => 'Switch to English',
     'common.shortcut_enter' => 'Нажмите Enter, чтобы начать',
     'common.space' => 'Пробел',
+    'common.save' => 'Сохранить',
 
     // --- includes/header.php ---
     'site.title_suffix' => 'MorseWave',
@@ -83,7 +84,7 @@ return [
     'index.invasion_title' => 'Вторжение — аркадный тауэр-дефенс',
     'index.invasion_text' => 'Защищай базу от волн пришельцев: принимай морзе-символы на слух в реальном времени и отбивай атаки точными ударами боевой лопаты.',
     'index.invasion_btn' => 'В бой 🛸 →',
-    'index.invasion_tag_wave' => '100 знаков в волне',
+    'index.invasion_tag_wave' => '3 волны',
     'index.invasion_tag_bosses' => '3 босса',
     'index.invasion_tag_bonus' => '+50 XP бонус дня',
     'index.daily_eyebrow' => 'Задание дня',

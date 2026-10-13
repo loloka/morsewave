@@ -6,6 +6,7 @@ return [
     'lang.switch_title' => 'Переключить на русский',
     'common.shortcut_enter' => 'Press Enter to start',
     'common.space' => 'Space',
+    'common.save' => 'Save',
 
     // --- includes/header.php ---
     'site.title_suffix' => 'MorseWave',
@@ -80,7 +81,7 @@ return [
     'index.invasion_title' => 'Invasion — Ear Training Arcade',
     'index.invasion_text' => 'Defend your base from alien waves: decode Morse symbols by ear in real time and strike back with your combat shovel.',
     'index.invasion_btn' => 'To battle 🛸 →',
-    'index.invasion_tag_wave' => '100 wave kills',
+    'index.invasion_tag_wave' => '3 waves',
     'index.invasion_tag_bosses' => '3 bosses',
     'index.invasion_tag_bonus' => '+50 XP daily bonus',
     'index.daily_eyebrow' => 'Daily challenge',
