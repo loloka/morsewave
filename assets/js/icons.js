@@ -30,7 +30,8 @@
         zap:        '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
         heart:      '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>',
         levels:     '<rect x="4" y="14" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/>',
-        tower:      '<path d="M12 2v5"/><circle cx="12" cy="7" r="1.5"/><path d="M7 21l3.5-11.5M17 21l-3.5-11.5"/><path d="M8.5 16h7M10 12h4"/><path d="M7.5 4a5 5 0 0 0 0 4M16.5 4a5 5 0 0 1 0 4"/>'
+        tower:      '<path d="M12 2v5"/><circle cx="12" cy="7" r="1.5"/><path d="M7 21l3.5-11.5M17 21l-3.5-11.5"/><path d="M8.5 16h7M10 12h4"/><path d="M7.5 4a5 5 0 0 0 0 4M16.5 4a5 5 0 0 1 0 4"/>',
+        sparkles:   '<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9L12 3z"/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>'
     };
 
     function icon(name, size) {

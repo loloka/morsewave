@@ -110,7 +110,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="card-eyebrow"><?= t('acc.logged_in_as') ?></div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <h2 class="mt-0" id="profile-name" style="margin-bottom:0;"></h2>
-                        <span id="profile-sponsor-badge" style="display:none;" class="wall-badge">👑 <?= t('account.sponsor_badge') ?></span>
+                        <span id="profile-sponsor-badge" style="display:none;" class="wall-badge"><?= mw_icon('crown', 13) ?> <?= t('account.sponsor_badge') ?></span>
                     </div>
                     <p class="muted mt-0" id="profile-email" style="font-size:13px;"></p>
                 </div>
@@ -139,13 +139,13 @@ include __DIR__ . '/includes/header.php';
             </p>
 
             <div class="sponsor-badge-selector" id="sponsor-badge-options">
-                <button type="button" class="sponsor-badge-btn" data-badge="crown" title="Корона">👑 Корона</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="heart" title="Сердечко">💖 Сердечко</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="lightning" title="Молния">⚡ Молния</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="radio" title="Трансивер">📻 Трансивер</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="star" title="Звезда">⭐ Звезда</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="sparkles" title="Сияние">✨ Сияние</button>
-                <button type="button" class="sponsor-badge-btn" data-badge="none" title="Скрыть значок">🚫 Без значка</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="crown" title="Корона"><?= mw_icon('crown', 16) ?> Корона</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="heart" title="Сердечко"><?= mw_icon('heart', 16) ?> Сердечко</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="lightning" title="Молния"><?= mw_icon('zap', 16) ?> Молния</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="radio" title="Трансивер"><?= mw_icon('radio', 16) ?> Трансивер</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="star" title="Звезда"><?= mw_icon('star', 16) ?> Звезда</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="sparkles" title="Сияние"><?= mw_icon('sparkles', 16) ?> Сияние</button>
+                <button type="button" class="sponsor-badge-btn" data-badge="none" title="Скрыть значок"><?= mw_icon('lock', 15) ?> Без значка</button>
             </div>
             <div id="sponsor-badge-feedback" class="feedback mt-2" style="font-size:13px; min-height:18px;"></div>
         </div>

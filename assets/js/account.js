@@ -214,6 +214,17 @@
         none: 'none'
     };
 
+    function getSponsorIcon(slug, size = 13) {
+        if (!slug || slug === 'none') return '';
+        const cleanSlug = SPONSOR_SLUG_MAP[slug] || slug;
+        if (cleanSlug === 'none') return '';
+        const iconName = cleanSlug === 'lightning' ? 'zap' : cleanSlug;
+        if (typeof MWIcon === 'function') {
+            return MWIcon(iconName, size);
+        }
+        return SPONSOR_BADGE_MAP[cleanSlug] || '👑';
+    }
+
     function renderSponsorState(user) {
         const badge = document.getElementById('profile-sponsor-badge');
         const chatCard = document.getElementById('supporter-chat-card');
@@ -226,7 +237,7 @@
         if (badge) {
             badge.style.display = isSponsor ? 'inline-block' : 'none';
             if (isSponsor) {
-                const icon = SPONSOR_BADGE_MAP[currentSlug] || '👑';
+                const icon = getSponsorIcon(currentSlug, 13);
                 badge.innerHTML = `${icon ? icon + ' ' : ''}${t('account.sponsor_badge')}`;
             }
         }
@@ -297,7 +308,7 @@
                         }
                         const badgeEl = document.getElementById('profile-sponsor-badge');
                         if (badgeEl) {
-                            const icon = SPONSOR_BADGE_MAP[newSlug] || '';
+                            const icon = getSponsorIcon(newSlug, 13);
                             badgeEl.innerHTML = `${icon ? icon + ' ' : ''}${t('account.sponsor_badge')}`;
                         }
                     } else {

@@ -1914,38 +1914,53 @@ input[type="range"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1;
     padding: 1px 2px;
     cursor: pointer;
-    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.65));
     transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
     user-select: none;
     overflow: visible;
 }
+.sponsor-crown svg {
+    display: block;
+    width: 14px;
+    height: 14px;
+    pointer-events: none;
+}
 @media (hover: hover) and (pointer: fine) {
     .sponsor-badge-wrap:hover .sponsor-crown {
-        transform: scale(1.25) rotate(6deg);
+        transform: scale(1.22) rotate(6deg);
     }
 }
 .sponsor-badge-wrap.active .sponsor-crown {
-    transform: scale(1.25) rotate(6deg);
+    transform: scale(1.22) rotate(6deg);
 }
 
-/* Персональные мягкие свечения под разные типы значков */
+/* Персональные мягкие свечения и акцентные цвета значков спонсора */
+.sponsor-badge-wrap[data-badge="crown"] .sponsor-crown {
+    color: #e6a838;
+    filter: drop-shadow(0 0 5px rgba(230, 168, 56, 0.75));
+}
 .sponsor-badge-wrap[data-badge="heart"] .sponsor-crown {
+    color: #ff6b8b;
     filter: drop-shadow(0 0 5px rgba(255, 107, 139, 0.85)) drop-shadow(0 0 2px rgba(255, 215, 0, 0.35));
 }
 .sponsor-badge-wrap[data-badge="lightning"] .sponsor-crown {
+    color: #ffd700;
     filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.85));
 }
 .sponsor-badge-wrap[data-badge="radio"] .sponsor-crown {
+    color: #4fd8c4;
     filter: drop-shadow(0 0 5px rgba(79, 216, 196, 0.75));
 }
-.sponsor-badge-wrap[data-badge="crown"] .sponsor-crown,
-.sponsor-badge-wrap[data-badge="star"] .sponsor-crown,
+.sponsor-badge-wrap[data-badge="star"] .sponsor-crown {
+    color: #f2c94c;
+    filter: drop-shadow(0 0 5px rgba(242, 201, 76, 0.75));
+}
 .sponsor-badge-wrap[data-badge="sparkles"] .sponsor-crown {
-    filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.7));
+    color: #e6a838;
+    filter: drop-shadow(0 0 5px rgba(230, 168, 56, 0.75));
 }
 
 /* Красивая стилизованная плашка-тултип спонсора */
@@ -1998,9 +2013,18 @@ input[type="range"] {
     border-color: #15181b transparent transparent transparent;
 }
 .sponsor-tooltip-spark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     font-size: 12px;
     line-height: 1;
+    color: var(--accent);
     filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
+}
+.sponsor-tooltip-spark svg {
+    width: 11px;
+    height: 11px;
+    display: block;
 }
 @media (hover: hover) and (pointer: fine) {
     .sponsor-badge-wrap:hover .sponsor-tooltip {
@@ -2292,22 +2316,38 @@ input[type="range"] {
 .sponsor-badge-btn {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 8px 16px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
     background: var(--surface-2);
     color: var(--text);
-    font-size: 14px;
+    font-family: var(--font-ui);
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.15s ease;
     user-select: none;
 }
+.sponsor-badge-btn svg {
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+}
+.sponsor-badge-btn[data-badge="crown"] svg { color: #e6a838; }
+.sponsor-badge-btn[data-badge="heart"] svg { color: #ff6b8b; }
+.sponsor-badge-btn[data-badge="lightning"] svg { color: #ffd700; }
+.sponsor-badge-btn[data-badge="radio"] svg { color: #4fd8c4; }
+.sponsor-badge-btn[data-badge="star"] svg { color: #f2c94c; }
+.sponsor-badge-btn[data-badge="sparkles"] svg { color: #e6a838; }
+.sponsor-badge-btn[data-badge="none"] svg { color: var(--text-faint); }
+
 .sponsor-badge-btn:hover {
     border-color: var(--accent);
     background: var(--surface);
     transform: translateY(-1px);
+}
+.sponsor-badge-btn:hover svg {
+    transform: scale(1.15);
 }
 .sponsor-badge-btn.active {
     border-color: var(--accent);

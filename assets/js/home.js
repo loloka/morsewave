@@ -128,16 +128,16 @@
         }
         function getSponsorBadgeHtml(item) {
             if (!item || !item.is_sponsor) return '';
-            const BADGE_MAP = {
-                crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '',
-                '👑': '👑', '💖': '💖', '⚡': '⚡', '📻': '📻', '⭐': '⭐', '✨': '✨'
-            };
             const slug = item.sponsor_badge || 'crown';
-            const icon = item.sponsor_badge_icon || BADGE_MAP[slug] || (slug === 'none' ? '' : '👑');
-            if (!icon) return '';
-            const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
+            if (slug === 'none') return '';
             const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
-            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
+            const iconName = cleanSlug === 'lightning' ? 'zap' : cleanSlug;
+            const icon = (typeof MWIcon === 'function')
+                ? MWIcon(iconName, 14)
+                : ({ crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨' }[cleanSlug] || '👑');
+            const tooltip = t('leaderboard.sponsor_tooltip') || 'Спонсор проекта MorseWave';
+            const sparkIcon = (typeof MWIcon === 'function') ? MWIcon('sparkles', 11) : '✨';
+            return `<span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="${escapeHtml(tooltip)}"><span class="sponsor-crown">${icon}</span><span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">${sparkIcon}</span><span class="sponsor-tooltip-text">${escapeHtml(tooltip)}</span></span></span>`;
         }
 
         const medals = ['🥇', '🥈', '🥉'];

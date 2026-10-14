@@ -129,14 +129,17 @@
                 const isSponsor = Number(d.is_sponsor) || d.amount >= 150;
                 const badgeText = d.amount > 0 ? `${d.amount} ₽` : '💌 0 ₽';
                 const dateStr = (d.created_at || '').slice(0, 10);
-                const BADGE_MAP = { crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨', none: '' };
                 const slug = d.sponsor_badge || 'crown';
-                const sponsorIcon = BADGE_MAP[slug] !== undefined ? BADGE_MAP[slug] : (d.sponsor_badge || '👑');
                 const cleanSlug = ['crown', 'heart', 'lightning', 'radio', 'star', 'sparkles'].includes(slug) ? slug : 'crown';
-                const sponsorBadgeHtml = isSponsor && sponsorIcon ? `
+                const iconName = cleanSlug === 'lightning' ? 'zap' : cleanSlug;
+                const sponsorIcon = (typeof MWIcon === 'function')
+                    ? MWIcon(iconName, 14)
+                    : ({ crown: '👑', heart: '💖', lightning: '⚡', radio: '📻', star: '⭐', sparkles: '✨' }[cleanSlug] || '👑');
+                const sparkIcon = (typeof MWIcon === 'function') ? MWIcon('sparkles', 11) : '✨';
+                const sponsorBadgeHtml = isSponsor && slug !== 'none' ? `
                     <span class="sponsor-badge-wrap" data-badge="${cleanSlug}" role="img" aria-label="Спонсор проекта MorseWave">
                         <span class="sponsor-crown">${sponsorIcon}</span>
-                        <span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">✨</span><span class="sponsor-tooltip-text">Спонсор проекта MorseWave</span></span>
+                        <span class="sponsor-tooltip" role="tooltip"><span class="sponsor-tooltip-spark">${sparkIcon}</span><span class="sponsor-tooltip-text">Спонсор проекта MorseWave</span></span>
                     </span>` : '';
 
                 return `
