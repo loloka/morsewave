@@ -1,17 +1,14 @@
 <?php
 require_once __DIR__ . '/icons.php';
-// Владелец посмотрел живьём: эмодзи в навигации и на ачивках выглядят
-// живее наших line-иконок — вернули эмодзи в таббаре и огоньке серии,
-// mw_icon() тут больше не используется, но файл оставлен — им ещё
-// пользуются "Буквы" (галочка) и часть главной (книга/мишень).
+// Навигация MorseWave: строгие контурные SVG-иконки вместо цветных эмодзи
 $navItems = [
-    'index'       => ['label' => t('nav.home'),         'icon' => '🏠', 'href' => 'index.php'],
-    'learn'       => ['label' => t('nav.learn'),        'icon' => '📖', 'href' => 'learn.php'],
-    'koch'        => ['label' => t('nav.koch'),         'icon' => '🎯', 'href' => 'koch.php'],
-    'groups'      => ['label' => t('nav.groups'),       'icon' => '🔢', 'href' => 'groups.php'],
-    'callsigns'   => ['label' => t('nav.callsigns'),    'icon' => '📡', 'href' => 'callsigns.php'],
-    'achievements'=> ['label' => t('nav.achievements'), 'icon' => '🏆', 'href' => 'achievements.php'],
-    'account'     => ['label' => t('nav.account'),      'icon' => '👤', 'href' => 'account.php'],
+    'index'       => ['label' => t('nav.home'),         'icon' => 'home',    'href' => 'index.php'],
+    'learn'       => ['label' => t('nav.learn'),        'icon' => 'book',    'href' => 'learn.php'],
+    'koch'        => ['label' => t('nav.koch'),         'icon' => 'headphones', 'href' => 'koch.php'],
+    'groups'      => ['label' => t('nav.groups'),       'icon' => 'levels',     'href' => 'groups.php'],
+    'callsigns'   => ['label' => t('nav.callsigns'),    'icon' => 'tower',      'href' => 'callsigns.php'],
+    'achievements'=> ['label' => t('nav.achievements'), 'icon' => 'trophy',  'href' => 'achievements.php'],
+    'account'     => ['label' => t('nav.account'),      'icon' => 'user',    'href' => 'account.php'],
 ];
 ?>
 <nav class="topnav">
@@ -28,14 +25,14 @@ $navItems = [
     <a href="account.php" class="nav-stats" title="<?= htmlspecialchars(t('nav.open_profile')) ?>">
         <span><?= t('nav.xp') ?> <b data-nav-xp>0</b></span>
         <span><?= t('nav.level') ?> <b data-nav-level>1</b></span>
-        <span>🔥 <b data-nav-streak>0</b></span>
+        <span class="nav-stat-streak" title="<?= htmlspecialchars(t('acc.streak_days')) ?>"><?= mw_icon('flame', 15) ?> <b data-nav-streak>0</b></span>
     </a>
 </nav>
 
 <div class="tabbar">
     <?php foreach ($navItems as $key => $item): ?>
         <a href="<?= $item['href'] ?>" class="<?= $activePage === $key ? 'active' : '' ?>">
-            <span class="tab-icon"><?= $item['icon'] ?></span>
+            <span class="tab-icon"><?= mw_icon($item['icon'], 20) ?></span>
             <span><?= $item['label'] ?></span>
         </a>
     <?php endforeach; ?>

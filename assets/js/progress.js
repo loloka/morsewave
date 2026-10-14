@@ -168,6 +168,15 @@ const Progress = (() => {
             if (parsed.kochLevelEarned === undefined) {
                 state.kochLevelEarned = state.kochLevel;
             }
+            if (!Array.isArray(state.unlockedAchievements)) {
+                state.unlockedAchievements = [];
+            }
+            if (!Array.isArray(state.learnedLetters)) {
+                state.learnedLetters = [];
+            }
+            if (!state.stats || typeof state.stats !== 'object') {
+                state.stats = defaults().stats;
+            }
             return state;
         } catch {
             return defaults();
@@ -991,12 +1000,31 @@ const Progress = (() => {
     let achievementsPromise = null;
 
     async function fetchAchievementDefs() {
-        if (cachedAchievements) return cachedAchievements;
+        if (cachedAchievements && cachedAchievements.length > 0) return cachedAchievements;
         if (!achievementsPromise) {
-            achievementsPromise = fetchDashboard(['achievements'])
-                .then((data) => { cachedAchievements = data.achievements || []; return cachedAchievements; })
-                .catch(() => { cachedAchievements = []; return cachedAchievements; })
-                .finally(() => { achievementsPromise = null; });
+            achievementsPromise = (async () => {
+                try {
+                    const data = await fetchDashboard(['achievements']);
+                    if (data && Array.isArray(data.achievements) && data.achievements.length > 0) {
+                        cachedAchievements = data.achievements;
+                        return cachedAchievements;
+                    }
+                } catch { /* пробуем fallback */ }
+
+                // Запасной fallback на прямой эндпоинт, если batch-ответ не вернул ачивки
+                try {
+                    const res = await fetch('api/achievements.php');
+                    if (res.ok) {
+                        const direct = await res.json();
+                        if (Array.isArray(direct) && direct.length > 0) {
+                            cachedAchievements = direct;
+                            return cachedAchievements;
+                        }
+                    }
+                } catch { /* не удалось */ }
+
+                return cachedAchievements || [];
+            })().finally(() => { achievementsPromise = null; });
         }
         return achievementsPromise;
     }

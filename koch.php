@@ -70,7 +70,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            💡 <?= t('koch.farnsworth_tooltip') ?>
+            <?= mw_icon('info', 14) ?> <?= t('koch.farnsworth_tooltip') ?>
         </div>
     </div>
 
@@ -90,7 +90,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="muted mt-2" id="koch-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            💡 <?= t('groups.buffer_tooltip') ?>
+            <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
         </div>
         <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
             <?= t('groups.buffer_hint') ?>
@@ -146,7 +146,7 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-2" id="pair-prompt-block" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:12px 16px;">
         <div class="flex-between flex-wrap gap-2" style="align-items:center;">
             <div>
-                <div style="font-weight:700; font-size:13px; color:var(--accent);">🥊 <?= t('groups.pair_prompt_title') ?></div>
+                <div style="font-weight:700; font-size:13px; color:var(--accent);"><?= mw_icon('zap', 14) ?> <?= t('groups.pair_prompt_title') ?></div>
                 <div class="muted mt-1" style="font-size:12px;" id="pair-prompt-text"></div>
             </div>
             <button class="btn btn-sm btn-primary" id="pair-prompt-btn" type="button"><?= t('groups.pair_prompt_btn') ?></button>

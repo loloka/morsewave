@@ -228,7 +228,7 @@ include __DIR__ . '/includes/header.php';
         </details>
 
         <div class="card mt-2">
-            <h3 class="mt-0">🎯 <?= t('acc.daily_goal_title') ?></h3>
+            <h3 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('target', 18) ?> <?= t('acc.daily_goal_title') ?></h3>
             <p class="muted mt-1" style="font-size:12px;">
                 <?= t('acc.daily_goal_desc') ?>
             </p>

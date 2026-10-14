@@ -45,7 +45,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            💡 <?= t('koch.farnsworth_tooltip') ?>
+            <?= mw_icon('info', 14) ?> <?= t('koch.farnsworth_tooltip') ?>
         </div>
     </div>
 
@@ -65,7 +65,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         <div class="muted mt-2" id="cs-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            💡 <?= t('groups.buffer_tooltip') ?>
+            <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
         </div>
         <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
             <?= t('groups.buffer_hint') ?>

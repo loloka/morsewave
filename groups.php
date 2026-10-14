@@ -101,7 +101,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                💡 <?= t('groups.farnsworth_tooltip') ?>
+                <?= mw_icon('info', 14) ?> <?= t('groups.farnsworth_tooltip') ?>
             </div>
         </div>
 
@@ -121,7 +121,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="muted mt-2" id="groups-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                💡 <?= t('groups.buffer_tooltip') ?>
+                <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
             </div>
             <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
                 <?= t('groups.buffer_hint') ?>
@@ -141,7 +141,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                💡 <?= t('groups.paper_tooltip') ?>
+                <?= mw_icon('info', 14) ?> <?= t('groups.paper_tooltip') ?>
             </div>
         </div>
     </div>
@@ -154,7 +154,7 @@ include __DIR__ . '/includes/header.php';
 
         <div id="pairs-smart-info" class="card mt-2" style="background:var(--surface-2); border:1px dashed var(--border); padding:12px 16px;">
             <div class="flex gap-2" style="align-items:center;">
-                <span style="font-size:22px;">🧠</span>
+                <span class="flex" style="align-items:center; color:var(--accent);"><?= mw_icon('target', 20) ?></span>
                 <div style="font-size:12px; line-height:1.4;">
                     <b style="color:var(--text);"><?= t('groups.pairs_smart_active_title') ?>:</b> 
                     <span class="muted"><?= t('groups.pairs_smart_active_desc') ?></span>
@@ -258,7 +258,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                💡 <?= t('groups.farnsworth_tooltip') ?>
+                <?= mw_icon('info', 14) ?> <?= t('groups.farnsworth_tooltip') ?>
             </div>
         </div>
 
@@ -278,7 +278,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="muted mt-2" id="pairs-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                💡 <?= t('groups.buffer_tooltip') ?>
+                <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
             </div>
         </div>
     </div>
@@ -339,15 +339,15 @@ include __DIR__ . '/includes/header.php';
     <div class="signal-line mt-2" id="groups-signal"></div>
 
     <div id="qrq-session-display" style="display:none; text-align:center; padding:20px 0;">
-        <div id="qrq-status-msg" style="font-size:18px; color:var(--text); font-weight:700;">🎧 <?= t('js.groups.qrq_active_listening') ?></div>
+        <div id="qrq-status-msg" class="flex gap-1" style="align-items:center; justify-content:center; font-size:18px; color:var(--text); font-weight:700;"><?= mw_icon('headphones', 20) ?> <?= t('js.groups.qrq_active_listening') ?></div>
         <div id="qrq-tip-msg" class="muted mt-2" style="font-size:14px; min-height:42px; line-height:1.4;"></div>
         <div id="qrq-revealed-group" class="mono mt-2" style="font-size:36px; letter-spacing:6px; color:var(--signal); min-height:50px; font-weight:bold;"></div>
     </div>
 
     <!-- Режим приёма на бумагу: индикатор воспроизведения / паузы -->
     <div id="paper-session-display" style="display:none; text-align:center; padding:24px 0;">
-        <div style="font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;">📝 <?= t('groups.paper_mode') ?></div>
-        <div id="paper-status-msg" style="font-size:22px; color:var(--text); font-weight:700; margin-top:8px;">🎧 <?= t('groups.paper_listening') ?></div>
+        <div class="flex gap-1" style="align-items:center; justify-content:center; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;"><?= mw_icon('notebook', 16) ?> <?= t('groups.paper_mode') ?></div>
+        <div id="paper-status-msg" class="flex gap-1" style="align-items:center; justify-content:center; font-size:22px; color:var(--text); font-weight:700; margin-top:8px;"><?= mw_icon('headphones', 22) ?> <?= t('groups.paper_listening') ?></div>
         <div id="paper-sub-msg" class="muted mt-2" style="font-size:14px; min-height:24px;"></div>
         <div id="paper-progress-wrap" style="max-width:320px; margin:16px auto 0; background:rgba(255,255,255,0.08); height:6px; border-radius:3px; overflow:hidden; display:none;">
             <div id="paper-progress-bar" style="width:100%; height:100%; background:var(--accent); transition:width 0.1s linear;"></div>
@@ -425,7 +425,7 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-2" id="pair-prompt-block" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:12px 16px;">
         <div class="flex-between flex-wrap gap-2" style="align-items:center;">
             <div>
-                <div style="font-weight:700; font-size:13px; color:var(--accent);">🥊 <?= t('groups.pair_prompt_title') ?></div>
+                <div style="font-weight:700; font-size:13px; color:var(--accent); display:flex; align-items:center; gap:4px;"><?= mw_icon('zap', 14) ?> <?= t('groups.pair_prompt_title') ?></div>
                 <div class="muted mt-1" style="font-size:12px;" id="pair-prompt-text"></div>
             </div>
             <button class="btn btn-sm btn-primary" id="pair-prompt-btn" type="button"><?= t('groups.pair_prompt_btn') ?></button>

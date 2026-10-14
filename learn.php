@@ -226,7 +226,7 @@ include __DIR__ . '/includes/header.php';
                 <!-- Живой перехват шифрограммы 3-го босса прямо внутри экрана игры -->
                 <div class="invasion-screen-quote" id="invasion-quote-box" style="display:none;">
                     <div class="invasion-screen-quote-inner">
-                        <span class="invasion-quote-badge">📻 <span id="invasion-quote-progress">0/0</span></span>
+                        <span class="invasion-quote-badge"><?= mw_icon('radio', 13) ?> <span id="invasion-quote-progress">0/0</span></span>
                         <div class="invasion-quote-display mono" id="invasion-quote-display"></div>
                         <div class="invasion-quote-translation" id="invasion-quote-translation" style="display:none;"></div>
                     </div>
@@ -241,13 +241,13 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="invasion-powerups">
             <button class="btn btn-sm powerup-btn" id="invasion-pu-repair" disabled>
-                <span class="pu-icon">💖</span> <span class="pu-name"><?= t('learn.invasion_pu_repair') ?></span> <span class="pu-cost">x10</span>
+                <span class="pu-icon"><?= mw_icon('heart', 14) ?></span> <span class="pu-name"><?= t('learn.invasion_pu_repair') ?></span> <span class="pu-cost">x10</span>
             </button>
             <button class="btn btn-sm powerup-btn" id="invasion-pu-slow" disabled>
-                <span class="pu-icon">⏱️</span> <span class="pu-name"><?= t('learn.invasion_pu_slow') ?></span> <span class="pu-cost">x15</span> <kbd class="muted">Space</kbd>
+                <span class="pu-icon"><?= mw_icon('target', 14) ?></span> <span class="pu-name"><?= t('learn.invasion_pu_slow') ?></span> <span class="pu-cost">x15</span> <kbd class="muted">Space</kbd>
             </button>
             <button class="btn btn-sm powerup-btn" id="invasion-pu-nuke" disabled>
-                <span class="pu-icon">📡</span> <span class="pu-name"><?= t('learn.invasion_pu_nuke') ?></span> <span class="pu-cost">x30</span> <kbd class="muted">Enter</kbd>
+                <span class="pu-icon"><?= mw_icon('antenna', 14) ?></span> <span class="pu-name"><?= t('learn.invasion_pu_nuke') ?></span> <span class="pu-cost">x30</span> <kbd class="muted">Enter</kbd>
             </button>
         </div>
 
@@ -276,15 +276,15 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <div class="stat">
                     <span class="value" id="invasion-result-kills">0</span>
-                    <span class="label">👾 <?= t('learn.invasion_stat_kills') ?></span>
+                    <span class="label"><?= mw_icon('target', 12) ?> <?= t('learn.invasion_stat_kills') ?></span>
                 </div>
                 <div class="stat">
                     <span class="value" id="invasion-result-hp">100/100</span>
-                    <span class="label">💖 <?= t('learn.invasion_base_hp') ?></span>
+                    <span class="label"><?= mw_icon('heart', 12) ?> <?= t('learn.invasion_base_hp') ?></span>
                 </div>
                 <div class="stat">
                     <span class="value" id="invasion-result-xp" style="color:var(--primary); font-weight:bold;">+0</span>
-                    <span class="label">⭐ <?= t('learn.invasion_stat_xp') ?></span>
+                    <span class="label"><?= mw_icon('star', 12) ?> <?= t('learn.invasion_stat_xp') ?></span>
                 </div>
             </div>
 
@@ -296,7 +296,7 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Расшифрованная радиограмма финального босса -->
             <div class="mt-2 p-2" id="invasion-result-quote-box" style="display:none; background:var(--bg); border-radius:6px; border:1px solid rgba(86, 204, 242, 0.4); text-align:center;">
-                <div class="muted mono" style="font-size:11px; margin-bottom:4px; letter-spacing:0.5px;">📻 <?= t('learn.invasion_quote_intercept') ?></div>
+                <div class="muted" style="font-size:11px; margin-bottom:4px; letter-spacing:0.5px;"><?= mw_icon('radio', 13) ?> <?= t('learn.invasion_quote_intercept') ?></div>
                 <div id="invasion-result-quote-text" class="mono" style="font-size:15px; font-weight:bold; color:var(--accent);"></div>
                 <div id="invasion-result-quote-trans" class="muted" style="font-size:12px; margin-top:3px; font-style:italic;"></div>
             </div>

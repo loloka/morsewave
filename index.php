@@ -46,13 +46,13 @@ include __DIR__ . '/includes/header.php';
                 </div>
 
                 <div class="promo-card-body">
-                    <h3 class="promo-card-title">👾 <?= t('index.invasion_title') ?></h3>
+                    <h3 class="promo-card-title"><?= t('index.invasion_title') ?></h3>
                     <p class="promo-card-desc"><?= t('index.invasion_text') ?></p>
 
                     <div class="promo-tags-row mono">
                         <span class="promo-tag"><span class="tag-pulse"></span><?= t('index.invasion_tag_wave') ?></span>
-                        <span class="promo-tag">🛸 <?= t('index.invasion_tag_bosses') ?></span>
-                        <span class="promo-tag">⭐ <?= t('index.invasion_tag_bonus') ?></span>
+                        <span class="promo-tag"><?= t('index.invasion_tag_bosses') ?></span>
+                        <span class="promo-tag"><?= mw_icon('star', 12) ?> <?= t('index.invasion_tag_bonus') ?></span>
                     </div>
 
                     <div class="promo-card-footer">
@@ -80,7 +80,7 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div class="card stat">
             <span class="label"><?= t('index.stat_streak') ?></span>
-            <span class="value">🔥 <span data-nav-streak>0</span></span>
+            <span class="value flex gap-1" style="align-items:center; color:var(--accent);"><?= mw_icon('flame', 22) ?> <span data-nav-streak>0</span></span>
         </div>
         <div class="card stat">
             <span class="label"><?= t('index.stat_learned') ?></span>
@@ -128,7 +128,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-icon"><?= mw_icon('target', 22) ?></div>
+                <div class="step-icon"><?= mw_icon('headphones', 22) ?></div>
                 <h3><?= t('index.step2_title') ?></h3>
                 <p><?= t('index.step2_text') ?></p>
                 <a href="koch.php" class="btn btn-sm"><?= t('index.step2_btn') ?></a>
@@ -138,7 +138,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">3</div>
             <div class="step-content">
-                <div class="step-icon">🔢</div>
+                <div class="step-icon"><?= mw_icon('levels', 22) ?></div>
                 <h3><?= t('index.step3_title') ?></h3>
                 <p><?= t('index.step3_text') ?></p>
                 <a href="groups.php" class="btn btn-sm"><?= t('index.step3_btn') ?></a>
@@ -148,7 +148,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">4</div>
             <div class="step-content">
-                <div class="step-icon">📡</div>
+                <div class="step-icon"><?= mw_icon('tower', 22) ?></div>
                 <h3><?= t('index.step4_title') ?></h3>
                 <p><?= t('index.step4_text') ?></p>
                 <div class="btn-row">
@@ -165,7 +165,7 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">5</div>
             <div class="step-content">
-                <div class="step-icon">📻</div>
+                <div class="step-icon"><?= mw_icon('radio', 22) ?></div>
                 <h3><?= t('index.step5_title') ?></h3>
                 <p><?= t('index.step5_text') ?></p>
                 <p class="muted" style="font-size:12px;"><?= strtr(t('index.step5_credit'), [

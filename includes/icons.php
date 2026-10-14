@@ -28,6 +28,12 @@ function mw_icon(string $name, int $size = 18): string
         'graduate'   => '<path d="M12 4L2 9l10 5 10-5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/>',
         'check'      => '<path d="M4 12.5l5 5L20 6"/>',
         'lock'       => '<rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/>',
+        'info'       => '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="8.01"/><line x1="12" y1="11" x2="12" y2="16"/>',
+        'radio'      => '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M6 18h.01M10 18h.01"/><circle cx="14" cy="12" r="3"/><line x1="19" y1="3" x2="6" y2="7"/>',
+        'zap'        => '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+        'heart'      => '<path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>',
+        'levels'     => '<rect x="4" y="14" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/>',
+        'tower'      => '<path d="M12 2v5"/><circle cx="12" cy="7" r="1.5"/><path d="M7 21l3.5-11.5M17 21l-3.5-11.5"/><path d="M8.5 16h7M10 12h4"/><path d="M7.5 4a5 5 0 0 0 0 4M16.5 4a5 5 0 0 1 0 4"/>',
     ];
 
     $inner = $paths[$name] ?? $paths['star'];

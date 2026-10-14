@@ -13,13 +13,14 @@
 
     function renderGrid() {
         const state = Progress.load();
+        const unlocked = Array.isArray(state?.unlockedAchievements) ? state.unlockedAchievements : [];
         if (!defs.length) {
-            grid.innerHTML = '<p>' + t('js.ach.load_failed') + '</p>';
+            grid.innerHTML = '<p class="muted">' + t('js.ach.load_failed') + '</p>';
             return;
         }
 
         grid.innerHTML = defs.map(a => `
-            <div class="badge ${state.unlockedAchievements.includes(a.code) ? 'unlocked' : ''}">
+            <div class="badge ${unlocked.includes(a.code) ? 'unlocked' : ''}">
                 <div class="icon">${a.icon}</div>
                 <div class="badge-text">
                     <div class="title">${a.title}</div>

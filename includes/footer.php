@@ -16,7 +16,7 @@
         <span class="dot">·</span>
         <a href="keyhardware.php"><?= t('footer.key_hardware') ?></a>
         <span class="dot">·</span>
-        <a href="donate.php" class="footer-donate-btn">💖 <?= t('footer.donate') ?></a>
+        <a href="donate.php" class="footer-donate-btn"><?= mw_icon('heart', 14) ?> <?= t('footer.donate') ?></a>
     </div>
 </footer>
 <script src="<?= asset_v('assets/js/i18n.js') ?>"></script>
