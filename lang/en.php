@@ -318,6 +318,7 @@ return [
     'groups.exam_pace_training' => 'Practice Pace',
     'groups.exam_pace_official_desc' => 'Official standard: characters at 20 WPM, effective pace ≈60 cpm.',
     'groups.exam_pace_training_desc' => 'Full exam format (50 groups, letters + digits), at your comfortable speed.',
+    'groups.speed_label' => 'Character speed',
     'groups.exam_training_speed_desc' => 'Choose your character speed (start with 10–12 WPM)',
     'groups.exam_speed_fixed' => '🎓 Exam speed is fixed by the standard (letters ~20 wpm, pauses stretched to ≈60 characters/min) — the slider plays no part here.',
     'groups.group_label' => 'Group',
