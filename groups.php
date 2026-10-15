@@ -6,11 +6,13 @@ $pageScript = 'groups.js';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="card-eyebrow"><?= t('groups.eyebrow') ?></div>
-<h1><?= t('groups.h1') ?></h1>
-<p><?= t('groups.intro') ?></p>
+<div class="groups-header-wrap">
+    <div class="card-eyebrow"><?= t('groups.eyebrow') ?></div>
+    <h1><?= t('groups.h1') ?></h1>
+    <p class="groups-page-intro"><?= t('groups.intro') ?></p>
+</div>
 
-<div class="mode-switch">
+<div class="mode-switch groups-mode-switch">
     <div class="chip active" data-mode="groups"><?= t('groups.mode_groups') ?></div>
     <div class="chip" data-mode="words"><?= t('groups.mode_words') ?></div>
     <div class="chip" data-mode="abbrev"><?= t('groups.mode_abbrev') ?></div>
@@ -20,7 +22,7 @@ include __DIR__ . '/includes/header.php';
 <div id="groups-mode">
 
 <div class="card mt-2" id="setup-panel">
-    <h3><?= t('groups.settings') ?></h3>
+    <h3 class="groups-settings-title"><?= t('groups.settings') ?></h3>
 
     <div class="segmented-nav mt-1" id="groups-exam-toggle">
         <button type="button" class="segmented-tab active" data-type="training"><?= t('groups.mode_training') ?></button>
@@ -145,10 +147,10 @@ include __DIR__ . '/includes/header.php';
                 <div class="groups-param-label"><?= t('groups.groups_per_session') ?></div>
                 <div class="groups-select-wrap">
                     <select id="groups-count" class="select-styled">
-                        <option value="10">10 <?= t('groups.groups_unit', ['{count}' => 10]) ?? 'групп' ?></option>
-                        <option value="20" selected>20 <?= t('groups.groups_unit', ['{count}' => 20]) ?? 'групп' ?></option>
-                        <option value="30">30 <?= t('groups.groups_unit', ['{count}' => 30]) ?? 'групп' ?></option>
-                        <option value="50">50 <?= t('groups.groups_unit', ['{count}' => 50]) ?? 'групп' ?></option>
+                        <option value="10">10 <?= t('groups.groups_unit') ?></option>
+                        <option value="20" selected>20 <?= t('groups.groups_unit') ?></option>
+                        <option value="30">30 <?= t('groups.groups_unit') ?></option>
+                        <option value="50">50 <?= t('groups.groups_unit') ?></option>
                     </select>
                 </div>
             </div>

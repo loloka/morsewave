@@ -198,6 +198,7 @@ return [
     'groups.collapse_charset' => 'Collapse',
     'groups.choose_charset_desc' => 'Select character set for training:',
     'groups.extra_settings' => 'Extra options',
+    'groups.groups_unit' => 'groups',
     'groups.set_letters' => 'Latin',
     'groups.set_cyrillic' => 'Cyrillic',
     'groups.set_digits' => 'Digits',

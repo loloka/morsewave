@@ -2627,17 +2627,77 @@ input[type="range"] {
 }
 
 @media (max-width: 600px) {
-    .groups-quick-row {
-        gap: 10px;
+    /* Компактный заголовок на мобилках, чтобы убрать лишний скролл */
+    .groups-header-wrap .card-eyebrow {
+        margin-bottom: 2px;
+        font-size: 11px;
     }
-    .groups-charset-card {
-        padding: 9px 11px;
+    .groups-header-wrap h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
     }
-    .groups-charset-toggle-btn {
-        padding: 5px 8px;
+    .groups-header-wrap .groups-page-intro {
+        display: none !important;
+    }
+    .groups-mode-switch {
+        margin-bottom: 8px !important;
+        gap: 6px;
+    }
+    .groups-mode-switch .chip {
+        padding: 5px 10px;
         font-size: 12px;
     }
-    .groups-speed-bar {
+    #setup-panel.card {
+        padding: 12px 14px;
+        margin-top: 6px !important;
+    }
+    .groups-settings-title {
+        display: none !important;
+    }
+    #groups-exam-toggle {
+        margin-top: 0 !important;
+    }
+    #groups-exam-toggle .segmented-tab {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+    .groups-charset-card {
         padding: 8px 10px;
+        margin-top: 8px !important;
+    }
+    .groups-quick-row {
+        margin-top: 8px !important;
+        gap: 8px;
+    }
+    .groups-speed-bar {
+        margin-top: 8px !important;
+        padding: 6px 10px;
+    }
+    .groups-extra-wrapper {
+        margin-top: 8px !important;
+    }
+    #setup-panel .btn-row {
+        margin-top: 10px !important;
+    }
+    #setup-panel #start-session {
+        height: 44px;
+        font-size: 15px;
+    }
+
+    /* При активной сессии: скрываем шапку и табы над сессией,
+       чтобы экран выглядел в точности как на скриншоте 2 без скролла */
+    body.morse-session-active .groups-header-wrap,
+    body.morse-session-active .groups-mode-switch {
+        display: none !important;
+    }
+    body.morse-session-active #session-panel.card {
+        margin-top: 4px !important;
+        padding: 10px 12px !important;
+    }
+    body.morse-session-active #session-panel .btn-row {
+        margin-top: 8px !important;
+    }
+    body.morse-session-active #groups-vkb {
+        margin-top: 6px !important;
     }
 }

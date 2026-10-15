@@ -201,6 +201,7 @@ return [
     'groups.collapse_charset' => 'Свернуть',
     'groups.choose_charset_desc' => 'Выберите набор символов для тренировки:',
     'groups.extra_settings' => 'Дополнительные параметры',
+    'groups.groups_unit' => 'групп',
     'groups.set_letters' => 'Латиница',
     'groups.set_cyrillic' => 'Кириллица',
     'groups.set_digits' => 'Цифры',

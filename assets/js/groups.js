@@ -635,12 +635,8 @@
         updateCharsetSummary();
     }
 
-    // Если сохранены активные доп. параметры, раскрываем блок и показываем точку
-    if (updateExtraActiveDot()) {
-        if (extraContent) extraContent.style.display = 'block';
-        if (extraChevron) extraChevron.textContent = '▴';
-        if (extraToggleBtn) extraToggleBtn.classList.add('is-open');
-    }
+    // Обновляем точку-индикатор доп. параметров, но держим блок свернутым по умолчанию
+    updateExtraActiveDot();
 
     const MIN_LEARNED_FOR_FILTER = 2;
 
@@ -1053,6 +1049,7 @@
     const EXAM_GROUP_GAP_MS = (1200 / EXAM_CHAR_WPM) * 16;
 
     function abortCurrentSession() {
+        document.body.classList.remove('morse-session-active');
         if (currentAudio) {
             currentAudio.stop();
             currentAudio = null;
@@ -1238,6 +1235,8 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        document.body.classList.add('morse-session-active');
+        window.scrollTo({ top: 0, behavior: 'auto' });
         groupTotalEl.textContent = activeCount;
         groupIndexEl.textContent = 1;
 
@@ -2395,6 +2394,8 @@
 
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        document.body.classList.add('morse-session-active');
+        window.scrollTo({ top: 0, behavior: 'auto' });
         answerInput.style.display = 'block';
         groupsSubmitRow.style.display = 'flex';
         examAnswerEl.style.display = 'none';
