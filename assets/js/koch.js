@@ -68,9 +68,11 @@
         const isFw = !!(fwEnabled && fwEnabled.checked);
         const isBuf = !!(bufferCheckbox && bufferCheckbox.checked);
         const isPaper = !!(paperCheckbox && paperCheckbox.checked);
+        const readyEl = document.getElementById('koch-ready-signal-enabled');
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const isNoise = !!(audioSettings && audioSettings.noiseLevel > 0);
-        const isActive = isFw || isBuf || isPaper || isNoise;
+        const isReady = !!(readyEl && readyEl.checked);
+        const isActive = isFw || isBuf || isPaper || isNoise || isReady;
         if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
         return isActive;
     }
@@ -406,6 +408,7 @@
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
                 localStorage.setItem('morsewave_ready_signal_user_set', '1');
+                updateKochExtraDot();
             });
         }
         if (kochToneFreq && kochToneFreqVal) {

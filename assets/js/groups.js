@@ -574,9 +574,11 @@
         const fw = document.getElementById('groups-farnsworth-enabled');
         const buf = document.getElementById('groups-buffer-enabled');
         const paper = document.getElementById('groups-paper-enabled');
+        const readyEl = document.getElementById('groups-ready-signal-enabled');
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const isNoise = !!(audioSettings && audioSettings.noiseLevel > 0);
-        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked) || isNoise);
+        const isReady = !!(readyEl && readyEl.checked);
+        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked) || isNoise || isReady);
         if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
         return isActive;
     }
@@ -604,6 +606,7 @@
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
                 localStorage.setItem('morsewave_ready_signal_user_set', '1');
+                updateExtraActiveDot();
             });
         }
         if (groupsToneFreq && groupsToneFreqVal) {
@@ -638,7 +641,8 @@
 
     [document.getElementById('groups-farnsworth-enabled'),
      document.getElementById('groups-buffer-enabled'),
-     document.getElementById('groups-paper-enabled')].forEach(el => {
+     document.getElementById('groups-paper-enabled'),
+     document.getElementById('groups-ready-signal-enabled')].forEach(el => {
         if (el) el.addEventListener('change', updateExtraActiveDot);
     });
 
