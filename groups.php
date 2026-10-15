@@ -53,12 +53,6 @@ include __DIR__ . '/includes/header.php';
                 <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
             </div>
 
-            <!-- Подсказка о разделении латиницы и кириллицы -->
-            <div class="muted" id="charset-exclusive-hint" style="font-size:12px; margin-top:8px; line-height:1.45; display:flex; align-items:flex-start; gap:6px;">
-                <span style="color:var(--accent); flex-shrink:0; margin-top:1px;"><?= mw_icon('info', 14) ?></span>
-                <span><?= t('groups.charset_exclusive_hint') ?></span>
-            </div>
-
             <!-- Подпанель для режима «Только выученные» -->
             <div id="learned-charset-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
                 <div class="flex-between flex-wrap gap-2" style="align-items:center;">
