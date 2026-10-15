@@ -254,14 +254,22 @@
     updateBufferDepthOptions(groupLen);
     
     const vkbEl = document.getElementById('groups-vkb');
-    function isCyrillicSession() {
+    function isCyrillicSession(overrideKey, overrideCharset) {
         if (session && typeof session.isCyrillic === 'boolean') return session.isCyrillic;
-        if (charsetKey === 'cyrillic' || charsetKey === 'cyrillic_digits') return true;
-        if (charsetKey === 'learned') {
+        if (currentSubmode === 'pairs') {
+            const pairChars = (typeof getSelectedPairChars === 'function') ? getSelectedPairChars() : null;
+            if (pairChars && (/[А-ЯЁ]/.test(pairChars.a || '') || /[А-ЯЁ]/.test(pairChars.b || ''))) return true;
+        }
+        const key = overrideKey || charsetKey;
+        if (key === 'cyrillic' || key === 'cyrillic_digits') return true;
+        if (key === 'learned') {
             const la = localStorage.getItem('morse_groups_learned_alphabet') || 'latin';
             return la === 'cyrillic';
         }
-        if (charsetKey === 'custom') {
+        if (key === 'custom') {
+            if (overrideCharset && Array.isArray(overrideCharset)) {
+                return overrideCharset.some(ch => /[А-ЯЁ]/.test(ch));
+            }
             const ci = document.getElementById('custom-charset-input');
             if (ci) {
                 const raw = ci.value.toUpperCase();
@@ -275,10 +283,14 @@
         if (typeof VirtualKeyboard !== 'undefined' && vkbEl) {
             const hasPunctuation = (charsetKey === 'koch') || (charsetKey === 'custom' && customInput && /[.?]/.test(customInput.value));
             const isCyr = isCyrillicSession();
+            let layout = isCyr ? 'cyrillic' : 'qwerty';
+            if (charsetKey === 'digits') {
+                layout = 'numeric';
+            }
             vkb = new VirtualKeyboard(vkbEl, inputEl, {
                 showSpace: isExam,
                 showPunctuation: hasPunctuation,
-                layout: isCyr ? 'cyrillic' : 'qwerty'
+                layout: layout
             });
         }
     }

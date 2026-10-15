@@ -194,13 +194,23 @@ class VirtualKeyboard {
         this.container.classList.add('vkb');
         
         const isCyrillic = this.options.layout === 'cyrillic';
+        const isNumeric = this.options.layout === 'numeric';
+
         if (isCyrillic) {
             this.container.classList.add('vkb-cyrillic');
+            this.container.classList.remove('vkb-numeric');
+        } else if (isNumeric) {
+            this.container.classList.add('vkb-numeric');
+            this.container.classList.remove('vkb-cyrillic');
         } else {
             this.container.classList.remove('vkb-cyrillic');
+            this.container.classList.remove('vkb-numeric');
         }
 
-        const ROWS = isCyrillic ? [
+        const ROWS = isNumeric ? [
+            ['1','2','3','4','5'],
+            ['6','7','8','9','0'],
+        ] : (isCyrillic ? [
             ['1','2','3','4','5','6','7','8','9','0'],
             ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х','Ъ'],
             ['Ф','Ы','В','А','П','Р','О','Л','Д','Ж','Э'],
@@ -210,7 +220,7 @@ class VirtualKeyboard {
             ['Q','W','E','R','T','Y','U','I','O','P'],
             ['A','S','D','F','G','H','J','K','L'],
             ['Z','X','C','V','B','N','M'],
-        ];
+        ]);
 
         const lastRow = ROWS[ROWS.length - 1];
         if (this.options.showSlash) {
