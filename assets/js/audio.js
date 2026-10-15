@@ -141,10 +141,22 @@ class MorseAudioBus {
         this.noiseGain.gain.setTargetAtTime(target, now, 0.05);
     }
 
+    startNoise() {
+        if (!this.noiseGain) return;
+        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { noiseLevel: 0 };
+        const level = this.configuredNoiseLevel ?? settings.noiseLevel ?? 0;
+        this.setNoiseLevel(level);
+    }
+
+    stopNoise() {
+        if (!this.noiseGain) return;
+        this.setNoiseLevel(0);
+    }
+
     configure(overrides = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true, noiseLevel: 0 };
         const pseudoStereo = overrides.pseudoStereo ?? settings.pseudoStereo ?? true;
-        const noiseLevel = overrides.noiseLevel ?? settings.noiseLevel ?? 0;
+        this.configuredNoiseLevel = overrides.noiseLevel ?? settings.noiseLevel ?? 0;
         const now = this.ctx.currentTime;
 
         if (pseudoStereo) {
@@ -153,10 +165,6 @@ class MorseAudioBus {
         } else {
             this.monoBus.gain.setTargetAtTime(1.0, now, 0.01);
             this.stereoBus.gain.setTargetAtTime(0, now, 0.01);
-        }
-
-        if (this.noiseGain) {
-            this.setNoiseLevel(noiseLevel);
         }
     }
 }
@@ -261,6 +269,7 @@ class MorseAudio {
         this._ensureCtx();
         const bus = getSharedMorseAudioBus(this.ctx);
         bus.configure();
+        bus.startNoise();
         this._stopped = false;
         const unit = this.unitMs();
         const scale = this.gapScale();
@@ -269,40 +278,39 @@ class MorseAudio {
 
         const chars = text.toUpperCase().split('');
 
-        for (let i = 0; i < chars.length; i++) {
-            if (this._stopped) return;
-            const ch = chars[i];
-
-            if (ch === ' ') {
-                await this._silence(wordGap);
-                continue;
-            }
-
-            // Кириллица не подмешана в MORSE_CODE (см. morse-data.js) — при
-            // отсутствии буквы в латинской таблице пробуем отдельную
-            // кириллическую. Это только доигрывание звука, декодирование
-            // ключом остаётся полностью раздельным (input.js).
-            const code = MORSE_CODE[ch] || (typeof CYRILLIC_CODE !== 'undefined' ? CYRILLIC_CODE[ch] : undefined);
-            if (!code) continue;
-
-            callbacks.onCharStart?.({ char: ch, index: i });
-
-            for (let s = 0; s < code.length; s++) {
+        try {
+            for (let i = 0; i < chars.length; i++) {
                 if (this._stopped) return;
-                const symbol = code[s];
-                const dur = symbol === '.' ? unit : unit * 3;
-                callbacks.onSymbol?.({ char: ch, symbol, index: i, durationMs: dur });
-                await this._tone(dur);
-                if (s < code.length - 1) await this._silence(unit); // пауза между элементами буквы
-            }
+                const ch = chars[i];
 
-            const isLast = i === chars.length - 1;
-            if (!isLast && chars[i + 1] !== ' ') {
-                await this._silence(interCharGap);
+                if (ch === ' ') {
+                    await this._silence(wordGap);
+                    continue;
+                }
+
+                const code = MORSE_CODE[ch] || (typeof CYRILLIC_CODE !== 'undefined' ? CYRILLIC_CODE[ch] : undefined);
+                if (!code) continue;
+
+                callbacks.onCharStart?.({ char: ch, index: i });
+
+                for (let s = 0; s < code.length; s++) {
+                    if (this._stopped) return;
+                    const symbol = code[s];
+                    const dur = symbol === '.' ? unit : unit * 3;
+                    callbacks.onSymbol?.({ char: ch, symbol, index: i, durationMs: dur });
+                    await this._tone(dur);
+                    if (s < code.length - 1) await this._silence(unit);
+                }
+
+                const isLast = i === chars.length - 1;
+                if (!isLast && chars[i + 1] !== ' ') {
+                    await this._silence(interCharGap);
+                }
             }
+        } finally {
+            bus.stopNoise();
+            callbacks.onDone?.();
         }
-
-        callbacks.onDone?.();
     }
 
     /**
@@ -315,25 +323,29 @@ class MorseAudio {
         this._ensureCtx();
         const bus = getSharedMorseAudioBus(this.ctx);
         bus.configure();
+        bus.startNoise();
         this._stopped = false;
         const unit = this.unitMs();
         const groups = pattern.trim().split(/\s+/).filter(Boolean);
 
-        for (let g = 0; g < groups.length; g++) {
-            if (this._stopped) return;
-            const code = groups[g];
-            for (let s = 0; s < code.length; s++) {
+        try {
+            for (let g = 0; g < groups.length; g++) {
                 if (this._stopped) return;
-                const symbol = code[s];
-                const dur = symbol === '.' ? unit : unit * 3;
-                callbacks.onSymbol?.({ symbol, durationMs: dur, groupIndex: g });
-                await this._tone(dur);
-                if (s < code.length - 1) await this._silence(unit);
+                const code = groups[g];
+                for (let s = 0; s < code.length; s++) {
+                    if (this._stopped) return;
+                    const symbol = code[s];
+                    const dur = symbol === '.' ? unit : unit * 3;
+                    callbacks.onSymbol?.({ symbol, durationMs: dur, groupIndex: g });
+                    await this._tone(dur);
+                    if (s < code.length - 1) await this._silence(unit);
+                }
+                if (g < groups.length - 1) await this._silence(unit * 3);
             }
-            if (g < groups.length - 1) await this._silence(unit * 3);
+        } finally {
+            bus.stopNoise();
+            callbacks.onDone?.();
         }
-
-        callbacks.onDone?.();
     }
 
     /**
@@ -345,6 +357,9 @@ class MorseAudio {
     stop() {
         this._stopped = true;
         clearTimeout(this._timer);
+        if (this.ctx && typeof getSharedMorseAudioBus === 'function') {
+            getSharedMorseAudioBus(this.ctx).stopNoise();
+        }
         if (this._silenceResolve) {
             const res = this._silenceResolve;
             this._silenceResolve = null;

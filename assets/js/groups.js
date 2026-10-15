@@ -1025,8 +1025,9 @@
         try {
             // В экзамене — фиксированный тайминг эталонной записи, а не
             // wpm-слайдер (см. EXAM_CHAR_WPM выше).
+            const examAudioWpm = session.wpm || EXAM_CHAR_WPM;
             currentAudio = session.isExam
-                ? new MorseAudio({ wpm: EXAM_CHAR_WPM, letterGapUnits: EXAM_LETTER_GAP_UNITS })
+                ? new MorseAudio({ wpm: examAudioWpm, letterGapUnits: EXAM_LETTER_GAP_UNITS })
                 : new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
             await currentAudio.play(session.groups[session.index], {
                 onCharStart: ({ index }) => {
@@ -1097,6 +1098,9 @@
             currentAudio.stop();
             currentAudio = null;
             isPlaying = false;
+        }
+        if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
+            getSharedMorseAudioBus(window.__morseSharedAudioCtx).stopNoise();
         }
         cancelPaperSleep();
         if (session && session.isPaperMode) {
@@ -1205,6 +1209,10 @@
         let bufferDepth = selectedBufferDepth || 'all';
 
         if (isExam) {
+            const isExamTraining = (selectedExamPace === 'training');
+            const customExamInput = document.getElementById('groups-exam-custom-wpm');
+            const examWpm = isExamTraining ? (parseInt(customExamInput ? customExamInput.value : '12', 10) || 12) : 20;
+            activeWpm = examWpm;
             activeGroupLen = 5;
             activeCharsetKey = 'mixed';
             activeCount = 50;
@@ -1745,8 +1753,11 @@
         feedbackEl.textContent = t('js.groups.exam_attention');
         feedbackEl.className = 'feedback show ok';
 
+        const examWpm = session.wpm || EXAM_CHAR_WPM;
+        const examGapMs = (1200 / examWpm) * 16;
+
         try {
-            const audio = new MorseAudio({ wpm: EXAM_CHAR_WPM, letterGapUnits: EXAM_LETTER_GAP_UNITS });
+            const audio = new MorseAudio({ wpm: examWpm, letterGapUnits: EXAM_LETTER_GAP_UNITS });
             await audio.play(EXAM_ATTENTION_TEXT, {
                 onCharStart: ({ index }) => {
                     if (session !== mySession || mySession.examStopped) return;
@@ -1771,11 +1782,7 @@
         examSubmitBtn.disabled = false;
         examAnswerEl.focus();
 
-        // Раньше первая группа стартовала сразу за «=» и сливалась с ним
-        // встык. В эталонной записи пауза после сигнала — той же длины,
-        // что и между группами (EXAM_GROUP_GAP_MS), поэтому используем её
-        // же здесь, а не отдельное число.
-        await delay(EXAM_GROUP_GAP_MS);
+        await delay(examGapMs);
         if (session !== mySession || mySession.examStopped) return;
 
         runExamPlayback();
@@ -1828,6 +1835,8 @@
     }
 
     async function runExamPlayback() {
+        const examWpm = session.wpm || EXAM_CHAR_WPM;
+        const examGapMs = (1200 / examWpm) * 16;
         for (session.index = 0; session.index < session.groups.length; session.index++) {
             if (session.examStopped) return;
             groupIndexEl.textContent = session.index + 1;
@@ -1835,7 +1844,7 @@
             session.playedCount = session.index + 1;
             if (session.examStopped) return;
             if (session.index < session.groups.length - 1) {
-                await delay(EXAM_GROUP_GAP_MS);
+                await delay(examGapMs);
                 if (session.examStopped) return;
             }
         }
@@ -2562,19 +2571,21 @@
             const trainingConfig = document.getElementById('groups-training-config');
             const pairsConfig = document.getElementById('groups-pairs-config');
             const qrqConfig = document.getElementById('groups-qrq-config');
-            const examHint = document.getElementById('groups-exam-hint-text');
+            const examConfig = document.getElementById('groups-exam-config');
             const startBtn = document.getElementById('start-session');
             
             if (trainingConfig) trainingConfig.style.display = (type === 'training') ? 'block' : 'none';
             if (pairsConfig) pairsConfig.style.display = (type === 'pairs') ? 'block' : 'none';
             if (qrqConfig) qrqConfig.style.display = (type === 'qrq') ? 'block' : 'none';
-            if (examHint) examHint.style.display = (type === 'exam') ? 'block' : 'none';
+            if (examConfig) examConfig.style.display = (type === 'exam') ? 'block' : 'none';
 
             if (type === 'exam') {
                 startBtn.innerHTML = '▶ ' + t('groups.mode_exam') + ' <kbd class="btn-kbd">Enter</kbd>';
-                const audioSettings = AudioSettings.load();
-                audioSettings.freq = 550;
-                audioSettings.save(audioSettings);
+                if (typeof AudioSettings !== 'undefined') {
+                    const audioSettings = AudioSettings.load();
+                    audioSettings.freq = 550;
+                    AudioSettings.save(audioSettings);
+                }
             } else if (type === 'pairs') {
                 startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
                 checkPairRecommendation();
@@ -2594,6 +2605,36 @@
             }
         });
     });
+
+    let selectedExamPace = 'official';
+    const examPaceChips = document.querySelectorAll('#groups-exam-pace-chips .chip');
+    const examCustomWrap = document.getElementById('groups-exam-custom-speed-wrap');
+    const examPaceDesc = document.getElementById('groups-exam-pace-desc');
+    const examCustomWpmSlider = document.getElementById('groups-exam-custom-wpm');
+    const examCustomWpmVal = document.getElementById('groups-exam-custom-wpm-val');
+
+    if (examPaceChips.length) {
+        examPaceChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                examPaceChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                selectedExamPace = chip.dataset.pace; // 'official' | 'training'
+                const isCustom = (selectedExamPace === 'training');
+                if (examCustomWrap) examCustomWrap.style.display = isCustom ? 'block' : 'none';
+                if (examPaceDesc) {
+                    examPaceDesc.textContent = isCustom
+                        ? t('groups.exam_pace_training_desc')
+                        : t('groups.exam_pace_official_desc');
+                }
+            });
+        });
+    }
+
+    if (examCustomWpmSlider && examCustomWpmVal) {
+        examCustomWpmSlider.addEventListener('input', () => {
+            examCustomWpmVal.textContent = examCustomWpmSlider.value;
+        });
+    }
 
     document.querySelectorAll('#pairs-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {

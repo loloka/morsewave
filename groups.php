@@ -433,9 +433,36 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <p class="muted mt-1" id="groups-exam-hint-text" style="display:none; font-size:12px; margin-bottom: 15px;">
-        <?= t('groups.exam_hint') ?>
-    </p>
+    <!-- ======================= РЕЖИМ: ЭКЗАМЕН ======================= -->
+    <div id="groups-exam-config" style="display:none;" class="subcard mt-2">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div style="font-weight:700; font-size:13px;"><?= t('groups.exam_pace_title') ?></div>
+                <div class="muted" style="font-size:11px; margin-top:2px;" id="groups-exam-pace-desc"><?= t('groups.exam_pace_official_desc') ?></div>
+            </div>
+            <div class="chip-row" id="groups-exam-pace-chips">
+                <div class="chip active" data-pace="official"><?= t('groups.exam_pace_official') ?></div>
+                <div class="chip" data-pace="training"><?= t('groups.exam_pace_training') ?></div>
+            </div>
+        </div>
+
+        <div id="groups-exam-custom-speed-wrap" class="mt-2" style="display:none; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <div>
+                    <div style="font-weight:600; font-size:13px;"><?= t('groups.speed_label') ?></div>
+                    <div class="muted" style="font-size:11px;"><?= t('groups.exam_training_speed_desc') ?></div>
+                </div>
+                <div class="speed-control">
+                    <input type="range" id="groups-exam-custom-wpm" min="8" max="25" step="1" value="12">
+                    <span class="speed-value" id="groups-exam-custom-wpm-val">12</span> wpm
+                </div>
+            </div>
+        </div>
+
+        <div class="muted mt-2" id="groups-exam-hint-text" style="font-size:12px; line-height:1.45; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+            <?= t('groups.exam_hint') ?>
+        </div>
+    </div>
 
     <div class="btn-row mt-2" style="align-items:center;">
         <button class="btn btn-primary" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('groups.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
