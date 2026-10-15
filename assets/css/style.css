@@ -1419,18 +1419,24 @@ input[type="range"] {
     font-size: 13px;
     line-height: 1.4;
 }
-/* На узких экранах — горизонтальная прокрутка вместо переноса, чтобы вкладки
-   не громоздились в два ряда и палец легко доставал до любой. */
+/* На узких экранах — аккуратная сетка 2x2 без горизонтальной прокрутки,
+   с крупными и удобными для пальца кнопками */
 @media (max-width: 480px) {
     .account-tabs {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 4px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        width: 100%;
+        margin-top: 12px;
     }
-    .account-tabs::-webkit-scrollbar { display: none; }
-    .account-tabs .chip { flex: 0 0 auto; }
+    .account-tabs .chip {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        padding: 9px 8px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
 }
 
 /* ---------- Daily challenge ---------- */

@@ -103,18 +103,45 @@ class MorseLamp {
     constructor(el) {
         this.el = el;
         this._offTimer = null;
+        if (this.el) {
+            this.updateVisibility();
+            this.el.style.cursor = 'pointer';
+            this.el.title = (typeof t === 'function' && t('js.signal.lamp_toggle_title'))
+                ? t('js.signal.lamp_toggle_title')
+                : 'Сигнальная лампа (кликните, чтобы включить/отключить)';
+            this.el.addEventListener('click', () => {
+                if (typeof DisplaySettings === 'undefined') return;
+                const settings = DisplaySettings.load();
+                const next = !(settings.showLamp !== false);
+                settings.showLamp = next;
+                DisplaySettings.save(settings);
+                document.querySelectorAll('.morse-lamp').forEach(l => {
+                    l.style.opacity = next ? '1' : '0.15';
+                });
+                const lampToggle = document.getElementById('show-lamp-toggle');
+                if (lampToggle) lampToggle.checked = next;
+            });
+        }
+    }
+
+    updateVisibility() {
+        if (!this.el || typeof DisplaySettings === 'undefined') return;
+        const visible = DisplaySettings.load().showLamp !== false;
+        this.el.style.opacity = visible ? '1' : '0.15';
     }
 
     on() {
+        if (typeof DisplaySettings !== 'undefined' && DisplaySettings.load().showLamp === false) return;
         clearTimeout(this._offTimer);
-        this.el.classList.add('lit');
+        this.el?.classList.add('lit');
     }
 
     off() {
-        this.el.classList.remove('lit');
+        this.el?.classList.remove('lit');
     }
 
     flash(durationMs = 150) {
+        if (typeof DisplaySettings !== 'undefined' && DisplaySettings.load().showLamp === false) return;
         this.on();
         clearTimeout(this._offTimer);
         this._offTimer = setTimeout(() => this.off(), durationMs);

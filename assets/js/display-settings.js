@@ -8,7 +8,7 @@
 const DisplaySettings = (() => {
     const KEY = 'morsewave_display_settings_v1';
 
-    const defaults = () => ({ showSignalLine: true });
+    const defaults = () => ({ showSignalLine: true, showLamp: true });
 
     function load() {
         try {

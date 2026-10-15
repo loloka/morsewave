@@ -50,6 +50,8 @@ class MorseAudioBus {
         this.masterGain.gain.value = 1.0;
 
         this._connect();
+        this._initKeepAlive();
+        this._initNoise();
         this.configure();
     }
 
@@ -75,9 +77,74 @@ class MorseAudioBus {
         this.masterGain.connect(this.ctx.destination);
     }
 
+    /**
+     * Постоянный неслышимый keep-alive поток (микробуфер тишины).
+     * Предотвращает засыпание питания ЦАП/усилителя звуковой карты (sleep/wake DAC pop)
+     * на мобильных устройствах и ПК (Realtek) между знаками и паузами.
+     */
+    _initKeepAlive() {
+        try {
+            const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 2, this.ctx.sampleRate);
+            const source = this.ctx.createBufferSource();
+            source.buffer = buffer;
+            source.loop = true;
+            const keepGain = this.ctx.createGain();
+            keepGain.gain.value = 0.00001; // -100 дБ, физически неслышимо
+            source.connect(keepGain).connect(this.masterGain);
+            source.start();
+            this._keepAliveSource = source;
+        } catch (_) {}
+    }
+
+    /**
+     * Генератор реалистичного атмосферного КВ-эфира (CW Noise).
+     * Мягкий розово-полосовой шум связного приёмника (полоса 300–2600 Гц).
+     */
+    _initNoise() {
+        try {
+            const sampleRate = this.ctx.sampleRate;
+            const bufferSize = sampleRate * 4;
+            const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+            const data = buffer.getChannelData(0);
+            let b0 = 0, b1 = 0, b2 = 0;
+            for (let i = 0; i < bufferSize; i++) {
+                const white = Math.random() * 2 - 1;
+                b0 = 0.99 * b0 + white * 0.05;
+                b1 = 0.96 * b1 + white * 0.10;
+                b2 = 0.86 * b2 + white * 0.25;
+                data[i] = (b0 + b1 + b2) * 0.25;
+            }
+
+            const noiseSource = this.ctx.createBufferSource();
+            noiseSource.buffer = buffer;
+            noiseSource.loop = true;
+
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = 750;
+            filter.Q.value = 0.85;
+
+            this.noiseGain = this.ctx.createGain();
+            this.noiseGain.gain.value = 0;
+
+            noiseSource.connect(filter).connect(this.noiseGain).connect(this.masterGain);
+            noiseSource.start();
+            this._noiseSource = noiseSource;
+        } catch (_) {}
+    }
+
+    setNoiseLevel(level) {
+        if (!this.noiseGain) return;
+        const now = this.ctx.currentTime;
+        const target = Math.max(0, Math.min(0.2, Number(level) || 0));
+        this.noiseGain.gain.cancelScheduledValues(now);
+        this.noiseGain.gain.setTargetAtTime(target, now, 0.05);
+    }
+
     configure(overrides = {}) {
-        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true };
+        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true, noiseLevel: 0 };
         const pseudoStereo = overrides.pseudoStereo ?? settings.pseudoStereo ?? true;
+        const noiseLevel = overrides.noiseLevel ?? settings.noiseLevel ?? 0;
         const now = this.ctx.currentTime;
 
         if (pseudoStereo) {
@@ -86,6 +153,10 @@ class MorseAudioBus {
         } else {
             this.monoBus.gain.setTargetAtTime(1.0, now, 0.01);
             this.stereoBus.gain.setTargetAtTime(0, now, 0.01);
+        }
+
+        if (this.noiseGain) {
+            this.setNoiseLevel(noiseLevel);
         }
     }
 }
@@ -137,7 +208,6 @@ class MorseAudio {
     _tone(durationMs) {
         return new Promise((resolve) => {
             const bus = getSharedMorseAudioBus(this.ctx);
-            bus.configure();
 
             const osc = this.ctx.createOscillator();
             const gain = this.ctx.createGain();
@@ -146,15 +216,23 @@ class MorseAudio {
 
             const now = this.ctx.currentTime;
             const dur = durationMs / 1000;
-            // Мягкая атака/затухание, чтобы не было щелчков
+
+            // Задаём 0 сразу, исключая просачивание дефолтного 1.0 в Web Audio
+            gain.gain.value = 0;
+
+            // Мягкая атака и затухание 4-5 мс (адаптивно к коротким точкам на высоких WPM)
+            const attack = Math.min(0.005, dur * 0.25);
+            const decay = attack;
+
             gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.35, now + 0.005);
-            gain.gain.setValueAtTime(0.35, now + dur - 0.005 > now ? now + dur - 0.005 : now);
+            gain.gain.linearRampToValueAtTime(0.35, now + attack);
+            gain.gain.setValueAtTime(0.35, Math.max(now + attack, now + dur - decay));
             gain.gain.linearRampToValueAtTime(0, now + dur);
 
             osc.connect(gain).connect(bus.input);
             osc.start(now);
-            osc.stop(now + dur);
+            // Останавливаем генератор через 5 мс после спада в 0, чтобы исключить обрыв ненулевой фазы
+            osc.stop(now + dur + 0.005);
             this._activeNodes = { osc, gain };
             osc.onended = () => {
                 if (this._activeNodes && this._activeNodes.osc === osc) this._activeNodes = null;
@@ -181,6 +259,8 @@ class MorseAudio {
      */
     async play(text, callbacks = {}) {
         this._ensureCtx();
+        const bus = getSharedMorseAudioBus(this.ctx);
+        bus.configure();
         this._stopped = false;
         const unit = this.unitMs();
         const scale = this.gapScale();
@@ -233,6 +313,8 @@ class MorseAudio {
      */
     async playPattern(pattern, callbacks = {}) {
         this._ensureCtx();
+        const bus = getSharedMorseAudioBus(this.ctx);
+        bus.configure();
         this._stopped = false;
         const unit = this.unitMs();
         const groups = pattern.trim().split(/\s+/).filter(Boolean);

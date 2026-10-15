@@ -188,6 +188,9 @@ include __DIR__ . '/includes/header.php';
                     <label class="chip" style="gap:8px;">
                         <input type="checkbox" id="groups-paper-enabled"> <?= t('groups.paper_mode') ?>
                     </label>
+                    <label class="chip" style="gap:8px;">
+                        <input type="checkbox" id="groups-ready-signal-enabled" checked> <?= t('groups.ready_signal_chip') ?>
+                    </label>
                 </div>
 
                 <!-- Панель настройки Фарнсворта -->
@@ -244,6 +247,28 @@ include __DIR__ . '/includes/header.php';
                     </div>
                     <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
                         <?= mw_icon('info', 14) ?> <?= t('groups.paper_tooltip') ?>
+                    </div>
+                </div>
+
+                <!-- Панель настройки Тона и Шума эфира -->
+                <div class="subcard mt-2" style="border-left:3px solid var(--accent); padding:12px 14px;">
+                    <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;"><?= t('groups.extra_audio_title') ?></div>
+                            <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.extra_audio_desc') ?></div>
+                        </div>
+                        <div class="speed-control">
+                            <input type="range" id="groups-tone-freq" min="300" max="1000" step="10" value="600">
+                            <span class="speed-value mono" id="groups-tone-freq-value">600</span> Hz
+                        </div>
+                    </div>
+                    <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                        <div class="muted" style="font-size:12px;"><?= t('groups.cw_noise_title') ?>:</div>
+                        <div class="chip-row" id="groups-cw-noise-chips" style="gap:6px;">
+                            <div class="chip chip-sm active" data-noise="0"><?= t('acc.cw_noise_off') ?></div>
+                            <div class="chip chip-sm" data-noise="0.035"><?= t('acc.cw_noise_low') ?></div>
+                            <div class="chip chip-sm" data-noise="0.07"><?= t('acc.cw_noise_med') ?></div>
+                        </div>
                     </div>
                 </div>
             </div>

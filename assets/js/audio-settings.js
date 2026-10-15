@@ -6,7 +6,13 @@
 const AudioSettings = (() => {
     const KEY = 'morsewave_audio_settings_v1';
 
-    const defaults = () => ({ freq: 600, waveform: 'sine', pseudoStereo: true });
+    const defaults = () => ({
+        freq: 600,
+        waveform: 'sine',
+        pseudoStereo: true,
+        noiseLevel: 0, // 0 = выкл, 0.035 = тихий, 0.07 = реалистичный
+        readySignal: true // позывной VVV = и 3 сек отсчёта перед стартом сессии
+    });
 
     function load() {
         try {

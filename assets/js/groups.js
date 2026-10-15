@@ -588,6 +588,49 @@
         });
     }
 
+    const readySignalEl = document.getElementById('groups-ready-signal-enabled');
+    const groupsToneFreq = document.getElementById('groups-tone-freq');
+    const groupsToneFreqVal = document.getElementById('groups-tone-freq-value');
+    const groupsCwNoiseChips = document.querySelectorAll('#groups-cw-noise-chips .chip');
+
+    if (typeof AudioSettings !== 'undefined') {
+        const audioSettings = AudioSettings.load();
+        if (readySignalEl) {
+            readySignalEl.checked = audioSettings.readySignal !== false;
+            readySignalEl.addEventListener('change', () => {
+                const s = AudioSettings.load();
+                s.readySignal = readySignalEl.checked;
+                AudioSettings.save(s);
+            });
+        }
+        if (groupsToneFreq && groupsToneFreqVal) {
+            groupsToneFreq.value = audioSettings.freq || 600;
+            groupsToneFreqVal.textContent = audioSettings.freq || 600;
+            groupsToneFreq.addEventListener('input', () => {
+                const s = AudioSettings.load();
+                s.freq = parseInt(groupsToneFreq.value, 10);
+                groupsToneFreqVal.textContent = s.freq;
+                AudioSettings.save(s);
+            });
+        }
+        if (groupsCwNoiseChips.length) {
+            const currentNoise = audioSettings.noiseLevel || 0;
+            groupsCwNoiseChips.forEach(c => c.classList.toggle('active', parseFloat(c.dataset.noise) === currentNoise));
+            groupsCwNoiseChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    groupsCwNoiseChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    const s = AudioSettings.load();
+                    s.noiseLevel = parseFloat(chip.dataset.noise) || 0;
+                    AudioSettings.save(s);
+                    if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
+                        getSharedMorseAudioBus(window.__morseSharedAudioCtx).setNoiseLevel(s.noiseLevel);
+                    }
+                });
+            });
+        }
+    }
+
     [document.getElementById('groups-farnsworth-enabled'),
      document.getElementById('groups-buffer-enabled'),
      document.getElementById('groups-paper-enabled')].forEach(el => {
@@ -1259,7 +1302,7 @@
         if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
         if (paperControlsRow) paperControlsRow.style.display = 'none';
 
-        feedbackEl.className = 'feedback';
+        const isReadySignal = readySignalEl ? readySignalEl.checked : ((typeof AudioSettings !== 'undefined') ? (AudioSettings.load().readySignal !== false) : true);
 
         if (isExam) {
             answerInput.style.display = 'none';
@@ -1282,7 +1325,11 @@
             if (vkbEl) vkbEl.style.display = 'none';
             if (paperSessionDisplay) paperSessionDisplay.style.display = 'block';
             if (paperControlsRow) paperControlsRow.style.display = 'flex';
-            runPaperPlayback();
+            if (isReadySignal) {
+                runReadyAttentionSequence(() => runPaperPlayback());
+            } else {
+                runPaperPlayback();
+            }
         } else {
             answerInput.style.display = 'block';
             groupsSubmitRow.style.display = 'flex';
@@ -1292,7 +1339,11 @@
             answerInput.value = '';
             if (typeof renderVkb !== 'undefined') renderVkb(answerInput, false);
             answerInput.focus();
-            playCurrentGroup();
+            if (isReadySignal) {
+                runReadyAttentionSequence(() => playCurrentGroup());
+            } else {
+                playCurrentGroup();
+            }
         }
     }
 
@@ -1728,6 +1779,52 @@
         if (session !== mySession || mySession.examStopped) return;
 
         runExamPlayback();
+    }
+
+    /**
+     * Сигнал готовности ЖЖЖ= (VVV =) перед началом обычной тренировочной сессии
+     * (по канону радиоспорта и экзаменов) + обратный отсчёт «3… 2… 1… Приём!»,
+     * чтобы радиооператор успел взять ручку или приготовиться к приёму.
+     */
+    async function runReadyAttentionSequence(onStart) {
+        const mySession = session;
+        const msg3 = (typeof t === 'function' && t('groups.ready_countdown_ready', { '{n}': '3' })) || 'Приготовьтесь: 3…';
+        feedbackEl.textContent = msg3;
+        feedbackEl.className = 'feedback show ok';
+        if (answerInput) answerInput.disabled = true;
+
+        try {
+            const currentWpm = Math.max(12, session.wpm || 15);
+            const audio = new MorseAudio({ wpm: currentWpm });
+            await audio.play(EXAM_ATTENTION_TEXT, {
+                onCharStart: ({ index }) => {
+                    if (session !== mySession || mySession.finished) return;
+                    const n = EXAM_ATTENTION_COUNTDOWN[index];
+                    feedbackEl.textContent = n !== undefined
+                        ? ((typeof t === 'function' && t('groups.ready_countdown_ready', { '{n}': n })) || `Приготовьтесь: ${n}…`)
+                        : ((typeof t === 'function' && t('groups.ready_countdown_go')) || 'Приём!');
+                    feedbackEl.className = 'feedback show ok';
+                },
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка сигнала готовности:', e);
+        }
+
+        if (session !== mySession || mySession.finished) return;
+        feedbackEl.className = 'feedback';
+        if (answerInput) {
+            answerInput.disabled = false;
+            answerInput.focus();
+        }
+
+        await delay(600);
+        if (session !== mySession || mySession.finished) return;
+
+        if (typeof onStart === 'function') onStart();
     }
 
     async function runExamPlayback() {

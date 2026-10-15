@@ -873,13 +873,34 @@
         pseudoStereoToggle.checked = current.pseudoStereo !== false;
     }
 
-    waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
+    const cwNoiseChips = document.querySelectorAll('#cw-noise-chips .chip');
+    const readySignalToggle = document.getElementById('ready-signal-toggle');
+
+    if (cwNoiseChips.length) {
+        cwNoiseChips.forEach(c => c.classList.toggle('active', parseFloat(c.dataset.noise) === (current.noiseLevel || 0)));
+        cwNoiseChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                cwNoiseChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                current.noiseLevel = parseFloat(chip.dataset.noise) || 0;
+                save();
+            });
+        });
+    }
+
+    if (readySignalToggle) {
+        readySignalToggle.checked = current.readySignal !== false;
+        readySignalToggle.addEventListener('change', () => {
+            current.readySignal = readySignalToggle.checked;
+            save();
+        });
+    }
 
     function save() {
         AudioSettings.save(current);
         if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
             const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
-            bus.configure({ pseudoStereo: current.pseudoStereo });
+            bus.configure({ pseudoStereo: current.pseudoStereo, noiseLevel: current.noiseLevel });
         }
     }
 
@@ -946,17 +967,38 @@
             if (pseudoStereoToggle) {
                 pseudoStereoToggle.checked = current.pseudoStereo !== false;
             }
+            if (cwNoiseChips.length) {
+                cwNoiseChips.forEach(c => c.classList.toggle('active', parseFloat(c.dataset.noise) === 0));
+            }
+            if (readySignalToggle) {
+                readySignalToggle.checked = true;
+            }
         });
     }
 
-    /* ---------- Отображение сигнальной линии ---------- */
+    /* ---------- Отображение сигнальной линии и лампы ---------- */
     const signalToggle = document.getElementById('show-signal-line-toggle');
-    signalToggle.checked = DisplaySettings.load().showSignalLine !== false;
-    signalToggle.addEventListener('change', () => {
-        const settings = DisplaySettings.load();
-        settings.showSignalLine = signalToggle.checked;
-        DisplaySettings.save(settings);
-    });
+    if (signalToggle) {
+        signalToggle.checked = DisplaySettings.load().showSignalLine !== false;
+        signalToggle.addEventListener('change', () => {
+            const settings = DisplaySettings.load();
+            settings.showSignalLine = signalToggle.checked;
+            DisplaySettings.save(settings);
+        });
+    }
+
+    const lampToggle = document.getElementById('show-lamp-toggle');
+    if (lampToggle) {
+        lampToggle.checked = DisplaySettings.load().showLamp !== false;
+        lampToggle.addEventListener('change', () => {
+            const settings = DisplaySettings.load();
+            settings.showLamp = lampToggle.checked;
+            DisplaySettings.save(settings);
+            document.querySelectorAll('.morse-lamp').forEach(el => {
+                el.style.opacity = lampToggle.checked ? '1' : '0.15';
+            });
+        });
+    }
 
     /* ---------- Дневная норма тренировки ---------- */
     const dailyGoalChips = document.querySelectorAll('.daily-goal-chips .chip, #daily-goal-chips .chip');
