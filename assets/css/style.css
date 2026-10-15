@@ -2575,6 +2575,10 @@ input[type="range"] {
 .groups-select-wrap select.select-styled:focus {
     border-color: var(--accent);
 }
+select.select-styled option {
+    background: var(--surface-2);
+    color: var(--text);
+}
 
 /* Полоса скорости WPM */
 .groups-speed-bar {

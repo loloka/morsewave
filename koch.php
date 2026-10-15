@@ -34,24 +34,34 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card mt-3" id="setup-panel">
     <h3><?= t('koch.session_settings') ?></h3>
-    <div class="flex-wrap gap-2 mt-1" style="align-items:center;">
-        <div class="speed-control">
-            <?= t('koch.symbol_speed') ?>
+
+    <div class="groups-quick-row mt-2">
+        <div class="groups-quick-col" style="max-width:280px;">
+            <div class="groups-param-label"><?= t('koch.groups_per_session') ?></div>
+            <div class="groups-select-wrap">
+                <select id="koch-count" class="select-styled">
+                    <option value="10" selected>10 <?= t('groups.groups_unit') ?></option>
+                    <option value="20">20 <?= t('groups.groups_unit') ?></option>
+                    <option value="30">30 <?= t('groups.groups_unit') ?></option>
+                    <option value="40">40 <?= t('groups.groups_unit') ?></option>
+                    <option value="50">50 <?= t('groups.groups_unit') ?></option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="groups-speed-bar mt-2">
+        <div class="speed-control" id="koch-wpm-control">
+            <span class="speed-label"><?= t('koch.symbol_speed') ?></span>
             <input type="range" id="koch-wpm" min="10" max="40" step="1" value="12">
-            <span class="speed-value" id="koch-wpm-value">12</span> wpm
+            <span class="speed-value" id="koch-wpm-value">12</span> <span class="speed-unit">wpm</span>
             <span class="muted cpm-hint" id="koch-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
-
-        <label class="chip"><?= t('koch.groups_per_session') ?>
-            <select id="koch-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="10" selected>10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option>
-            </select>
-        </label>
     </div>
 
     <!-- Дополнительные параметры в Кохе (сворачиваемый спойлер) -->
     <div class="groups-extra-wrapper mt-2">
-        <button type="button" class="groups-extra-btn" id="koch-extra-toggle-btn" type="button">
+        <button type="button" class="groups-extra-btn" id="koch-extra-toggle-btn">
             <span class="groups-extra-btn-left">
                 <span class="groups-extra-icon"><?= mw_icon('sliders', 14) ?></span>
                 <span><?= t('groups.extra_settings') ?></span>

@@ -574,7 +574,11 @@
         const fw = document.getElementById('groups-farnsworth-enabled');
         const buf = document.getElementById('groups-buffer-enabled');
         const paper = document.getElementById('groups-paper-enabled');
-        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked));
+        const readyEl = document.getElementById('groups-ready-signal-enabled');
+        const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
+        const isNoise = !!(audioSettings && audioSettings.noiseLevel > 0);
+        const isNonDefaultReady = !!(readyEl && !readyEl.checked);
+        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked) || isNoise || isNonDefaultReady);
         if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
         return isActive;
     }
@@ -601,6 +605,7 @@
                 const s = AudioSettings.load();
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
+                updateExtraActiveDot();
             });
         }
         if (groupsToneFreq && groupsToneFreqVal) {
@@ -626,9 +631,11 @@
                     if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
                         getSharedMorseAudioBus(window.__morseSharedAudioCtx).setNoiseLevel(s.noiseLevel);
                     }
+                    updateExtraActiveDot();
                 });
             });
         }
+        updateExtraActiveDot();
     }
 
     [document.getElementById('groups-farnsworth-enabled'),
@@ -1107,9 +1114,10 @@
             getSharedMorseAudioBus(window.__morseSharedAudioCtx).stopNoise();
         }
         cancelPaperSleep();
-        if (session && session.isPaperMode) {
+        if (session) {
+            session.examStopped = true;
             session.paperStopped = true;
-            if (!session.finished) {
+            if (session.isPaperMode && !session.finished) {
                 session.dbXpEarned = 0;
             }
         }
@@ -1767,16 +1775,20 @@
         const examWpm = session.wpm || EXAM_CHAR_WPM;
         const examPaceWpm = session.farnsworth || examWpm;
         const examGapMs = (1200 / examPaceWpm) * 16;
+        const audio = new MorseAudio({
+            wpm: examWpm,
+            letterGapUnits: session.farnsworth ? 3 : EXAM_LETTER_GAP_UNITS,
+            farnsworthWpm: session.farnsworth || null
+        });
+        currentAudio = audio;
 
         try {
-            const audio = new MorseAudio({
-                wpm: examWpm,
-                letterGapUnits: session.farnsworth ? 3 : EXAM_LETTER_GAP_UNITS,
-                farnsworthWpm: session.farnsworth || null
-            });
             await audio.play(EXAM_ATTENTION_TEXT, {
                 onCharStart: ({ index }) => {
-                    if (session !== mySession || mySession.examStopped) return;
+                    if (session !== mySession || mySession.examStopped || mySession.finished) {
+                        audio.stop();
+                        return;
+                    }
                     const n = EXAM_ATTENTION_COUNTDOWN[index];
                     feedbackEl.textContent = n !== undefined
                         ? t('js.groups.exam_get_ready', { '{n}': n })
@@ -1784,14 +1796,20 @@
                     feedbackEl.className = 'feedback show ok';
                 },
                 onSymbol: ({ symbol, durationMs }) => {
+                    if (session !== mySession || mySession.examStopped || mySession.finished) {
+                        audio.stop();
+                        return;
+                    }
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
                 },
             });
         } catch (e) {
             console.error('Ошибка воспроизведения сигнала ЖЖЖ=:', e);
+        } finally {
+            if (currentAudio === audio) currentAudio = null;
         }
-        if (session !== mySession || mySession.examStopped) return;
+        if (session !== mySession || mySession.examStopped || mySession.finished) return;
 
         feedbackEl.className = 'feedback';
         examAnswerEl.disabled = false;
@@ -1799,7 +1817,7 @@
         examAnswerEl.focus();
 
         await delay(examGapMs);
-        if (session !== mySession || mySession.examStopped) return;
+        if (session !== mySession || mySession.examStopped || mySession.finished) return;
 
         runExamPlayback();
     }
@@ -1816,12 +1834,17 @@
         feedbackEl.className = 'feedback show ok';
         if (answerInput) answerInput.disabled = true;
 
+        const currentWpm = Math.max(12, session.wpm || 15);
+        const audio = new MorseAudio({ wpm: currentWpm });
+        currentAudio = audio;
+
         try {
-            const currentWpm = Math.max(12, session.wpm || 15);
-            const audio = new MorseAudio({ wpm: currentWpm });
             await audio.play(EXAM_ATTENTION_TEXT, {
                 onCharStart: ({ index }) => {
-                    if (session !== mySession || mySession.finished) return;
+                    if (session !== mySession || mySession.finished || mySession.paperStopped) {
+                        audio.stop();
+                        return;
+                    }
                     const n = EXAM_ATTENTION_COUNTDOWN[index];
                     feedbackEl.textContent = n !== undefined
                         ? ((typeof t === 'function' && t('groups.ready_countdown_ready', { '{n}': n })) || `Приготовьтесь: ${n}…`)
@@ -1829,15 +1852,21 @@
                     feedbackEl.className = 'feedback show ok';
                 },
                 onSymbol: ({ symbol, durationMs }) => {
+                    if (session !== mySession || mySession.finished || mySession.paperStopped) {
+                        audio.stop();
+                        return;
+                    }
                     signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
                     lamp.flash(durationMs);
                 },
             });
         } catch (e) {
             console.error('Ошибка сигнала готовности:', e);
+        } finally {
+            if (currentAudio === audio) currentAudio = null;
         }
 
-        if (session !== mySession || mySession.finished) return;
+        if (session !== mySession || mySession.finished || mySession.paperStopped) return;
         feedbackEl.className = 'feedback';
         if (answerInput) {
             answerInput.disabled = false;
@@ -1845,7 +1874,7 @@
         }
 
         await delay(600);
-        if (session !== mySession || mySession.finished) return;
+        if (session !== mySession || mySession.finished || mySession.paperStopped) return;
 
         if (typeof onStart === 'function') onStart();
     }
@@ -3001,6 +3030,11 @@
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
     function stopGroupsSession() {
+        if (session) {
+            session.finished = true;
+            session.examStopped = true;
+            session.paperStopped = true;
+        }
         if (currentAudio) {
             currentAudio.stop();
             currentAudio = null;

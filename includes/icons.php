@@ -35,6 +35,7 @@ function mw_icon(string $name, int $size = 18): string
         'levels'     => '<rect x="4" y="14" width="4" height="6" rx="1"/><rect x="10" y="9" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/>',
         'tower'      => '<path d="M12 2v5"/><circle cx="12" cy="7" r="1.5"/><path d="M7 21l3.5-11.5M17 21l-3.5-11.5"/><path d="M8.5 16h7M10 12h4"/><path d="M7.5 4a5 5 0 0 0 0 4M16.5 4a5 5 0 0 1 0 4"/>',
         'sparkles'   => '<path d="M12 3l1.9 4.8 4.8 1.9-4.8 1.9L12 16.4l-1.9-4.8L5.3 9.7l4.8-1.9L12 3z"/><path d="M19 16l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8.8-2z"/>',
+        'sliders'    => '<path d="M4 6h16M4 12h16M4 18h16"/><circle cx="8" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="10" cy="18" r="2"/>',
     ];
 
     $inner = $paths[$name] ?? $paths['star'];
