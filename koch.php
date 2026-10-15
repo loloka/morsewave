@@ -42,14 +42,6 @@ include __DIR__ . '/includes/header.php';
             <span class="muted cpm-hint" id="koch-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
         </div>
 
-        <label class="chip" style="gap:8px;">
-            <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
-        </label>
-
-        <label class="chip" style="gap:8px;">
-            <input type="checkbox" id="koch-buffer-enabled"> <?= t('groups.buffer_input') ?>
-        </label>
-
         <label class="chip"><?= t('koch.groups_per_session') ?>
             <select id="koch-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
                 <option value="10" selected>10</option><option value="20">20</option><option value="30">30</option><option value="40">40</option><option value="50">50</option>
@@ -57,43 +49,115 @@ include __DIR__ . '/includes/header.php';
         </label>
     </div>
 
-    <!-- Панель настройки Фарнсворта в Кохе -->
-    <div id="koch-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
-        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-            <div>
-                <div style="font-weight:700; font-size:13px;"><?= t('koch.farnsworth') ?></div>
-                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
-            </div>
-            <div class="speed-control" id="koch-farnsworth-wrap">
-                <input type="range" id="koch-farnsworth" min="5" max="30" step="1" value="10">
-                <span class="speed-value" id="koch-farnsworth-value">10</span> wpm
-            </div>
-        </div>
-        <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <?= mw_icon('info', 14) ?> <?= t('koch.farnsworth_tooltip') ?>
-        </div>
-    </div>
+    <!-- Дополнительные параметры в Кохе (сворачиваемый спойлер) -->
+    <div class="groups-extra-wrapper mt-2">
+        <button type="button" class="groups-extra-btn" id="koch-extra-toggle-btn" type="button">
+            <span class="groups-extra-btn-left">
+                <span class="groups-extra-icon"><?= mw_icon('sliders', 14) ?></span>
+                <span><?= t('groups.extra_settings') ?></span>
+                <span class="badge-active-dot" id="koch-extra-active-dot" style="display:none;" title="Включены доп. параметры"></span>
+            </span>
+            <span class="groups-chevron" id="koch-extra-chevron">▾</span>
+        </button>
 
-    <!-- Панель настройки буфера памяти в Кохе -->
-    <div id="koch-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
-        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-            <div>
-                <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
-                <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+        <div class="groups-extra-content subcard mt-1" id="koch-extra-content" style="display:none;">
+            <div class="chip-row" style="gap:8px;">
+                <label class="chip" style="gap:8px;">
+                    <input type="checkbox" id="koch-farnsworth-enabled"> <?= t('koch.farnsworth') ?>
+                </label>
+                <label class="chip" style="gap:8px;" id="koch-buffer-label">
+                    <input type="checkbox" id="koch-buffer-enabled"> <?= t('groups.buffer_input') ?>
+                </label>
+                <label class="chip" style="gap:8px;">
+                    <input type="checkbox" id="koch-paper-enabled"> <?= t('groups.paper_mode') ?>
+                </label>
+                <label class="chip" style="gap:8px;">
+                    <input type="checkbox" id="koch-ready-signal-enabled" checked> <?= t('groups.ready_signal_chip') ?>
+                </label>
             </div>
-            <div class="chip-row" id="koch-buffer-depth-chips">
-                <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
-                <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
-                <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
-                <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
-                <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+
+            <!-- Панель настройки Фарнсворта в Кохе -->
+            <div id="koch-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('koch.farnsworth') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+                    </div>
+                    <div class="speed-control" id="koch-farnsworth-wrap">
+                        <input type="range" id="koch-farnsworth" min="5" max="30" step="1" value="10">
+                        <span class="speed-value" id="koch-farnsworth-value">10</span> wpm
+                        <span class="muted cpm-hint" id="koch-farnsworth-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 50]) ?></span>
+                    </div>
+                </div>
+                <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                    <?= mw_icon('info', 14) ?> <?= t('koch.farnsworth_tooltip') ?>
+                </div>
             </div>
-        </div>
-        <div class="muted mt-2" id="koch-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
-        </div>
-        <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
-            <?= t('groups.buffer_hint') ?>
+
+            <!-- Панель настройки буфера памяти в Кохе -->
+            <div id="koch-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+                    </div>
+                    <div class="chip-row" id="koch-buffer-depth-chips">
+                        <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
+                        <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                        <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                        <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                        <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+                    </div>
+                </div>
+                <div class="muted mt-2" id="koch-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                    <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
+                </div>
+                <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
+                    <?= t('groups.buffer_hint') ?>
+                </div>
+            </div>
+
+            <!-- Панель настройки приёма на бумагу в Кохе -->
+            <div id="koch-paper-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); width:100%;">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('groups.paper_gap_label') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.paper_gap_desc') ?></div>
+                    </div>
+                    <div class="speed-control" id="koch-paper-gap-wrap">
+                        <input type="range" id="koch-paper-gap" min="1" max="10" step="0.5" value="3">
+                        <span class="speed-value" id="koch-paper-gap-value">3.0</span> <?= t('groups.seconds_short') ?>
+                    </div>
+                </div>
+                <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                    <?= mw_icon('info', 14) ?> <?= t('groups.paper_tooltip') ?>
+                </div>
+            </div>
+
+            <!-- Тон и шум эфира в Кохе -->
+            <div class="subcard mt-2" style="border-left:3px solid var(--accent); width:100%;">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('audio.freq_label') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('audio.freq_desc') ?></div>
+                    </div>
+                    <div class="speed-control">
+                        <input type="range" id="koch-tone-freq" min="300" max="1000" step="10" value="600">
+                        <span class="speed-value" id="koch-tone-freq-value">600</span> Гц
+                    </div>
+                </div>
+                <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('audio.noise_label') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('audio.noise_desc') ?></div>
+                    </div>
+                    <div class="chip-row" id="koch-cw-noise-chips">
+                        <div class="chip" data-noise="0"><?= t('audio.noise_off') ?></div>
+                        <div class="chip" data-noise="0.04"><?= t('audio.noise_low') ?></div>
+                        <div class="chip" data-noise="0.10"><?= t('audio.noise_med') ?></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -110,21 +174,31 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <div class="signal-line mt-2" id="koch-signal"></div>
+
+    <!-- Режим приёма на бумагу: индикатор воспроизведения / паузы -->
+    <div id="koch-paper-session-display" style="display:none; text-align:center; padding:24px 0;">
+        <div class="flex gap-1" style="align-items:center; justify-content:center; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;"><?= mw_icon('notebook', 16) ?> <?= t('groups.paper_mode') ?></div>
+        <div id="koch-paper-status-msg" class="flex gap-1" style="align-items:center; justify-content:center; font-size:22px; color:var(--text); font-weight:700; margin-top:8px;"><?= mw_icon('headphones', 22) ?> <?= t('groups.paper_listening') ?></div>
+        <div id="koch-paper-sub-msg" class="muted mt-2" style="font-size:14px; min-height:24px;"></div>
+        <div id="koch-paper-progress-wrap" style="max-width:320px; margin:16px auto 0; background:rgba(255,255,255,0.08); height:6px; border-radius:3px; overflow:hidden; display:none;">
+            <div id="koch-paper-progress-bar" style="width:100%; height:100%; background:var(--accent); transition:width 0.1s linear;"></div>
+        </div>
+    </div>
+
     <input type="text" id="koch-answer" class="answer-input mt-2" placeholder="<?= htmlspecialchars(t('koch.answer_placeholder')) ?>" autocomplete="off">
 
-    <!-- Экранная клавиатура — только на телефонах/планшетах (см. koch.js).
-         На Кохе набор символов часто смешивает буквы, цифры и знаки
-         (. и ?), а у стандартной клавиатуры телефона они на разных
-         "страницах" — переключение туда-обратно между каждой группой
-         утомляет и съедает время. Своя клавиатура показывает сразу все
-         символы текущего уровня на одном экране; на компьютере её нет,
-         ввод остаётся обычным, с физической клавиатуры. -->
+    <!-- Экранная клавиатура — только на телефонах/планшетах -->
     <div class="vkb mt-2" id="koch-vkb" style="display:none;"></div>
 
-    <div class="btn-row mt-2">
+    <div class="btn-row mt-2" id="koch-submit-row">
         <button class="btn btn-primary" id="submit-answer"><?= t('koch.check') ?> <kbd class="btn-kbd">Enter</kbd></button>
         <button class="btn" id="koch-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
     </div>
+
+    <div class="btn-row mt-2" id="koch-paper-controls-row" style="display:none;">
+        <button class="btn" id="koch-paper-stop-btn" type="button"><?= t('groups.words_stop') ?> <kbd class="btn-kbd">Esc</kbd></button>
+    </div>
+
     <div class="feedback mt-3" id="koch-feedback" style="margin-top:24px;"></div>
 </div>
 
@@ -136,6 +210,16 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('koch.result_xp') ?></span></div>
     </div>
     <div class="feedback mt-2 show" id="result-message"></div>
+
+    <!-- Блок радиограммы для проверки записи на бумагу -->
+    <div id="koch-paper-result-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:16px;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <h4 class="mt-0" style="color:var(--accent);"><?= t('groups.paper_radiogram_title') ?></h4>
+            <button class="btn btn-sm" id="koch-paper-copy-btn" type="button"><?= mw_icon('copy', 14) ?> <?= t('common.copy') ?></button>
+        </div>
+        <div class="muted mt-1" style="font-size:12px;"><?= t('groups.paper_radiogram_desc') ?></div>
+        <pre id="koch-paper-radiogram-text" style="background:var(--surface); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px; font-family:var(--font-mono); font-size:16px; letter-spacing:2px; line-height:1.8; margin-top:10px; white-space:pre-wrap; word-break:break-word;"></pre>
+    </div>
     
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
         <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>

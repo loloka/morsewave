@@ -45,11 +45,25 @@
     const fwWrap = document.getElementById('koch-farnsworth-wrap');
     const fwSlider = document.getElementById('koch-farnsworth');
     const fwValue = document.getElementById('koch-farnsworth-value');
+    const fwCpm = document.getElementById('koch-farnsworth-cpm');
     const fwPanel = document.getElementById('koch-farnsworth-panel');
+
+    const extraToggleBtn = document.getElementById('koch-extra-toggle-btn');
+    const extraContent = document.getElementById('koch-extra-content');
+    const extraChevron = document.getElementById('koch-extra-chevron');
+    const extraActiveDot = document.getElementById('koch-extra-active-dot');
+
+    function updateKochExtraDot() {
+        const isFw = fwEnabled && fwEnabled.checked;
+        const isBuf = typeof bufferCheckbox !== 'undefined' && bufferCheckbox && bufferCheckbox.checked;
+        const isPaper = typeof paperCheckbox !== 'undefined' && paperCheckbox && paperCheckbox.checked;
+        if (extraActiveDot) extraActiveDot.style.display = (isFw || isBuf || isPaper) ? 'inline-block' : 'none';
+    }
 
     function updateKochFarnsworthVisibility() {
         const on = fwEnabled && fwEnabled.checked;
         if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
+        updateKochExtraDot();
     }
 
     const setupPanel = document.getElementById('setup-panel');
@@ -92,6 +106,9 @@
         fwSlider.value = savedFwWpm;
         fwValue.textContent = savedFwWpm;
     }
+    if (fwCpm && typeof cpmHintText === 'function') {
+        fwCpm.textContent = cpmHintText(fwSlider.value);
+    }
 
     const kochCountEl = document.getElementById('koch-count');
     const savedKochCount = localStorage.getItem('morse_koch_count');
@@ -111,6 +128,7 @@
     });
     fwSlider.addEventListener('input', () => { 
         fwValue.textContent = fwSlider.value; 
+        if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value);
         localStorage.setItem('morse_koch_fw_wpm', fwSlider.value);
     });
     if (fwEnabled) {
@@ -291,6 +309,18 @@
         if (bufferPanel) {
             bufferPanel.style.display = (bufferCheckbox && bufferCheckbox.checked) ? 'block' : 'none';
         }
+        updateKochExtraDot();
+    }
+
+    const paperCheckbox = document.getElementById('koch-paper-enabled');
+    const paperPanel = document.getElementById('koch-paper-panel');
+    const paperGapSlider = document.getElementById('koch-paper-gap');
+    const paperGapValue = document.getElementById('koch-paper-gap-value');
+
+    function updateKochPaperVisibility() {
+        const on = paperCheckbox && paperCheckbox.checked;
+        if (paperPanel) paperPanel.style.display = on ? 'block' : 'none';
+        updateKochExtraDot();
     }
 
     if (bufferCheckbox) {
@@ -300,9 +330,100 @@
         }
         updateBufferPanelVisibility();
         bufferCheckbox.addEventListener('change', () => {
+            if (bufferCheckbox.checked && paperCheckbox) {
+                paperCheckbox.checked = false;
+                updateKochPaperVisibility();
+                localStorage.setItem('morse_koch_paper_enabled', 'false');
+            }
             localStorage.setItem('morse_koch_buffer_enabled', bufferCheckbox.checked);
             updateBufferPanelVisibility();
         });
+    }
+
+    if (paperCheckbox) {
+        const savedPaper = localStorage.getItem('morse_koch_paper_enabled');
+        if (savedPaper !== null) paperCheckbox.checked = (savedPaper === 'true');
+        updateKochPaperVisibility();
+        paperCheckbox.addEventListener('change', () => {
+            if (paperCheckbox.checked && bufferCheckbox) {
+                bufferCheckbox.checked = false;
+                updateBufferPanelVisibility();
+                localStorage.setItem('morse_koch_buffer_enabled', 'false');
+            }
+            localStorage.setItem('morse_koch_paper_enabled', paperCheckbox.checked);
+            updateKochPaperVisibility();
+        });
+    }
+
+    if (paperGapSlider) {
+        const savedGap = localStorage.getItem('morse_koch_paper_gap');
+        if (savedGap) {
+            paperGapSlider.value = savedGap;
+            if (paperGapValue) paperGapValue.textContent = parseFloat(savedGap).toFixed(1);
+        }
+        paperGapSlider.addEventListener('input', () => {
+            if (paperGapValue) paperGapValue.textContent = parseFloat(paperGapSlider.value).toFixed(1);
+        });
+        paperGapSlider.addEventListener('change', () => {
+            localStorage.setItem('morse_koch_paper_gap', paperGapSlider.value);
+        });
+    }
+
+    if (extraToggleBtn && extraContent) {
+        const savedExtraOpen = localStorage.getItem('morse_koch_extra_open') === 'true';
+        if (savedExtraOpen) {
+            extraContent.style.display = 'block';
+            if (extraChevron) extraChevron.textContent = '▴';
+            extraToggleBtn.classList.add('is-open');
+        }
+        extraToggleBtn.addEventListener('click', () => {
+            const isOpen = extraContent.style.display !== 'none';
+            extraContent.style.display = isOpen ? 'none' : 'block';
+            if (extraChevron) extraChevron.textContent = isOpen ? '▾' : '▴';
+            extraToggleBtn.classList.toggle('is-open', !isOpen);
+            localStorage.setItem('morse_koch_extra_open', !isOpen);
+        });
+    }
+    updateKochExtraDot();
+
+    const readySignalEl = document.getElementById('koch-ready-signal-enabled');
+    const kochToneFreq = document.getElementById('koch-tone-freq');
+    const kochToneFreqVal = document.getElementById('koch-tone-freq-value');
+    const kochCwNoiseChips = document.querySelectorAll('#koch-cw-noise-chips .chip');
+
+    if (typeof AudioSettings !== 'undefined') {
+        const audioSettings = AudioSettings.load();
+        if (readySignalEl) {
+            readySignalEl.checked = audioSettings.readySignal !== false;
+            readySignalEl.addEventListener('change', () => {
+                const s = AudioSettings.load();
+                s.readySignal = readySignalEl.checked;
+                AudioSettings.save(s);
+            });
+        }
+        if (kochToneFreq && kochToneFreqVal) {
+            kochToneFreq.value = audioSettings.freq || 600;
+            kochToneFreqVal.textContent = audioSettings.freq || 600;
+            kochToneFreq.addEventListener('input', () => {
+                const s = AudioSettings.load();
+                s.freq = parseInt(kochToneFreq.value, 10);
+                kochToneFreqVal.textContent = s.freq;
+                AudioSettings.save(s);
+            });
+        }
+        if (kochCwNoiseChips.length) {
+            const currentNoise = audioSettings.noiseLevel || 0;
+            kochCwNoiseChips.forEach(c => c.classList.toggle('active', parseFloat(c.dataset.noise) === currentNoise));
+            kochCwNoiseChips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    kochCwNoiseChips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    const s = AudioSettings.load();
+                    s.noiseLevel = parseFloat(chip.dataset.noise);
+                    AudioSettings.save(s);
+                });
+            });
+        }
     }
 
     document.querySelectorAll('#koch-buffer-depth-chips .chip').forEach(chip => {
@@ -442,6 +563,14 @@
             currentAudio = null;
             isPlaying = false;
         }
+        if (typeof getSharedAudioContext === 'function' && typeof getSharedMorseAudioBus === 'function') {
+            try {
+                const ctx = getSharedAudioContext();
+                if (ctx) getSharedMorseAudioBus(ctx).stopNoise();
+            } catch (e) {}
+        }
+        cancelPaperSleep();
+        document.body.classList.remove('morse-session-active');
         if (session && !session.finished && session.dbXpEarned > 0) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             Progress.logXp(session.dbXpEarned, 'koch', {
@@ -460,7 +589,204 @@
     window.addEventListener('beforeunload', abortCurrentSession);
     window.addEventListener('pagehide', abortCurrentSession);
 
-    function startSession() {
+    const EXAM_ATTENTION_TEXT = 'ЖЖЖ=';
+    const EXAM_ATTENTION_COUNTDOWN = { 0: '3', 1: '2', 2: '1' };
+
+    async function runReadyAttentionSequence() {
+        const mySession = session;
+        const msg3 = (typeof t === 'function' && t('groups.ready_countdown_ready', { '{n}': '3' })) || 'Приготовьтесь: 3…';
+        feedbackEl.textContent = msg3;
+        feedbackEl.className = 'feedback show ok';
+        if (answerInput) answerInput.disabled = true;
+
+        try {
+            const currentWpm = Math.max(12, session.wpm || 15);
+            const audio = new MorseAudio({ wpm: currentWpm });
+            await audio.play(EXAM_ATTENTION_TEXT, {
+                onCharStart: ({ index }) => {
+                    if (session !== mySession || mySession.finished) return;
+                    const n = EXAM_ATTENTION_COUNTDOWN[index];
+                    feedbackEl.textContent = n !== undefined
+                        ? ((typeof t === 'function' && t('groups.ready_countdown_ready', { '{n}': n })) || `Приготовьтесь: ${n}…`)
+                        : ((typeof t === 'function' && t('groups.ready_countdown_go')) || 'Приём!');
+                    feedbackEl.className = 'feedback show ok';
+                },
+                onSymbol: ({ symbol, durationMs }) => {
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                },
+            });
+        } catch (e) {
+            console.error('Ошибка сигнала готовности:', e);
+        }
+
+        if (session !== mySession || mySession.finished) return;
+        feedbackEl.className = 'feedback';
+        if (answerInput) {
+            answerInput.disabled = false;
+        }
+    }
+
+    let paperSleepResolve = null;
+    let paperSleepTimeout = null;
+    function cancelPaperSleep() {
+        if (paperSleepTimeout) { clearTimeout(paperSleepTimeout); paperSleepTimeout = null; }
+        if (paperSleepResolve) { paperSleepResolve(); paperSleepResolve = null; }
+    }
+
+    async function runPaperPlayback() {
+        const total = session.groups.length;
+        const paperSubMsg = document.getElementById('koch-paper-sub-msg');
+        const paperStatusMsg = document.getElementById('koch-paper-status-msg');
+        const paperProgressWrap = document.getElementById('koch-paper-progress-wrap');
+        const paperProgressBar = document.getElementById('koch-paper-progress-bar');
+
+        for (let i = 0; i < total; i++) {
+            if (session.paperStopped || session.finished) break;
+            session.index = i;
+            renderGroupIndex();
+            if (paperStatusMsg) paperStatusMsg.textContent = '🎧 ' + t('groups.paper_listening');
+            if (paperSubMsg) {
+                paperSubMsg.textContent = t('js.groups.paper_status_playing', {
+                    '{current}': i + 1,
+                    '{total}': total
+                });
+            }
+            if (paperProgressWrap) paperProgressWrap.style.display = 'none';
+            signalLine.clear();
+
+            try {
+                if (currentAudio) {
+                    currentAudio.stop();
+                    currentAudio = null;
+                }
+                currentAudio = new MorseAudio({
+                    wpm: session.wpm,
+                    farnsworthWpm: session.farnsworth || null
+                });
+                await currentAudio.play(session.groups[i], {
+                    onSymbol: ({ symbol, durationMs }) => {
+                        signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                        lamp.flash(durationMs);
+                    }
+                });
+            } catch (err) {
+                console.error('Ошибка в режиме бумаги:', err);
+            } finally {
+                currentAudio = null;
+            }
+
+            if (session.paperStopped || session.finished) break;
+            session.playedCount = i + 1;
+
+            if (i < total - 1) {
+                const gapMs = Math.round(session.paperGap * 1000);
+                if (paperProgressWrap) paperProgressWrap.style.display = 'block';
+                if (paperProgressBar) paperProgressBar.style.width = '100%';
+
+                const startTime = Date.now();
+                await new Promise(resolve => {
+                    paperSleepResolve = resolve;
+                    const updateCountdown = () => {
+                        if (session.paperStopped || session.finished) {
+                            cleanup();
+                            resolve();
+                            return;
+                        }
+                        const elapsed = Date.now() - startTime;
+                        const remaining = Math.max(0, gapMs - elapsed);
+                        const secText = (remaining / 1000).toFixed(1);
+                        if (paperStatusMsg) {
+                            paperStatusMsg.textContent = '⏸ ' + t('groups.paper_pause', { '{sec}': secText });
+                        }
+                        if (paperProgressBar) {
+                            const pct = Math.max(0, (remaining / gapMs) * 100);
+                            paperProgressBar.style.width = pct + '%';
+                        }
+                        if (remaining <= 0) {
+                            cleanup();
+                            resolve();
+                        } else {
+                            paperSleepTimeout = setTimeout(updateCountdown, 50);
+                        }
+                    };
+                    const cleanup = () => {
+                        if (paperSleepTimeout) { clearTimeout(paperSleepTimeout); paperSleepTimeout = null; }
+                        paperSleepResolve = null;
+                    };
+                    updateCountdown();
+                });
+
+                if (session.paperStopped || session.finished) break;
+            }
+        }
+
+        if (session.paperStopped) {
+            if (session.playedCount > 0) {
+                finishPaperSession();
+            } else {
+                abortCurrentSession();
+                sessionPanel.style.display = 'none';
+                setupPanel.style.display = 'block';
+            }
+        } else {
+            finishPaperSession();
+        }
+    }
+
+    function finishPaperSession() {
+        if (!session || session.finished) return;
+        session.finished = true;
+        cancelPaperSleep();
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        signalLine.clear();
+        lamp.off();
+
+        sessionPanel.style.display = 'none';
+        resultPanel.style.display = 'block';
+
+        const playedGroups = session.groups.slice(0, session.playedCount);
+        const lines = [];
+        for (let i = 0; i < playedGroups.length; i += 5) {
+            lines.push(playedGroups.slice(i, i + 5).join('   '));
+        }
+        const radiogramText = lines.join('\n');
+
+        const radiogramEl = document.getElementById('koch-paper-radiogram-text');
+        if (radiogramEl) radiogramEl.textContent = radiogramText;
+
+        const paperResBlock = document.getElementById('koch-paper-result-block');
+        if (paperResBlock) paperResBlock.style.display = 'block';
+
+        const standardGrid = document.querySelector('#result-panel .grid-3');
+        if (standardGrid) standardGrid.style.display = 'none';
+        const mistakesBlock = document.getElementById('mistakes-block');
+        if (mistakesBlock) mistakesBlock.style.display = 'none';
+        const pairPromptBlock = document.getElementById('pair-prompt-block');
+        if (pairPromptBlock) pairPromptBlock.style.display = 'none';
+
+        const resultMsg = document.getElementById('result-message');
+        if (resultMsg) {
+            resultMsg.textContent = t('groups.paper_result_hint');
+            resultMsg.className = 'feedback show ok mt-2';
+        }
+
+        const xpEarned = session.playedCount * 3;
+        Progress.addXp(xpEarned, 'koch', {
+            wpm: session.wpm,
+            paper: true,
+            groups: session.playedCount
+        });
+        const resultXp = document.getElementById('result-xp');
+        if (resultXp) resultXp.textContent = `+${xpEarned}`;
+
+        document.body.classList.remove('morse-session-active');
+    }
+
+    async function startSession() {
         abortCurrentSession();
         if (currentAudio) {
             currentAudio.stop();
@@ -472,7 +798,8 @@
         const farnsworth = fwEnabled.checked ? parseInt(fwSlider.value, 10) : 0;
         const count = parseInt(document.getElementById('koch-count').value, 10);
         const charset = currentCharset();
-        const isBufferMode = bufferCheckbox ? bufferCheckbox.checked : false;
+        const isPaperMode = paperCheckbox && paperCheckbox.checked;
+        const isBufferMode = !isPaperMode && bufferCheckbox && bufferCheckbox.checked;
 
         session = {
             groups: Array.from({ length: count }, () => weightedRandomGroup(charset, GROUP_LEN)),
@@ -480,6 +807,10 @@
             wpm, farnsworth, count,
             isBufferMode,
             bufferDepth: selectedBufferDepth,
+            isPaperMode,
+            paperGap: paperGapSlider ? parseFloat(paperGapSlider.value) || 3.0 : 3.0,
+            paperStopped: false,
+            playedCount: 0,
             correctChars: 0,
             totalChars: 0,
             xpEarned: 0,
@@ -490,15 +821,48 @@
             history: []
         };
 
+        document.body.classList.add('morse-session-active');
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
-        groupTotalEl.textContent = count;
-        feedbackEl.className = 'feedback';
-        renderGroupIndex();
-        answerInput.value = '';
-        answerInput.focus();
-        playCurrentGroup();
+
+        const settings = typeof AudioSettings !== 'undefined' ? AudioSettings.load() : { readySignal: true };
+        const needReadySignal = readySignalEl ? readySignalEl.checked : (settings.readySignal !== false);
+
+        if (needReadySignal) {
+            await runReadyAttentionSequence();
+            if (!session || session.finished) return;
+        }
+
+        if (isPaperMode) {
+            const paperDisplay = document.getElementById('koch-paper-session-display');
+            if (paperDisplay) paperDisplay.style.display = 'block';
+            const paperControls = document.getElementById('koch-paper-controls-row');
+            if (paperControls) paperControls.style.display = 'flex';
+            const submitRow = document.getElementById('koch-submit-row');
+            if (submitRow) submitRow.style.display = 'none';
+            if (answerInput) answerInput.style.display = 'none';
+            if (vkbEl) vkbEl.style.display = 'none';
+            if (replayBtn) replayBtn.style.display = 'none';
+            runPaperPlayback();
+        } else {
+            const paperDisplay = document.getElementById('koch-paper-session-display');
+            if (paperDisplay) paperDisplay.style.display = 'none';
+            const paperControls = document.getElementById('koch-paper-controls-row');
+            if (paperControls) paperControls.style.display = 'none';
+            const submitRow = document.getElementById('koch-submit-row');
+            if (submitRow) submitRow.style.display = 'flex';
+            if (answerInput) answerInput.style.display = 'block';
+            if (isTouch && vkbEl) vkbEl.style.display = 'flex';
+            if (replayBtn) replayBtn.style.display = 'inline-flex';
+
+            groupTotalEl.textContent = count;
+            feedbackEl.className = 'feedback';
+            renderGroupIndex();
+            answerInput.value = '';
+            answerInput.focus();
+            playCurrentGroup();
+        }
     }
 
     function renderGroupIndex() {
@@ -898,6 +1262,11 @@
 
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        const standardGrid = document.querySelector('#result-panel .grid-3');
+        if (standardGrid) standardGrid.style.display = '';
+        const paperResBlock = document.getElementById('koch-paper-result-block');
+        if (paperResBlock) paperResBlock.style.display = 'none';
+        document.body.classList.add('morse-session-active');
         answerInput.style.display = 'block';
         answerInput.value = '';
         replayBtn.style.display = 'inline-flex';
@@ -910,6 +1279,19 @@
     }
 
     function stopKochSession() {
+        if (session && session.isPaperMode) {
+            session.paperStopped = true;
+            cancelPaperSleep();
+            if (currentAudio) { currentAudio.stop(); currentAudio = null; }
+            if (session.playedCount > 0) {
+                finishPaperSession();
+            } else {
+                abortCurrentSession();
+                sessionPanel.style.display = 'none';
+                setupPanel.style.display = 'block';
+            }
+            return;
+        }
         if (currentAudio) {
             currentAudio.stop();
             currentAudio = null;
@@ -936,6 +1318,22 @@
     const kochStopBtn = document.getElementById('koch-stop-btn');
     if (kochStopBtn) kochStopBtn.addEventListener('click', stopKochSession);
 
+    const kochPaperStopBtn = document.getElementById('koch-paper-stop-btn');
+    if (kochPaperStopBtn) kochPaperStopBtn.addEventListener('click', stopKochSession);
+
+    const kochPaperCopyBtn = document.getElementById('koch-paper-copy-btn');
+    if (kochPaperCopyBtn) {
+        kochPaperCopyBtn.addEventListener('click', () => {
+            const textEl = document.getElementById('koch-paper-radiogram-text');
+            if (!textEl) return;
+            navigator.clipboard.writeText(textEl.textContent).then(() => {
+                const orig = kochPaperCopyBtn.innerHTML;
+                kochPaperCopyBtn.innerHTML = '✓ ' + (typeof t === 'function' ? t('common.copied') : 'Скопировано');
+                setTimeout(() => { kochPaperCopyBtn.innerHTML = orig; }, 2000);
+            });
+        });
+    }
+
     document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 
     document.getElementById('start-session').addEventListener('click', startSession);
@@ -944,6 +1342,11 @@
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
+        const standardGrid = document.querySelector('#result-panel .grid-3');
+        if (standardGrid) standardGrid.style.display = '';
+        const paperResBlock = document.getElementById('koch-paper-result-block');
+        if (paperResBlock) paperResBlock.style.display = 'none';
+        document.body.classList.remove('morse-session-active');
     });
     answerInput.addEventListener('keydown', (e) => {
         if (typeof answerInput.bufferMaxAllowed === 'number' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {

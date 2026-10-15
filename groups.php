@@ -455,6 +455,24 @@ include __DIR__ . '/includes/header.php';
                 <div class="speed-control">
                     <input type="range" id="groups-exam-custom-wpm" min="8" max="25" step="1" value="12">
                     <span class="speed-value" id="groups-exam-custom-wpm-val">12</span> wpm
+                    <span class="muted cpm-hint" id="groups-exam-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
+                </div>
+            </div>
+
+            <!-- Фарнсворт (пауза между знаками) в тренировочном темпе экзамена -->
+            <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <label class="chip" style="gap:8px; margin:0; cursor:pointer;">
+                        <input type="checkbox" id="groups-exam-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+                    </label>
+                    <div class="speed-control" id="groups-exam-farnsworth-wrap" style="display:none;">
+                        <input type="range" id="groups-exam-farnsworth" min="5" max="25" step="1" value="10">
+                        <span class="speed-value" id="groups-exam-farnsworth-val">10</span> wpm
+                        <span class="muted cpm-hint" id="groups-exam-farnsworth-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 50]) ?></span>
+                    </div>
+                </div>
+                <div class="muted mt-1" id="groups-exam-farnsworth-desc" style="display:none; font-size:11px;">
+                    <?= t('groups.farnsworth_speed_desc') ?>
                 </div>
             </div>
         </div>

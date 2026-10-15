@@ -1027,7 +1027,11 @@
             // wpm-слайдер (см. EXAM_CHAR_WPM выше).
             const examAudioWpm = session.wpm || EXAM_CHAR_WPM;
             currentAudio = session.isExam
-                ? new MorseAudio({ wpm: examAudioWpm, letterGapUnits: EXAM_LETTER_GAP_UNITS })
+                ? new MorseAudio({
+                    wpm: examAudioWpm,
+                    letterGapUnits: session.farnsworth ? 3 : EXAM_LETTER_GAP_UNITS,
+                    farnsworthWpm: session.farnsworth || null
+                })
                 : new MorseAudio({ wpm: session.wpm, farnsworthWpm: session.farnsworth || null });
             await currentAudio.play(session.groups[session.index], {
                 onCharStart: ({ index }) => {
@@ -1213,6 +1217,13 @@
             const customExamInput = document.getElementById('groups-exam-custom-wpm');
             const examWpm = isExamTraining ? (parseInt(customExamInput ? customExamInput.value : '12', 10) || 12) : 20;
             activeWpm = examWpm;
+            const examFwEl = document.getElementById('groups-exam-farnsworth-enabled');
+            const examFwSliderEl = document.getElementById('groups-exam-farnsworth');
+            if (isExamTraining && examFwEl && examFwEl.checked && examFwSliderEl) {
+                activeFarnsworth = parseInt(examFwSliderEl.value, 10) || 0;
+            } else {
+                activeFarnsworth = 0;
+            }
             activeGroupLen = 5;
             activeCharsetKey = 'mixed';
             activeCount = 50;
@@ -1754,10 +1765,15 @@
         feedbackEl.className = 'feedback show ok';
 
         const examWpm = session.wpm || EXAM_CHAR_WPM;
-        const examGapMs = (1200 / examWpm) * 16;
+        const examPaceWpm = session.farnsworth || examWpm;
+        const examGapMs = (1200 / examPaceWpm) * 16;
 
         try {
-            const audio = new MorseAudio({ wpm: examWpm, letterGapUnits: EXAM_LETTER_GAP_UNITS });
+            const audio = new MorseAudio({
+                wpm: examWpm,
+                letterGapUnits: session.farnsworth ? 3 : EXAM_LETTER_GAP_UNITS,
+                farnsworthWpm: session.farnsworth || null
+            });
             await audio.play(EXAM_ATTENTION_TEXT, {
                 onCharStart: ({ index }) => {
                     if (session !== mySession || mySession.examStopped) return;
@@ -1836,7 +1852,8 @@
 
     async function runExamPlayback() {
         const examWpm = session.wpm || EXAM_CHAR_WPM;
-        const examGapMs = (1200 / examWpm) * 16;
+        const examPaceWpm = session.farnsworth || examWpm;
+        const examGapMs = (1200 / examPaceWpm) * 16;
         for (session.index = 0; session.index < session.groups.length; session.index++) {
             if (session.examStopped) return;
             groupIndexEl.textContent = session.index + 1;
@@ -2612,6 +2629,13 @@
     const examPaceDesc = document.getElementById('groups-exam-pace-desc');
     const examCustomWpmSlider = document.getElementById('groups-exam-custom-wpm');
     const examCustomWpmVal = document.getElementById('groups-exam-custom-wpm-val');
+    const examCustomWpmCpm = document.getElementById('groups-exam-wpm-cpm');
+    const examFwEnabled = document.getElementById('groups-exam-farnsworth-enabled');
+    const examFwWrap = document.getElementById('groups-exam-farnsworth-wrap');
+    const examFwDesc = document.getElementById('groups-exam-farnsworth-desc');
+    const examFwSlider = document.getElementById('groups-exam-farnsworth');
+    const examFwVal = document.getElementById('groups-exam-farnsworth-val');
+    const examFwValCpm = document.getElementById('groups-exam-farnsworth-cpm');
 
     if (examPaceChips.length) {
         examPaceChips.forEach(chip => {
@@ -2631,8 +2655,57 @@
     }
 
     if (examCustomWpmSlider && examCustomWpmVal) {
+        const savedExamWpm = localStorage.getItem('morse_exam_custom_wpm');
+        if (savedExamWpm) {
+            examCustomWpmSlider.value = savedExamWpm;
+            examCustomWpmVal.textContent = savedExamWpm;
+        }
+        if (examCustomWpmCpm && typeof cpmHintText === 'function') {
+            examCustomWpmCpm.textContent = cpmHintText(examCustomWpmSlider.value);
+        }
+
         examCustomWpmSlider.addEventListener('input', () => {
-            examCustomWpmVal.textContent = examCustomWpmSlider.value;
+            const val = examCustomWpmSlider.value;
+            examCustomWpmVal.textContent = val;
+            if (examCustomWpmCpm && typeof cpmHintText === 'function') {
+                examCustomWpmCpm.textContent = cpmHintText(val);
+            }
+            if (examFwSlider) examFwSlider.max = Math.max(val, 25);
+            localStorage.setItem('morse_exam_custom_wpm', val);
+        });
+    }
+
+    if (examFwEnabled) {
+        const savedExamFwEnabled = localStorage.getItem('morse_exam_fw_enabled') === 'true';
+        examFwEnabled.checked = savedExamFwEnabled;
+        if (examFwWrap) examFwWrap.style.display = savedExamFwEnabled ? 'inline-flex' : 'none';
+        if (examFwDesc) examFwDesc.style.display = savedExamFwEnabled ? 'block' : 'none';
+
+        examFwEnabled.addEventListener('change', () => {
+            const on = examFwEnabled.checked;
+            if (examFwWrap) examFwWrap.style.display = on ? 'inline-flex' : 'none';
+            if (examFwDesc) examFwDesc.style.display = on ? 'block' : 'none';
+            localStorage.setItem('morse_exam_fw_enabled', on);
+        });
+    }
+
+    if (examFwSlider && examFwVal) {
+        const savedExamFwWpm = localStorage.getItem('morse_exam_fw_wpm');
+        if (savedExamFwWpm) {
+            examFwSlider.value = savedExamFwWpm;
+            examFwVal.textContent = savedExamFwWpm;
+        }
+        if (examFwValCpm && typeof cpmHintText === 'function') {
+            examFwValCpm.textContent = cpmHintText(examFwSlider.value);
+        }
+
+        examFwSlider.addEventListener('input', () => {
+            const val = examFwSlider.value;
+            examFwVal.textContent = val;
+            if (examFwValCpm && typeof cpmHintText === 'function') {
+                examFwValCpm.textContent = cpmHintText(val);
+            }
+            localStorage.setItem('morse_exam_fw_wpm', val);
         });
     }
 
