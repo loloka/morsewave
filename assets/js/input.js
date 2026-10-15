@@ -193,26 +193,39 @@ class VirtualKeyboard {
         this.container.innerHTML = '';
         this.container.classList.add('vkb');
         
-        const QWERTY_ROWS = [
+        const isCyrillic = this.options.layout === 'cyrillic';
+        if (isCyrillic) {
+            this.container.classList.add('vkb-cyrillic');
+        } else {
+            this.container.classList.remove('vkb-cyrillic');
+        }
+
+        const ROWS = isCyrillic ? [
+            ['1','2','3','4','5','6','7','8','9','0'],
+            ['Й','Ц','У','К','Е','Н','Г','Ш','Щ','З','Х','Ъ'],
+            ['Ф','Ы','В','А','П','Р','О','Л','Д','Ж','Э'],
+            ['Я','Ч','С','М','И','Т','Ь','Б','Ю'],
+        ] : [
             ['1','2','3','4','5','6','7','8','9','0'],
             ['Q','W','E','R','T','Y','U','I','O','P'],
             ['A','S','D','F','G','H','J','K','L'],
             ['Z','X','C','V','B','N','M'],
         ];
 
+        const lastRow = ROWS[ROWS.length - 1];
         if (this.options.showSlash) {
-            QWERTY_ROWS[3].push('/');
+            lastRow.push('/');
         }
         if (this.options.showPunctuation) {
-            QWERTY_ROWS[3].push('.', '?');
+            lastRow.push('.', '?');
         }
         if (Array.isArray(this.options.extraKeys)) {
             this.options.extraKeys.forEach((k) => {
-                if (!QWERTY_ROWS[3].includes(k)) QWERTY_ROWS[3].push(k);
+                if (!lastRow.includes(k)) lastRow.push(k);
             });
         }
 
-        QWERTY_ROWS.forEach((row) => {
+        ROWS.forEach((row) => {
             const rowEl = document.createElement('div');
             rowEl.className = 'vkb-row';
             row.forEach((ch) => {

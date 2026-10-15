@@ -31,7 +31,7 @@ include __DIR__ . '/includes/header.php';
 
     <div id="groups-training-config">
         <div class="mt-2">
-            <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.length_label') ?></div>
+            <div class="muted" style="font-size:13px; font-weight:600; margin-bottom:6px;"><?= t('groups.length_label') ?></div>
             <div class="chip-row" id="length-chips">
                 <div class="chip" data-len="2">2</div>
                 <div class="chip active" data-len="3">3</div>
@@ -41,23 +41,87 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="mt-2">
-            <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('groups.charset_label') ?></div>
+            <div class="muted" style="font-size:13px; font-weight:600; margin-bottom:6px;"><?= t('groups.charset_label') ?></div>
             <div class="chip-row" id="charset-chips">
                 <div class="chip active" data-set="letters"><?= t('groups.set_letters') ?></div>
+                <div class="chip" data-set="cyrillic"><?= t('groups.set_cyrillic') ?></div>
                 <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
                 <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
+                <div class="chip" data-set="cyrillic_digits"><?= t('groups.set_cyrillic_digits') ?></div>
                 <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
                 <div class="chip" data-set="koch" id="chip-set-koch"><?= t('groups.set_koch') ?></div>
                 <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
             </div>
-            <div class="muted" id="koch-charset-hint" style="display:none; font-size:11px; margin-top:6px;">
+
+            <!-- Подсказка о разделении латиницы и кириллицы -->
+            <div class="muted" id="charset-exclusive-hint" style="font-size:12px; margin-top:8px; line-height:1.45; display:flex; align-items:flex-start; gap:6px;">
+                <span style="color:var(--accent); flex-shrink:0; margin-top:1px;"><?= mw_icon('info', 14) ?></span>
+                <span><?= t('groups.charset_exclusive_hint') ?></span>
+            </div>
+
+            <!-- Подпанель для режима «Только выученные» -->
+            <div id="learned-charset-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('groups.learned_alphabet_label') ?></div>
+                        <div class="muted" style="font-size:12px; margin-top:2px;"><?= t('groups.learned_alphabet_desc') ?></div>
+                    </div>
+                    <div class="chip-row" id="learned-alphabet-chips">
+                        <div class="chip active" data-alphabet="latin" id="chip-learned-latin">
+                            <span><?= t('groups.learned_latin') ?></span>
+                            <span class="chip-count" id="learned-latin-count">0</span>
+                        </div>
+                        <div class="chip" data-alphabet="cyrillic" id="chip-learned-cyrillic">
+                            <span><?= t('groups.learned_cyrillic') ?></span>
+                            <span class="chip-count" id="learned-cyrillic-count">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Предупреждение, если нет выученных букв в выбранном алфавите -->
+                <div id="learned-none-warning" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.45;">
+                    <div class="flex gap-2" style="align-items:flex-start;">
+                        <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; color:var(--text);" id="learned-none-title"><?= t('groups.learned_none_title') ?></div>
+                            <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="learned-none-text"></div>
+                            <div class="mt-2">
+                                <a href="learn.php" id="learned-none-link" class="btn btn-sm btn-primary" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                                    <?= mw_icon('book-open', 14) ?> <span><?= t('groups.learned_go_to_learn') ?></span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Список выученных символов (превью) -->
+                <div class="muted mt-2" id="learned-chars-preview" style="display:none; font-size:12px; line-height:1.45; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                    <span class="muted"><?= t('groups.learned_chars_list') ?>:</span> <span class="mono bold" id="learned-chars-text" style="color:var(--text); letter-spacing:0.04em; margin-left:4px;"></span>
+                </div>
+            </div>
+
+            <!-- Подсказка для режима Коха -->
+            <div class="muted" id="koch-charset-hint" style="display:none; font-size:12px; margin-top:6px; line-height:1.45;">
                 <span id="koch-charset-text"></span>
                 <a href="koch.php" style="color:var(--accent);margin-left:6px;text-decoration:underline;"><?= t('groups.koch_open_mode') ?></a>
             </div>
-            <input type="text" id="custom-charset-input" class="answer-input mt-1"
+
+            <!-- Ввод для «Свои символы» -->
+            <input type="text" id="custom-charset-input" class="answer-input mt-2"
                    placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"
-                   style="display:none; text-transform:uppercase;" autocomplete="off">
-            <div class="muted" id="custom-charset-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
+                   style="display:none; text-transform:uppercase; font-family:var(--font-mono); letter-spacing:0.06em;" autocomplete="off">
+            <div class="muted" id="custom-charset-hint" style="display:none; font-size:12px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
+
+            <!-- Предупреждение о конфликте латиницы и кириллицы в своих символах -->
+            <div id="custom-charset-conflict" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:12px; line-height:1.45; color:var(--text);">
+                <div class="flex gap-2" style="align-items:flex-start;">
+                    <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
+                    <div style="flex:1;">
+                        <div style="font-weight:700; color:var(--danger, #ef4444);"><?= t('groups.conflict_title') ?></div>
+                        <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="custom-charset-conflict-text"><?= t('groups.custom_conflict_warning') ?></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="groups-speed-row">

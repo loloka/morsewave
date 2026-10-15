@@ -254,13 +254,31 @@
     updateBufferDepthOptions(groupLen);
     
     const vkbEl = document.getElementById('groups-vkb');
-    let vkb = null;
+    function isCyrillicSession() {
+        if (session && typeof session.isCyrillic === 'boolean') return session.isCyrillic;
+        if (charsetKey === 'cyrillic' || charsetKey === 'cyrillic_digits') return true;
+        if (charsetKey === 'learned') {
+            const la = localStorage.getItem('morse_groups_learned_alphabet') || 'latin';
+            return la === 'cyrillic';
+        }
+        if (charsetKey === 'custom') {
+            const ci = document.getElementById('custom-charset-input');
+            if (ci) {
+                const raw = ci.value.toUpperCase();
+                return /[А-ЯЁ]/.test(raw);
+            }
+        }
+        return false;
+    }
+
     function renderVkb(inputEl, isExam) {
         if (typeof VirtualKeyboard !== 'undefined' && vkbEl) {
             const hasPunctuation = (charsetKey === 'koch') || (charsetKey === 'custom' && customInput && /[.?]/.test(customInput.value));
+            const isCyr = isCyrillicSession();
             vkb = new VirtualKeyboard(vkbEl, inputEl, {
                 showSpace: isExam,
-                showPunctuation: hasPunctuation
+                showPunctuation: hasPunctuation,
+                layout: isCyr ? 'cyrillic' : 'qwerty'
             });
         }
     }
@@ -329,7 +347,21 @@
     });
     const customInput = document.getElementById('custom-charset-input');
     const customHint = document.getElementById('custom-charset-hint');
+    const customConflict = document.getElementById('custom-charset-conflict');
     const kochHint = document.getElementById('koch-charset-hint');
+    const learnedPanel = document.getElementById('learned-charset-panel');
+    const learnedNoneWarning = document.getElementById('learned-none-warning');
+    const learnedNoneTitle = document.getElementById('learned-none-title');
+    const learnedNoneText = document.getElementById('learned-none-text');
+    const learnedNoneLink = document.getElementById('learned-none-link');
+    const learnedCharsPreview = document.getElementById('learned-chars-preview');
+    const learnedCharsText = document.getElementById('learned-chars-text');
+    const learnedLatinCount = document.getElementById('learned-latin-count');
+    const learnedCyrillicCount = document.getElementById('learned-cyrillic-count');
+    const chipLearnedLatin = document.getElementById('chip-learned-latin');
+    const chipLearnedCyrillic = document.getElementById('chip-learned-cyrillic');
+
+    let learnedAlphabet = localStorage.getItem('morse_groups_learned_alphabet') || 'latin';
 
     function updateKochHint() {
         const kochHintText = document.getElementById('koch-charset-text');
@@ -347,6 +379,94 @@
         kochChip.textContent = `${t('groups.set_koch')} (${level})`;
     }
 
+    function updateLearnedPanel() {
+        if (!learnedPanel) return;
+        const state = Progress.load();
+        const latinChars = (state.learnedLetters || []).filter(ch => !ch.startsWith(CYRILLIC_PREFIX) && /^[A-Z]$/.test(ch));
+        const cyrillicChars = (state.learnedLetters || []).filter(ch => ch.startsWith(CYRILLIC_PREFIX)).map(ch => ch.replace(CYRILLIC_PREFIX, ''));
+
+        if (learnedLatinCount) learnedLatinCount.textContent = latinChars.length;
+        if (learnedCyrillicCount) learnedCyrillicCount.textContent = cyrillicChars.length;
+
+        if (chipLearnedLatin) chipLearnedLatin.classList.toggle('active', learnedAlphabet === 'latin');
+        if (chipLearnedCyrillic) chipLearnedCyrillic.classList.toggle('active', learnedAlphabet === 'cyrillic');
+
+        const isCyr = (learnedAlphabet === 'cyrillic');
+        const count = isCyr ? cyrillicChars.length : latinChars.length;
+        const chars = isCyr ? cyrillicChars : latinChars;
+        const startBtn = document.getElementById('start-session');
+
+        if (count === 0) {
+            if (learnedNoneWarning) {
+                learnedNoneWarning.style.display = 'block';
+                if (learnedNoneTitle) learnedNoneTitle.textContent = t('groups.learned_none_title');
+                if (learnedNoneText) learnedNoneText.textContent = isCyr ? t('groups.learned_none_cyrillic') : t('groups.learned_none_latin');
+                if (learnedNoneLink) learnedNoneLink.href = isCyr ? 'learn.php?tab=cyrillic' : 'learn.php';
+            }
+            if (learnedCharsPreview) learnedCharsPreview.style.display = 'none';
+            if (startBtn && charsetKey === 'learned') startBtn.disabled = true;
+        } else {
+            if (learnedNoneWarning) learnedNoneWarning.style.display = 'none';
+            if (learnedCharsPreview) {
+                learnedCharsPreview.style.display = 'block';
+                if (learnedCharsText) learnedCharsText.textContent = chars.join(' ') + ` (${count})`;
+            }
+            if (startBtn && charsetKey === 'learned') startBtn.disabled = false;
+        }
+    }
+
+    document.querySelectorAll('#learned-alphabet-chips .chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            learnedAlphabet = chip.dataset.alphabet;
+            localStorage.setItem('morse_groups_learned_alphabet', learnedAlphabet);
+            updateLearnedPanel();
+        });
+    });
+
+    function hasAlphabetConflict(text) {
+        const raw = text.toUpperCase();
+        const hasLatin = /[A-Z]/.test(raw);
+        const hasCyrillic = /[А-ЯЁ]/.test(raw);
+        return hasLatin && hasCyrillic;
+    }
+
+    function parseCustomCharset() {
+        if (!customInput) return [];
+        const raw = customInput.value.toUpperCase();
+        const chars = [...new Set(raw.replace(/[^A-ZА-ЯЁ0-9.?/]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split('')))];
+        return chars.filter(ch => (MORSE_CODE && MORSE_CODE[ch]) || (typeof CYRILLIC_CODE !== 'undefined' && CYRILLIC_CODE[ch]));
+    }
+
+    function validateCustomCharset() {
+        if (!customInput) return true;
+        const conflict = hasAlphabetConflict(customInput.value);
+        const startBtn = document.getElementById('start-session');
+
+        if (customConflict) {
+            customConflict.style.display = conflict ? 'block' : 'none';
+        }
+
+        if (conflict) {
+            if (startBtn && charsetKey === 'custom') startBtn.disabled = true;
+            return false;
+        }
+
+        const parsed = parseCustomCharset();
+        const isValid = parsed.length >= 2;
+        if (startBtn && charsetKey === 'custom') {
+            startBtn.disabled = !isValid;
+        }
+        return isValid;
+    }
+
+    if (customInput) {
+        customInput.addEventListener('input', () => {
+            const cleaned = customInput.value.replace(/[^A-Za-zА-Яа-яЁё0-9 .?/-]/g, '');
+            if (cleaned !== customInput.value) customInput.value = cleaned;
+            validateCustomCharset();
+        });
+    }
+
     document.querySelectorAll('#charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#charset-chips .chip').forEach(c => c.classList.remove('active'));
@@ -355,11 +475,26 @@
             localStorage.setItem('morse_groups_charset', charsetKey);
             const isCustom = charsetKey === 'custom';
             const isKoch = charsetKey === 'koch';
-            customInput.style.display = isCustom ? 'block' : 'none';
-            customHint.style.display = isCustom ? 'block' : 'none';
+            const isLearned = charsetKey === 'learned';
+
+            if (customInput) customInput.style.display = isCustom ? 'block' : 'none';
+            if (customHint) customHint.style.display = isCustom ? 'block' : 'none';
+            if (customConflict && !isCustom) customConflict.style.display = 'none';
+
+            if (learnedPanel) learnedPanel.style.display = isLearned ? 'block' : 'none';
+            if (isLearned) updateLearnedPanel();
+
             if (kochHint) {
                 kochHint.style.display = isKoch ? 'block' : 'none';
                 if (isKoch) updateKochHint();
+            }
+
+            const startBtn = document.getElementById('start-session');
+            if (!isLearned && !isCustom && startBtn) {
+                startBtn.disabled = false;
+            }
+            if (isCustom) {
+                validateCustomCharset();
             }
         });
     });
@@ -370,33 +505,35 @@
         if (chip) chip.click();
     }
 
-    const MIN_LEARNED_FOR_FILTER = 5;
-
-    // parseCustomCharset() и так молча отфильтровывает всё, кроме A-Z0-9
-    // (кириллица там просто не проходит regex-класс [^A-Z0-9]), но само
-    // поле ввода это не показывало — можно было напечатать русские буквы
-    // и не понять, почему они не учитываются. Чистим прямо по вводу, чтобы
-    // недопустимые символы вообще не появлялись в поле.
-    customInput.addEventListener('input', () => {
-        const cleaned = customInput.value.replace(/[^A-Za-z0-9 ]/g, '');
-        if (cleaned !== customInput.value) customInput.value = cleaned;
-    });
-
-    function parseCustomCharset() {
-        const raw = customInput.value.toUpperCase();
-        const chars = [...new Set(raw.replace(/[^A-Z0-9]/g, ' ').split(/\s+/).filter(Boolean).flatMap(s => s.split('')))];
-        return chars.filter(ch => MORSE_CODE[ch]);
-    }
+    const MIN_LEARNED_FOR_FILTER = 2;
 
     function getCharset(key = charsetKey) {
         const state = Progress.load();
         switch (key) {
             case 'digits': return '0123456789'.split('');
             case 'mixed': return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('');
-            case 'learned':
-                return state.learnedLetters.length >= MIN_LEARNED_FOR_FILTER
-                    ? state.learnedLetters
+            case 'cyrillic': {
+                const cyr = (typeof CYRILLIC_LEARNABLE !== 'undefined')
+                    ? CYRILLIC_LEARNABLE
+                    : ['А','Б','В','Г','Д','Е','Ж','З','И','Й','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ы','Ь','Э','Ю','Я'];
+                return cyr.slice();
+            }
+            case 'cyrillic_digits': {
+                const cyr = (typeof CYRILLIC_LEARNABLE !== 'undefined')
+                    ? CYRILLIC_LEARNABLE
+                    : ['А','Б','В','Г','Д','Е','Ж','З','И','Й','К','Л','М','Н','О','П','Р','С','Т','У','Ф','Х','Ц','Ч','Ш','Щ','Ы','Ь','Э','Ю','Я'];
+                return cyr.concat('0123456789'.split(''));
+            }
+            case 'learned': {
+                const isCyr = (learnedAlphabet === 'cyrillic');
+                const learned = isCyr
+                    ? (state.learnedLetters || []).filter(ch => ch.startsWith(CYRILLIC_PREFIX)).map(ch => ch.replace(CYRILLIC_PREFIX, ''))
+                    : (state.learnedLetters || []).filter(ch => !ch.startsWith(CYRILLIC_PREFIX) && /^[A-Z]$/.test(ch));
+                if (learned.length >= 1) return learned;
+                return isCyr
+                    ? ((typeof CYRILLIC_LEARNABLE !== 'undefined') ? CYRILLIC_LEARNABLE.slice() : ['А','Б','В'])
                     : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+            }
             case 'koch': {
                 const level = Math.min(Math.max(2, state.kochLevel || 2), KOCH_ORDER.length);
                 const chars = KOCH_ORDER.slice(0, level);
@@ -406,6 +543,8 @@
                 const custom = parseCustomCharset();
                 return custom.length >= MIN_LEARNED_FOR_FILTER ? custom : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
             }
+            case 'letters':
+            case 'latin':
             default: return 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
         }
     }
@@ -428,7 +567,10 @@
      * isExam).
      */
     function weightedRandomGroup(charset, len) {
-        const weights = charset.map(ch => 1 + (1 - Progress.groupsLetterScore(ch)) * 0.5);
+        const weights = charset.map(ch => {
+            const key = (typeof progressKeyForChar === 'function') ? progressKeyForChar(ch) : ch;
+            return 1 + (1 - Progress.groupsLetterScore(key)) * 0.5;
+        });
         const total = weights.reduce((sum, w) => sum + w, 0);
         let g = '';
         for (let i = 0; i < len; i++) {
@@ -635,8 +777,10 @@
         let charsetFactor = Math.max(0.15, Math.sqrt(charsetSize / 26));
         if (charsetKey === 'digits') {
             charsetFactor = 1.0;
-        } else if (charsetKey === 'mixed') {
+        } else if (charsetKey === 'mixed' || charsetKey === 'cyrillic_digits') {
             charsetFactor = 1.25;
+        } else if (charsetKey === 'cyrillic') {
+            charsetFactor = 1.0;
         }
         const lengthFactor = len / 3;
         // Надбавка за скорость (speedXpFactor из morse-data.js) — ТОЛЬКО для
@@ -838,6 +982,39 @@
             return;
         }
 
+        if (currentSubmode === 'training') {
+            if (charsetKey === 'learned') {
+                const state = Progress.load();
+                const isCyr = (learnedAlphabet === 'cyrillic');
+                const count = isCyr
+                    ? (state.learnedLetters || []).filter(ch => ch.startsWith(CYRILLIC_PREFIX)).length
+                    : (state.learnedLetters || []).filter(ch => !ch.startsWith(CYRILLIC_PREFIX) && /^[A-Z]$/.test(ch)).length;
+                if (count === 0) {
+                    if (learnedNoneWarning) {
+                        learnedNoneWarning.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        learnedNoneWarning.classList.remove('pairs-shake');
+                        void learnedNoneWarning.offsetWidth;
+                        learnedNoneWarning.classList.add('pairs-shake');
+                    }
+                    return;
+                }
+            } else if (charsetKey === 'custom') {
+                if (!validateCustomCharset()) {
+                    if (customConflict && customConflict.style.display !== 'none') {
+                        customConflict.classList.remove('pairs-shake');
+                        void customConflict.offsetWidth;
+                        customConflict.classList.add('pairs-shake');
+                    } else if (customInput) {
+                        customInput.classList.remove('pairs-shake');
+                        void customInput.offsetWidth;
+                        customInput.classList.add('pairs-shake');
+                    }
+                    if (customInput) customInput.focus();
+                    return;
+                }
+            }
+        }
+
         const isExam = (currentSubmode === 'exam');
         const isPairs = (currentSubmode === 'pairs');
         const isPaperMode = (currentSubmode === 'training' && paperCheckbox && paperCheckbox.checked);
@@ -901,6 +1078,8 @@
             generatedGroups = Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(activeCharset, activeGroupLen));
         }
 
+        const isCyrillic = isCyrillicSession(activeCharsetKey, activeCharset);
+
         session = {
             groups: generatedGroups,
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
@@ -912,6 +1091,7 @@
             isBufferMode,
             bufferDepth,
             isPairs,
+            isCyrillic,
             isPaperMode,
             paperGap: paperGapSlider ? parseFloat(paperGapSlider.value) || 3.0 : 3.0,
             paperStopped: false,
@@ -1545,8 +1725,11 @@
 
     function scoreAnswer(expected, typed) {
         let correct = 0;
+        const typedUpper = typed.toUpperCase();
         for (let i = 0; i < expected.length; i++) {
-            if (typed[i] && typed[i].toUpperCase() === expected[i]) correct++;
+            const exp = expected[i];
+            const typ = typedUpper[i];
+            if (typ && (typ === exp || (exp === 'Ё' && typ === 'Е') || (exp === 'Е' && typ === 'Ё'))) correct++;
         }
         return correct;
     }
@@ -1567,10 +1750,13 @@
         for (let i = 0; i < expected.length; i++) {
             const e = expected[i] || '';
             const tChar = typedUpper[i] || '';
-            if (e !== tChar && e) {
+            const isMatch = (e === tChar) || (e === 'Ё' && tChar === 'Е') || (e === 'Е' && tChar === 'Ё');
+            if (!isMatch && e) {
                 session.wrongPairs.push({ expected: e, typed: tChar });
                 if (tChar && typeof Progress.recordPairConfusion === 'function') {
-                    Progress.recordPairConfusion(e, tChar);
+                    const eKey = (typeof progressKeyForChar === 'function') ? progressKeyForChar(e) : e;
+                    const tKey = (typeof progressKeyForChar === 'function') ? progressKeyForChar(tChar) : tChar;
+                    Progress.recordPairConfusion(eKey, tKey);
                 }
             }
         }
@@ -1600,14 +1786,16 @@
             for (let i = 0; i < expected.length; i++) {
                 const e = expected[i];
                 const t = typedUpper[i];
-                const isCorrect = (e === t);
-                Progress.recordGroupsAttempt(e, isCorrect);
+                const isCorrect = (e === t) || (e === 'Ё' && t === 'Е') || (e === 'Е' && t === 'Ё');
+                const eKey = (typeof progressKeyForChar === 'function') ? progressKeyForChar(e) : e;
+                Progress.recordGroupsAttempt(eKey, isCorrect);
                 if (!isCorrect) {
-                    session.wrongPairs.push({ expected: e, typed: t || '' });
-                    if (t && window.MORSE_CODE && window.MORSE_CODE[t]) {
-                        Progress.recordGroupsAttempt(t, false);
+                    const isValidChar = (window.MORSE_CODE && window.MORSE_CODE[t]) || (typeof CYRILLIC_CODE !== 'undefined' && CYRILLIC_CODE[t]);
+                    if (t && isValidChar) {
+                        const tKey = (typeof progressKeyForChar === 'function') ? progressKeyForChar(t) : t;
+                        Progress.recordGroupsAttempt(tKey, false);
                         if (typeof Progress.recordPairConfusion === 'function') {
-                            Progress.recordPairConfusion(e, t);
+                            Progress.recordPairConfusion(eKey, tKey);
                         }
                     }
                 }
@@ -2024,7 +2212,7 @@
             const charsToInsert = [p.expected];
             // Если вместо буквы ввели другой существующий символ, добавляем его в ту же группу,
             // чтобы натренировать отличие между ними на слух!
-            if (p.typed && window.MORSE_CODE && window.MORSE_CODE[p.typed] && p.typed !== p.expected) {
+            if (p.typed && ((window.MORSE_CODE && window.MORSE_CODE[p.typed]) || (typeof CYRILLIC_CODE !== 'undefined' && CYRILLIC_CODE[p.typed])) && p.typed !== p.expected) {
                 charsToInsert.push(p.typed);
             }
             
@@ -2063,6 +2251,7 @@
             isRetrain: true, isAbuse: isAbuse,
             isBufferMode: session.isBufferMode !== undefined ? session.isBufferMode : (bufferCheckbox ? bufferCheckbox.checked : false),
             bufferDepth: session.bufferDepth || selectedBufferDepth || 'all',
+            isCyrillic: !!session?.isCyrillic || isCyrillicSession(),
             startTime: Date.now(), history: []
         };
         session = retrySession;
