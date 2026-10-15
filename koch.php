@@ -39,7 +39,6 @@ include __DIR__ . '/includes/header.php';
         <div class="groups-quick-col">
             <div class="groups-param-label"><?= t('groups.length_label') ?></div>
             <div class="chip-row" id="koch-length-chips">
-                <div class="chip" data-len="1">1</div>
                 <div class="chip" data-len="2">2</div>
                 <div class="chip" data-len="3">3</div>
                 <div class="chip" data-len="4">4</div>

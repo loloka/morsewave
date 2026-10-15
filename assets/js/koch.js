@@ -1,6 +1,6 @@
 (function () {
     let groupLen = parseInt(localStorage.getItem('morse_koch_len'), 10) || 5;
-    if (![1, 2, 3, 4, 5].includes(groupLen)) groupLen = 5;
+    if (![2, 3, 4, 5].includes(groupLen)) groupLen = 5;
     const PASS_THRESHOLD = 0.9;
     const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
