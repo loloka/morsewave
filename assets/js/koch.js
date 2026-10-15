@@ -48,15 +48,24 @@
     const fwCpm = document.getElementById('koch-farnsworth-cpm');
     const fwPanel = document.getElementById('koch-farnsworth-panel');
 
+    const bufferCheckbox = document.getElementById('koch-buffer-enabled');
+    const bufferPanel = document.getElementById('koch-buffer-panel');
+    let selectedBufferDepth = localStorage.getItem('morse_koch_buffer_depth') || 'all';
+
+    const paperCheckbox = document.getElementById('koch-paper-enabled');
+    const paperPanel = document.getElementById('koch-paper-panel');
+    const paperGapSlider = document.getElementById('koch-paper-gap');
+    const paperGapValue = document.getElementById('koch-paper-gap-value');
+
     const extraToggleBtn = document.getElementById('koch-extra-toggle-btn');
     const extraContent = document.getElementById('koch-extra-content');
     const extraChevron = document.getElementById('koch-extra-chevron');
     const extraActiveDot = document.getElementById('koch-extra-active-dot');
 
     function updateKochExtraDot() {
-        const isFw = fwEnabled && fwEnabled.checked;
-        const isBuf = typeof bufferCheckbox !== 'undefined' && bufferCheckbox && bufferCheckbox.checked;
-        const isPaper = typeof paperCheckbox !== 'undefined' && paperCheckbox && paperCheckbox.checked;
+        const isFw = !!(fwEnabled && fwEnabled.checked);
+        const isBuf = !!(bufferCheckbox && bufferCheckbox.checked);
+        const isPaper = !!(paperCheckbox && paperCheckbox.checked);
         if (extraActiveDot) extraActiveDot.style.display = (isFw || isBuf || isPaper) ? 'inline-block' : 'none';
     }
 
@@ -291,10 +300,6 @@
     });
 
 
-    const bufferCheckbox = document.getElementById('koch-buffer-enabled');
-    const bufferPanel = document.getElementById('koch-buffer-panel');
-    let selectedBufferDepth = localStorage.getItem('morse_koch_buffer_depth') || 'all';
-
     function updateKochBufferTip(depth) {
         const tipEl = document.getElementById('koch-buffer-tip-text');
         if (!tipEl) return;
@@ -311,11 +316,6 @@
         }
         updateKochExtraDot();
     }
-
-    const paperCheckbox = document.getElementById('koch-paper-enabled');
-    const paperPanel = document.getElementById('koch-paper-panel');
-    const paperGapSlider = document.getElementById('koch-paper-gap');
-    const paperGapValue = document.getElementById('koch-paper-gap-value');
 
     function updateKochPaperVisibility() {
         const on = paperCheckbox && paperCheckbox.checked;
