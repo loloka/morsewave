@@ -93,7 +93,7 @@ include __DIR__ . '/includes/header.php';
                     <input type="checkbox" id="koch-paper-enabled"> <?= t('groups.paper_mode') ?>
                 </label>
                 <label class="chip" style="gap:8px;">
-                    <input type="checkbox" id="koch-ready-signal-enabled" checked> <?= t('groups.ready_signal_chip') ?>
+                    <input type="checkbox" id="koch-ready-signal-enabled"> <?= t('groups.ready_signal_chip') ?>
                 </label>
             </div>
 

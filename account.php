@@ -313,7 +313,7 @@ include __DIR__ . '/includes/header.php';
 
         <div class="mt-3">
             <label class="flex gap-2" style="align-items:center; cursor:pointer;">
-                <input type="checkbox" id="ready-signal-toggle" checked>
+                <input type="checkbox" id="ready-signal-toggle">
                 <span style="font-weight:500;"><?= t('acc.ready_signal_label') ?></span>
             </label>
             <p class="muted mt-1" style="font-size:12px;margin-left:24px;margin-top:4px;">

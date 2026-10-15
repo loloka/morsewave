@@ -11,7 +11,7 @@ const AudioSettings = (() => {
         waveform: 'sine',
         pseudoStereo: true,
         noiseLevel: 0, // 0 = выкл, 0.035 = тихий, 0.07 = реалистичный
-        readySignal: true // позывной VVV = и 3 сек отсчёта перед стартом сессии
+        readySignal: false // позывной VVV = и 3 сек отсчёта перед стартом сессии (по умолчанию выкл)
     });
 
     function load() {
@@ -22,6 +22,10 @@ const AudioSettings = (() => {
             // Если остался временный bell или transceiver — возвращаем на sine
             if (parsed.waveform === 'bell' || parsed.waveform === 'transceiver') {
                 parsed.waveform = 'sine';
+            }
+            // По умолчанию VVV = выключен у всех, пока пользователь явно не включил
+            if (!localStorage.getItem('morsewave_ready_signal_user_set')) {
+                parsed.readySignal = false;
             }
             return { ...defaults(), ...parsed };
         } catch {

@@ -574,11 +574,9 @@
         const fw = document.getElementById('groups-farnsworth-enabled');
         const buf = document.getElementById('groups-buffer-enabled');
         const paper = document.getElementById('groups-paper-enabled');
-        const readyEl = document.getElementById('groups-ready-signal-enabled');
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const isNoise = !!(audioSettings && audioSettings.noiseLevel > 0);
-        const isNonDefaultReady = !!(readyEl && !readyEl.checked);
-        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked) || isNoise || isNonDefaultReady);
+        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked) || isNoise);
         if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
         return isActive;
     }
@@ -600,12 +598,12 @@
     if (typeof AudioSettings !== 'undefined') {
         const audioSettings = AudioSettings.load();
         if (readySignalEl) {
-            readySignalEl.checked = audioSettings.readySignal !== false;
+            readySignalEl.checked = !!audioSettings.readySignal;
             readySignalEl.addEventListener('change', () => {
                 const s = AudioSettings.load();
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
-                updateExtraActiveDot();
+                localStorage.setItem('morsewave_ready_signal_user_set', '1');
             });
         }
         if (groupsToneFreq && groupsToneFreqVal) {
@@ -1329,7 +1327,7 @@
         if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
         if (paperControlsRow) paperControlsRow.style.display = 'none';
 
-        const isReadySignal = readySignalEl ? readySignalEl.checked : ((typeof AudioSettings !== 'undefined') ? (AudioSettings.load().readySignal !== false) : true);
+        const isReadySignal = readySignalEl ? readySignalEl.checked : ((typeof AudioSettings !== 'undefined') ? !!AudioSettings.load().readySignal : false);
 
         if (isExam) {
             answerInput.style.display = 'none';
@@ -1867,14 +1865,17 @@
         }
 
         if (session !== mySession || mySession.finished || mySession.paperStopped) return;
-        feedbackEl.className = 'feedback';
+        feedbackEl.textContent = (typeof t === 'function' && t('groups.ready_countdown_go')) || 'Приём!';
+        feedbackEl.className = 'feedback show ok';
         if (answerInput) {
             answerInput.disabled = false;
             answerInput.focus();
         }
 
-        await delay(600);
+        await delay(1400);
         if (session !== mySession || mySession.finished || mySession.paperStopped) return;
+        feedbackEl.className = 'feedback';
+        feedbackEl.textContent = '';
 
         if (typeof onStart === 'function') onStart();
     }

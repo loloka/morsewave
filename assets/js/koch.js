@@ -2,6 +2,7 @@
     let groupLen = parseInt(localStorage.getItem('morse_koch_len'), 10) || 5;
     if (![1, 2, 3, 4, 5].includes(groupLen)) groupLen = 5;
     const PASS_THRESHOLD = 0.9;
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
     /**
      * Та же логика, что и в groups.js: маленький открытый набор символов
@@ -67,11 +68,9 @@
         const isFw = !!(fwEnabled && fwEnabled.checked);
         const isBuf = !!(bufferCheckbox && bufferCheckbox.checked);
         const isPaper = !!(paperCheckbox && paperCheckbox.checked);
-        const readyEl = document.getElementById('koch-ready-signal-enabled');
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const isNoise = !!(audioSettings && audioSettings.noiseLevel > 0);
-        const isNonDefaultReady = !!(readyEl && !readyEl.checked);
-        const isActive = isFw || isBuf || isPaper || isNoise || isNonDefaultReady;
+        const isActive = isFw || isBuf || isPaper || isNoise;
         if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
         return isActive;
     }
@@ -401,12 +400,12 @@
     if (typeof AudioSettings !== 'undefined') {
         const audioSettings = AudioSettings.load();
         if (readySignalEl) {
-            readySignalEl.checked = audioSettings.readySignal !== false;
+            readySignalEl.checked = !!audioSettings.readySignal;
             readySignalEl.addEventListener('change', () => {
                 const s = AudioSettings.load();
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
-                updateKochExtraDot();
+                localStorage.setItem('morsewave_ready_signal_user_set', '1');
             });
         }
         if (kochToneFreq && kochToneFreqVal) {
@@ -689,10 +688,16 @@
         }
 
         if (session !== mySession || mySession.finished || mySession.paperStopped) return;
-        feedbackEl.className = 'feedback';
+        feedbackEl.textContent = (typeof t === 'function' && t('groups.ready_countdown_go')) || 'Приём!';
+        feedbackEl.className = 'feedback show ok';
         if (answerInput) {
             answerInput.disabled = false;
         }
+
+        await delay(1400);
+        if (session !== mySession || mySession.finished || mySession.paperStopped) return;
+        feedbackEl.className = 'feedback';
+        feedbackEl.textContent = '';
     }
 
     let paperSleepResolve = null;
@@ -895,8 +900,8 @@
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
 
-        const settings = typeof AudioSettings !== 'undefined' ? AudioSettings.load() : { readySignal: true };
-        const needReadySignal = readySignalEl ? readySignalEl.checked : (settings.readySignal !== false);
+        const settings = typeof AudioSettings !== 'undefined' ? AudioSettings.load() : { readySignal: false };
+        const needReadySignal = readySignalEl ? readySignalEl.checked : (settings.readySignal === true);
 
         if (needReadySignal) {
             await runReadyAttentionSequence();

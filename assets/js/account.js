@@ -889,9 +889,10 @@
     }
 
     if (readySignalToggle) {
-        readySignalToggle.checked = current.readySignal !== false;
+        readySignalToggle.checked = !!current.readySignal;
         readySignalToggle.addEventListener('change', () => {
             current.readySignal = readySignalToggle.checked;
+            localStorage.setItem('morsewave_ready_signal_user_set', '1');
             save();
         });
     }
@@ -971,7 +972,7 @@
                 cwNoiseChips.forEach(c => c.classList.toggle('active', parseFloat(c.dataset.noise) === 0));
             }
             if (readySignalToggle) {
-                readySignalToggle.checked = true;
+                readySignalToggle.checked = false;
             }
         });
     }
