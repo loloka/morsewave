@@ -135,26 +135,23 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <!-- Тон и шум эфира в Кохе -->
-            <div class="subcard mt-2" style="border-left:3px solid var(--accent); width:100%;">
+            <div class="subcard mt-2" style="border-left:3px solid var(--accent); width:100%; padding:12px 14px;">
                 <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                     <div>
-                        <div style="font-weight:700; font-size:13px;"><?= t('audio.freq_label') ?></div>
-                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('audio.freq_desc') ?></div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('groups.extra_audio_title') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.extra_audio_desc') ?></div>
                     </div>
                     <div class="speed-control">
                         <input type="range" id="koch-tone-freq" min="300" max="1000" step="10" value="600">
-                        <span class="speed-value" id="koch-tone-freq-value">600</span> Гц
+                        <span class="speed-value mono" id="koch-tone-freq-value">600</span> Hz
                     </div>
                 </div>
-                <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                    <div>
-                        <div style="font-weight:700; font-size:13px;"><?= t('audio.noise_label') ?></div>
-                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('audio.noise_desc') ?></div>
-                    </div>
-                    <div class="chip-row" id="koch-cw-noise-chips">
-                        <div class="chip" data-noise="0"><?= t('audio.noise_off') ?></div>
-                        <div class="chip" data-noise="0.04"><?= t('audio.noise_low') ?></div>
-                        <div class="chip" data-noise="0.10"><?= t('audio.noise_med') ?></div>
+                <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                    <div class="muted" style="font-size:12px;"><?= t('groups.cw_noise_title') ?>:</div>
+                    <div class="chip-row" id="koch-cw-noise-chips" style="gap:6px;">
+                        <div class="chip chip-sm active" data-noise="0"><?= t('acc.cw_noise_off') ?></div>
+                        <div class="chip chip-sm" data-noise="0.035"><?= t('acc.cw_noise_low') ?></div>
+                        <div class="chip chip-sm" data-noise="0.07"><?= t('acc.cw_noise_med') ?></div>
                     </div>
                 </div>
             </div>
