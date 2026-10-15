@@ -30,176 +30,220 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <div id="groups-training-config">
-        <div class="mt-2">
-            <div class="muted" style="font-size:13px; font-weight:600; margin-bottom:6px;"><?= t('groups.length_label') ?></div>
-            <div class="chip-row" id="length-chips">
-                <div class="chip" data-len="2">2</div>
-                <div class="chip active" data-len="3">3</div>
-                <div class="chip" data-len="4">4</div>
-                <div class="chip" data-len="5">5</div>
-            </div>
-        </div>
-
-        <div class="mt-2">
-            <div class="muted" style="font-size:13px; font-weight:600; margin-bottom:6px;"><?= t('groups.charset_label') ?></div>
-            <div class="chip-row" id="charset-chips">
-                <div class="chip active" data-set="letters"><?= t('groups.set_letters') ?></div>
-                <div class="chip" data-set="cyrillic"><?= t('groups.set_cyrillic') ?></div>
-                <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
-                <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
-                <div class="chip" data-set="cyrillic_digits"><?= t('groups.set_cyrillic_digits') ?></div>
-                <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
-                <div class="chip" data-set="koch" id="chip-set-koch"><?= t('groups.set_koch') ?></div>
-                <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
-            </div>
-
-            <!-- Подпанель для режима «Только выученные» -->
-            <div id="learned-charset-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
-                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-                    <div>
-                        <div style="font-weight:700; font-size:13px;"><?= t('groups.learned_alphabet_label') ?></div>
-                        <div class="muted" style="font-size:12px; margin-top:2px;"><?= t('groups.learned_alphabet_desc') ?></div>
-                    </div>
-                    <div class="chip-row" id="learned-alphabet-chips">
-                        <div class="chip active" data-alphabet="latin" id="chip-learned-latin">
-                            <span><?= t('groups.learned_latin') ?></span>
-                            <span class="chip-count" id="learned-latin-count">0</span>
-                        </div>
-                        <div class="chip" data-alphabet="cyrillic" id="chip-learned-cyrillic">
-                            <span><?= t('groups.learned_cyrillic') ?></span>
-                            <span class="chip-count" id="learned-cyrillic-count">0</span>
+        <!-- 1. Набор символов: отдельный аккуратный блок со сворачиванием -->
+        <div class="groups-charset-card mt-2" id="groups-charset-card">
+            <div class="groups-charset-header" id="groups-charset-header" role="button" tabindex="0" title="<?= t('groups.change_charset') ?>">
+                <div class="groups-charset-summary">
+                    <span class="groups-charset-icon"><?= mw_icon('layers', 20) ?></span>
+                    <div class="groups-charset-info">
+                        <span class="groups-charset-caption"><?= t('groups.charset_label') ?></span>
+                        <div class="groups-charset-current">
+                            <span class="bold" id="groups-charset-current-name"><?= t('groups.set_letters') ?></span>
+                            <span class="badge-mini" id="groups-charset-current-badge">26 букв</span>
                         </div>
                     </div>
                 </div>
+                <div class="groups-charset-toggle-btn" id="groups-charset-toggle-btn">
+                    <span id="groups-charset-toggle-text"><?= t('groups.change_charset') ?></span>
+                    <span class="groups-chevron" id="groups-charset-chevron">▾</span>
+                </div>
+            </div>
 
-                <!-- Предупреждение, если нет выученных букв в выбранном алфавите -->
-                <div id="learned-none-warning" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.45;">
-                    <div class="flex gap-2" style="align-items:flex-start;">
-                        <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
-                        <div style="flex:1;">
-                            <div style="font-weight:700; color:var(--text);" id="learned-none-title"><?= t('groups.learned_none_title') ?></div>
-                            <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="learned-none-text"></div>
-                            <div class="mt-2">
-                                <a href="learn.php" id="learned-none-link" class="btn btn-sm btn-primary" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
-                                    <?= mw_icon('book-open', 14) ?> <span><?= t('groups.learned_go_to_learn') ?></span>
-                                </a>
+            <!-- Раскрывающееся тело с чипами и поднастройками -->
+            <div class="groups-charset-body" id="groups-charset-body" style="display:none;">
+                <div class="muted small mb-1" style="font-size:12px; margin-top:8px;"><?= t('groups.choose_charset_desc') ?></div>
+                <div class="chip-row" id="charset-chips">
+                    <div class="chip active" data-set="letters"><?= t('groups.set_letters') ?></div>
+                    <div class="chip" data-set="cyrillic"><?= t('groups.set_cyrillic') ?></div>
+                    <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
+                    <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
+                    <div class="chip" data-set="cyrillic_digits"><?= t('groups.set_cyrillic_digits') ?></div>
+                    <div class="chip" data-set="learned"><?= t('groups.set_learned') ?></div>
+                    <div class="chip" data-set="koch" id="chip-set-koch"><?= t('groups.set_koch') ?></div>
+                    <div class="chip" data-set="custom"><?= t('groups.set_custom') ?></div>
+                </div>
+
+                <!-- Подпанель для режима «Только выученные» -->
+                <div id="learned-charset-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                    <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;"><?= t('groups.learned_alphabet_label') ?></div>
+                            <div class="muted" style="font-size:12px; margin-top:2px;"><?= t('groups.learned_alphabet_desc') ?></div>
+                        </div>
+                        <div class="chip-row" id="learned-alphabet-chips">
+                            <div class="chip active" data-alphabet="latin" id="chip-learned-latin">
+                                <span><?= t('groups.learned_latin') ?></span>
+                                <span class="chip-count" id="learned-latin-count">0</span>
+                            </div>
+                            <div class="chip" data-alphabet="cyrillic" id="chip-learned-cyrillic">
+                                <span><?= t('groups.learned_cyrillic') ?></span>
+                                <span class="chip-count" id="learned-cyrillic-count">0</span>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Предупреждение, если нет выученных букв в выбранном алфавите -->
+                    <div id="learned-none-warning" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:13px; line-height:1.45;">
+                        <div class="flex gap-2" style="align-items:flex-start;">
+                            <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
+                            <div style="flex:1;">
+                                <div style="font-weight:700; color:var(--text);" id="learned-none-title"><?= t('groups.learned_none_title') ?></div>
+                                <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="learned-none-text"></div>
+                                <div class="mt-2">
+                                    <a href="learn.php" id="learned-none-link" class="btn btn-sm btn-primary" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
+                                        <?= mw_icon('book-open', 14) ?> <span><?= t('groups.learned_go_to_learn') ?></span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Список выученных символов (превью) -->
+                    <div class="muted mt-2" id="learned-chars-preview" style="display:none; font-size:12px; line-height:1.45; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                        <span class="muted"><?= t('groups.learned_chars_list') ?>:</span> <span class="mono bold" id="learned-chars-text" style="color:var(--text); letter-spacing:0.04em; margin-left:4px;"></span>
+                    </div>
                 </div>
 
-                <!-- Список выученных символов (превью) -->
-                <div class="muted mt-2" id="learned-chars-preview" style="display:none; font-size:12px; line-height:1.45; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                    <span class="muted"><?= t('groups.learned_chars_list') ?>:</span> <span class="mono bold" id="learned-chars-text" style="color:var(--text); letter-spacing:0.04em; margin-left:4px;"></span>
+                <!-- Подсказка для режима Коха -->
+                <div class="muted" id="koch-charset-hint" style="display:none; font-size:12px; margin-top:6px; line-height:1.45;">
+                    <span id="koch-charset-text"></span>
+                    <a href="koch.php" style="color:var(--accent);margin-left:6px;text-decoration:underline;"><?= t('groups.koch_open_mode') ?></a>
                 </div>
-            </div>
 
-            <!-- Подсказка для режима Коха -->
-            <div class="muted" id="koch-charset-hint" style="display:none; font-size:12px; margin-top:6px; line-height:1.45;">
-                <span id="koch-charset-text"></span>
-                <a href="koch.php" style="color:var(--accent);margin-left:6px;text-decoration:underline;"><?= t('groups.koch_open_mode') ?></a>
-            </div>
+                <!-- Ввод для «Свои символы» -->
+                <input type="text" id="custom-charset-input" class="answer-input mt-2"
+                       placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"
+                       style="display:none; text-transform:uppercase; font-family:var(--font-mono); letter-spacing:0.06em;" autocomplete="off">
+                <div class="muted" id="custom-charset-hint" style="display:none; font-size:12px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
 
-            <!-- Ввод для «Свои символы» -->
-            <input type="text" id="custom-charset-input" class="answer-input mt-2"
-                   placeholder="<?= htmlspecialchars(t('groups.custom_placeholder')) ?>"
-                   style="display:none; text-transform:uppercase; font-family:var(--font-mono); letter-spacing:0.06em;" autocomplete="off">
-            <div class="muted" id="custom-charset-hint" style="display:none; font-size:12px; margin-top:4px;"><?= t('groups.custom_hint') ?></div>
-
-            <!-- Предупреждение о конфликте латиницы и кириллицы в своих символах -->
-            <div id="custom-charset-conflict" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:12px; line-height:1.45; color:var(--text);">
-                <div class="flex gap-2" style="align-items:flex-start;">
-                    <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
-                    <div style="flex:1;">
-                        <div style="font-weight:700; color:var(--danger, #ef4444);"><?= t('groups.conflict_title') ?></div>
-                        <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="custom-charset-conflict-text"><?= t('groups.custom_conflict_warning') ?></div>
+                <!-- Предупреждение о конфликте латиницы и кириллицы в своих символах -->
+                <div id="custom-charset-conflict" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:12px 14px; font-size:12px; line-height:1.45; color:var(--text);">
+                    <div class="flex gap-2" style="align-items:flex-start;">
+                        <span style="font-size:18px; line-height:1; flex-shrink:0;">⚠️</span>
+                        <div style="flex:1;">
+                            <div style="font-weight:700; color:var(--danger, #ef4444);"><?= t('groups.conflict_title') ?></div>
+                            <div class="muted" style="margin-top:4px; font-size:12px; line-height:1.45;" id="custom-charset-conflict-text"><?= t('groups.custom_conflict_warning') ?></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="groups-speed-row">
+        <!-- 2. Быстрые параметры тренировки (компактная сетка) -->
+        <div class="groups-quick-row mt-2">
+            <div class="groups-quick-col">
+                <div class="groups-param-label"><?= t('groups.length_label') ?></div>
+                <div class="chip-row" id="length-chips">
+                    <div class="chip" data-len="2">2</div>
+                    <div class="chip active" data-len="3">3</div>
+                    <div class="chip" data-len="4">4</div>
+                    <div class="chip" data-len="5">5</div>
+                </div>
+            </div>
+
+            <div class="groups-quick-col">
+                <div class="groups-param-label"><?= t('groups.groups_per_session') ?></div>
+                <div class="groups-select-wrap">
+                    <select id="groups-count" class="select-styled">
+                        <option value="10">10 <?= t('groups.groups_unit', ['{count}' => 10]) ?? 'групп' ?></option>
+                        <option value="20" selected>20 <?= t('groups.groups_unit', ['{count}' => 20]) ?? 'групп' ?></option>
+                        <option value="30">30 <?= t('groups.groups_unit', ['{count}' => 30]) ?? 'групп' ?></option>
+                        <option value="50">50 <?= t('groups.groups_unit', ['{count}' => 50]) ?? 'групп' ?></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Скорость (WPM) -->
+        <div class="groups-speed-bar mt-2">
             <div class="speed-control" id="groups-wpm-control">
-                <?= t('groups.speed') ?>
+                <span class="speed-label"><?= t('groups.speed') ?></span>
                 <input type="range" id="groups-wpm" min="5" max="60" step="1" value="12">
-                <span class="speed-value" id="groups-wpm-value">12</span> wpm
+                <span class="speed-value" id="groups-wpm-value">12</span> <span class="speed-unit">wpm</span>
                 <span class="muted cpm-hint" id="groups-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 60]) ?></span>
             </div>
-
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
-            </label>
-
-            <label class="chip" style="gap:8px;" id="groups-buffer-label">
-                <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
-            </label>
-
-            <label class="chip" style="gap:8px;">
-                <input type="checkbox" id="groups-paper-enabled"> <?= t('groups.paper_mode') ?>
-            </label>
-
-            <label class="chip"><?= t('groups.groups_per_session') ?>
-                <select id="groups-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                    <option value="10" selected>10</option><option value="20">20</option>
-                    <option value="30">30</option><option value="50">50</option>
-                </select>
-            </label>
         </div>
 
-        <!-- Панель настройки Фарнсворта -->
-        <div id="groups-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
-            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-                <div>
-                    <div style="font-weight:700; font-size:13px;"><?= t('groups.farnsworth') ?></div>
-                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
-                </div>
-                <div class="speed-control" id="groups-farnsworth-wrap">
-                    <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
-                    <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
-                </div>
-            </div>
-            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                <?= mw_icon('info', 14) ?> <?= t('groups.farnsworth_tooltip') ?>
-            </div>
-        </div>
+        <!-- 4. Дополнительные опции (Фарнсворт, Буфер, Бумага) -->
+        <div class="groups-extra-wrapper mt-2">
+            <button type="button" class="groups-extra-btn" id="groups-extra-toggle-btn">
+                <span class="groups-extra-btn-left">
+                    <span class="groups-extra-icon"><?= mw_icon('sliders', 14) ?></span>
+                    <span><?= t('groups.extra_settings') ?></span>
+                    <span class="badge-active-dot" id="groups-extra-active-dot" style="display:none;" title="Включены доп. параметры"></span>
+                </span>
+                <span class="groups-chevron" id="groups-extra-chevron">▾</span>
+            </button>
 
-        <!-- Панель настройки буфера памяти -->
-        <div id="groups-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
-            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-                <div>
-                    <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
-                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+            <div class="groups-extra-content subcard mt-1" id="groups-extra-content" style="display:none;">
+                <div class="chip-row" style="gap:8px;">
+                    <label class="chip" style="gap:8px;">
+                        <input type="checkbox" id="groups-farnsworth-enabled"> <?= t('groups.farnsworth') ?>
+                    </label>
+                    <label class="chip" style="gap:8px;" id="groups-buffer-label">
+                        <input type="checkbox" id="groups-buffer-enabled"> <?= t('groups.buffer_input') ?>
+                    </label>
+                    <label class="chip" style="gap:8px;">
+                        <input type="checkbox" id="groups-paper-enabled"> <?= t('groups.paper_mode') ?>
+                    </label>
                 </div>
-                <div class="chip-row" id="buffer-depth-chips">
-                    <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
-                    <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
-                    <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
-                    <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
-                    <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
-                </div>
-            </div>
-            <div class="muted mt-2" id="groups-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
-            </div>
-            <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
-                <?= t('groups.buffer_hint') ?>
-            </div>
-        </div>
 
-        <!-- Панель настройки приёма на бумагу -->
-        <div id="groups-paper-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
-            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-                <div>
-                    <div style="font-weight:700; font-size:13px;"><?= t('groups.paper_gap_label') ?></div>
-                    <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.paper_gap_desc') ?></div>
+                <!-- Панель настройки Фарнсворта -->
+                <div id="groups-farnsworth-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                    <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;"><?= t('groups.farnsworth') ?></div>
+                            <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.farnsworth_speed_desc') ?></div>
+                        </div>
+                        <div class="speed-control" id="groups-farnsworth-wrap">
+                            <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
+                            <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
+                        </div>
+                    </div>
+                    <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                        <?= mw_icon('info', 14) ?> <?= t('groups.farnsworth_tooltip') ?>
+                    </div>
                 </div>
-                <div class="speed-control" id="groups-paper-gap-wrap">
-                    <input type="range" id="groups-paper-gap" min="1" max="10" step="0.5" value="3">
-                    <span class="speed-value" id="groups-paper-gap-value">3.0</span> <?= t('groups.seconds_short') ?>
+
+                <!-- Панель настройки буфера памяти -->
+                <div id="groups-buffer-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                    <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;"><?= t('groups.buffer_depth_label') ?></div>
+                            <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.buffer_depth_desc') ?></div>
+                        </div>
+                        <div class="chip-row" id="buffer-depth-chips">
+                            <div class="chip" data-depth="1">1 <?= t('groups.chars_short') ?></div>
+                            <div class="chip" data-depth="2">2 <?= t('groups.chars_short') ?></div>
+                            <div class="chip" data-depth="3">3 <?= t('groups.chars_short') ?></div>
+                            <div class="chip" data-depth="4">4 <?= t('groups.chars_short') ?></div>
+                            <div class="chip active" data-depth="all"><?= t('groups.buffer_depth_all') ?></div>
+                        </div>
+                    </div>
+                    <div class="muted mt-2" id="groups-buffer-tip-text" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                        <?= mw_icon('info', 14) ?> <?= t('groups.buffer_tooltip') ?>
+                    </div>
+                    <div class="muted mt-1" style="font-size:11px; opacity:0.85;">
+                        <?= t('groups.buffer_hint') ?>
+                    </div>
                 </div>
-            </div>
-            <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-                <?= mw_icon('info', 14) ?> <?= t('groups.paper_tooltip') ?>
+
+                <!-- Панель настройки приёма на бумагу -->
+                <div id="groups-paper-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent);">
+                    <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                        <div>
+                            <div style="font-weight:700; font-size:13px;"><?= t('groups.paper_gap_label') ?></div>
+                            <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.paper_gap_desc') ?></div>
+                        </div>
+                        <div class="speed-control" id="groups-paper-gap-wrap">
+                            <input type="range" id="groups-paper-gap" min="1" max="10" step="0.5" value="3">
+                            <span class="speed-value" id="groups-paper-gap-value">3.0</span> <?= t('groups.seconds_short') ?>
+                        </div>
+                    </div>
+                    <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                        <?= mw_icon('info', 14) ?> <?= t('groups.paper_tooltip') ?>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

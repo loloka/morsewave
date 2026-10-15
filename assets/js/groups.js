@@ -425,6 +425,7 @@
             }
             if (startBtn && charsetKey === 'learned') startBtn.disabled = false;
         }
+        if (typeof updateCharsetSummary === 'function') updateCharsetSummary();
     }
 
     document.querySelectorAll('#learned-alphabet-chips .chip').forEach(chip => {
@@ -468,6 +469,7 @@
         if (startBtn && charsetKey === 'custom') {
             startBtn.disabled = !isValid;
         }
+        if (typeof updateCharsetSummary === 'function') updateCharsetSummary();
         return isValid;
     }
 
@@ -476,8 +478,121 @@
             const cleaned = customInput.value.replace(/[^A-Za-zА-Яа-яЁё0-9 .?/-]/g, '');
             if (cleaned !== customInput.value) customInput.value = cleaned;
             validateCustomCharset();
+            updateCharsetSummary();
         });
     }
+
+    const charsetCard = document.getElementById('groups-charset-card');
+    const charsetHeader = document.getElementById('groups-charset-header');
+    const charsetBody = document.getElementById('groups-charset-body');
+    const charsetChevron = document.getElementById('groups-charset-chevron');
+    const charsetToggleText = document.getElementById('groups-charset-toggle-text');
+    const charsetCurrentName = document.getElementById('groups-charset-current-name');
+    const charsetCurrentBadge = document.getElementById('groups-charset-current-badge');
+
+    function updateCharsetSummary() {
+        if (!charsetCurrentName || !charsetCurrentBadge) return;
+        let name = t('groups.set_letters');
+        let badge = '26 букв';
+
+        switch (charsetKey) {
+            case 'letters':
+                name = t('groups.set_letters');
+                badge = '26 букв';
+                break;
+            case 'cyrillic':
+                name = t('groups.set_cyrillic');
+                badge = '32 буквы';
+                break;
+            case 'digits':
+                name = t('groups.set_digits');
+                badge = '10 цифр';
+                break;
+            case 'mixed':
+                name = t('groups.set_mixed');
+                badge = '36 знаков';
+                break;
+            case 'cyrillic_digits':
+                name = t('groups.set_cyrillic_digits');
+                badge = '42 знака';
+                break;
+            case 'learned': {
+                name = t('groups.set_learned');
+                const isCyr = (learnedAlphabet === 'cyrillic');
+                const state = Progress.load();
+                const total = isCyr
+                    ? ((state.learnedLetters || []).filter(ch => ch.startsWith(CYRILLIC_PREFIX)).length)
+                    : ((state.learnedLetters || []).filter(ch => !ch.startsWith(CYRILLIC_PREFIX) && /^[A-Z]$/.test(ch)).length);
+                badge = (isCyr ? t('groups.learned_cyrillic') : t('groups.learned_latin')) + ' • ' + total;
+                break;
+            }
+            case 'koch': {
+                name = t('groups.set_koch');
+                const state = Progress.load();
+                const lvl = Math.min(Math.max(2, state.kochLevel || 2), KOCH_ORDER.length);
+                badge = lvl + ' знаков';
+                break;
+            }
+            case 'custom': {
+                name = t('groups.set_custom');
+                if (customInput) {
+                    const unique = new Set(customInput.value.replace(/[^A-Za-zА-Яа-яЁё0-9 .?/-]/g, '').toUpperCase().split('').filter(c => c && c !== ' '));
+                    badge = unique.size > 0 ? (unique.size + ' знаков') : 'настроить';
+                } else {
+                    badge = 'свой набор';
+                }
+                break;
+            }
+        }
+        charsetCurrentName.textContent = name;
+        charsetCurrentBadge.textContent = badge;
+    }
+
+    function toggleCharsetDropdown(forceState) {
+        if (!charsetBody) return;
+        const willOpen = (typeof forceState === 'boolean') ? forceState : (charsetBody.style.display === 'none');
+        charsetBody.style.display = willOpen ? 'block' : 'none';
+        if (charsetCard) charsetCard.classList.toggle('is-open', willOpen);
+        if (charsetChevron) charsetChevron.textContent = willOpen ? '▴' : '▾';
+        if (charsetToggleText) charsetToggleText.textContent = willOpen ? t('groups.collapse_charset') : t('groups.change_charset');
+    }
+
+    if (charsetHeader) {
+        charsetHeader.addEventListener('click', (e) => {
+            if (e.target.closest('#custom-charset-input') || e.target.closest('#learned-alphabet-chips')) return;
+            toggleCharsetDropdown();
+        });
+    }
+
+    // Дополнительные параметры: аккордеон и индикатор
+    const extraToggleBtn = document.getElementById('groups-extra-toggle-btn');
+    const extraContent = document.getElementById('groups-extra-content');
+    const extraChevron = document.getElementById('groups-extra-chevron');
+    const extraActiveDot = document.getElementById('groups-extra-active-dot');
+
+    function updateExtraActiveDot() {
+        const fw = document.getElementById('groups-farnsworth-enabled');
+        const buf = document.getElementById('groups-buffer-enabled');
+        const paper = document.getElementById('groups-paper-enabled');
+        const isActive = !!((fw && fw.checked) || (buf && buf.checked) || (paper && paper.checked));
+        if (extraActiveDot) extraActiveDot.style.display = isActive ? 'inline-block' : 'none';
+        return isActive;
+    }
+
+    if (extraToggleBtn && extraContent) {
+        extraToggleBtn.addEventListener('click', () => {
+            const isOpen = (extraContent.style.display !== 'none');
+            extraContent.style.display = isOpen ? 'none' : 'block';
+            if (extraChevron) extraChevron.textContent = isOpen ? '▾' : '▴';
+            extraToggleBtn.classList.toggle('is-open', !isOpen);
+        });
+    }
+
+    [document.getElementById('groups-farnsworth-enabled'),
+     document.getElementById('groups-buffer-enabled'),
+     document.getElementById('groups-paper-enabled')].forEach(el => {
+        if (el) el.addEventListener('change', updateExtraActiveDot);
+    });
 
     document.querySelectorAll('#charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -508,6 +623,7 @@
             if (isCustom) {
                 validateCustomCharset();
             }
+            updateCharsetSummary();
         });
     });
 
@@ -515,6 +631,15 @@
     if (savedCharset) {
         const chip = document.querySelector(`#charset-chips .chip[data-set="${savedCharset}"]`);
         if (chip) chip.click();
+    } else {
+        updateCharsetSummary();
+    }
+
+    // Если сохранены активные доп. параметры, раскрываем блок и показываем точку
+    if (updateExtraActiveDot()) {
+        if (extraContent) extraContent.style.display = 'block';
+        if (extraChevron) extraChevron.textContent = '▴';
+        if (extraToggleBtn) extraToggleBtn.classList.add('is-open');
     }
 
     const MIN_LEARNED_FOR_FILTER = 2;

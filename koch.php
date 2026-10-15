@@ -11,12 +11,12 @@ include __DIR__ . '/includes/header.php';
 <p><?= t('koch.intro') ?></p>
 
 <div class="card mt-3">
-    <div class="flex-between flex-wrap gap-2">
-        <div>
+    <div class="koch-status-head">
+        <div class="koch-status-level">
             <div class="card-eyebrow"><?= t('koch.opened') ?></div>
             <div class="value mono" style="font-size:28px;color:var(--accent)" id="koch-level">2</div>
         </div>
-        <div style="max-width:480px;flex:1;">
+        <div class="koch-status-symbols">
             <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('koch.current_charset_hint') ?></div>
             <div class="chip-row" id="koch-charset"></div>
         </div>
