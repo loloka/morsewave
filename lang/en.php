@@ -160,9 +160,9 @@ return [
 
     // --- koch.php ---
     'koch.title' => 'Koch method',
-    'koch.eyebrow' => 'CW classic',
+    'koch.eyebrow' => 'Classic for self-paced online learning',
     'koch.h1' => 'Koch method',
-    'koch.intro' => 'Characters are sent at target speed from day one — this trains your ear to recognize the melody as a whole rather than counting dots and dashes. You start with just two characters: pass a session with ≥ 90% accuracy to unlock the next one.',
+    'koch.intro' => 'Characters are sounded at target speed from day one, but with an extended pause (Farnsworth) — combined with a specific order of letters, this method completely eliminates counting dots and dashes. Training begins with just two symbols: pass a session with ≥ 90% accuracy to unlock the next one.',
     'koch.opened' => 'Symbols unlocked',
     'koch.current_charset_hint' => 'Current symbol set — tap to hear it',
     'koch.jump_hint' => 'Not a beginner anymore — or want to start over? Set the number of unlocked symbols (you can lower it too):',

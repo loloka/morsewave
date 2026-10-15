@@ -1,5 +1,6 @@
 (function () {
-    const GROUP_LEN = 5;
+    let groupLen = parseInt(localStorage.getItem('morse_koch_len'), 10) || 5;
+    if (![1, 2, 3, 4, 5].includes(groupLen)) groupLen = 5;
     const PASS_THRESHOLD = 0.9;
 
     /**
@@ -456,6 +457,44 @@
     });
     updateKochBufferTip(selectedBufferDepth);
 
+    function updateKochBufferDepthOptions(len) {
+        const chipsContainer = document.getElementById('koch-buffer-depth-chips');
+        if (!chipsContainer) return;
+        const chips = chipsContainer.querySelectorAll('.chip');
+        chips.forEach(chip => {
+            const depth = chip.dataset.depth;
+            if (depth === 'all') {
+                chip.style.display = '';
+            } else {
+                const num = parseInt(depth, 10);
+                chip.style.display = (num < len) ? '' : 'none';
+            }
+        });
+        if (selectedBufferDepth !== 'all' && parseInt(selectedBufferDepth, 10) >= len) {
+            chips.forEach(c => c.classList.remove('active'));
+            const allChip = chipsContainer.querySelector('[data-depth="all"]');
+            if (allChip) allChip.classList.add('active');
+            selectedBufferDepth = 'all';
+            localStorage.setItem('morse_koch_buffer_depth', 'all');
+            updateKochBufferTip('all');
+        }
+    }
+
+    const lengthChips = document.querySelectorAll('#koch-length-chips .chip');
+    if (lengthChips.length) {
+        lengthChips.forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.len, 10) === groupLen);
+            c.addEventListener('click', () => {
+                lengthChips.forEach(chip => chip.classList.remove('active'));
+                c.classList.add('active');
+                groupLen = parseInt(c.dataset.len, 10) || 5;
+                localStorage.setItem('morse_koch_len', groupLen);
+                updateKochBufferDepthOptions(groupLen);
+            });
+        });
+    }
+    updateKochBufferDepthOptions(groupLen);
+
     /**
      * Тот же принцип, что и weightedRandomGroup в groups.js (2026-08-02) —
      * лёгкий уклон в сторону символов, которые пользователь чаще путает
@@ -831,7 +870,8 @@
         const isBufferMode = !isPaperMode && bufferCheckbox && bufferCheckbox.checked;
 
         session = {
-            groups: Array.from({ length: count }, () => weightedRandomGroup(charset, GROUP_LEN)),
+            groupLen,
+            groups: Array.from({ length: count }, () => weightedRandomGroup(charset, groupLen)),
             index: 0,
             wpm, farnsworth, count,
             isBufferMode,
@@ -844,7 +884,7 @@
             totalChars: 0,
             xpEarned: 0,
             dbXpEarned: 0,
-            xpRate: xpRateForSession(charset.length, GROUP_LEN),
+            xpRate: xpRateForSession(charset.length, groupLen),
             wrongPairs: [],
             startTime: Date.now(),
             history: []
@@ -1248,7 +1288,7 @@
         const pairsToTrain = uniquePairs.slice(0, 20);
         const charset = currentCharset();
         const newGroups = [];
-        const groupLen = 5;
+        const retryGroupLen = (session && session.groupLen) ? session.groupLen : groupLen;
         
         for (const p of pairsToTrain) {
             const charsToInsert = [p.expected];
@@ -1257,7 +1297,7 @@
             }
             
             const g = [];
-            const targetLen = Math.max(groupLen, charsToInsert.length);
+            const targetLen = Math.max(retryGroupLen, charsToInsert.length);
             const randomCount = targetLen - charsToInsert.length;
             
             for (let i = 0; i < randomCount; i++) {
@@ -1275,6 +1315,7 @@
         const retryXpRate = isAbuse ? 1 : 3;
 
         const retrySession = {
+            groupLen: retryGroupLen,
             groups: newGroups,
             count: session.count, // for bonus computation
             index: 0, wpm: session.wpm,

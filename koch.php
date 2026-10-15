@@ -36,7 +36,18 @@ include __DIR__ . '/includes/header.php';
     <h3><?= t('koch.session_settings') ?></h3>
 
     <div class="groups-quick-row mt-2">
-        <div class="groups-quick-col" style="max-width:280px;">
+        <div class="groups-quick-col">
+            <div class="groups-param-label"><?= t('groups.length_label') ?></div>
+            <div class="chip-row" id="koch-length-chips">
+                <div class="chip" data-len="1">1</div>
+                <div class="chip" data-len="2">2</div>
+                <div class="chip" data-len="3">3</div>
+                <div class="chip" data-len="4">4</div>
+                <div class="chip active" data-len="5">5</div>
+            </div>
+        </div>
+
+        <div class="groups-quick-col">
             <div class="groups-param-label"><?= t('koch.groups_per_session') ?></div>
             <div class="groups-select-wrap">
                 <select id="koch-count" class="select-styled">
