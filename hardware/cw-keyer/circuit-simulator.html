@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Интерактивный симулятор схемы CW Keyer (MorseWave)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #0f141c; color: #e2e8f0; padding: 24px; min-height: 100vh; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 24px; }
+    header h1 { font-size: 28px; color: #38bdf8; margin-bottom: 8px; }
+    header p { color: #94a3b8; font-size: 14px; }
+    
+    .panel {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    }
+    
+    .canvas-wrapper {
+      position: relative;
+      background: #090d16;
+      border-radius: 8px;
+      border: 1px solid #1e293b;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    canvas { display: block; width: 100%; height: 500px; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      align-items: center;
+    }
+
+    .paddle-box {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .paddle-btn {
+      flex: 1;
+      height: 90px;
+      border-radius: 8px;
+      border: 2px solid #475569;
+      background: #334155;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.08s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .paddle-btn span { font-size: 13px; color: #94a3b8; font-weight: normal; }
+    .paddle-btn:active, .paddle-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+      transform: translateY(2px);
+    }
+
+    .stats-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+    }
+    .stat-row { display: flex; justify-content: space-between; font-size: 14px; }
+    .stat-val { font-family: monospace; font-weight: bold; color: #38bdf8; }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: #38bdf8;
+    }
+
+    .oled-screen {
+      background: #000;
+      border: 3px solid #334155;
+      border-radius: 6px;
+      padding: 12px;
+      font-family: 'Courier New', Courier, monospace;
+      color: #38bdf8;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+    .oled-header { font-size: 11px; display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 4px; }
+    .oled-text { font-size: 20px; font-weight: bold; word-break: break-all; margin-top: 6px; }
+
+    .help-hint {
+      margin-top: 16px;
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>⚡ Интерактивный симулятор схемы CW Keyer</h1>
+    <p>Arduino Uno/Nano · Спортивное весло (Iambic B) · Транзисторный усилитель · Анимация сигналов</p>
+  </header>
+
+  <div class="panel">
+    <div class="canvas-wrapper">
+      <canvas id="circuitCanvas"></canvas>
+    </div>
+
+    <div class="controls">
+      <!-- Весло -->
+      <div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px; text-align: center;">ФИЗИЧЕСКОЕ ВЕСЛО (КЛАВИШИ [Z] И [X]):</div>
+        <div class="paddle-box">
+          <button class="paddle-btn" id="btnDah">
+            ТИРЕ [—]
+            <span>Большой палец [Z]</span>
+          </button>
+          <button class="paddle-btn" id="btnDit">
+            ТОЧКА [·]
+            <span>Указательный [X]</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Виртуальный OLED -->
+      <div>
+        <div style="font-size: 13px; color: #94a3b8; margin-bottom: 8px;">МОНИТОР ДИСПЛЕЯ SSD1306 (I2C):</div>
+        <div class="oled-screen">
+          <div class="oled-header">
+            <span id="oledWpm">WPM: 20 | IAMBIC-B</span>
+            <span id="oledStatus">READY</span>
+          </div>
+          <div class="oled-text" id="oledMorse">_</div>
+          <div style="font-size: 13px; color: #64748b;" id="oledDecoded">...</div>
+        </div>
+      </div>
+
+      <!-- Настройки -->
+      <div class="stats-box">
+        <div class="slider-row">
+          <label style="font-size: 13px; width: 110px;">Скорость (WPM):</label>
+          <input type="range" id="wpmSlider" min="10" max="40" value="20">
+          <span class="stat-val" id="wpmVal">20</span>
+        </div>
+        <div class="slider-row">
+          <label style="font-size: 13px; width: 110px;">Тон звука (Гц):</label>
+          <input type="range" id="pitchSlider" min="400" max="900" value="650">
+          <span class="stat-val" id="pitchVal">650</span>
+        </div>
+        <div class="stat-row">
+          <span>Состояние транзистора:</span>
+          <span class="stat-val" id="transistorState" style="color: #64748b;">ЗАКРЫТ</span>
+        </div>
+        <div class="stat-row">
+          <span>Ток динамика:</span>
+          <span class="stat-val" id="spkCurrent">0 мА</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-hint">
+      💡 <b>Совет:</b> попробуй нажать одновременно [Z] и [X] (Squeeze режим). Кейер начнет чередовать точки и тире, как настоящий Iambic B!
+    </div>
+  </div>
+</div>
+
+<script>
+// --- АУДИО ДВИЖОК (Web Audio API: мягкий синус с огибающей) ---
+let audioCtx = null;
+let osc = null;
+let gainNode = null;
+let isAudioActive = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  osc = audioCtx.createOscillator();
+  gainNode = audioCtx.createGain();
+  osc.type = 'sine'; // Мягкий бархатный тон
+  osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.start();
+}
+
+function startTone() {
+  initAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const freq = parseInt(document.getElementById('pitchSlider').value);
+  osc.frequency.setValueAtTime(freq, now);
+  // Плавное нарастание (5 мс огибающая) — без щелчков!
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0.2, now + 0.005);
+  isAudioActive = true;
+}
+
+function stopTone() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0, now + 0.005);
+  isAudioActive = false;
+}
+
+// --- ЯМБИЧЕСКИЙ ДВИЖОК (IAMBIC B) ---
+let ditPressed = false;
+let dahPressed = false;
+let ditMemory = false;
+let dahMemory = false;
+let isSending = false;
+let currentSymbol = ''; // '.' or '-'
+let elementStartTime = 0;
+let elementDuration = 0;
+let pauseDuration = 0;
+
+let currentMorseWord = '';
+let decodedText = '';
+let lastUpTime = Date.now();
+
+const MORSE_TABLE = {
+  '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
+  '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
+  '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
+  '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
+  '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
+  '--..': 'Z', '-----': '0', '.----': '1', '..---': '2', '...--': '3',
+  '....-': '4', '.....': '5', '-....': '6', '--...': '7', '---..': '8',
+  '----.': '9', '.-.-.-': '.', '--..--': ',', '..--..': '?'
+};
+
+function getWpm() { return parseInt(document.getElementById('wpmSlider').value); }
+function getDotLen() { return 1200 / getWpm(); } // Длительность точки в мс (стандарт PARIS)
+
+function tickKeyer() {
+  const dotLen = getDotLen();
+  const now = Date.now();
+
+  // Запоминание в режиме Iambic B
+  if (ditPressed) ditMemory = true;
+  if (dahPressed) dahMemory = true;
+
+  if (!isSending) {
+    if (ditMemory) {
+      sendElement('.', dotLen);
+      ditMemory = false;
+    } else if (dahMemory) {
+      sendElement('-', dotLen * 3);
+      dahMemory = false;
+    } else {
+      // Проверка пауз между буквами и словами
+      const pause = now - lastUpTime;
+      if (currentMorseWord && pause > dotLen * 3) {
+        const char = MORSE_TABLE[currentMorseWord] || '?';
+        decodedText += char;
+        if (decodedText.length > 20) decodedText = decodedText.slice(-20);
+        currentMorseWord = '';
+        updateOled();
+      }
+      if (pause > dotLen * 7 && decodedText && !decodedText.endsWith(' ')) {
+        decodedText += ' ';
+        updateOled();
+      }
+    }
+  } else {
+    // В процессе передачи посылки
+    const elapsed = now - elementStartTime;
+    if (elapsed < elementDuration) {
+      // Звучит элемент
+      if (!isAudioActive) startTone();
+    } else if (elapsed < elementDuration + pauseDuration) {
+      // Межэлементная пауза (1 точка)
+      if (isAudioActive) stopTone();
+    } else {
+      // Завершение элемента
+      isSending = false;
+      lastUpTime = Date.now();
+      
+      // Iambic B чередование:
+      if (currentSymbol === '.') {
+        if (dahPressed || dahMemory) {
+          sendElement('-', dotLen * 3);
+          dahMemory = false;
+        }
+      } else if (currentSymbol === '-') {
+        if (ditPressed || ditMemory) {
+          sendElement('.', dotLen);
+          ditMemory = false;
+        }
+      }
+    }
+  }
+
+  // Обновляем индикаторы
+  document.getElementById('transistorState').textContent = isAudioActive ? 'ОТКРЫТ (НАСЫЩЕН)' : 'ЗАКРЫТ';
+  document.getElementById('transistorState').style.color = isAudioActive ? '#38bdf8' : '#64748b';
+  document.getElementById('spkCurrent').textContent = isAudioActive ? '180 мА' : '0 мА';
+
+  requestAnimationFrame(tickKeyer);
+}
+
+function sendElement(sym, duration) {
+  isSending = true;
+  currentSymbol = sym;
+  elementStartTime = Date.now();
+  elementDuration = duration;
+  pauseDuration = getDotLen();
+  currentMorseWord += sym;
+  updateOled();
+}
+
+function updateOled() {
+  document.getElementById('oledMorse').textContent = currentMorseWord || '_';
+  document.getElementById('oledDecoded').textContent = decodedText || '...';
+  document.getElementById('oledWpm').textContent = `WPM: ${getWpm()} | IAMBIC-B`;
+}
+
+// --- УПРАВЛЕНИЕ КЛАВИШАМИ И МЫШКОЙ ---
+const btnDit = document.getElementById('btnDit');
+const btnDah = document.getElementById('btnDah');
+
+btnDit.addEventListener('mousedown', () => { ditPressed = true; btnDit.classList.add('active'); });
+window.addEventListener('mouseup', () => { ditPressed = false; dahPressed = false; btnDit.classList.remove('active'); btnDah.classList.remove('active'); });
+btnDah.addEventListener('mousedown', () => { dahPressed = true; btnDah.classList.add('active'); });
+
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.code === 'KeyX') { ditPressed = true; btnDit.classList.add('active'); }
+  if (e.code === 'KeyZ') { dahPressed = true; btnDah.classList.add('active'); }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code === 'KeyX') { ditPressed = false; btnDit.classList.remove('active'); }
+  if (e.code === 'KeyZ') { dahPressed = false; btnDah.classList.remove('active'); }
+});
+
+document.getElementById('wpmSlider').addEventListener('input', (e) => {
+  document.getElementById('wpmVal').textContent = e.target.value;
+  updateOled();
+});
+document.getElementById('pitchSlider').addEventListener('input', (e) => {
+  document.getElementById('pitchVal').textContent = e.target.value;
+});
+
+// --- CANVAS ОТРИСОВКА СХЕМЫ И АНИМАЦИЯ ТОКА ---
+const canvas = document.getElementById('circuitCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+let particleOffset = 0;
+
+function drawCircuit() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Центры блоков
+  const unoX = w * 0.45;
+  const unoY = h * 0.45;
+  const paddleX = w * 0.15;
+  const paddleY = h * 0.45;
+  const spkX = w * 0.85;
+  const spkY = h * 0.45;
+
+  // 1. Рисуем плату Arduino Uno/Nano
+  ctx.fillStyle = '#00646e'; // фирменный Teal цвет платы
+  ctx.strokeStyle = '#00a3b4';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(unoX - 110, unoY - 140, 220, 280, 10);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 16px monospace';
+  ctx.fillText('ARDUINO UNO', unoX - 60, unoY - 110);
+  ctx.font = '11px sans-serif';
+  ctx.fillStyle = '#bbf7d0';
+  ctx.fillText('ATmega328P Core', unoX - 45, unoY - 90);
+
+  // Пины на плате
+  drawPin(unoX - 110, unoY - 30, 'D2 (INT0 / Точка)', '#38bdf8');
+  drawPin(unoX - 110, unoY + 10, 'D3 (INT1 / Тире)', '#38bdf8');
+  drawPin(unoX + 110, unoY - 10, 'D6 (PWM Tone)', '#f59e0b');
+  drawPin(unoX + 110, unoY + 80, 'GND (Ground)', '#64748b');
+  drawPin(unoX + 110, unoY + 110, '+5V Power', '#ef4444');
+
+  // 2. Блок весла
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(paddleX - 70, paddleY - 80, 140, 160, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('PADDLE 3.5mm', paddleX - 50, paddleY - 60);
+
+  // Лепестки весла
+  ctx.fillStyle = ditPressed ? '#38bdf8' : '#334155';
+  ctx.fillRect(paddleX - 40, paddleY - 30, 80, 24);
+  ctx.fillStyle = '#fff';
+  ctx.font = '11px monospace';
+  ctx.fillText('DIT (Точка) [X]', paddleX - 35, paddleY - 14);
+
+  ctx.fillStyle = dahPressed ? '#38bdf8' : '#334155';
+  ctx.fillRect(paddleX - 40, paddleY + 10, 80, 24);
+  ctx.fillStyle = '#fff';
+  ctx.fillText('DAH (Тире) [Z]', paddleX - 35, paddleY + 26);
+
+  // 3. Блок динамика и транзистора
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#475569';
+  ctx.beginPath();
+  ctx.roundRect(spkX - 80, spkY - 100, 160, 200, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillText('ОВИНАЛЬНЫЙ ДИНАМИК', spkX - 70, spkY - 80);
+
+  // Диффузор динамика
+  const spkPulse = isAudioActive ? Math.sin(Date.now() / 15) * 4 : 0;
+  ctx.beginPath();
+  ctx.ellipse(spkX, spkY + 20, 35 + spkPulse, 55 + spkPulse, 0, 0, Math.PI * 2);
+  ctx.fillStyle = isAudioActive ? '#0284c7' : '#0f172a';
+  ctx.fill();
+  ctx.strokeStyle = isAudioActive ? '#38bdf8' : '#334155';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Транзистор NPN (посередине между Uno и Динамиком)
+  const txX = (unoX + spkX) / 2;
+  const txY = unoY + 10;
+  ctx.fillStyle = '#0f172a';
+  ctx.strokeStyle = isAudioActive ? '#38bdf8' : '#475569';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(txX, txY, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px monospace';
+  ctx.fillText('NPN', txX - 10, txY - 4);
+  ctx.fillText('BC547', txX - 15, txY + 9);
+
+  // --- ПРОВОДА И АНИМАЦИЯ ТОКА ---
+  particleOffset = (particleOffset + 2) % 20;
+
+  // Провод D2 (Точки)
+  drawWire([
+    { x: paddleX + 40, y: paddleY - 18 },
+    { x: unoX - 110, y: unoY - 30 }
+  ], ditPressed ? '#38bdf8' : '#334155', ditPressed);
+
+  // Провод D3 (Тире)
+  drawWire([
+    { x: paddleX + 40, y: paddleY + 22 },
+    { x: unoX - 110, y: unoY + 10 }
+  ], dahPressed ? '#38bdf8' : '#334155', dahPressed);
+
+  // Провод D6 (PWM Тон к базе транзистора)
+  drawWire([
+    { x: unoX + 110, y: unoY - 10 },
+    { x: txX - 22, y: txY }
+  ], isAudioActive ? '#f59e0b' : '#334155', isAudioActive);
+
+  // Провод от транзистора к динамику
+  drawWire([
+    { x: txX + 22, y: txY },
+    { x: spkX - 45, y: spkY + 20 }
+  ], isAudioActive ? '#38bdf8' : '#334155', isAudioActive);
+
+  // Питание +5V к динамику
+  drawWire([
+    { x: unoX + 110, y: unoY + 110 },
+    { x: spkX, y: unoY + 110 },
+    { x: spkX, y: spkY + 80 }
+  ], '#ef4444', isAudioActive);
+
+  requestAnimationFrame(drawCircuit);
+}
+
+function drawPin(x, y, label, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '10px monospace';
+  if (x < canvas.width / 2) {
+    ctx.fillText(label, x + 10, y + 3);
+  } else {
+    ctx.fillText(label, x - 130, y + 3);
+  }
+}
+
+function drawWire(points, color, active) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = active ? 3 : 1.5;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    ctx.lineTo(points[i].x, points[i].y);
+  }
+  ctx.stroke();
+
+  if (active) {
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    const p1 = points[0];
+    const p2 = points[points.length - 1];
+    const t = (Date.now() % 1000) / 1000;
+    const px = p1.x + (p2.x - p1.x) * t;
+    const py = p1.y + (p2.y - p1.y) * t;
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// Запуск
+tickKeyer();
+drawCircuit();
+</script>
+</body>
+</html>

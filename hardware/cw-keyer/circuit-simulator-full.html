@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Полный интерактивный симулятор CW Keyer v1.0 (MorseWave Full Edition)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #0a0e17; color: #e2e8f0; padding: 20px; min-height: 100vh; }
+    .container { max-width: 1300px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 16px; }
+    header h1 { font-size: 26px; color: #38bdf8; margin-bottom: 6px; }
+    header p { color: #94a3b8; font-size: 13px; }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 16px;
+    }
+
+    .main-canvas-panel {
+      background: #111827;
+      border: 1px solid #1f2937;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    .sidebar-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 14px;
+    }
+
+    .card-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #94a3b8;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* OLED Screen */
+    .oled-box {
+      background: #000;
+      border: 3px solid #334155;
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'Courier New', Courier, monospace;
+      color: #38bdf8;
+      box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.25);
+    }
+    .oled-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      border-bottom: 1px dashed #1e293b;
+      padding-bottom: 4px;
+    }
+    .oled-cw-stream {
+      font-size: 24px;
+      min-height: 34px;
+      line-height: 34px;
+      font-weight: bold;
+      color: #67e8f9;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .oled-text-decoded {
+      font-size: 14px;
+      color: #f8fafc;
+      min-height: 20px;
+      word-break: break-all;
+    }
+
+    /* Canvas */
+    .canvas-wrapper {
+      background: #060911;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    canvas { display: block; width: 100%; height: 460px; }
+
+    /* Paddle */
+    .paddle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .paddle-btn {
+      height: 75px;
+      border-radius: 8px;
+      border: 2px solid #475569;
+      background: #334155;
+      color: #fff;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.05s ease;
+    }
+    .paddle-btn span { font-size: 11px; color: #94a3b8; font-weight: normal; }
+    .paddle-btn:active, .paddle-btn.active {
+      background: #0284c7;
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.6);
+      transform: translateY(2px);
+    }
+
+    /* Memories */
+    .memory-btn-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .mem-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      padding: 8px 4px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .mem-btn:hover { background: #1e293b; border-color: #38bdf8; color: #fff; }
+    .mem-btn:active { background: #0284c7; color: #fff; }
+
+    /* Sliders */
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    .control-row input[type="range"] {
+      flex: 1;
+      accent-color: #38bdf8;
+    }
+    .val-badge {
+      font-family: monospace;
+      color: #38bdf8;
+      font-weight: bold;
+      min-width: 45px;
+      text-align: right;
+    }
+
+    /* Indicators */
+    .led-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      font-size: 12px;
+    }
+    .led-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .led-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #334155;
+      box-shadow: inset 0 0 3px rgba(0,0,0,0.5);
+    }
+    .led-dot.green-on { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+    .led-dot.red-on { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+
+    .tx-status-box {
+      background: #0b1320;
+      border-left: 3px solid #64748b;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      font-size: 12px;
+    }
+    .tx-active { border-left-color: #ef4444; color: #fca5a5; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>⚡ MorseWave Keyer v1.0 — Полный интерактивный стенд</h1>
+    <p>Arduino ATmega328P · Весло СРТ · Опторазвязка TX/PTT · Кнопки памяти M1-M5 · OLED I2C · NPN усилитель</p>
+  </header>
+
+  <div class="grid-layout">
+    <!-- ЛЕВАЯ КОЛОНКА: СХЕМА НА CANVAS + ВЕСЛО -->
+    <div class="main-canvas-panel">
+      <div class="canvas-wrapper">
+        <canvas id="circuitCanvas"></canvas>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: center;">
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">ФИЗИЧЕСКОЕ ВЕСЛО (КЛАВИШИ [Z] И [X]):</div>
+          <div class="paddle-grid">
+            <button class="paddle-btn" id="btnDah">
+              ТИРЕ [—]
+              <span>Большой палец [Z]</span>
+            </button>
+            <button class="paddle-btn" id="btnDit">
+              ТОЧКА [·]
+              <span>Указательный [X]</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 6px;">ИНДИКАТОРЫ И СТАТУС ВЫХОДОВ:</div>
+          <div class="card" style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <div class="led-row">
+              <div class="led-pill">
+                <div class="led-dot green-on"></div>
+                <span>PWR (5V)</span>
+              </div>
+              <div class="led-pill">
+                <div class="led-dot" id="ledTxKey"></div>
+                <span>TX KEY (D4)</span>
+              </div>
+              <div class="led-pill">
+                <div class="led-dot" id="ledPtt"></div>
+                <span>PTT (D5)</span>
+              </div>
+            </div>
+            <div class="tx-status-box" id="txStatus">
+              Трансивер: ПРИЁМ (TX KEY и PTT разомкнуты)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ПРАВАЯ КОЛОНКА: OLED, МАКРОСЫ, КРУТИЛКА СКОРОСТИ -->
+    <div class="sidebar-panel">
+      <!-- OLED Screen -->
+      <div class="card">
+        <div class="card-title">
+          <span>OLED 0.96" SSD1306 (I2C)</span>
+          <span style="color: #22c55e;">● 0x3C</span>
+        </div>
+        <div class="oled-box">
+          <div class="oled-top">
+            <span id="oledWpm">20 WPM</span>
+            <span>IAMBIC-B</span>
+            <span id="oledMode">TX:READY</span>
+          </div>
+          <div class="oled-cw-stream" id="oledStream">_</div>
+          <div class="oled-text-decoded" id="oledDecoded">...</div>
+        </div>
+      </div>
+
+      <!-- Кнопки памяти M1-M5 и CMD -->
+      <div class="card">
+        <div class="card-title">
+          <span>Кнопки памяти (МАТРИЦА A1)</span>
+          <span style="font-size: 10px; color: #38bdf8;">1 ПИН ADC</span>
+        </div>
+        <div class="memory-btn-row">
+          <button class="mem-btn" onclick="playMacro('CQ CQ DE R9OGL K')">M1 (CQ)</button>
+          <button class="mem-btn" onclick="playMacro('5NN BK')">M2 (5NN)</button>
+          <button class="mem-btn" onclick="playMacro('R9OGL')">M3 (CALL)</button>
+          <button class="mem-btn" onclick="playMacro('73 TU EE')">M4 (73)</button>
+          <button class="mem-btn" onclick="playMacro('TEST R9OGL')">M5 (TEST)</button>
+          <button class="mem-btn" onclick="toggleTune()" style="color: #f59e0b;" id="btnTune">CMD (TUNE)</button>
+        </div>
+      </div>
+
+      <!-- Крутилка WPM (Потенциометр A0) -->
+      <div class="card">
+        <div class="card-title">
+          <span>Потенциометр WPM (A0)</span>
+          <span class="val-badge" id="potWpmVal">20 WPM</span>
+        </div>
+        <div class="control-row">
+          <input type="range" id="potWpm" min="10" max="45" value="20">
+        </div>
+        <div class="control-row" style="margin-top: 8px;">
+          <span style="font-size: 12px; color: #94a3b8;">Тон сайдтона:</span>
+          <input type="range" id="potPitch" min="450" max="850" value="650">
+          <span class="val-badge" id="pitchVal">650 Hz</span>
+        </div>
+      </div>
+
+      <!-- Связь с MorseWave WebSerial -->
+      <div class="card" style="background: #0f172a; border-color: #0284c7;">
+        <div style="font-size: 11px; color: #38bdf8; font-weight: bold; margin-bottom: 4px;">WEBSERIAL ПОТОК В БРАУЗЕР:</div>
+        <div style="font-family: monospace; font-size: 12px; color: #94a3b8; height: 38px; overflow: hidden;" id="serialLog">
+          PORT: 115200 baud [CONNECTED]<br>READY TO RECEIVE
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// --- AUDIO ENGINE (Web Audio API) ---
+let audioCtx = null;
+let osc = null;
+let gainNode = null;
+let isAudioActive = false;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  osc = audioCtx.createOscillator();
+  gainNode = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+  gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.start();
+}
+
+function keyOn() {
+  initAudio();
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const freq = parseInt(document.getElementById('potPitch').value);
+  osc.frequency.setValueAtTime(freq, now);
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0.25, now + 0.005); // 5ms soft attack
+  isAudioActive = true;
+  updateHardwareState(true);
+}
+
+function keyOff() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+  gainNode.gain.cancelScheduledValues(now);
+  gainNode.gain.setValueAtTime(gainNode.gain.value, now);
+  gainNode.gain.linearRampToValueAtTime(0, now + 0.005); // 5ms soft decay
+  isAudioActive = false;
+  updateHardwareState(false);
+}
+
+function updateHardwareState(active) {
+  const ledTx = document.getElementById('ledTxKey');
+  const ledPtt = document.getElementById('ledPtt');
+  const txStatus = document.getElementById('txStatus');
+
+  if (active) {
+    ledTx.className = 'led-dot red-on';
+    ledPtt.className = 'led-dot red-on';
+    txStatus.className = 'tx-status-box tx-active';
+    txStatus.textContent = 'Трансивер: ПЕРЕДАЧА (Оптопара PC817 замкнула KEY IN!)';
+  } else {
+    ledTx.className = 'led-dot';
+    ledPtt.className = 'led-dot';
+    txStatus.className = 'tx-status-box';
+    txStatus.textContent = 'Трансивер: ПРИЁМ (TX KEY и PTT разомкнуты)';
+  }
+}
+
+// --- IAMBIC B KEYER CORE ---
+let ditPressed = false;
+let dahPressed = false;
+let ditMemory = false;
+let dahMemory = false;
+let isSending = false;
+let currentSymbol = '';
+let elementStartTime = 0;
+let elementDuration = 0;
+let pauseDuration = 0;
+
+let currentMorseChar = '';
+let decodedText = '';
+let lastUpTime = Date.now();
+let isTuning = false;
+
+// Macro buffer
+let macroQueue = [];
+
+const MORSE_TABLE = {
+  '.-': 'A', '-...': 'B', '-.-.': 'C', '-..': 'D', '.': 'E',
+  '..-.': 'F', '--.': 'G', '....': 'H', '..': 'I', '.---': 'J',
+  '-.-': 'K', '.-..': 'L', '--': 'M', '-.': 'N', '---': 'O',
+  '.--.': 'P', '--.-': 'Q', '.-.': 'R', '...': 'S', '-': 'T',
+  '..-': 'U', '...-': 'V', '.--': 'W', '-..-': 'X', '-.--': 'Y',
+  '--..': 'Z', '-----': '0', '.----': '1', '..---': '2', '...--': '3',
+  '....-': '4', '.....': '5', '-....': '6', '--...': '7', '---..': '8',
+  '----.': '9', '.-.-.-': '.', '--..--': ',', '..--..': '?'
+};
+const CHAR_TO_MORSE = {};
+for (let m in MORSE_TABLE) CHAR_TO_MORSE[MORSE_TABLE[m]] = m;
+
+function getWpm() { return parseInt(document.getElementById('potWpm').value); }
+function getDotLen() { return 1200 / getWpm(); }
+
+function tickKeyer() {
+  const dotLen = getDotLen();
+  const now = Date.now();
+
+  if (isTuning) {
+    requestAnimationFrame(tickKeyer);
+    return;
+  }
+
+  // Check Macro playback first
+  if (!isSending && macroQueue.length > 0 && !ditPressed && !dahPressed) {
+    const item = macroQueue.shift();
+    if (item === ' ') {
+      // word pause
+      decodedText += ' ';
+      updateOled();
+      setTimeout(tickKeyer, dotLen * 5);
+      return;
+    } else {
+      sendElement(item, item === '.' ? dotLen : dotLen * 3);
+    }
+  }
+
+  // Dot / Dash memory for Iambic B
+  if (ditPressed) ditMemory = true;
+  if (dahPressed) dahMemory = true;
+
+  if (!isSending) {
+    if (ditMemory) {
+      sendElement('.', dotLen);
+      ditMemory = false;
+    } else if (dahMemory) {
+      sendElement('-', dotLen * 3);
+      dahMemory = false;
+    } else {
+      // Pause detection (letter / word)
+      const pause = now - lastUpTime;
+      if (currentMorseChar && pause > dotLen * 2.8) {
+        const char = MORSE_TABLE[currentMorseChar] || '?';
+        decodedText += char;
+        logSerial(`[${char}]`);
+        if (decodedText.length > 25) decodedText = decodedText.slice(-25);
+        currentMorseChar = '';
+        updateOled();
+      }
+      if (pause > dotLen * 6.5 && decodedText && !decodedText.endsWith(' ')) {
+        decodedText += ' ';
+        logSerial(' <SPACE>');
+        updateOled();
+      }
+    }
+  } else {
+    // During an active dit/dah
+    const elapsed = now - elementStartTime;
+    if (elapsed < elementDuration) {
+      if (!isAudioActive) keyOn();
+    } else if (elapsed < elementDuration + pauseDuration) {
+      if (isAudioActive) keyOff();
+    } else {
+      isSending = false;
+      lastUpTime = Date.now();
+
+      // Iambic B Squeeze alternation:
+      if (currentSymbol === '.') {
+        if (dahPressed || dahMemory) {
+          sendElement('-', dotLen * 3);
+          dahMemory = false;
+        }
+      } else if (currentSymbol === '-') {
+        if (ditPressed || ditMemory) {
+          sendElement('.', dotLen);
+          ditMemory = false;
+        }
+      }
+    }
+  }
+
+  requestAnimationFrame(tickKeyer);
+}
+
+function sendElement(sym, duration) {
+  isSending = true;
+  currentSymbol = sym;
+  elementStartTime = Date.now();
+  elementDuration = duration;
+  pauseDuration = getDotLen();
+  currentMorseChar += sym;
+  logSerial(sym);
+  updateOled();
+}
+
+function updateOled() {
+  document.getElementById('oledStream').textContent = currentMorseChar || '_';
+  document.getElementById('oledDecoded').textContent = decodedText || '...';
+  document.getElementById('oledWpm').textContent = `${getWpm()} WPM`;
+}
+
+function logSerial(msg) {
+  const box = document.getElementById('serialLog');
+  box.textContent += msg;
+  box.scrollTop = box.scrollHeight;
+}
+
+function playMacro(text) {
+  macroQueue = [];
+  for (let ch of text.toUpperCase()) {
+    if (ch === ' ') {
+      macroQueue.push(' ');
+    } else if (CHAR_TO_MORSE[ch]) {
+      for (let s of CHAR_TO_MORSE[ch]) macroQueue.push(s);
+      macroQueue.push(' '); // space between chars
+    }
+  }
+}
+
+function toggleTune() {
+  isTuning = !isTuning;
+  const btn = document.getElementById('btnTune');
+  if (isTuning) {
+    btn.style.background = '#ef4444';
+    btn.style.color = '#fff';
+    keyOn();
+    document.getElementById('oledMode').textContent = 'TUNE:ON';
+  } else {
+    btn.style.background = '#0f172a';
+    btn.style.color = '#cbd5e1';
+    keyOff();
+    document.getElementById('oledMode').textContent = 'TX:READY';
+  }
+}
+
+// Controls
+const btnDit = document.getElementById('btnDit');
+const btnDah = document.getElementById('btnDah');
+
+btnDit.addEventListener('mousedown', () => { ditPressed = true; btnDit.classList.add('active'); });
+btnDah.addEventListener('mousedown', () => { dahPressed = true; btnDah.classList.add('active'); });
+window.addEventListener('mouseup', () => {
+  ditPressed = false; dahPressed = false;
+  btnDit.classList.remove('active'); btnDah.classList.remove('active');
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.repeat) return;
+  if (e.code === 'KeyX') { ditPressed = true; btnDit.classList.add('active'); }
+  if (e.code === 'KeyZ') { dahPressed = true; btnDah.classList.add('active'); }
+});
+window.addEventListener('keyup', (e) => {
+  if (e.code === 'KeyX') { ditPressed = false; btnDit.classList.remove('active'); }
+  if (e.code === 'KeyZ') { dahPressed = false; btnDah.classList.remove('active'); }
+});
+
+document.getElementById('potWpm').addEventListener('input', (e) => {
+  document.getElementById('potWpmVal').textContent = `${e.target.value} WPM`;
+  updateOled();
+});
+document.getElementById('potPitch').addEventListener('input', (e) => {
+  document.getElementById('pitchVal').textContent = `${e.target.value} Hz`;
+});
+
+// --- CANVAS CIRCUIT RENDERER ---
+const canvas = document.getElementById('circuitCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = canvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawFullCircuit() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Координаты ключевых блоков
+  const uno = { x: w * 0.42, y: h * 0.46, w: 200, h: 260 };
+  const paddle = { x: w * 0.12, y: h * 0.46 };
+  const spk = { x: w * 0.88, y: h * 0.72 };
+  const txJack = { x: w * 0.88, y: h * 0.22 };
+  const oled = { x: w * 0.42, y: h * 0.1 };
+
+  // 1. ARDUINO NANO/UNO
+  ctx.fillStyle = '#00646e';
+  ctx.strokeStyle = '#00a3b4';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(uno.x - uno.w/2, uno.y - uno.h/2, uno.w, uno.h, 10);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 15px monospace';
+  ctx.fillText('ARDUINO ATmega328P', uno.x - 75, uno.y - 100);
+
+  // Пины левые
+  drawNode(uno.x - uno.w/2, uno.y - 30, 'D2 (DIT - Точка)', '#38bdf8', true);
+  drawNode(uno.x - uno.w/2, uno.y + 10, 'D3 (DAH - Тире)', '#38bdf8', true);
+  drawNode(uno.x - uno.w/2, uno.y + 60, 'A0 (WPM POT)', '#a855f7', true);
+  drawNode(uno.x - uno.w/2, uno.y + 90, 'A1 (BTN MATRIX)', '#ec4899', true);
+
+  // Пины верхние (I2C)
+  drawNode(uno.x - 20, uno.y - uno.h/2, 'A4 (SDA)', '#38bdf8', false);
+  drawNode(uno.x + 20, uno.y - uno.h/2, 'A5 (SCL)', '#38bdf8', false);
+
+  // Пины правые
+  drawNode(uno.x + uno.w/2, uno.y - 60, 'D4 (TX KEY)', '#ef4444', false);
+  drawNode(uno.x + uno.w/2, uno.y - 20, 'D5 (PTT OUT)', '#ef4444', false);
+  drawNode(uno.x + uno.w/2, uno.y + 30, 'D6 (TONE PWM)', '#f59e0b', false);
+  drawNode(uno.x + uno.w/2, uno.y + 80, 'GND', '#64748b', false);
+  drawNode(uno.x + uno.w/2, uno.y + 110, '+5V', '#ef4444', false);
+
+  // 2. БЛОК ВЕСЛА
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#475569';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.roundRect(paddle.x - 60, paddle.y - 70, 120, 140, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('ВЕСЛО 3.5мм', paddle.x - 40, paddle.y - 50);
+
+  // Лепестки
+  ctx.fillStyle = ditPressed ? '#38bdf8' : '#334155';
+  ctx.fillRect(paddle.x - 45, paddle.y - 25, 90, 22);
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px monospace';
+  ctx.fillText('DIT (Указат.)', paddle.x - 38, paddle.y - 10);
+
+  ctx.fillStyle = dahPressed ? '#38bdf8' : '#334155';
+  ctx.fillRect(paddle.x - 45, paddle.y + 10, 90, 22);
+  ctx.fillStyle = '#fff';
+  ctx.fillText('DAH (Большой)', paddle.x - 38, paddle.y + 25);
+
+  // 3. БЛОК ОПТОПАРЫ PC817 (TX/PTT)
+  const optoX = w * 0.70;
+  const optoY = h * 0.28;
+  ctx.fillStyle = '#111827';
+  ctx.strokeStyle = isAudioActive ? '#ef4444' : '#475569';
+  ctx.beginPath();
+  ctx.roundRect(optoX - 45, optoY - 50, 90, 100, 6);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px monospace';
+  ctx.fillText('PC817 x2', optoX - 25, optoY - 30);
+  ctx.fillStyle = '#64748b';
+  ctx.fillText('ОПТОРАЗВЯЗКА', optoX - 35, optoY - 12);
+  ctx.fillStyle = isAudioActive ? '#ef4444' : '#334155';
+  ctx.fillRect(optoX - 30, optoY + 5, 60, 30);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(isAudioActive ? 'ЗАМКНУТО' : 'ИЗОЛЯЦИЯ', optoX - 28, optoY + 24);
+
+  // Разъем TX-500
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#475569';
+  ctx.beginPath();
+  ctx.roundRect(txJack.x - 60, txJack.y - 40, 120, 80, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = isAudioActive ? '#ef4444' : '#94a3b8';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('ТРАНСИВЕР KEY', txJack.x - 48, txJack.y - 15);
+  ctx.font = '11px monospace';
+  ctx.fillStyle = '#64748b';
+  ctx.fillText(isAudioActive ? '● В ЭФИРЕ' : '○ ОЖИДАНИЕ', txJack.x - 35, txJack.y + 15);
+
+  // 4. БЛОК NPN УСИЛИТЕЛЯ И ОВАЛЬНОГО ДИНАМИКА
+  const npnX = w * 0.68;
+  const npnY = h * 0.72;
+
+  // Транзистор
+  ctx.fillStyle = '#0f172a';
+  ctx.strokeStyle = isAudioActive ? '#38bdf8' : '#475569';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(npnX, npnY, 22, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#fff';
+  ctx.font = '10px monospace';
+  ctx.fillText('BC547', npnX - 15, npnY + 4);
+
+  // Динамик
+  ctx.fillStyle = '#1e293b';
+  ctx.strokeStyle = '#475569';
+  ctx.beginPath();
+  ctx.roundRect(spk.x - 65, spk.y - 65, 130, 130, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText('ДИНАМИК 8Ω 1.5W', spk.x - 52, spk.y - 45);
+
+  // Вибрация диффузора
+  const spkPulse = isAudioActive ? Math.sin(Date.now() / 15) * 5 : 0;
+  ctx.beginPath();
+  ctx.ellipse(spk.x, spk.y + 8, 30 + spkPulse, 45 + spkPulse, 0, 0, Math.PI * 2);
+  ctx.fillStyle = isAudioActive ? '#0284c7' : '#0f172a';
+  ctx.fill();
+  ctx.strokeStyle = isAudioActive ? '#38bdf8' : '#334155';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // 5. ПРОВОДА И АНИМАЦИЯ
+  // D2 Весло
+  drawTrace([
+    { x: paddle.x + 45, y: paddle.y - 14 },
+    { x: uno.x - uno.w/2, y: uno.y - 30 }
+  ], ditPressed ? '#38bdf8' : '#334155', ditPressed);
+
+  // D3 Весло
+  drawTrace([
+    { x: paddle.x + 45, y: paddle.y + 21 },
+    { x: uno.x - uno.w/2, y: uno.y + 10 }
+  ], dahPressed ? '#38bdf8' : '#334155', dahPressed);
+
+  // D4 к Оптопаре
+  drawTrace([
+    { x: uno.x + uno.w/2, y: uno.y - 60 },
+    { x: optoX - 45, y: optoY - 20 }
+  ], isAudioActive ? '#ef4444' : '#334155', isAudioActive);
+
+  // Оптопара к Трансиверу
+  drawTrace([
+    { x: optoX + 45, y: optoY - 20 },
+    { x: txJack.x - 60, y: txJack.y }
+  ], isAudioActive ? '#ef4444' : '#334155', isAudioActive);
+
+  // D6 к Транзистору
+  drawTrace([
+    { x: uno.x + uno.w/2, y: uno.y + 30 },
+    { x: npnX - 22, y: npnY }
+  ], isAudioActive ? '#f59e0b' : '#334155', isAudioActive);
+
+  // Транзистор к Динамику
+  drawTrace([
+    { x: npnX + 22, y: npnY },
+    { x: spk.x - 65, y: spk.y + 8 }
+  ], isAudioActive ? '#38bdf8' : '#334155', isAudioActive);
+
+  requestAnimationFrame(drawFullCircuit);
+}
+
+function drawNode(x, y, label, color, isLeft) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '10px monospace';
+  if (isLeft) {
+    ctx.fillText(label, x + 8, y + 3);
+  } else {
+    ctx.fillText(label, x - 100, y + 3);
+  }
+}
+
+function drawTrace(points, color, active) {
+  ctx.strokeStyle = color;
+  ctx.lineWidth = active ? 3 : 1.5;
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.stroke();
+
+  if (active) {
+    ctx.fillStyle = '#fff';
+    const t = (Date.now() % 800) / 800;
+    const p1 = points[0];
+    const p2 = points[points.length - 1];
+    const px = p1.x + (p2.x - p1.x) * t;
+    const py = p1.y + (p2.y - p1.y) * t;
+    ctx.beginPath();
+    ctx.arc(px, py, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+// Запуск
+tickKeyer();
+drawFullCircuit();
+</script>
+</body>
+</html>
