@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "e:\\dev\\morse-trainer\\hardware\\MorseWave_Pro\\MorseWave_Pro\\MorseWave_Pro.kicad_sch")
-		(date "2026-10-18T01:26:42")
+		(date "2026-10-18T01:48:51")
 		(tool "Eeschema 10.0.7")
 		(sheet
 			(number "1")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "031fa189-e693-4144-b6ea-40bf1e98a0cd")
+			(tstamps "c31b0503-6489-49f9-8df6-cbf77bbf7dae")
 			(units
 				(unit
 					(name "A")
@@ -195,10 +195,10 @@
 		(comp
 			(ref "C1")
 			(value "10nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -231,7 +231,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2c6b6be5-074a-4783-be6a-8a904919ad74")
+			(tstamps "cb3da1d5-14de-4dde-b92b-731c8df85760")
 			(units
 				(unit
 					(name "A")
@@ -249,10 +249,10 @@
 		(comp
 			(ref "C2")
 			(value "10nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -285,7 +285,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "687ea0c2-7aa3-491b-9107-3f371499c61f")
+			(tstamps "4038607f-0b29-46fc-b75b-81fb9eaac419")
 			(units
 				(unit
 					(name "A")
@@ -303,10 +303,10 @@
 		(comp
 			(ref "C3")
 			(value "100nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -339,7 +339,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7f0c1261-b822-4626-9ace-f7e80880e737")
+			(tstamps "b155f3f6-0270-4ac2-bfbf-9cd1bbe12ad2")
 			(units
 				(unit
 					(name "A")
@@ -357,10 +357,10 @@
 		(comp
 			(ref "C4")
 			(value "47nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -393,7 +393,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "69adbbbb-b564-4a2b-9de5-f114a764fb7d")
+			(tstamps "1c3fe5b8-bc5d-425f-844c-172d75a427da")
 			(units
 				(unit
 					(name "A")
@@ -411,10 +411,10 @@
 		(comp
 			(ref "C5")
 			(value "100nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -447,7 +447,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8e0c958b-8b31-48cf-b00f-dc00793b5993")
+			(tstamps "ec5e248b-ac95-4002-84e6-4760b86b3e69")
 			(units
 				(unit
 					(name "A")
@@ -465,10 +465,10 @@
 		(comp
 			(ref "C6")
 			(value "100uF")
-			(footprint "Capacitor_SMD:CP_Elec_6.3x5.4")
+			(footprint "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:CP_Elec_6.3x5.4")
+					(name "Footprint") "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm")
 				(field
 					(name "Datasheet")
 				)
@@ -501,7 +501,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7fc6d989-997f-4a39-8595-d85dcb46e06d")
+			(tstamps "c065dc96-c04d-4f3c-9423-518ecdbcc75b")
 			(units
 				(unit
 					(name "A")
@@ -519,10 +519,10 @@
 		(comp
 			(ref "C7")
 			(value "100nF")
-			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(footprint "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 			(fields
 				(field
-					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+					(name "Footprint") "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm")
 				(field
 					(name "Datasheet")
 				)
@@ -555,7 +555,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "83e9cff5-149e-4070-b58c-2a4e3f2c0339")
+			(tstamps "a3b4454e-7e8e-4321-ad4b-0870f6a6d529")
 			(units
 				(unit
 					(name "A")
@@ -609,7 +609,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "26f0194f-c9ba-46b4-b1ef-1b8279304e40")
+			(tstamps "88beee0c-0a2d-46b3-91aa-63ca805b8fac")
 			(units
 				(unit
 					(name "A")
@@ -627,10 +627,10 @@
 		(comp
 			(ref "D2")
 			(value "1N4148")
-			(footprint "Diode_SMD:D_SOD-123")
+			(footprint "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Diode_SMD:D_SOD-123")
+					(name "Footprint") "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -663,7 +663,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c0ff65b4-ee57-4962-81cf-d2c722c3742e")
+			(tstamps "910b32e4-edff-451c-b321-bc6b24f4fc3e")
 			(units
 				(unit
 					(name "A")
@@ -713,7 +713,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "04185e15-b80d-4ac9-adc4-fd61e1e9ab8b")
+			(tstamps "7d4a22cd-8d99-4977-ba1c-1bd500b8ab4e")
 			(units
 				(unit
 					(name "A")
@@ -764,7 +764,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "abf59714-bbba-46cd-bfe1-f39047d4989b")
+			(tstamps "ca7404ea-7ae6-46b7-b1ef-f324b4eca087")
 			(units
 				(unit
 					(name "A")
@@ -821,7 +821,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "feab16fa-85ad-47e8-b3d9-e28473d2816f")
+			(tstamps "b2530e97-490a-4f1c-8c1a-0d87f2d4fb31")
 			(units
 				(unit
 					(name "A")
@@ -875,7 +875,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1dc1a7e1-a548-4988-8197-2b8ea1a612c6")
+			(tstamps "bf20faa4-cf8e-4a2a-895a-fec2adb45eaf")
 			(units
 				(unit
 					(name "A")
@@ -929,7 +929,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fc17201a-bf0e-4a01-9ed3-03d9b0f554df")
+			(tstamps "809c71ed-71da-482c-88b7-c9a8e05b5556")
 			(units
 				(unit
 					(name "A")
@@ -983,7 +983,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ddb9c89d-9c67-40cd-8e6c-953e6ad037bf")
+			(tstamps "4b38865a-0f12-451b-9751-192df0893070")
 			(units
 				(unit
 					(name "A")
@@ -1043,7 +1043,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2af3481d-f750-4553-bb8c-978b778bc913")
+			(tstamps "0d2dc36d-af47-4f8e-97d7-65fbaa0bf92c")
 			(units
 				(unit
 					(name "A")
@@ -1099,7 +1099,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "290aabca-7be2-4818-96da-4335b267171d")
+			(tstamps "e3f98453-e457-4b42-be87-a91ce4d70102")
 			(units
 				(unit
 					(name "A")
@@ -1120,10 +1120,10 @@
 		(comp
 			(ref "R1")
 			(value "1k")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1156,7 +1156,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "348ac209-fa24-4c17-a9cb-de7bf22fe5ef")
+			(tstamps "2115842d-46a6-44b0-8a1f-5fbafde04b5d")
 			(units
 				(unit
 					(name "A")
@@ -1174,10 +1174,10 @@
 		(comp
 			(ref "R2")
 			(value "1k")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1210,7 +1210,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d553a13d-3e62-43f8-88bc-07cf62b749da")
+			(tstamps "979e2094-8bff-4b84-97ab-f0670ac31bf3")
 			(units
 				(unit
 					(name "A")
@@ -1228,10 +1228,10 @@
 		(comp
 			(ref "R3")
 			(value "330R")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1264,7 +1264,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9b4c7e8f-a058-49fa-9318-1acb51678ce8")
+			(tstamps "e846b698-f92b-4ab1-a3ce-68d398e563d6")
 			(units
 				(unit
 					(name "A")
@@ -1282,10 +1282,10 @@
 		(comp
 			(ref "R4")
 			(value "330R")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1318,7 +1318,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "650f5e77-70ce-4a78-9689-b0cd141fdc8e")
+			(tstamps "ba013429-6cd6-4e23-ac7b-304d27412938")
 			(units
 				(unit
 					(name "A")
@@ -1336,10 +1336,10 @@
 		(comp
 			(ref "R5")
 			(value "330R")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1372,7 +1372,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "86f5d2e8-6e39-494a-9a50-87e2e1067906")
+			(tstamps "c4fe44de-5ae8-4d7a-b586-44e28e91e120")
 			(units
 				(unit
 					(name "A")
@@ -1390,10 +1390,10 @@
 		(comp
 			(ref "R6")
 			(value "470R")
-			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1426,7 +1426,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a6803664-36c9-4946-9725-aaa974768a2b")
+			(tstamps "833844b7-7c60-4026-8505-1f215934db78")
 			(units
 				(unit
 					(name "A")
@@ -1444,10 +1444,10 @@
 		(comp
 			(ref "R7")
 			(value "33R (1W)")
-			(footprint "Resistor_SMD:R_1206_3216Metric")
+			(footprint "Resistor_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal")
 			(fields
 				(field
-					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal")
 				(field
 					(name "Datasheet")
 				)
@@ -1480,7 +1480,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "588706bc-c981-4b71-9028-f410568209d6")
+			(tstamps "280b4d5e-f282-461e-b37b-50505d3b5492")
 			(units
 				(unit
 					(name "A")
@@ -1534,7 +1534,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ae8a2bc4-8041-4537-a1d9-9dcd840ee51c")
+			(tstamps "c5098126-787f-467e-8a62-43eb8ac3e2ae")
 			(units
 				(unit
 					(name "A")
@@ -1591,7 +1591,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fb910b39-13f0-4bd3-9211-412295cb7991")
+			(tstamps "1fbf2117-eb61-4e6e-ba7f-a7131564853e")
 			(units
 				(unit
 					(name "A")
@@ -1648,7 +1648,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "54379cd3-bbc9-4137-8af6-6c356e8135b7")
+			(tstamps "6007a671-2fb1-40c5-8b0d-640ca69ff8ca")
 			(units
 				(unit
 					(name "A")
@@ -1705,7 +1705,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7df52968-e0bf-48c0-9264-7537b3be9222")
+			(tstamps "b1eff7ca-9083-4f72-80ea-fe358c90b457")
 			(units
 				(unit
 					(name "A")
@@ -1765,7 +1765,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a2b71f3a-92ce-4b7e-b77e-3003b286e696")
+			(tstamps "1cd01a8c-019b-4417-bcea-3297c4f6daeb")
 			(units
 				(unit
 					(name "A")

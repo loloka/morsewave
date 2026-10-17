@@ -363,7 +363,7 @@ s.lbl("DIT", 76.20, p_j1_1[1], 0, "left bottom")
 # C1 shunt across DIT to GND:
 # Place C1 so Pin 1 touches p_j1_1[1] (53.34)
 # In Device:C rot=0: Pin 1 is at y - 3.81. So y = 53.34 + 3.81 = 57.15
-s.sym("C1", "10nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 63.50, 57.15, 0)
+s.sym("C1", "10nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 63.50, 57.15, 0)
 p_c1_1 = s.pin_pos("C1", 1)
 p_c1_2 = s.pin_pos("C1", 2)
 s.junc(p_c1_1[0], p_c1_1[1])
@@ -377,7 +377,7 @@ s.wr(55.88, 76.20, 76.20, 76.20)
 s.lbl("DAH", 76.20, 76.20, 0, "left bottom")
 
 # C2 shunt across DAH to GND:
-s.sym("C2", "10nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 63.50, 80.01, 0)
+s.sym("C2", "10nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 63.50, 80.01, 0)
 p_c2_1 = s.pin_pos("C2", 1)
 p_c2_2 = s.pin_pos("C2", 2)
 s.junc(p_c2_1[0], p_c2_1[1])
@@ -403,7 +403,7 @@ p_u2_4 = s.pin_pos("U2", 4)  # Collector
 
 # R4 (330R) horizontal rot=90: Pin 2 at p_u2_1[0], Pin 1 to the left
 # In Device:R rot=90: Pin 2 is at x + 3.81. We want Pin 2 at p_u2_1[0] - 6.35
-s.sym("R4", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 246.38, p_u2_1[1], 90)
+s.sym("R4", "330R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 246.38, p_u2_1[1], 90)
 p_r4_1 = s.pin_pos("R4", 1)
 p_r4_2 = s.pin_pos("R4", 2)
 
@@ -431,7 +431,7 @@ s.wr(284.48, p_j2_1[1], p_j2_1[0], p_j2_1[1])
 
 # Flyback Diode D2 (1N4148):
 # Place D2 vertical rot=270 between Collector and Emitter at x=279.40
-s.sym("D2", "1N4148", "Diode_SMD:D_SOD-123", "Device", "D", 279.40, 55.88, 270)
+s.sym("D2", "1N4148", "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal", "Device", "D", 279.40, 55.88, 270)
 p_d2_1 = s.pin_pos("D2", 1)  # Cathode (top)
 p_d2_2 = s.pin_pos("D2", 2)  # Anode (bottom)
 
@@ -448,7 +448,7 @@ p_u3_2 = s.pin_pos("U3", 2)
 p_u3_3 = s.pin_pos("U3", 3)
 p_u3_4 = s.pin_pos("U3", 4)
 
-s.sym("R5", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 246.38, p_u3_1[1], 90)
+s.sym("R5", "330R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 246.38, p_u3_1[1], 90)
 p_r5_1 = s.pin_pos("R5", 1)
 p_r5_2 = s.pin_pos("R5", 2)
 
@@ -479,7 +479,7 @@ s.txt("4. АНАЛОГОВЫЙ ЗВУКОВОЙ ТРАКТ: 2-ЗВЕННЫЙ Ф�
 AUDIO_Y = 190.50
 
 # R1 (1k) horizontal rot=90
-s.sym("R1", "1k", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 45.72, AUDIO_Y, 90)
+s.sym("R1", "1k", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 45.72, AUDIO_Y, 90)
 p_r1_1 = s.pin_pos("R1", 1)
 p_r1_2 = s.pin_pos("R1", 2)
 
@@ -487,7 +487,7 @@ s.lbl("AUDIO_PWM", p_r1_1[0] - 7.62, p_r1_1[1], 0, "right bottom")
 s.wr(p_r1_1[0] - 7.62, p_r1_1[1], p_r1_1[0], p_r1_1[1])
 
 # C3 (100nF) shunt to GND
-s.sym("C3", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 58.42, AUDIO_Y + 3.81, 0)
+s.sym("C3", "100nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 58.42, AUDIO_Y + 3.81, 0)
 p_c3_1 = s.pin_pos("C3", 1)
 p_c3_2 = s.pin_pos("C3", 2)
 
@@ -497,14 +497,14 @@ s.wr(p_c3_2[0], p_c3_2[1], p_c3_2[0], p_c3_2[1] + 5.08)
 s.pwr("GND", p_c3_2[0], p_c3_2[1] + 5.08, 0)
 
 # R2 (1k) horizontal rot=90
-s.sym("R2", "1k", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 72.39, AUDIO_Y, 90)
+s.sym("R2", "1k", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 72.39, AUDIO_Y, 90)
 p_r2_1 = s.pin_pos("R2", 1)
 p_r2_2 = s.pin_pos("R2", 2)
 
 s.wr(p_c3_1[0], p_c3_1[1], p_r2_1[0], p_r2_1[1])
 
 # C4 (47nF) shunt to GND
-s.sym("C4", "47nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 85.09, AUDIO_Y + 3.81, 0)
+s.sym("C4", "47nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 85.09, AUDIO_Y + 3.81, 0)
 p_c4_1 = s.pin_pos("C4", 1)
 p_c4_2 = s.pin_pos("C4", 2)
 
@@ -524,7 +524,7 @@ s.wr(p_rv3_3[0], p_rv3_3[1], p_rv3_3[0], p_rv3_3[1] + 5.08)
 s.pwr("GND", p_rv3_3[0], p_rv3_3[1] + 5.08, 0)
 
 # R6 (470R) horizontal rot=90: Base resistor for Q1
-s.sym("R6", "470R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 110.49, p_rv3_2[1], 90)
+s.sym("R6", "470R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 110.49, p_rv3_2[1], 90)
 p_r6_1 = s.pin_pos("R6", 1)
 p_r6_2 = s.pin_pos("R6", 2)
 
@@ -542,7 +542,7 @@ s.pwr("GND", p_q1_e[0], p_q1_e[1] + 3.81, 0)
 
 # Collector node:
 # C5 (100nF) damping cap to GND
-s.sym("C5", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 137.16, p_q1_c[1] + 3.81, 0)
+s.sym("C5", "100nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 137.16, p_q1_c[1] + 3.81, 0)
 p_c5_1 = s.pin_pos("C5", 1)
 p_c5_2 = s.pin_pos("C5", 2)
 
@@ -562,7 +562,7 @@ s.wr(p_c5_1[0], p_c5_1[1], p_j4_1[0], p_j4_1[1])
 R7_Y = 175.26
 s.wr(p_j4_2[0], p_j4_2[1], p_j4_2[0], R7_Y)
 
-s.sym("R7", "33R (1W)", "Resistor_SMD:R_1206_3216Metric", "Device", "R", 158.75, R7_Y, 90)
+s.sym("R7", "33R (1W)", "Resistor_THT:R_Axial_DIN0411_L9.9mm_D3.6mm_P12.70mm_Horizontal", "Device", "R", 158.75, R7_Y, 90)
 p_r7_1 = s.pin_pos("R7", 1)
 p_r7_2 = s.pin_pos("R7", 2)
 
@@ -607,7 +607,7 @@ s.wr(p_rv2_2[0], p_rv2_2[1], p_rv2_2[0] + 6.35, p_rv2_2[1])
 s.lbl("POT_TONE", p_rv2_2[0] + 6.35, p_rv2_2[1], 0, "left bottom")
 
 # LED Key: D1 + R3
-s.sym("R3", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 283.21, 190.50, 90)
+s.sym("R3", "330R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 283.21, 190.50, 90)
 p_r3_1 = s.pin_pos("R3", 1)
 p_r3_2 = s.pin_pos("R3", 2)
 
@@ -686,12 +686,12 @@ s.txt("8. ФИЛЬТРАЦИЯ ШИНЫ ПИТАНИЯ +5V", 228.60, 223.52)
 PWR_LINE_Y = 233.68
 
 # C6 (100uF Electrolytic)
-s.sym("C6", "100uF", "Capacitor_SMD:CP_Elec_6.3x5.4", "Device", "C_Polarized", 246.38, PWR_LINE_Y + 3.81, 0)
+s.sym("C6", "100uF", "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm", "Device", "C_Polarized", 246.38, PWR_LINE_Y + 3.81, 0)
 p_c6_1 = s.pin_pos("C6", 1)
 p_c6_2 = s.pin_pos("C6", 2)
 
 # C7 (100nF Ceramic)
-s.sym("C7", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 261.62, PWR_LINE_Y + 3.81, 0)
+s.sym("C7", "100nF", "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm", "Device", "C", 261.62, PWR_LINE_Y + 3.81, 0)
 p_c7_1 = s.pin_pos("C7", 1)
 p_c7_2 = s.pin_pos("C7", 2)
 
