@@ -178,17 +178,17 @@ void playStartupGreeting() {
   if (hasOled) {
     oled.clear();
     oled.setScale(1);
-    oled.setCursor(18, 1);
+    oled.setCursor(19, 1);
     oled.print(F("MORSEWAVE KEYER"));
     oled.setScale(2);
-    oled.setCursor(26, 3);
+    oled.setCursor(34, 3);
     oled.print(F("VVV ="));
     oled.setScale(1);
-    oled.setCursor(24, 6);
-    oled.print(F("R8OA EDITION"));
+    oled.setCursor(25, 6);
+    oled.print(F("R9OGL EDITION"));
   }
 
-  Serial.println(F(">> Startup Intro: VVV = (Radiogram CQ) <<"));
+  Serial.println(F(">> Startup Intro: VVV = (DE R9OGL) <<"));
 
   // Проигрываем V V V = (три буквы V и знак раздела =)
   playIntroChar("...-");  // V
