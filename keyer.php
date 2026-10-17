@@ -16,11 +16,22 @@ include __DIR__ . '/includes/header.php';
         <span>⚡</span> R9OGL HARDWARE EDITION · v1.7
     </div>
     <h1>Боевой телеграфный ключ MorseWave Pro</h1>
-    <p class="muted mt-0" style="font-size: 16px; max-width: 820px; line-height: 1.6;">
-        Подключите ваш физический манипулятор к тренажеру MorseWave через WebSerial (USB COM-порт). 
-        Здесь вы можете проверить работу ключа в реальном времени, настроить скорость и тон крутилками на лету, 
-        протестировать передачу в эхо-тренажере и оставить заявку на авторский ключ ручной сборки.
+    <p class="muted mt-0" style="font-size: 16px; max-width: 860px; line-height: 1.6;">
+        Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод).
     </p>
+
+    <!-- Информационная плашка подключения -->
+    <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #4fd8c4; font-size: 15px;">
+            <span>🔌</span> Как устроен и подключается ключ:
+        </div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">
+            Манипулятор подключается к компьютеру через плату <b>Arduino (Nano / Uno)</b> с открытой <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">прошивкой MorseWave Pro v1.7 (GitHub) ↗</a>.
+        </div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
+            Поддерживается <b>любой манипулятор</b> — двухрычажный ямбический (с упором на режим Iambic B) или однорычажное весло — через стандартный разъём <b>Jack 3.5 мм</b> (поддержка классического прямого ключа-клоподава будет добавлена в следующих версиях).
+        </div>
+    </div>
 </div>
 
 <!-- =========================================================
@@ -243,39 +254,6 @@ include __DIR__ . '/includes/header.php';
                 <span>Исходники на GitHub ↗</span>
             </a>
         </div>
-    </div>
-</div>
-
-<!-- =========================================================
-     РАЗДЕЛ ЗАКАЗА АВТОРСКОГО ЭЛЕКТРОННОГО БЛОКА
-     ========================================================= -->
-<div class="order-section-card" id="preorder-section">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-        <div>
-            <div class="card-eyebrow">МАСТЕРСКАЯ R9OGL</div>
-            <h2 style="margin: 0 0 6px;">Электронный блок MorseWave Pro</h2>
-        </div>
-        <span class="badge" style="background:rgba(232, 163, 61, 0.15); color:#e8a33d; border:1px solid rgba(232, 163, 61, 0.4); padding:6px 14px; border-radius:20px; font-weight:700; font-size:12px;">
-            🔒 ЗАКАЗ ВРЕМЕННО НЕДОСТУПЕН
-        </span>
-    </div>
-
-    <p class="muted" style="max-width: 780px; font-size: 15px; line-height:1.6;">
-        Электронный блок подключается к любому манипулятору — двухрычажному ямбическому (режим B) или однорычажному веслу — через стандартный разъём Jack 3.5 мм (поддержка классического прямого ключа-клоподава будет добавлена в следующих версиях).
-    </p>
-
-    <div class="alert mt-3" style="background: var(--surface-2); border: 1px dashed var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
-        <div style="font-size: 32px;">🛠</div>
-        <div style="flex: 1; min-width: 260px;">
-            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">Приём заявок временно приостановлен</div>
-            <div style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
-                В данный момент идёт финальная доводка прошивки и подготовка первой авторской серии блоков. 
-                Вы можете собрать такой ключ самостоятельно по схеме и прошивке из репозитория — все чертежи и инструкции полностью открыты!
-            </div>
-        </div>
-        <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-primary" style="background:#4fd8c4; color:#0b0f12; font-weight:700; padding:10px 20px; text-decoration:none; border-radius:8px;">
-            Собрать своими руками (GitHub) ↗
-        </a>
     </div>
 </div>
 
