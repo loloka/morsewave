@@ -1,16 +1,18 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.2 (Single-Lever / Iambic with Type-Ahead FIFO)
- *  - Аппаратная буферизация элементов (FIFO очередь на 8 знаков, как в TX-500):
- *      * Можно отбивать "R" (.-.) или "A" (.-) рукой быстро (на своей скорости),
- *        а ключ плавно и красиво воспроизведет их на медленной скорости крутилки!
- *      * Защита от дребезга механических контактов (15 мс антидребезг).
- *      * Честный автоповтор при удержании весла в сторону точек или тире.
- *      * Идеально работает с однорычажным манипулятором (веслом) и двухрычажным!
+ *  MorseWave Pro Keyer v1.3 (Classic Curtis 8044 / TX-500 Single-Lever)
+ *  - Классический аппаратный алгоритм Curtis 8044 (как в трансивере TX-500):
+ *      * Защита от дребезга: во время звучания точки контакт точки полностью
+ *        игнорируется (слушается только тире), и наоборот!
+ *      * Память элементов (Dot/Dash Memory): можно отбивать знак быстрее
+ *        выставленной скорости, ключ чисто и ритмично его доиграет.
+ *      * Никаких очередей, ложных повторов и каши!
+ *  - Блокировка крутилок во время передачи:
+ *      * Потенциометры опрашиваются ТОЛЬКО в тишине (IDLE), поэтому просадка
+ *        питания от динамика больше не сбивает WPM и не спамит в Serial!
  *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец)
  *  - Плавные крутилки A0 (WPM: 10..35) и A2 (PITCH: 450..850 Гц)
- *  - Мгновенный вывод параметров в Serial Monitor при повороте крутилок
- *  - Автоопределение OLED 0.96" по I2C (работает как с дисплеем, так и без)
+ *  - Автоопределение OLED 0.96" по I2C
  * =====================================================================
  */
 
@@ -28,51 +30,25 @@ const int PIN_LED_KEY   = 8;    // Светодиод KEY
 const int PIN_POT_WPM   = A0;   // Потенциометр скорости
 const int PIN_POT_PITCH = A2;   // Потенциометр тона
 
-// --- ДИНАМИЧЕСКИЕ ПАРАМЕТРЫ ---
+// --- ПАРАМЕТРЫ СКОРОСТИ И ТОНА ---
 int currentWpm = 18;
 int currentPitch = 650;
 unsigned long ditMs = 1200 / 18;
 unsigned long dahMs = ditMs * 3;
 
-// --- БУФЕР ВВОДА ЭЛЕМЕНТОВ (FIFO ОЧЕРЕДЬ, КАК В ТРАНСИВЕРАХ) ---
-enum Element {
-  ELEM_NONE = 0,
-  ELEM_DIT  = 1,
-  ELEM_DAH  = 2
-};
-
-const int QUEUE_MAX = 8;
-Element elementQueue[QUEUE_MAX];
-int qHead = 0;
-int qTail = 0;
-int qCount = 0;
-
-void enqueue(Element elem) {
-  if (qCount < QUEUE_MAX) {
-    elementQueue[qTail] = elem;
-    qTail = (qTail + 1) % QUEUE_MAX;
-    qCount++;
-  }
-}
-
-Element dequeue() {
-  if (qCount == 0) return ELEM_NONE;
-  Element elem = elementQueue[qHead];
-  qHead = (qHead + 1) % QUEUE_MAX;
-  qCount--;
-  return elem;
-}
-
-// --- АВТОМАТ СОСТОЯНИЙ ГЕНЕРАТОРА CW ---
+// --- АВТОМАТ СОСТОЯНИЙ КЛЮЧА CURTIS 8044 ---
 enum KeyerState {
   STATE_IDLE,
-  STATE_ELEMENT,    // Звучит элемент (точка или тире)
-  STATE_PAUSE       // Межэлементная пауза (длительность 1 точка)
+  STATE_PLAY_DIT,
+  STATE_PAUSE_DIT,
+  STATE_PLAY_DAH,
+  STATE_PAUSE_DAH
 };
 
 KeyerState state = STATE_IDLE;
-Element currentPlaying = ELEM_NONE;
 unsigned long stateStartTime = 0;
+bool ditMemory = false;
+bool dahMemory = false;
 unsigned long lastSymbolEndTime = 0;
 
 // Декодер текста Морзе
@@ -121,10 +97,10 @@ void setup() {
     oled.setCursor(0, 0);
     oled.print(F("MorseWave Keyer"));
     oled.setCursor(0, 2);
-    oled.print(F("Mode: BUFFERED"));
+    oled.print(F("Mode: CURTIS 8044"));
   }
 
-  // Первоначальное чтение потенциометров
+  // Первоначальное чтение крутилок
   int rawWpm = analogRead(PIN_POT_WPM);
   currentWpm = map(rawWpm, 0, 1023, 10, 35);
   ditMs = 1200 / currentWpm;
@@ -136,7 +112,7 @@ void setup() {
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("  MorseWave Pro Keyer v1.2 (TX-500 Type-Ahead)    "));
+  Serial.println(F("  MorseWave Pro Keyer v1.3 (Curtis 8044 / TX500)  "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -148,137 +124,93 @@ void setup() {
   Serial.println(F(" Hz"));
   Serial.print(F("OLED  : "));
   Serial.println(hasOled ? F("ONLINE") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
-  Serial.println(F("--------------------------------------------------"));
-  Serial.println(F("Очередь элементов активна: можно отбивать быстрее "));
-  Serial.println(F("выставленной скорости, ключ всё четко воспроизведет!"));
   Serial.println(F("=================================================="));
   Serial.println();
 }
 
 void loop() {
-  samplePaddle();
-  readPots();
   handleKeyer();
+  readPots();
   handleDecodedPauses();
 }
 
-// --- СКАНИРОВАНИЕ ВЕСЛА С АНТИДРЕБЕЗГОМ И БУФЕРИЗАЦИЕЙ ---
-void samplePaddle() {
-  const unsigned long DEBOUNCE_MS = 15;
-  static unsigned long lastDitEdge = 0;
-  static unsigned long lastDahEdge = 0;
-  static bool prevDitPin = HIGH;
-  static bool prevDahPin = HIGH;
-
-  unsigned long now = millis();
-  bool curDit = digitalRead(PIN_DIT);
-  bool curDah = digitalRead(PIN_DAH);
-
-  // Нажатие ТОЧКИ (перепад HIGH -> LOW)
-  if (curDit == LOW && prevDitPin == HIGH) {
-    if (now - lastDitEdge > DEBOUNCE_MS) {
-      lastDitEdge = now;
-      enqueue(ELEM_DIT);
-    }
-  }
-
-  // Нажатие ТИРЕ (перепад HIGH -> LOW)
-  if (curDah == LOW && prevDahPin == HIGH) {
-    if (now - lastDahEdge > DEBOUNCE_MS) {
-      lastDahEdge = now;
-      enqueue(ELEM_DAH);
-    }
-  }
-
-  prevDitPin = curDit;
-  prevDahPin = curDah;
-}
-
-// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ С УСРЕДНЕНИЕМ ---
-void readPots() {
-  static unsigned long lastPotRead = 0;
-  if (millis() - lastPotRead > 60) {
-    lastPotRead = millis();
-
-    static int smoothWpm = -1;
-    int rawWpm = analogRead(PIN_POT_WPM);
-    if (smoothWpm == -1) smoothWpm = rawWpm;
-    smoothWpm = (smoothWpm * 3 + rawWpm) / 4;
-    int newWpm = map(smoothWpm, 0, 1023, 10, 35);
-
-    static int smoothPitch = -1;
-    int rawPitch = analogRead(PIN_POT_PITCH);
-    if (smoothPitch == -1) smoothPitch = rawPitch;
-    smoothPitch = (smoothPitch * 3 + rawPitch) / 4;
-    int newPitch = map(smoothPitch, 0, 1023, 450, 850);
-    newPitch = (newPitch / 25) * 25;
-
-    bool wpmChanged = (newWpm != currentWpm);
-    bool pitchChanged = (abs(newPitch - currentPitch) >= 25);
-
-    if (wpmChanged || pitchChanged) {
-      currentWpm = newWpm;
-      ditMs = 1200 / currentWpm;
-      dahMs = ditMs * 3;
-      currentPitch = newPitch;
-
-      if (hasOled) updateScreen();
-
-      Serial.print(F("\n[KNOB] Speed: "));
-      Serial.print(currentWpm);
-      Serial.print(F(" WPM (dit: "));
-      Serial.print(ditMs);
-      Serial.print(F(" ms) | Tone: "));
-      Serial.print(currentPitch);
-      Serial.println(F(" Hz"));
-    }
-  }
-}
-
-// --- АВТОМАТ СОСТОЯНИЙ ГЕНЕРАЦИИ МОРЗЕ ---
+// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА CURTIS 8044 ---
 void handleKeyer() {
   unsigned long now = millis();
+  bool ditPin = (digitalRead(PIN_DIT) == LOW);
+  bool dahPin = (digitalRead(PIN_DAH) == LOW);
+
+  // Запоминание противоположного контакта (Dot/Dash Memory):
+  // Пока передается точка (звук или пауза), ловим нажатие тире
+  if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
+    if (dahPin) dahMemory = true;
+  }
+  // Пока передается тире (звук или пауза), ловим нажатие точки
+  if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
+    if (ditPin) ditMemory = true;
+  }
 
   switch (state) {
     case STATE_IDLE:
-      // Если в очереди есть буферизированные клики:
-      if (qCount > 0) {
-        startElement(dequeue());
-      } else if (digitalRead(PIN_DIT) == LOW) {
-        // Удержание точки
-        startElement(ELEM_DIT);
-      } else if (digitalRead(PIN_DAH) == LOW) {
-        // Удержание тире
-        startElement(ELEM_DAH);
+      // В покое: приоритет у нажатого лепестка
+      if (dahPin) {
+        startDah();
+      } else if (ditPin) {
+        startDit();
       }
       break;
 
-    case STATE_ELEMENT: {
-      unsigned long duration = (currentPlaying == ELEM_DIT) ? ditMs : dahMs;
-      if (now - stateStartTime >= duration) {
+    case STATE_PLAY_DIT:
+      if (now - stateStartTime >= ditMs) {
         stopToneOutput();
-        state = STATE_PAUSE;
+        state = STATE_PAUSE_DIT;
         stateStartTime = now;
       }
       break;
-    }
 
-    case STATE_PAUSE:
+    case STATE_PAUSE_DIT:
       if (now - stateStartTime >= ditMs) {
-        // Пауза завершена. Что играть дальше?
-        if (qCount > 0) {
-          // Берем следующий элемент из очереди!
-          startElement(dequeue());
-        } else if (digitalRead(PIN_DIT) == LOW) {
-          // Точка всё еще зажата (автоповтор)
-          startElement(ELEM_DIT);
-        } else if (digitalRead(PIN_DAH) == LOW) {
-          // Тире всё еще зажато (автоповтор)
-          startElement(ELEM_DAH);
+        // Пауза точки окончена: что передавать дальше?
+        if (dahMemory || dahPin) {
+          // Было нажато тире -> передаем тире!
+          dahMemory = false;
+          startDah();
+        } else if (ditPin) {
+          // Точка ВСЁ ЕЩЁ зажата -> автоповтор точки!
+          startDit();
         } else {
-          // Очередь пуста и лепесток отпущен в нейтраль -> знак завершен!
+          // Ничего не нажато -> завершаем передачу
           state = STATE_IDLE;
-          currentPlaying = ELEM_NONE;
+          ditMemory = false;
+          dahMemory = false;
+          lastSymbolEndTime = millis();
+        }
+      }
+      break;
+
+    case STATE_PLAY_DAH:
+      if (now - stateStartTime >= dahMs) {
+        stopToneOutput();
+        state = STATE_PAUSE_DAH;
+        stateStartTime = now;
+      }
+      break;
+
+    case STATE_PAUSE_DAH:
+      if (now - stateStartTime >= ditMs) {
+        // Пауза тире окончена: что передавать дальше?
+        if (ditMemory || ditPin) {
+          // Была нажата точка -> передаем точку!
+          ditMemory = false;
+          startDit();
+        } else if (dahPin) {
+          // Тире ВСЁ ЕЩЁ зажато -> автоповтор тире!
+          startDah();
+        } else {
+          // Ничего не нажато -> завершаем передачу
+          state = STATE_IDLE;
+          ditMemory = false;
+          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -286,22 +218,27 @@ void handleKeyer() {
   }
 }
 
-void startElement(Element elem) {
-  currentPlaying = elem;
-  state = STATE_ELEMENT;
+void startDit() {
+  state = STATE_PLAY_DIT;
   stateStartTime = millis();
 
   tone(PIN_AUDIO, currentPitch);
   digitalWrite(PIN_LED_KEY, HIGH);
 
-  if (elem == ELEM_DIT) {
-    currentMorseChar += ".";
-    Serial.print(".");
-  } else {
-    currentMorseChar += "-";
-    Serial.print("-");
-  }
+  currentMorseChar += ".";
+  Serial.print(".");
+  if (hasOled) updateScreen();
+}
 
+void startDah() {
+  state = STATE_PLAY_DAH;
+  stateStartTime = millis();
+
+  tone(PIN_AUDIO, currentPitch);
+  digitalWrite(PIN_LED_KEY, HIGH);
+
+  currentMorseChar += "-";
+  Serial.print("-");
   if (hasOled) updateScreen();
 }
 
@@ -310,14 +247,71 @@ void stopToneOutput() {
   digitalWrite(PIN_LED_KEY, LOW);
 }
 
+// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ (ТОЛЬКО В СОСТОЯНИИ ПОКОЯ) ---
+void readPots() {
+  // КРИТИЧЕСКИ ВАЖНО: не читать АЦП во время передачи звука!
+  // Ток динамика просаживает питание, что вызывало ложные скачки WPM!
+  if (state != STATE_IDLE) return;
+
+  static unsigned long lastPotRead = 0;
+  if (millis() - lastPotRead > 100) {
+    lastPotRead = millis();
+
+    // Чтение WPM с мертвой зоной (deadband)
+    static int lastRawWpm = -1;
+    int rawWpm = analogRead(PIN_POT_WPM);
+    if (lastRawWpm == -1) lastRawWpm = rawWpm;
+
+    if (abs(rawWpm - lastRawWpm) > 20) {
+      lastRawWpm = rawWpm;
+      int newWpm = map(rawWpm, 0, 1023, 10, 35);
+      if (newWpm != currentWpm) {
+        currentWpm = newWpm;
+        ditMs = 1200 / currentWpm;
+        dahMs = ditMs * 3;
+        if (hasOled) updateScreen();
+
+        Serial.print(F("\n[KNOB] Speed: "));
+        Serial.print(currentWpm);
+        Serial.print(F(" WPM (dit: "));
+        Serial.print(ditMs);
+        Serial.print(F(" ms) | Tone: "));
+        Serial.print(currentPitch);
+        Serial.println(F(" Hz"));
+      }
+    }
+
+    // Чтение PITCH с мертвой зоной
+    static int lastRawPitch = -1;
+    int rawPitch = analogRead(PIN_POT_PITCH);
+    if (lastRawPitch == -1) lastRawPitch = rawPitch;
+
+    if (abs(rawPitch - lastRawPitch) > 30) {
+      lastRawPitch = rawPitch;
+      int newPitch = map(rawPitch, 0, 1023, 450, 850);
+      newPitch = (newPitch / 25) * 25;
+      if (abs(newPitch - currentPitch) >= 25) {
+        currentPitch = newPitch;
+        if (hasOled) updateScreen();
+
+        Serial.print(F("\n[KNOB] Speed: "));
+        Serial.print(currentWpm);
+        Serial.print(F(" WPM | Tone: "));
+        Serial.print(currentPitch);
+        Serial.println(F(" Hz"));
+      }
+    }
+  }
+}
+
+// --- ДЕКОДЕР БУКВ И ПАУЗ ---
 void handleDecodedPauses() {
-  // Пока звучит элемент или в очереди еще есть знаки — паузу не считаем!
-  if (state != STATE_IDLE || qCount > 0 || currentMorseChar.length() == 0) return;
+  if (state != STATE_IDLE || currentMorseChar.length() == 0) return;
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // Межзнаковая пауза (3 точки) -> распознаем букву
-  if (pause > ditMs * 3) {
+  // Межзнаковая пауза (3 длительности точки) -> декодируем букву
+  if (pause >= ditMs * 3) {
     char letter = decodeMorse(currentMorseChar);
     decodedLine += letter;
     if (decodedLine.length() > 14) {
@@ -332,8 +326,8 @@ void handleDecodedPauses() {
     if (hasOled) updateScreen();
   }
 
-  // Пауза между словами (7 точек) -> пробел
-  if (pause > ditMs * 7 && decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
+  // Межсловная пауза (7 длительностей точки) -> пробел и перенос строки
+  if (pause >= ditMs * 7 && decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
     decodedLine += " ";
     Serial.println();
     if (hasOled) updateScreen();
@@ -348,7 +342,7 @@ void updateScreen() {
   oled.print(currentWpm);
   oled.print(F("WPM "));
   oled.print(currentPitch);
-  oled.print(F("Hz BUF "));
+  oled.print(F("Hz KEY "));
 
   oled.setScale(2);
   oled.setCursor(10, 3);
