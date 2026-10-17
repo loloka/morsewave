@@ -76,7 +76,7 @@ include __DIR__ . '/includes/header.php';
         <div class="oled-subcard-telemetry" style="margin-top:16px; background:#040608; border:1px solid #1c232a; border-radius:10px; padding:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">
                 <span>Метрология тайминга элементов</span>
-                <span style="color:#4fd8c4; font-family:var(--font-mono); font-size:11px;">СТАНДАРТ ITU (1:3:1)</span>
+                <span style="color:#4fd8c4; font-family:var(--font-mono); font-size:11px;">СТАНДАРТ ITU PARIS (1 : 3 : 7)</span>
             </div>
             
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center; font-family:var(--font-mono);">
@@ -98,15 +98,23 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
+            <div style="margin-top:8px; font-size:11px; color:var(--text-faint); text-align:center; font-family:var(--font-mono); border-top:1px dashed #1a222c; padding-top:6px;">
+                Длительности: Точка = 1T &middot; Тире = 3T &middot; Межзнак = 3T &middot; Межсловная = 7T (T = 1200 / WPM)
+            </div>
+
             <!-- Архитектурные подсказки с понятным объяснением -->
-            <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px; font-size:12px;">
-                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Curtis 8044: аппаратный эталон телеграфных ключей. Автоматически формирует безупречную длину точек (1T) и тире (3T). Режим A доигрывает текущий элемент до конца.">
+            <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px; font-size:12px;">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Curtis 8044 — прародитель ямбических ключей. Режим B (Iambic Mode B) автоматически вставляет завершающий противоположный элемент при сжатии и отпускании весел (squeeze keying).">
                     <span style="color:#4fd8c4;">⏱</span>
-                    <span><b>Тайминг Curtis:</b> Автомат эталонной длины знаков (Режим A)</span>
+                    <span><b>Тайминг Curtis:</b> Ямбический алгоритм ITU (Режим B)</span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Память элементов Lookahead: чип запоминает нажатие следующего элемента прямо во время звучания текущего, исключая залипания и пропуск элементов в знаках K и R.">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Память элементов Lookahead 2-Stage: чип буферизует следующее нажатие прямо во время звучания текущего элемента, исключая пропуски в буквах K (-.-) и R (.-.).">
                     <span style="color:#e8a33d;">🧠</span>
-                    <span><b>Память элементов:</b> Предвыборка Lookahead (без залипаний)</span>
+                    <span><b>Память элементов:</b> Lookahead 2-Stage (без залипаний)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Антидребезг контактов: аппаратная подтяжка и программный гистерезис полностью отсекают паразитные микроискрения механических контактов манипулятора.">
+                    <span style="color:#60a5fa;">🛡️</span>
+                    <span><b>Антидребезг:</b> Аппаратно-программная фильтрация (Debounce)</span>
                 </div>
             </div>
         </div>
@@ -245,34 +253,121 @@ include __DIR__ . '/includes/header.php';
     <div class="specs-grid">
         <div class="spec-item">
             <div class="spec-item-icon">⚡</div>
-            <div class="spec-item-title">Алгоритм Curtis 8044 + Lookahead</div>
+            <div class="spec-item-title">Алгоритм Curtis 8044 + Lookahead (Ямбик B)</div>
             <div class="spec-item-desc">
-                Двухуровневая предвыборка памяти элементов. Знаки «K» (-.-) и «R» (.-.) отдаются быстро без залипаний и без необходимости «дожимать» весло. 100% защита от дребезга контактов.
+                Двухуровневая предвыборка памяти элементов (Lookahead 2-Stage). Чип считывает и буферизует нажатие противоположного контакта прямо во время звучания текущего знака. Знаки «K» (-.-), «R» (.-.) и «C» (-.-.) передаются виртуозно и гладко в ямбическом сжатии (squeeze keying) без залипаний.
+            </div>
+        </div>
+
+        <div class="spec-item">
+            <div class="spec-item-icon">🛡️</div>
+            <div class="spec-item-title">Аппаратный и программный антидребезг</div>
+            <div class="spec-item-desc">
+                Механические контакты манипуляторов (особенно скоростных весел СРТ с зазором в доли миллиметра) страдают от пачек микроискрений (bounce 0.5–5 мс). Двухкаскадный фильтр с внутренней подтяжкой и цифровым гистерезисом на 100% исключает ложные двойные точки и срывы передачи.
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🎛</div>
-            <div class="spec-item-title">Регулировка WPM и Тона на лету</div>
+            <div class="spec-item-title">Регулировка WPM и Тона на лету (Dual EMA)</div>
             <div class="spec-item-desc">
-                Скорость от 10 до олимпийских 60 WPM и тон от 400 до 1200 Гц перестраиваются прямо во время передачи. Цифровой фильтр АЦП (EMA) полностью изолирует помехи динамика.
+                Скорость от 10 до олимпийских 60 WPM и тон от 400 до 1200 Гц перестраиваются плавно двумя аналоговыми ручками прямо во время передачи QSO. Цифровой экспоненциальный фильтр АЦП (EMA) полностью изолирует помехи по питанию и наводки динамика.
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🔊</div>
-            <div class="spec-item-title">Аналоговый теплый звук</div>
+            <div class="spec-item-title">Аналоговый теплый звук (Soft Audio)</div>
             <div class="spec-item-desc">
-                Усилитель на NPN-транзисторе BC547 с конденсатором 100 нФ для сглаживания колючего меандра. Овальный динамик 8 Ом 1.5 Вт в капсуле звучит сочно и мягко без звона.
+                Усилитель на NPN-транзисторе BC547 с конденсатором 100 нФ для сглаживания колючего меандра. Овальный динамик 8 Ом 1.5 Вт в капсуле звучит сочно, мягко и округло, не утомляя слух радиолюбителя часами.
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">📟</div>
-            <div class="spec-item-title">Экран OLED 0.96" Fast I2C</div>
+            <div class="spec-item-title">Экран OLED 0.96" Fast I2C (400 кГц)</div>
             <div class="spec-item-desc">
-                Шина разогнана до 400 кГц. Позонное обновление экрана занимает 0.3 мс, исключая лаги звука. Вывод скорости, тона, крупного знака Морзе и бегущей строки текста с честными пробелами.
+                Шина разогнана до 400 кГц. Позонное обновление экрана занимает всего 0.3 мс, исключая лаги и микрофризы звука. Живой вывод скорости, тона, крупного знака Морзе и бегущей строки текста с честными паузами ITU.
             </div>
+        </div>
+
+        <div class="spec-item">
+            <div class="spec-item-icon">🧠</div>
+            <div class="spec-item-title">Декодер ITU и честные паузы</div>
+            <div class="spec-item-desc">
+                Жадный парсер (Greedy Segmentation) расшифровывает буквы даже при беглой слитной передаче. Строгий контроль межсловных пауз по формуле 7T выдаёт ровно один пробел между словами без спама и артефактов в Serial-порт.
+            </div>
+        </div>
+    </div>
+
+    <!-- Сравнение с китайским MX-K2 -->
+    <div class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+            <div>
+                <div class="card-eyebrow" style="color:#e8a33d;">СРАВНЕНИЕ АППАРАТНЫХ РЕШЕНИЙ</div>
+                <h3 style="margin:0;">MorseWave Pro против стандартного китайского кейера MX-K2</h3>
+            </div>
+            <span style="font-size:12px; font-weight:600; background:#161f28; color:#4fd8c4; border:1px solid #233140; padding:4px 12px; border-radius:12px;">
+                Новое поколение CW-ключей
+            </span>
+        </div>
+
+        <p class="muted" style="font-size:14px; margin-top:0; margin-bottom:18px;">
+            Популярный китайский ключ MX-K2 (Auto Memory Keyer за $15) годами оставался компромиссным решением. Сравните его архитектуру с MorseWave Pro:
+        </p>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
+                <thead>
+                    <tr style="border-bottom:1px solid #233140; color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">
+                        <th style="padding:10px 12px;">Параметр</th>
+                        <th style="padding:10px 12px; color:var(--text-muted); width:35%;">Обычный MX-K2 (Китай)</th>
+                        <th style="padding:10px 12px; color:#4fd8c4; width:45%;">MorseWave Pro (R9OGL Edition)</th>
+                    </tr>
+                </thead>
+                <tbody style="line-height:1.5;">
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Связь с ПК и браузером</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет (только автономный манипулятор трансивера)</td>
+                        <td style="padding:12px; color:#4fd8c4; font-weight:600;"><span style="color:#10b981;">✓</span> Прямой WebSerial по USB (эхо-тренажёр в браузере, терминал, логгеры)</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Экран и визуализация</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет экрана (настройка вслепую писком через звуковое меню)</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>OLED 0.96" (400 кГц)</b>: живой WPM, тон, большой знак Морзе и бегущая строка</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Регулировка скорости и тона</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Только кнопками или через сервисное меню</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>2 аналоговые ручки</b>: мгновенная плавная смена WPM и тона прямо во время передачи</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Качество звука самоконтроля</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Резкий колючий меандр без фильтра (утомляет уши за 15 минут)</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Аналоговый каскад с RC-фильтром</b> на BC547: мягкий, округлый ламповый звук</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Тайминг и ямбическая память</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Базовый тайминг, глотает точки в ямбике выше 25 WPM</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Curtis 8044 Mode B + Lookahead 2-Stage</b>: идеальные пропорции ITU до 60 WPM</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Защита от дребезга контактов</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Базовая, сбоит на скоростных веслах с узким зазором</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Двухкаскадный антидребезг</b> (Pull-up + цифровой гистерезис в автомате состояний)</td>
+                    </tr>
+                    <tr style="border-bottom:1px solid #141a21;">
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Встроенный декодер Морзе</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Отсутствует</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Жадный декодер ITU</b> с авторазделением знаков и однократными пробелами 7T</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Открытость и калибровка</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Закрытый китайский микроконтроллер (OTP)</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>100% Open Source</b>: C++/Arduino, простая прошивка, открытая схема BOM</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
