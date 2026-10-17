@@ -116,13 +116,41 @@ const MorseEntry morseTable[] = {
 };
 const int MORSE_TABLE_SIZE = sizeof(morseTable) / sizeof(MorseEntry);
 
-const char* decodeMorse(const String& code) {
+String decodeMorse(const String& code) {
+  // 1. Прямой поиск точного совпадения в таблице
   for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
     if (code == morseTable[i].code) {
-      return morseTable[i].text;
+      return String(morseTable[i].text);
     }
   }
-  return "?";
+
+  // 2. Если знак слитный (оператор передал буквы без достаточной паузы, например R9 или CQ):
+  // Автоматический жадный парсер (Greedy Segmentation) разбивает слипшуюся цепочку на валидные знаки
+  String result = "";
+  String remaining = code;
+
+  while (remaining.length() > 0) {
+    bool matched = false;
+    int maxLen = min((int)remaining.length(), 6);
+    for (int len = maxLen; len >= 1; len--) {
+      String prefix = remaining.substring(0, len);
+      for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
+        if (prefix == morseTable[i].code) {
+          result += morseTable[i].text;
+          remaining = remaining.substring(len);
+          matched = true;
+          break;
+        }
+      }
+      if (matched) break;
+    }
+    if (!matched) {
+      result += "?";
+      remaining = remaining.substring(1);
+    }
+  }
+
+  return (result.length() > 0) ? result : "?";
 }
 
 // Вывод визуальной шкалы прогресс-бара в Serial
@@ -478,9 +506,11 @@ void handleDecodedPauses() {
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // 1. Межзнаковая пауза (>= 3 длительностей точки) -> декодируем символ
-  if (currentMorseChar.length() > 0 && pause >= ditMs * 3) {
-    const char* decoded = decodeMorse(currentMorseChar);
+  // 1. Межзнаковая пауза (в сумме с межэлементной паузой дает 2.2 длительности точки)
+  // При 20 WPM это всего ~72 мс после окончания знака — мгновенное разделение букв!
+  unsigned long charSpaceThreshold = (ditMs * 12) / 10;
+  if (currentMorseChar.length() > 0 && pause >= charSpaceThreshold) {
+    String decoded = decodeMorse(currentMorseChar);
     decodedLine += decoded;
     if (decodedLine.length() > 32) {
       decodedLine = decodedLine.substring(decodedLine.length() - 32);
@@ -499,8 +529,9 @@ void handleDecodedPauses() {
     }
   }
 
-  // 2. Межсловная пауза (>= 7 длительностей точки) -> ровно ОДИН пробел
-  if (wordSpaceNeeded && pause >= ditMs * 7) {
+  // 2. Межсловная пауза (в сумме с межэлементной дает 5.5 точек) -> ровно ОДИН пробел
+  unsigned long wordSpaceThreshold = (ditMs * 45) / 10;
+  if (wordSpaceNeeded && pause >= wordSpaceThreshold) {
     wordSpaceNeeded = false; // Однократное срабатывание: не будет спама пробелами!
 
     if (decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
