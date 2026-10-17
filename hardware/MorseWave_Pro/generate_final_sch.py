@@ -129,11 +129,16 @@ class Schematic:
         self.items = []
         self.sym_registry = {}
 
-    def sym(self, ref, val, footprint, lib_name, sym_name, x, y, rot=0):
+    def sym(self, ref, val, footprint, lib_name, sym_name, x, y, rot=0, ref_offset=None, val_offset=None):
         lib_id = f"{lib_name}:{sym_name}"
         pins = load_sym_pins(lib_name, sym_name)
         pin_str = "\n".join([f'\t\t(pin "{p}" (uuid "{new_uuid()}"))' for p in pins.keys()])
         hide_ref = ' (hide yes)' if ref.startswith('#PWR') else ''
+        
+        rx = x + (ref_offset[0] if ref_offset else 0)
+        ry = y + (ref_offset[1] if ref_offset else -3.81)
+        vx = x + (val_offset[0] if val_offset else 0)
+        vy = y + (val_offset[1] if val_offset else 3.81)
         
         u = new_uuid()
         self.items.append(f"""\t(symbol
@@ -146,11 +151,11 @@ class Schematic:
 \t\t(dnp no)
 \t\t(uuid "{u}")
 \t\t(property "Reference" "{ref}"
-\t\t\t(at {x:.2f} {y - 4:.2f} 0){hide_ref}
+\t\t\t(at {rx:.2f} {ry:.2f} 0){hide_ref}
 \t\t\t(effects (font (size 1.27 1.27)))
 \t\t)
 \t\t(property "Value" "{val}"
-\t\t\t(at {x:.2f} {y + 4:.2f} 0)
+\t\t\t(at {vx:.2f} {vy:.2f} 0)
 \t\t\t(effects (font (size 1.27 1.27)))
 \t\t)
 \t\t(property "Footprint" "{footprint}"
@@ -170,9 +175,14 @@ class Schematic:
 \t)""")
         self.sym_registry[ref] = (lib_name, sym_name, x, y, rot)
 
-    def pwr(self, val, x, y, rot=0):
+    def pwr(self, val, x, y, rot=0, val_offset=None):
         ref = "#PWR" + new_uuid()[:6].upper()
-        self.sym(ref, val, "", "power", val, x, y, rot)
+        if val_offset is None:
+            if val == "+5V":
+                val_offset = (0, -2.54) if rot == 0 else (0, 2.54)
+            else:
+                val_offset = (0, 2.54) if rot == 0 else (0, -2.54)
+        self.sym(ref, val, "", "power", val, x, y, rot, val_offset=val_offset)
 
     def lbl(self, name, x, y, rot=0, justify="left bottom"):
         u = new_uuid()
@@ -431,7 +441,7 @@ s.wr(284.48, p_j2_1[1], p_j2_1[0], p_j2_1[1])
 
 # Flyback Diode D2 (1N4148):
 # Place D2 vertical rot=270 between Collector and Emitter at x=279.40
-s.sym("D2", "1N4148", "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal", "Device", "D", 279.40, 55.88, 270)
+s.sym("D2", "1N4148", "Diode_THT:D_DO-35_SOD27_P7.62mm_Horizontal", "Device", "D", 279.40, 55.88, 270, ref_offset=(4.5, -2.0), val_offset=(4.5, 2.0))
 p_d2_1 = s.pin_pos("D2", 1)  # Cathode (top)
 p_d2_2 = s.pin_pos("D2", 2)  # Anode (bottom)
 
@@ -637,19 +647,20 @@ p_j5_2 = s.pin_pos("J5", 2)  # +5V
 p_j5_3 = s.pin_pos("J5", 3)  # OLED_SCL
 p_j5_4 = s.pin_pos("J5", 4)  # OLED_SDA
 
-# Pin 1: GND
+# Pin 1: GND (bottom pin, Y=124.46) - route left and DOWN
 s.wr(p_j5_1[0], p_j5_1[1], p_j5_1[0] - 7.62, p_j5_1[1])
-s.pwr("GND", p_j5_1[0] - 7.62, p_j5_1[1], 90)
+s.wr(p_j5_1[0] - 7.62, p_j5_1[1], p_j5_1[0] - 7.62, p_j5_1[1] + 5.08)
+s.pwr("GND", p_j5_1[0] - 7.62, p_j5_1[1] + 5.08, 0)
 
-# Pin 2: +5V
-s.wr(p_j5_2[0], p_j5_2[1], p_j5_2[0] - 7.62, p_j5_2[1])
-s.pwr("+5V", p_j5_2[0] - 7.62, p_j5_2[1], 90)
+# Pin 2: +5V (Y=121.92) - route left horizontally
+s.wr(p_j5_2[0], p_j5_2[1], p_j5_2[0] - 15.24, p_j5_2[1])
+s.pwr("+5V", p_j5_2[0] - 15.24, p_j5_2[1], 90)
 
-# Pin 3: OLED_SCL
+# Pin 3: OLED_SCL (Y=119.38)
 s.wr(p_j5_3[0], p_j5_3[1], p_j5_3[0] - 7.62, p_j5_3[1])
 s.lbl("OLED_SCL", p_j5_3[0] - 7.62, p_j5_3[1], 0, "right bottom")
 
-# Pin 4: OLED_SDA
+# Pin 4: OLED_SDA (top pin, Y=116.84)
 s.wr(p_j5_4[0], p_j5_4[1], p_j5_4[0] - 7.62, p_j5_4[1])
 s.lbl("OLED_SDA", p_j5_4[0] - 7.62, p_j5_4[1], 0, "right bottom")
 
@@ -660,20 +671,25 @@ s.lbl("OLED_SDA", p_j5_4[0] - 7.62, p_j5_4[1], 0, "right bottom")
 s.txt("7. РАЗЪЁМ PS/2 КЛАВИАТУРЫ (ОПЦИЯ)", 233.68, 106.68)
 
 s.sym("J6", "PS2_KEYBOARD", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Connector", "Conn_01x04_Pin", 259.08, 121.92, 180)
-p_j6_1 = s.pin_pos("J6", 1)  # +5V
-p_j6_2 = s.pin_pos("J6", 2)  # GND
-p_j6_3 = s.pin_pos("J6", 3)  # PS2_DATA
-p_j6_4 = s.pin_pos("J6", 4)  # PS2_CLK
+p_j6_1 = s.pin_pos("J6", 1)  # +5V (bottom pin, Y=124.46)
+p_j6_2 = s.pin_pos("J6", 2)  # GND (Y=121.92)
+p_j6_3 = s.pin_pos("J6", 3)  # PS2_DATA (Y=119.38)
+p_j6_4 = s.pin_pos("J6", 4)  # PS2_CLK (top pin, Y=116.84)
 
+# Pin 1: +5V (bottom pin) - route left and DOWN
 s.wr(p_j6_1[0], p_j6_1[1], p_j6_1[0] - 7.62, p_j6_1[1])
-s.pwr("+5V", p_j6_1[0] - 7.62, p_j6_1[1], 90)
+s.wr(p_j6_1[0] - 7.62, p_j6_1[1], p_j6_1[0] - 7.62, p_j6_1[1] + 5.08)
+s.pwr("+5V", p_j6_1[0] - 7.62, p_j6_1[1] + 5.08, 180)
 
-s.wr(p_j6_2[0], p_j6_2[1], p_j6_2[0] - 7.62, p_j6_2[1])
-s.pwr("GND", p_j6_2[0] - 7.62, p_j6_2[1], 90)
+# Pin 2: GND - route left horizontally
+s.wr(p_j6_2[0], p_j6_2[1], p_j6_2[0] - 15.24, p_j6_2[1])
+s.pwr("GND", p_j6_2[0] - 15.24, p_j6_2[1], 90)
 
+# Pin 3: PS2_DATA
 s.wr(p_j6_3[0], p_j6_3[1], p_j6_3[0] - 7.62, p_j6_3[1])
 s.lbl("PS2_DATA", p_j6_3[0] - 7.62, p_j6_3[1], 0, "right bottom")
 
+# Pin 4: PS2_CLK
 s.wr(p_j6_4[0], p_j6_4[1], p_j6_4[0] - 7.62, p_j6_4[1])
 s.lbl("PS2_CLK", p_j6_4[0] - 7.62, p_j6_4[1], 0, "right bottom")
 
@@ -719,11 +735,12 @@ final_sch = f"""(kicad_sch
 \t(uuid "{SHEET_UUID}")
 \t(paper "A3")
 \t(title_block
-\t\t(title "MorseWave Pro Keyer (R9OGL Edition)")
+\t\t(title "MorseWave Pro Keyer")
 \t\t(date "2026-10-18")
-\t\t(rev "v2.0 PCB")
-\t\t(company "R9OGL Hardware Workshop")
-\t\t(comment 1 "CW Keyer with Curtis Lookahead, 2-Stage Filter & Transceiver Isolation")
+\t\t(rev "v2.0 (THT Classic)")
+\t\t(company "By R9OGL")
+\t\t(comment 1 "CW Keyer with Curtis Lookahead, 2-Stage Audio Filter & Transceiver Isolation")
+\t\t(comment 2 "Website: morse.r9old.ru | Call: R9OGL")
 \t)
 \t(lib_symbols
 {lib_str}
