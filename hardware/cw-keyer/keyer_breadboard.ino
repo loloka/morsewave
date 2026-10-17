@@ -140,6 +140,72 @@ void printBar(int val, int minVal, int maxVal, int width) {
   Serial.print(F("]"));
 }
 
+// --- ПРИВЕТСТВИЕ ПРИ ВКЛЮЧЕНИИ: VVV = (КАК ПЕРЕД РАДИОГРАММАМИ) ---
+void playIntroTone(bool isDah) {
+  unsigned long duration = isDah ? dahMs : ditMs;
+  tone(PIN_AUDIO, currentPitch);
+  digitalWrite(PIN_LED_KEY, HIGH);
+  unsigned long start = millis();
+  while (millis() - start < duration) {
+    // Если коснулись весла — мгновенно прерываем звук
+    if (digitalRead(PIN_DIT) == LOW || digitalRead(PIN_DAH) == LOW) {
+      noTone(PIN_AUDIO);
+      digitalWrite(PIN_LED_KEY, LOW);
+      return;
+    }
+  }
+  noTone(PIN_AUDIO);
+  digitalWrite(PIN_LED_KEY, LOW);
+
+  start = millis();
+  while (millis() - start < ditMs) {
+    if (digitalRead(PIN_DIT) == LOW || digitalRead(PIN_DAH) == LOW) return;
+  }
+}
+
+void playIntroChar(const char* morse) {
+  for (int i = 0; morse[i] != '\0'; i++) {
+    if (digitalRead(PIN_DIT) == LOW || digitalRead(PIN_DAH) == LOW) return;
+    playIntroTone(morse[i] == '-');
+  }
+  unsigned long start = millis();
+  while (millis() - start < ditMs * 2) {
+    if (digitalRead(PIN_DIT) == LOW || digitalRead(PIN_DAH) == LOW) return;
+  }
+}
+
+void playStartupGreeting() {
+  if (hasOled) {
+    oled.clear();
+    oled.setScale(1);
+    oled.setCursor(18, 1);
+    oled.print(F("MORSEWAVE KEYER"));
+    oled.setScale(2);
+    oled.setCursor(26, 3);
+    oled.print(F("VVV ="));
+    oled.setScale(1);
+    oled.setCursor(24, 6);
+    oled.print(F("R8OA EDITION"));
+  }
+
+  Serial.println(F(">> Startup Intro: VVV = (Radiogram CQ) <<"));
+
+  // Проигрываем V V V = (три буквы V и знак раздела =)
+  playIntroChar("...-");  // V
+  playIntroChar("...-");  // V
+  playIntroChar("...-");  // V
+  playIntroChar("-...-"); // = (BT)
+
+  delay(150);
+
+  if (hasOled) {
+    drawScreenLayout();
+    updateScreenHeader();
+    updateScreenText();
+    updateScreenMorse();
+  }
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -173,11 +239,8 @@ void setup() {
   currentPitch = map(constrain(rawPitch, ADC_MIN, ADC_MAX), ADC_MIN, ADC_MAX, MIN_PITCH, MAX_PITCH);
   currentPitch = (currentPitch / 25) * 25;
 
-  if (hasOled) {
-    updateScreenHeader();
-    updateScreenText();
-    updateScreenMorse();
-  }
+  // Воспроизводим фирменное приветствие радиограмм "VVV ="
+  playStartupGreeting();
 
   Serial.println();
   Serial.println(F("=================================================="));
