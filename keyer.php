@@ -68,7 +68,7 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <div class="oled-footer-ticker" id="oled-ticker-text">
-                TXT: VVV = R9OGL KEYER ONLINE
+                TXT: VVV = KEYER ONLINE
             </div>
         </div>
         

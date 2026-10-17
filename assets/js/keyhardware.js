@@ -268,6 +268,11 @@
                 badgeStatus.style.borderColor = '#4fd8c4';
             }
 
+            if (oledTicker) {
+                oledTicker.textContent = 'TXT: CQ DE R9OGL';
+            }
+            currentDecodedText = '';
+
             appendTerminal('\n[СИСТЕМА] Порт 115200 бод открыт! Ожидание сигналов с ключа...\n', 'sys');
 
             const textDecoder = new TextDecoderStream();
@@ -323,6 +328,10 @@
             badgeStatus.style.color = 'var(--text-muted)';
             badgeStatus.style.borderColor = 'var(--border)';
         }
+        if (oledTicker) {
+            oledTicker.textContent = 'TXT: 73';
+        }
+        currentDecodedText = '';
         appendTerminal('\n[СИСТЕМА] Устройство отключено.\n', 'sys');
     }
 
