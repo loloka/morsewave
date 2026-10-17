@@ -105,6 +105,17 @@
                 const pct = Math.max(0, Math.min(100, ((currentWpm - 10) / (60 - 10)) * 100));
                 gaugeWpmBar.style.width = `${pct}%`;
             }
+
+            // Динамический расчёт длительностей по стандарту PARIS (T_dit = 1200 / WPM мс)
+            const dMs = Math.round(1200 / currentWpm);
+            const elDit = document.getElementById('val-dit-ms');
+            const elDah = document.getElementById('val-dah-ms');
+            const elChar = document.getElementById('val-char-pause-ms');
+            const elWord = document.getElementById('val-word-pause-ms');
+            if (elDit) elDit.textContent = `${dMs} мс`;
+            if (elDah) elDah.textContent = `${dMs * 3} мс`;
+            if (elChar) elChar.textContent = `${dMs * 3} мс`;
+            if (elWord) elWord.textContent = `${dMs * 7} мс`;
         }
         if (pitch && oledPitch) {
             currentToneFreq = parseInt(pitch, 10);
@@ -331,12 +342,32 @@
         });
     }
 
-    // --- Интерактивный эхо-тренажёр (Morserino & CW Pro) ---
+    // --- Интерактивный эхо-тренажёр CW Pro ---
     const echoCategories = {
-        callsigns: ['R9OGL', 'R8OA', 'RA9O', 'UA9O', 'UA0A', 'RA3A', 'DL1ABC', 'K1ZZ', 'W1AW', 'OH2ZZ', 'RK9O', 'UA9OC'],
-        qcodes: ['CQ CQ', '73 DE R9OGL', 'QRZ?', 'QTH', 'RST 599', 'GM OM', 'TU 73', 'FB OM', 'HW?', 'SK'],
-        contest: ['5NN 001', '5NN 599', 'TEST R9OGL', 'TU 5NN TU', '599 16', 'CQ TEST'],
-        groups: ['VVV =', 'PARIS', 'SOS', 'K M R', 'C W', 'CQ']
+        callsigns: [
+            'R9OGL', 'R8OA', 'RA9O', 'UA9O', 'UA9OC', 'RK9O', 'RN9O', 'RU9CD', 'RA9F',
+            'UA3XYZ', 'R1ABC', 'R7ABC', 'R2XY', 'RA1XYZ', 'RN6AB', 'RV3EF', 'RW4GH',
+            'RX2IJ', 'RZ8KL', 'RC5MN', 'RD7OP', 'RO1QR', 'UA9XYZ', 'UB4ABC', 'UI8AB',
+            'RK4W', 'RZ6D', 'W1AW', 'K5ZZ', 'N4XYZ', 'AA7BC', 'G0ABC', 'M0XYZ',
+            'DL1ABC', 'DK5XYZ', 'DJ9ZB', 'JA1ABC', 'JH3XYZ', 'F5ABC', 'EA1XYZ',
+            'SP5ABC', 'SM0XYZ', 'VE3ABC', 'VK2ABC', 'ZL1ABC', 'HB9ABC', 'PY2ABC',
+            'LU1ABC', 'OK1ABC', 'OE3XYZ', 'I2ABC'
+        ],
+        qcodes: [
+            'CQ CQ', '73 DE R9OGL', 'QRZ?', 'QTH', 'RST 599', 'GM OM', 'GE OM', 'GA OM',
+            'PSE K', 'TNX 73', 'TU 73', 'FB OM', 'QSL PSE', 'QSO', 'QRP', 'QRO',
+            'QRS', 'QRQ', 'QRM', 'QRN', 'HW?', 'SK', 'CL', 'UR 599', 'MY QTH',
+            'RIG 100W', 'ANT DIPOLE', 'CFM', 'RPRT 599', 'OP OM', 'CUAGN 73'
+        ],
+        contest: [
+            '5NN 001', '5NN 599', 'TEST R9OGL', 'TU 5NN TU', '599 16', 'CQ TEST',
+            'UR 5NN 01', '73 EE', '5NN BK', 'NR 001', 'CFM 5NN'
+        ],
+        groups: [
+            'VVV =', 'PARIS', 'SOS', 'CQ', 'DE', 'BK', 'K', 'KN', 'AS', 'AR',
+            'SK', 'BT', 'UR', 'MY', 'TNX', 'TKS', 'PSE', 'FB', 'WX', 'RST',
+            'CFM', '73', '88'
+        ]
     };
 
     let activeCategory = 'callsigns';

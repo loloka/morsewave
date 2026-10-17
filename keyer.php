@@ -13,7 +13,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="hardware-hero">
     <div class="hardware-callsign-badge">
-        <span>⚡</span> R9OGL HARDWARE EDITION · v1.7
+        <span>⚡</span> R9OGL HARDWARE EDITION · v1.7 BETA
     </div>
     <h1>Боевой телеграфный ключ MorseWave Pro</h1>
     <p class="muted mt-0" style="font-size: 16px; max-width: 860px; line-height: 1.6;">
@@ -72,9 +72,43 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         
-        <div style="margin-top: 14px; font-size: 12px; color: var(--text-faint); display:flex; justify-content:space-between;">
-            <span>Спортивный тайминг: Curtis 8044 Mode A</span>
-            <span>Память элементов: Lookahead 2-Stage</span>
+        <!-- Блок живой метрологии и параметров тайминга -->
+        <div class="oled-subcard-telemetry" style="margin-top:16px; background:#040608; border:1px solid #1c232a; border-radius:10px; padding:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">
+                <span>Метрология тайминга элементов</span>
+                <span style="color:#4fd8c4; font-family:var(--font-mono); font-size:11px;">СТАНДАРТ ITU (1:3:1)</span>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center; font-family:var(--font-mono);">
+                <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Точка (Dit)</div>
+                    <div id="val-dit-ms" style="font-size:13px; font-weight:700; color:#4fd8c4; margin-top:2px;">60 мс</div>
+                </div>
+                <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Тире (Dah)</div>
+                    <div id="val-dah-ms" style="font-size:13px; font-weight:700; color:#e8a33d; margin-top:2px;">180 мс</div>
+                </div>
+                <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Межзнак</div>
+                    <div id="val-char-pause-ms" style="font-size:13px; font-weight:700; color:var(--text); margin-top:2px;">180 мс</div>
+                </div>
+                <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Межсловная</div>
+                    <div id="val-word-pause-ms" style="font-size:13px; font-weight:700; color:var(--text-muted); margin-top:2px;">420 мс</div>
+                </div>
+            </div>
+
+            <!-- Архитектурные подсказки с понятным объяснением -->
+            <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px; font-size:12px;">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Curtis 8044: аппаратный эталон телеграфных ключей. Автоматически формирует безупречную длину точек (1T) и тире (3T). Режим A доигрывает текущий элемент до конца.">
+                    <span style="color:#4fd8c4;">⏱</span>
+                    <span><b>Тайминг Curtis:</b> Автомат эталонной длины знаков (Режим A)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Память элементов Lookahead: чип запоминает нажатие следующего элемента прямо во время звучания текущего, исключая залипания и пропуск элементов в знаках K и R.">
+                    <span style="color:#e8a33d;">🧠</span>
+                    <span><b>Память элементов:</b> Предвыборка Lookahead (без залипаний)</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -132,12 +166,12 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- =========================================================
-     ЭХО-ТРЕНАЖЕР: ПРОВЕРКА ПЕРЕДАЧИ В РЕАЛЬНОМ ВРЕМЕНИ (MORSERINO & PRO)
+     ЭХО-ТРЕНАЖЕР: ПРОВЕРКА ПЕРЕДАЧИ В РЕАЛЬНОМ ВРЕМЕНИ (CW PRO)
      ========================================================= -->
 <div class="keyer-echo-test">
     <div class="echo-header-bar" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
         <div>
-            <div class="card-eyebrow">ИНТЕРАКТИВНЫЙ САМОКОНТРОЛЬ · MORSERINO & CW PRO</div>
+            <div class="card-eyebrow">ИНТЕРАКТИВНЫЙ САМОКОНТРОЛЬ · ЭХО-ТРЕНАЖЁР CW PRO</div>
             <h2 style="margin:0;">Эхо-тренажёр боевой передачи</h2>
         </div>
         <div class="echo-stats-pill" style="display:inline-flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600;">
@@ -151,7 +185,7 @@ include __DIR__ . '/includes/header.php';
     <div class="echo-controls-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; background:var(--surface-2); padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
         <div class="echo-mode-switch" style="display:inline-flex; gap:6px;">
             <button type="button" class="btn echo-mode-btn active" data-mode="echo" id="btn-mode-echo" style="font-size:12px; padding:6px 12px; border-radius:6px; font-weight:600; cursor:pointer;">
-                🎧 Режим Эхо (как в Morserino)
+                🎧 Режим Эхо (на слух)
             </button>
             <button type="button" class="btn echo-mode-btn" data-mode="visual" id="btn-mode-visual" style="font-size:12px; padding:6px 12px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid transparent; color:var(--text-muted);">
                 👁 Чтение с экрана
@@ -164,7 +198,7 @@ include __DIR__ . '/includes/header.php';
                 <option value="callsigns" selected>📻 Позывные (R9OGL, R8OA...)</option>
                 <option value="qcodes">💬 Q-коды и радиожаргон (73, CQ, 599)</option>
                 <option value="contest">🏆 Контест-номера (5NN 001)</option>
-                <option value="groups">🔤 Символы и группы (VVV =, PARIS)</option>
+                <option value="groups">🔤 Сокращения и группы (VVV =, PARIS)</option>
             </select>
         </div>
     </div>
