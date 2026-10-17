@@ -36,6 +36,10 @@ const int MAX_WPM   = 60;
 const int MIN_PITCH = 400;
 const int MAX_PITCH = 1200;
 
+// Калибровка АЦП (при питании шины от VIN ~4.2 В и AREF 5.0 В максимум равен ~850)
+const int ADC_MIN   = 15;
+const int ADC_MAX   = 850;
+
 int currentWpm = 20;
 int currentPitch = 700;
 unsigned long ditMs = 1200 / 20;
@@ -161,12 +165,12 @@ void setup() {
 
   // Первоначальное чтение крутилок
   int rawWpm = analogRead(PIN_POT_WPM);
-  currentWpm = map(rawWpm, 0, 1023, MIN_WPM, MAX_WPM);
+  currentWpm = map(constrain(rawWpm, ADC_MIN, ADC_MAX), ADC_MIN, ADC_MAX, MIN_WPM, MAX_WPM);
   ditMs = 1200 / currentWpm;
   dahMs = ditMs * 3;
 
   int rawPitch = analogRead(PIN_POT_PITCH);
-  currentPitch = map(rawPitch, 0, 1023, MIN_PITCH, MAX_PITCH);
+  currentPitch = map(constrain(rawPitch, ADC_MIN, ADC_MAX), ADC_MIN, ADC_MAX, MIN_PITCH, MAX_PITCH);
   currentPitch = (currentPitch / 25) * 25;
 
   if (hasOled) {
@@ -346,9 +350,10 @@ void readPots() {
     }
     filteredWpmAdc = (filteredWpmAdc * 3 + rawWpm) / 4;
 
-    if (abs(filteredWpmAdc - lastReportedWpmAdc) > 22) {
+    if (abs(filteredWpmAdc - lastReportedWpmAdc) > 20) {
       lastReportedWpmAdc = filteredWpmAdc;
-      int newWpm = map(filteredWpmAdc, 0, 1023, MIN_WPM, MAX_WPM);
+      int clampedAdc = constrain(filteredWpmAdc, ADC_MIN, ADC_MAX);
+      int newWpm = map(clampedAdc, ADC_MIN, ADC_MAX, MIN_WPM, MAX_WPM);
       if (newWpm != currentWpm) {
         currentWpm = newWpm;
         ditMs = 1200 / currentWpm;
@@ -378,9 +383,10 @@ void readPots() {
     }
     filteredPitchAdc = (filteredPitchAdc * 3 + rawPitch) / 4;
 
-    if (abs(filteredPitchAdc - lastReportedPitchAdc) > 26) {
+    if (abs(filteredPitchAdc - lastReportedPitchAdc) > 24) {
       lastReportedPitchAdc = filteredPitchAdc;
-      int newPitch = map(filteredPitchAdc, 0, 1023, MIN_PITCH, MAX_PITCH);
+      int clampedAdc = constrain(filteredPitchAdc, ADC_MIN, ADC_MAX);
+      int newPitch = map(clampedAdc, ADC_MIN, ADC_MAX, MIN_PITCH, MAX_PITCH);
       newPitch = (newPitch / 25) * 25;
       if (abs(newPitch - currentPitch) >= 25) {
         currentPitch = newPitch;
