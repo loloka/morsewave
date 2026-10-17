@@ -1,17 +1,19 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.4 (SRT Olympic Edition - up to 60 WPM)
- *  - Диапазон скорости: от 10 до 60 WPM (длительность точки от 120 до 20 мс)!
- *  - Диапазон тона: от 400 до 1200 Гц (шаг 25 Гц)!
- *  - Красивый графический прогресс-бар в Serial Monitor при вращении крутилок
- *  - Профессиональный интерфейс на OLED 0.96" (SSD1306 128x64):
- *      * Строка 0: WPM, частота тона и индикатор режима
- *      * Строка 3: КРУПНЫЙ вывод передаваемого знака Морзе в реальном времени
- *      * Строка 6-7: Бегущая строка принятого текста
+ *  MorseWave Pro Keyer v1.5 (Live Tuning Edition)
+ *  - Регулировка скорости (WPM) и тона (PITCH) НА ЛЕТУ:
+ *      * Крутите ручку скорости прямо во время передачи — скорость точек и тире
+ *        меняется плавно и непрерывно прямо под пальцами!
+ *      * Крутите ручку тона прямо во время звука — высота звука меняется мгновенно!
+ *      * Цифровой фильтр АЦП с гистерезисом (deadband) отсекает любые помехи по питанию.
+ *  - Скоростной I2C Fast Mode (400 кГц) для мгновенного обновления OLED без задержек.
+ *  - Диапазон скорости: от 10 до 60 WPM (длительность точки от 120 до 20 мс).
+ *  - Диапазон тона: от 400 до 1200 Гц (шаг 25 Гц).
+ *  - Красивый графический прогресс-бар в Serial Monitor при вращении крутилок.
+ *  - Профессиональный интерфейс на OLED 0.96" (SSD1306 128x64).
  *  - Классический алгоритм Curtis 8044 / TX-500:
  *      * Полная защита от дребезга контактов весла
  *      * Память элементов (Dot/Dash Memory) для скоростной передачи
- *      * Блокировка АЦП крутилок во время звучания
  *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец)
  * =====================================================================
  */
@@ -108,6 +110,8 @@ void setup() {
 
   // Проверка наличия OLED-дисплея по I2C (адрес 0x3C)
   Wire.begin();
+  Wire.setClock(400000); // 400 кГц Fast I2C для мгновенной отрисовки без задержек
+
   Wire.beginTransmission(0x3C);
   if (Wire.endTransmission() == 0) {
     hasOled = true;
@@ -129,11 +133,12 @@ void setup() {
   if (hasOled) {
     updateScreenHeader();
     updateScreenText();
+    updateScreenMorse();
   }
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("  MorseWave Pro Keyer v1.4 (SRT 60 WPM Edition)   "));
+  Serial.println(F("   MorseWave Pro Keyer v1.5 (Live Tuning Edition) "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -150,9 +155,9 @@ void setup() {
   Serial.println();
 
   Serial.print(F("OLED  : "));
-  Serial.println(hasOled ? F("ONLINE (SSD1306 128x64 OK)") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
+  Serial.println(hasOled ? F("ONLINE (SSD1306 Fast I2C OK)") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
   Serial.println(F("--------------------------------------------------"));
-  Serial.println(F("Крутилка A0: 10..60 WPM | Крутилка A2: 400..1200 Hz"));
+  Serial.println(F("Крутилки работают НА ЛЕТУ прямо во время передачи!"));
   Serial.println(F("=================================================="));
   Serial.println();
 }
@@ -267,22 +272,27 @@ void stopToneOutput() {
   digitalWrite(PIN_LED_KEY, LOW);
 }
 
-// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ (ТОЛЬКО В ПОКОЕ IDLE) ---
+// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ НА ЛЕТУ С ФИЛЬТРАЦИЕЙ ПОМЕХ ---
 void readPots() {
-  if (state != STATE_IDLE) return;
-
   static unsigned long lastPotRead = 0;
-  if (millis() - lastPotRead > 80) {
+  if (millis() - lastPotRead > 40) {
     lastPotRead = millis();
 
-    // Чтение WPM с мертвой зоной (deadband)
-    static int lastRawWpm = -1;
+    // 1. ЧТЕНИЕ WPM НА ЛЕТУ
+    static int filteredWpmAdc = -1;
+    static int lastReportedWpmAdc = -1;
     int rawWpm = analogRead(PIN_POT_WPM);
-    if (lastRawWpm == -1) lastRawWpm = rawWpm;
+    if (filteredWpmAdc == -1) {
+      filteredWpmAdc = rawWpm;
+      lastReportedWpmAdc = rawWpm;
+    }
+    // Экспоненциальное сглаживание фильтрует импульсные помехи питания
+    filteredWpmAdc = (filteredWpmAdc * 3 + rawWpm) / 4;
 
-    if (abs(rawWpm - lastRawWpm) > 18) {
-      lastRawWpm = rawWpm;
-      int newWpm = map(rawWpm, 0, 1023, MIN_WPM, MAX_WPM);
+    // Зона нечувствительности (deadband) 22 отсчета
+    if (abs(filteredWpmAdc - lastReportedWpmAdc) > 22) {
+      lastReportedWpmAdc = filteredWpmAdc;
+      int newWpm = map(filteredWpmAdc, 0, 1023, MIN_WPM, MAX_WPM);
       if (newWpm != currentWpm) {
         currentWpm = newWpm;
         ditMs = 1200 / currentWpm;
@@ -302,17 +312,27 @@ void readPots() {
       }
     }
 
-    // Чтение PITCH с мертвой зоной
-    static int lastRawPitch = -1;
+    // 2. ЧТЕНИЕ PITCH НА ЛЕТУ
+    static int filteredPitchAdc = -1;
+    static int lastReportedPitchAdc = -1;
     int rawPitch = analogRead(PIN_POT_PITCH);
-    if (lastRawPitch == -1) lastRawPitch = rawPitch;
+    if (filteredPitchAdc == -1) {
+      filteredPitchAdc = rawPitch;
+      lastReportedPitchAdc = rawPitch;
+    }
+    filteredPitchAdc = (filteredPitchAdc * 3 + rawPitch) / 4;
 
-    if (abs(rawPitch - lastRawPitch) > 25) {
-      lastRawPitch = rawPitch;
-      int newPitch = map(rawPitch, 0, 1023, MIN_PITCH, MAX_PITCH);
+    if (abs(filteredPitchAdc - lastReportedPitchAdc) > 26) {
+      lastReportedPitchAdc = filteredPitchAdc;
+      int newPitch = map(filteredPitchAdc, 0, 1023, MIN_PITCH, MAX_PITCH);
       newPitch = (newPitch / 25) * 25;
       if (abs(newPitch - currentPitch) >= 25) {
         currentPitch = newPitch;
+
+        // ЕСЛИ ЗВУК СЕЙЧАС ИГРАЕТ — МГНОВЕННО МЕНЯЕМ ТОН В ДИНАМИКЕ НА ЛЕТУ!
+        if (state == STATE_PLAY_DIT || state == STATE_PLAY_DAH) {
+          tone(PIN_AUDIO, currentPitch);
+        }
 
         if (hasOled) updateScreenHeader();
 
