@@ -1,18 +1,18 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.3 (Classic Curtis 8044 / TX-500 Single-Lever)
- *  - Классический аппаратный алгоритм Curtis 8044 (как в трансивере TX-500):
- *      * Защита от дребезга: во время звучания точки контакт точки полностью
- *        игнорируется (слушается только тире), и наоборот!
- *      * Память элементов (Dot/Dash Memory): можно отбивать знак быстрее
- *        выставленной скорости, ключ чисто и ритмично его доиграет.
- *      * Никаких очередей, ложных повторов и каши!
- *  - Блокировка крутилок во время передачи:
- *      * Потенциометры опрашиваются ТОЛЬКО в тишине (IDLE), поэтому просадка
- *        питания от динамика больше не сбивает WPM и не спамит в Serial!
+ *  MorseWave Pro Keyer v1.4 (SRT Olympic Edition - up to 60 WPM)
+ *  - Диапазон скорости: от 10 до 60 WPM (длительность точки от 120 до 20 мс)!
+ *  - Диапазон тона: от 400 до 1200 Гц (шаг 25 Гц)!
+ *  - Красивый графический прогресс-бар в Serial Monitor при вращении крутилок
+ *  - Профессиональный интерфейс на OLED 0.96" (SSD1306 128x64):
+ *      * Строка 0: WPM, частота тона и индикатор режима
+ *      * Строка 3: КРУПНЫЙ вывод передаваемого знака Морзе в реальном времени
+ *      * Строка 6-7: Бегущая строка принятого текста
+ *  - Классический алгоритм Curtis 8044 / TX-500:
+ *      * Полная защита от дребезга контактов весла
+ *      * Память элементов (Dot/Dash Memory) для скоростной передачи
+ *      * Блокировка АЦП крутилок во время звучания
  *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец)
- *  - Плавные крутилки A0 (WPM: 10..35) и A2 (PITCH: 450..850 Гц)
- *  - Автоопределение OLED 0.96" по I2C
  * =====================================================================
  */
 
@@ -30,10 +30,15 @@ const int PIN_LED_KEY   = 8;    // Светодиод KEY
 const int PIN_POT_WPM   = A0;   // Потенциометр скорости
 const int PIN_POT_PITCH = A2;   // Потенциометр тона
 
-// --- ПАРАМЕТРЫ СКОРОСТИ И ТОНА ---
-int currentWpm = 18;
-int currentPitch = 650;
-unsigned long ditMs = 1200 / 18;
+// --- ДИАПАЗОНЫ НАСТРОЕК ---
+const int MIN_WPM   = 10;
+const int MAX_WPM   = 60;
+const int MIN_PITCH = 400;
+const int MAX_PITCH = 1200;
+
+int currentWpm = 20;
+int currentPitch = 700;
+unsigned long ditMs = 1200 / 20;
 unsigned long dahMs = ditMs * 3;
 
 // --- АВТОМАТ СОСТОЯНИЙ КЛЮЧА CURTIS 8044 ---
@@ -75,6 +80,21 @@ char decodeMorse(String code) {
   return '?';
 }
 
+// Вывод визуальной шкалы прогресс-бара в Serial
+void printBar(int val, int minVal, int maxVal, int width) {
+  int filled = map(val, minVal, maxVal, 0, width);
+  if (filled < 0) filled = 0;
+  if (filled > width) filled = width;
+
+  Serial.print(F(" ["));
+  for (int i = 0; i < width; i++) {
+    if (i < filled) Serial.print(F("="));
+    else if (i == filled) Serial.print(F(">"));
+    else Serial.print(F(" "));
+  }
+  Serial.print(F("]"));
+}
+
 void setup() {
   Serial.begin(115200);
 
@@ -86,44 +106,53 @@ void setup() {
   noTone(PIN_AUDIO);
   digitalWrite(PIN_LED_KEY, LOW);
 
-  // Проверка I2C OLED
+  // Проверка наличия OLED-дисплея по I2C (адрес 0x3C)
   Wire.begin();
   Wire.beginTransmission(0x3C);
   if (Wire.endTransmission() == 0) {
     hasOled = true;
     oled.init();
     oled.clear();
-    oled.setScale(1);
-    oled.setCursor(0, 0);
-    oled.print(F("MorseWave Keyer"));
-    oled.setCursor(0, 2);
-    oled.print(F("Mode: CURTIS 8044"));
+    drawScreenLayout();
   }
 
   // Первоначальное чтение крутилок
   int rawWpm = analogRead(PIN_POT_WPM);
-  currentWpm = map(rawWpm, 0, 1023, 10, 35);
+  currentWpm = map(rawWpm, 0, 1023, MIN_WPM, MAX_WPM);
   ditMs = 1200 / currentWpm;
   dahMs = ditMs * 3;
 
   int rawPitch = analogRead(PIN_POT_PITCH);
-  currentPitch = map(rawPitch, 0, 1023, 450, 850);
+  currentPitch = map(rawPitch, 0, 1023, MIN_PITCH, MAX_PITCH);
   currentPitch = (currentPitch / 25) * 25;
+
+  if (hasOled) {
+    updateScreenHeader();
+    updateScreenText();
+  }
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("  MorseWave Pro Keyer v1.3 (Curtis 8044 / TX500)  "));
+  Serial.println(F("  MorseWave Pro Keyer v1.4 (SRT 60 WPM Edition)   "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
   Serial.print(F(" WPM (dit: "));
   Serial.print(ditMs);
-  Serial.println(F(" ms)"));
+  Serial.print(F(" ms)"));
+  printBar(currentWpm, MIN_WPM, MAX_WPM, 16);
+  Serial.println();
+
   Serial.print(F("Tone  : "));
   Serial.print(currentPitch);
-  Serial.println(F(" Hz"));
+  Serial.print(F(" Hz"));
+  printBar(currentPitch, MIN_PITCH, MAX_PITCH, 16);
+  Serial.println();
+
   Serial.print(F("OLED  : "));
-  Serial.println(hasOled ? F("ONLINE") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
+  Serial.println(hasOled ? F("ONLINE (SSD1306 128x64 OK)") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
+  Serial.println(F("--------------------------------------------------"));
+  Serial.println(F("Крутилка A0: 10..60 WPM | Крутилка A2: 400..1200 Hz"));
   Serial.println(F("=================================================="));
   Serial.println();
 }
@@ -140,7 +169,7 @@ void handleKeyer() {
   bool ditPin = (digitalRead(PIN_DIT) == LOW);
   bool dahPin = (digitalRead(PIN_DAH) == LOW);
 
-  // Запоминание противоположного контакта (Dot/Dash Memory):
+  // Память противоположного элемента (Dot/Dash Memory):
   // Пока передается точка (звук или пауза), ловим нажатие тире
   if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
     if (dahPin) dahMemory = true;
@@ -152,7 +181,6 @@ void handleKeyer() {
 
   switch (state) {
     case STATE_IDLE:
-      // В покое: приоритет у нажатого лепестка
       if (dahPin) {
         startDah();
       } else if (ditPin) {
@@ -170,16 +198,12 @@ void handleKeyer() {
 
     case STATE_PAUSE_DIT:
       if (now - stateStartTime >= ditMs) {
-        // Пауза точки окончена: что передавать дальше?
         if (dahMemory || dahPin) {
-          // Было нажато тире -> передаем тире!
           dahMemory = false;
           startDah();
         } else if (ditPin) {
-          // Точка ВСЁ ЕЩЁ зажата -> автоповтор точки!
           startDit();
         } else {
-          // Ничего не нажато -> завершаем передачу
           state = STATE_IDLE;
           ditMemory = false;
           dahMemory = false;
@@ -198,16 +222,12 @@ void handleKeyer() {
 
     case STATE_PAUSE_DAH:
       if (now - stateStartTime >= ditMs) {
-        // Пауза тире окончена: что передавать дальше?
         if (ditMemory || ditPin) {
-          // Была нажата точка -> передаем точку!
           ditMemory = false;
           startDit();
         } else if (dahPin) {
-          // Тире ВСЁ ЕЩЁ зажато -> автоповтор тире!
           startDah();
         } else {
-          // Ничего не нажато -> завершаем передачу
           state = STATE_IDLE;
           ditMemory = false;
           dahMemory = false;
@@ -227,7 +247,7 @@ void startDit() {
 
   currentMorseChar += ".";
   Serial.print(".");
-  if (hasOled) updateScreen();
+  if (hasOled) updateScreenMorse();
 }
 
 void startDah() {
@@ -239,7 +259,7 @@ void startDah() {
 
   currentMorseChar += "-";
   Serial.print("-");
-  if (hasOled) updateScreen();
+  if (hasOled) updateScreenMorse();
 }
 
 void stopToneOutput() {
@@ -247,14 +267,12 @@ void stopToneOutput() {
   digitalWrite(PIN_LED_KEY, LOW);
 }
 
-// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ (ТОЛЬКО В СОСТОЯНИИ ПОКОЯ) ---
+// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ (ТОЛЬКО В ПОКОЕ IDLE) ---
 void readPots() {
-  // КРИТИЧЕСКИ ВАЖНО: не читать АЦП во время передачи звука!
-  // Ток динамика просаживает питание, что вызывало ложные скачки WPM!
   if (state != STATE_IDLE) return;
 
   static unsigned long lastPotRead = 0;
-  if (millis() - lastPotRead > 100) {
+  if (millis() - lastPotRead > 80) {
     lastPotRead = millis();
 
     // Чтение WPM с мертвой зоной (deadband)
@@ -262,22 +280,25 @@ void readPots() {
     int rawWpm = analogRead(PIN_POT_WPM);
     if (lastRawWpm == -1) lastRawWpm = rawWpm;
 
-    if (abs(rawWpm - lastRawWpm) > 20) {
+    if (abs(rawWpm - lastRawWpm) > 18) {
       lastRawWpm = rawWpm;
-      int newWpm = map(rawWpm, 0, 1023, 10, 35);
+      int newWpm = map(rawWpm, 0, 1023, MIN_WPM, MAX_WPM);
       if (newWpm != currentWpm) {
         currentWpm = newWpm;
         ditMs = 1200 / currentWpm;
         dahMs = ditMs * 3;
-        if (hasOled) updateScreen();
 
-        Serial.print(F("\n[KNOB] Speed: "));
+        if (hasOled) updateScreenHeader();
+
+        Serial.print(F("\n[SPEED] "));
+        if (currentWpm < 10) Serial.print(F(" "));
         Serial.print(currentWpm);
         Serial.print(F(" WPM (dit: "));
+        if (ditMs < 100) Serial.print(F(" "));
         Serial.print(ditMs);
-        Serial.print(F(" ms) | Tone: "));
-        Serial.print(currentPitch);
-        Serial.println(F(" Hz"));
+        Serial.print(F(" ms)"));
+        printBar(currentWpm, MIN_WPM, MAX_WPM, 18);
+        Serial.println();
       }
     }
 
@@ -286,25 +307,27 @@ void readPots() {
     int rawPitch = analogRead(PIN_POT_PITCH);
     if (lastRawPitch == -1) lastRawPitch = rawPitch;
 
-    if (abs(rawPitch - lastRawPitch) > 30) {
+    if (abs(rawPitch - lastRawPitch) > 25) {
       lastRawPitch = rawPitch;
-      int newPitch = map(rawPitch, 0, 1023, 450, 850);
+      int newPitch = map(rawPitch, 0, 1023, MIN_PITCH, MAX_PITCH);
       newPitch = (newPitch / 25) * 25;
       if (abs(newPitch - currentPitch) >= 25) {
         currentPitch = newPitch;
-        if (hasOled) updateScreen();
 
-        Serial.print(F("\n[KNOB] Speed: "));
-        Serial.print(currentWpm);
-        Serial.print(F(" WPM | Tone: "));
+        if (hasOled) updateScreenHeader();
+
+        Serial.print(F("\n[TONE]  "));
+        if (currentPitch < 1000) Serial.print(F(" "));
         Serial.print(currentPitch);
-        Serial.println(F(" Hz"));
+        Serial.print(F(" Hz"));
+        printBar(currentPitch, MIN_PITCH, MAX_PITCH, 18);
+        Serial.println();
       }
     }
   }
 }
 
-// --- ДЕКОДЕР БУКВ И ПАУЗ ---
+// --- ДЕКОДЕР ЗНАКОВ И ПАУЗ ---
 void handleDecodedPauses() {
   if (state != STATE_IDLE || currentMorseChar.length() == 0) return;
 
@@ -314,8 +337,8 @@ void handleDecodedPauses() {
   if (pause >= ditMs * 3) {
     char letter = decodeMorse(currentMorseChar);
     decodedLine += letter;
-    if (decodedLine.length() > 14) {
-      decodedLine = decodedLine.substring(decodedLine.length() - 14);
+    if (decodedLine.length() > 21) {
+      decodedLine = decodedLine.substring(decodedLine.length() - 21);
     }
 
     Serial.print(" [");
@@ -323,35 +346,72 @@ void handleDecodedPauses() {
     Serial.print("] ");
 
     currentMorseChar = "";
-    if (hasOled) updateScreen();
+    if (hasOled) {
+      updateScreenMorse();
+      updateScreenText();
+    }
   }
 
-  // Межсловная пауза (7 длительностей точки) -> пробел и перенос строки
+  // Межсловная пауза (7 длительностей точки) -> пробел
   if (pause >= ditMs * 7 && decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
     decodedLine += " ";
     Serial.println();
-    if (hasOled) updateScreen();
+    if (hasOled) updateScreenText();
   }
 }
 
-void updateScreen() {
+// --- ОТРИСОВКА ИНТЕРФЕЙСА OLED (БЫСТРАЯ, БЕЗ МЕРЦАНИЯ) ---
+void drawScreenLayout() {
+  if (!hasOled) return;
+
+  oled.clear();
+  oled.setScale(1);
+
+  // Горизонтальный разделитель под шапкой (строка 1)
+  oled.setCursor(0, 1);
+  oled.print(F("---------------------"));
+
+  // Подпись принятого текста (строка 5)
+  oled.setCursor(0, 5);
+  oled.print(F("TXT:"));
+}
+
+void updateScreenHeader() {
   if (!hasOled) return;
 
   oled.setScale(1);
   oled.setCursor(0, 0);
+  oled.print(F("WPM:"));
+  if (currentWpm < 10) oled.print(F(" "));
   oled.print(currentWpm);
-  oled.print(F("WPM "));
+  oled.print(F(" "));
+  if (currentPitch < 1000) oled.print(F(" "));
   oled.print(currentPitch);
-  oled.print(F("Hz KEY "));
+  oled.print(F("Hz  [CW]"));
+}
 
+void updateScreenMorse() {
+  if (!hasOled) return;
+
+  // Строка 3: Крупный шрифт (Scale 2) для текущего знака Морзе
   oled.setScale(2);
+  oled.setCursor(0, 3);
+  oled.print(F("          ")); // Очистка старых символов
   oled.setCursor(10, 3);
-  oled.print(F("          "));
-  oled.setCursor(10, 3);
-  oled.print(currentMorseChar.length() > 0 ? currentMorseChar : F("_"));
+  if (currentMorseChar.length() > 0) {
+    oled.print(currentMorseChar);
+  } else {
+    oled.print(F("- READY -"));
+  }
+}
+
+void updateScreenText() {
+  if (!hasOled) return;
 
   oled.setScale(1);
-  oled.setCursor(0, 6);
-  oled.print(F("TXT: "));
-  oled.print(decodedLine);
+  oled.setCursor(28, 5);
+  // Печатаем строку текста с дополнением пробелами
+  String displayStr = decodedLine;
+  while (displayStr.length() < 16) displayStr += " ";
+  oled.print(displayStr.substring(displayStr.length() - 16));
 }
