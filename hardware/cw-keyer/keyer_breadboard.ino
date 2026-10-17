@@ -1,14 +1,15 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.1 (Authentic Iambic A / Curtis Timing)
- *  - Честный режим IAMBIC A (Curtis 8044):
- *      * Решение о повторе принимается ТОЛЬКО в конце паузы!
- *      * Никаких двойных точек при одиночном касании (буквы A, R передаются четко)!
- *      * Автоповтор работает при удержании весла!
- *      * Ямбическое чередование (squeeze) работает без паразитных хвостов.
+ *  MorseWave Pro Keyer v1.2 (Single-Lever / Iambic with Type-Ahead FIFO)
+ *  - Аппаратная буферизация элементов (FIFO очередь на 8 знаков, как в TX-500):
+ *      * Можно отбивать "R" (.-.) или "A" (.-) рукой быстро (на своей скорости),
+ *        а ключ плавно и красиво воспроизведет их на медленной скорости крутилки!
+ *      * Защита от дребезга механических контактов (15 мс антидребезг).
+ *      * Честный автоповтор при удержании весла в сторону точек или тире.
+ *      * Идеально работает с однорычажным манипулятором (веслом) и двухрычажным!
  *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец)
  *  - Плавные крутилки A0 (WPM: 10..35) и A2 (PITCH: 450..850 Гц)
- *  - Наглядный вывод в Serial Monitor при каждом повороте крутилки!
+ *  - Мгновенный вывод параметров в Serial Monitor при повороте крутилок
  *  - Автоопределение OLED 0.96" по I2C (работает как с дисплеем, так и без)
  * =====================================================================
  */
@@ -33,21 +34,45 @@ int currentPitch = 650;
 unsigned long ditMs = 1200 / 18;
 unsigned long dahMs = ditMs * 3;
 
-// Автомат состояний Iambic A
+// --- БУФЕР ВВОДА ЭЛЕМЕНТОВ (FIFO ОЧЕРЕДЬ, КАК В ТРАНСИВЕРАХ) ---
+enum Element {
+  ELEM_NONE = 0,
+  ELEM_DIT  = 1,
+  ELEM_DAH  = 2
+};
+
+const int QUEUE_MAX = 8;
+Element elementQueue[QUEUE_MAX];
+int qHead = 0;
+int qTail = 0;
+int qCount = 0;
+
+void enqueue(Element elem) {
+  if (qCount < QUEUE_MAX) {
+    elementQueue[qTail] = elem;
+    qTail = (qTail + 1) % QUEUE_MAX;
+    qCount++;
+  }
+}
+
+Element dequeue() {
+  if (qCount == 0) return ELEM_NONE;
+  Element elem = elementQueue[qHead];
+  qHead = (qHead + 1) % QUEUE_MAX;
+  qCount--;
+  return elem;
+}
+
+// --- АВТОМАТ СОСТОЯНИЙ ГЕНЕРАТОРА CW ---
 enum KeyerState {
   STATE_IDLE,
-  STATE_DIT,
-  STATE_DAH,
-  STATE_PAUSE
+  STATE_ELEMENT,    // Звучит элемент (точка или тире)
+  STATE_PAUSE       // Межэлементная пауза (длительность 1 точка)
 };
 
 KeyerState state = STATE_IDLE;
-KeyerState lastElement = STATE_IDLE;
-
+Element currentPlaying = ELEM_NONE;
 unsigned long stateStartTime = 0;
-bool ditMemory = false;
-bool dahMemory = false;
-bool wasSqueezed = false;
 unsigned long lastSymbolEndTime = 0;
 
 // Декодер текста Морзе
@@ -85,7 +110,7 @@ void setup() {
   noTone(PIN_AUDIO);
   digitalWrite(PIN_LED_KEY, LOW);
 
-  // Проверяем наличие дисплея на шине I2C (адрес 0x3C)
+  // Проверка I2C OLED
   Wire.begin();
   Wire.beginTransmission(0x3C);
   if (Wire.endTransmission() == 0) {
@@ -96,9 +121,7 @@ void setup() {
     oled.setCursor(0, 0);
     oled.print(F("MorseWave Keyer"));
     oled.setCursor(0, 2);
-    oled.print(F("Mode: IAMBIC-A"));
-    oled.setCursor(0, 4);
-    oled.print(F("Curtis Timing"));
+    oled.print(F("Mode: BUFFERED"));
   }
 
   // Первоначальное чтение потенциометров
@@ -113,7 +136,7 @@ void setup() {
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("     MorseWave Pro Keyer v1.1 (IAMBIC-A Curtis)   "));
+  Serial.println(F("  MorseWave Pro Keyer v1.2 (TX-500 Type-Ahead)    "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -126,23 +149,57 @@ void setup() {
   Serial.print(F("OLED  : "));
   Serial.println(hasOled ? F("ONLINE") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
   Serial.println(F("--------------------------------------------------"));
-  Serial.println(F("Покрути A0 для смены WPM, A2 для смены Тона."));
+  Serial.println(F("Очередь элементов активна: можно отбивать быстрее "));
+  Serial.println(F("выставленной скорости, ключ всё четко воспроизведет!"));
   Serial.println(F("=================================================="));
   Serial.println();
 }
 
 void loop() {
+  samplePaddle();
   readPots();
   handleKeyer();
   handleDecodedPauses();
 }
 
+// --- СКАНИРОВАНИЕ ВЕСЛА С АНТИДРЕБЕЗГОМ И БУФЕРИЗАЦИЕЙ ---
+void samplePaddle() {
+  const unsigned long DEBOUNCE_MS = 15;
+  static unsigned long lastDitEdge = 0;
+  static unsigned long lastDahEdge = 0;
+  static bool prevDitPin = HIGH;
+  static bool prevDahPin = HIGH;
+
+  unsigned long now = millis();
+  bool curDit = digitalRead(PIN_DIT);
+  bool curDah = digitalRead(PIN_DAH);
+
+  // Нажатие ТОЧКИ (перепад HIGH -> LOW)
+  if (curDit == LOW && prevDitPin == HIGH) {
+    if (now - lastDitEdge > DEBOUNCE_MS) {
+      lastDitEdge = now;
+      enqueue(ELEM_DIT);
+    }
+  }
+
+  // Нажатие ТИРЕ (перепад HIGH -> LOW)
+  if (curDah == LOW && prevDahPin == HIGH) {
+    if (now - lastDahEdge > DEBOUNCE_MS) {
+      lastDahEdge = now;
+      enqueue(ELEM_DAH);
+    }
+  }
+
+  prevDitPin = curDit;
+  prevDahPin = curDah;
+}
+
+// --- ЧТЕНИЕ ПОТЕНЦИОМЕТРОВ С УСРЕДНЕНИЕМ ---
 void readPots() {
   static unsigned long lastPotRead = 0;
   if (millis() - lastPotRead > 60) {
     lastPotRead = millis();
 
-    // Фильтрация шумов АЦП (экспоненциальное сглаживание)
     static int smoothWpm = -1;
     int rawWpm = analogRead(PIN_POT_WPM);
     if (smoothWpm == -1) smoothWpm = rawWpm;
@@ -167,7 +224,6 @@ void readPots() {
 
       if (hasOled) updateScreen();
 
-      // Выводим в Serial аккуратную строчку с текущими параметрами
       Serial.print(F("\n[KNOB] Speed: "));
       Serial.print(currentWpm);
       Serial.print(F(" WPM (dit: "));
@@ -179,128 +235,73 @@ void readPots() {
   }
 }
 
-// =====================================================================
-//  АЛГОРИТМ ЧИСТОГО IAMBIC A (CURTIS 8044)
-// =====================================================================
+// --- АВТОМАТ СОСТОЯНИЙ ГЕНЕРАЦИИ МОРЗЕ ---
 void handleKeyer() {
   unsigned long now = millis();
-  bool ditPressed = (digitalRead(PIN_DIT) == LOW);
-  bool dahPressed = (digitalRead(PIN_DAH) == LOW);
-
-  // Отслеживаем сжатие обоих лепестков (squeeze)
-  if (ditPressed && dahPressed) {
-    wasSqueezed = true;
-  }
-
-  // Запоминание противоположного лепестка (Dot / Dash Memory)
-  if (state == STATE_DIT || (state == STATE_PAUSE && lastElement == STATE_DIT)) {
-    if (dahPressed) dahMemory = true;
-  }
-  if (state == STATE_DAH || (state == STATE_PAUSE && lastElement == STATE_DAH)) {
-    if (ditPressed) ditMemory = true;
-  }
-
-  // Правило Curtis Mode A:
-  // Если оба лепестка были сжаты, а затем оба отпущены до окончания элемента/паузы,
-  // память сбрасывается, чтобы не приписывался лишний паразитный элемент!
-  if (wasSqueezed && !ditPressed && !dahPressed) {
-    ditMemory = false;
-    dahMemory = false;
-    wasSqueezed = false;
-  }
 
   switch (state) {
     case STATE_IDLE:
-      if (ditPressed) {
-        startDit();
-      } else if (dahPressed) {
-        startDah();
+      // Если в очереди есть буферизированные клики:
+      if (qCount > 0) {
+        startElement(dequeue());
+      } else if (digitalRead(PIN_DIT) == LOW) {
+        // Удержание точки
+        startElement(ELEM_DIT);
+      } else if (digitalRead(PIN_DAH) == LOW) {
+        // Удержание тире
+        startElement(ELEM_DAH);
       }
       break;
 
-    case STATE_DIT:
-      if (now - stateStartTime >= ditMs) {
+    case STATE_ELEMENT: {
+      unsigned long duration = (currentPlaying == ELEM_DIT) ? ditMs : dahMs;
+      if (now - stateStartTime >= duration) {
         stopToneOutput();
         state = STATE_PAUSE;
-        lastElement = STATE_DIT;
         stateStartTime = now;
       }
       break;
-
-    case STATE_DAH:
-      if (now - stateStartTime >= dahMs) {
-        stopToneOutput();
-        state = STATE_PAUSE;
-        lastElement = STATE_DAH;
-        stateStartTime = now;
-      }
-      break;
+    }
 
     case STATE_PAUSE:
-      // Межэлементная пауза равна ровно 1 длительности точки (ditMs)
       if (now - stateStartTime >= ditMs) {
-        // ВОТ ЗДЕСЬ (спустя полную длительность паузы!) принимаем решение:
-        if (lastElement == STATE_DIT) {
-          // После точки: в приоритете тире (память или зажатие)
-          if (dahMemory || dahPressed) {
-            dahMemory = false;
-            wasSqueezed = false;
-            startDah();
-          } else if (ditPressed) {
-            // Точка ВСЁ ЕЩЁ зажата пальцем (честный автоповтор)
-            wasSqueezed = false;
-            startDit();
-          } else {
-            // Ничего не зажато -> знак закончен
-            state = STATE_IDLE;
-            ditMemory = false;
-            dahMemory = false;
-            wasSqueezed = false;
-            lastSymbolEndTime = millis();
-          }
-        } else if (lastElement == STATE_DAH) {
-          // После тире: в приоритете точка (память или зажатие)
-          if (ditMemory || ditPressed) {
-            ditMemory = false;
-            wasSqueezed = false;
-            startDit();
-          } else if (dahPressed) {
-            // Тире ВСЁ ЕЩЁ зажато пальцем (честный автоповтор)
-            wasSqueezed = false;
-            startDah();
-          } else {
-            // Ничего не зажато -> знак закончен
-            state = STATE_IDLE;
-            ditMemory = false;
-            dahMemory = false;
-            wasSqueezed = false;
-            lastSymbolEndTime = millis();
-          }
+        // Пауза завершена. Что играть дальше?
+        if (qCount > 0) {
+          // Берем следующий элемент из очереди!
+          startElement(dequeue());
+        } else if (digitalRead(PIN_DIT) == LOW) {
+          // Точка всё еще зажата (автоповтор)
+          startElement(ELEM_DIT);
+        } else if (digitalRead(PIN_DAH) == LOW) {
+          // Тире всё еще зажато (автоповтор)
+          startElement(ELEM_DAH);
+        } else {
+          // Очередь пуста и лепесток отпущен в нейтраль -> знак завершен!
+          state = STATE_IDLE;
+          currentPlaying = ELEM_NONE;
+          lastSymbolEndTime = millis();
         }
       }
       break;
   }
 }
 
-void startDit() {
-  state = STATE_DIT;
+void startElement(Element elem) {
+  currentPlaying = elem;
+  state = STATE_ELEMENT;
   stateStartTime = millis();
+
   tone(PIN_AUDIO, currentPitch);
   digitalWrite(PIN_LED_KEY, HIGH);
 
-  currentMorseChar += ".";
-  Serial.print(".");
-  if (hasOled) updateScreen();
-}
+  if (elem == ELEM_DIT) {
+    currentMorseChar += ".";
+    Serial.print(".");
+  } else {
+    currentMorseChar += "-";
+    Serial.print("-");
+  }
 
-void startDah() {
-  state = STATE_DAH;
-  stateStartTime = millis();
-  tone(PIN_AUDIO, currentPitch);
-  digitalWrite(PIN_LED_KEY, HIGH);
-
-  currentMorseChar += "-";
-  Serial.print("-");
   if (hasOled) updateScreen();
 }
 
@@ -310,11 +311,12 @@ void stopToneOutput() {
 }
 
 void handleDecodedPauses() {
-  if (state != STATE_IDLE || currentMorseChar.length() == 0) return;
+  // Пока звучит элемент или в очереди еще есть знаки — паузу не считаем!
+  if (state != STATE_IDLE || qCount > 0 || currentMorseChar.length() == 0) return;
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // Пауза между знаками (3 точки) -> распознаем букву
+  // Межзнаковая пауза (3 точки) -> распознаем букву
   if (pause > ditMs * 3) {
     char letter = decodeMorse(currentMorseChar);
     decodedLine += letter;
@@ -346,7 +348,7 @@ void updateScreen() {
   oled.print(currentWpm);
   oled.print(F("WPM "));
   oled.print(currentPitch);
-  oled.print(F("Hz IAM-A "));
+  oled.print(F("Hz BUF "));
 
   oled.setScale(2);
   oled.setCursor(10, 3);
