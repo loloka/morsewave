@@ -68,7 +68,7 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <div class="oled-footer-ticker" id="oled-ticker-text">
-                TXT: VVV = KEYER ONLINE
+                TXT: VVV = R9OGL KEYER ONLINE
             </div>
         </div>
         
@@ -261,17 +261,17 @@ include __DIR__ . '/includes/header.php';
 
         <div class="spec-item">
             <div class="spec-item-icon">🛡️</div>
-            <div class="spec-item-title">Аппаратный и программный антидребезг</div>
+            <div class="spec-item-title">Аппаратный и цифровой антидребезг</div>
             <div class="spec-item-desc">
-                Механические контакты манипуляторов (особенно скоростных весел СРТ с зазором в доли миллиметра) страдают от пачек микроискрений (bounce 0.5–5 мс). Двухкаскадный фильтр с внутренней подтяжкой и цифровым гистерезисом на 100% исключает ложные двойные точки и срывы передачи.
+                Механические контакты манипуляторов (особенно скоростных весел СРТ с зазором в доли миллиметра) страдают от микроискрений (bounce). Система с аппаратной подтяжкой и программной фильтрацией на 100% исключает ложные двойные точки и срывы знаков.
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🎛</div>
-            <div class="spec-item-title">Регулировка WPM и Тона на лету (Dual EMA)</div>
+            <div class="spec-item-title">3 ручки управления на лету: WPM, Тон и Громкость</div>
             <div class="spec-item-desc">
-                Скорость от 10 до олимпийских 60 WPM и тон от 400 до 1200 Гц перестраиваются плавно двумя аналоговыми ручками прямо во время передачи QSO. Цифровой экспоненциальный фильтр АЦП (EMA) полностью изолирует помехи по питанию и наводки динамика.
+                Скорость от 10 до 60 WPM, частота тона от 400 до 1200 Гц и громкость динамика регулируются физическими ручками прямо во время QSO. Экспоненциальный цифровой фильтр АЦП (EMA) полностью изолирует шумы по питанию.
             </div>
         </div>
 
@@ -287,15 +287,15 @@ include __DIR__ . '/includes/header.php';
             <div class="spec-item-icon">📟</div>
             <div class="spec-item-title">Экран OLED 0.96" Fast I2C (400 кГц)</div>
             <div class="spec-item-desc">
-                Шина разогнана до 400 кГц. Позонное обновление экрана занимает всего 0.3 мс, исключая лаги и микрофризы звука. Живой вывод скорости, тона, крупного знака Морзе и бегущей строки текста с честными паузами ITU.
+                Шина разогнана до 400 кГц. Позонное обновление экрана занимает всего 0.3 мс, исключая лаги и микрофризы звука. Живой вывод скорости, тона, крупного расшифрованного знака и бегущей строки текста.
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🧠</div>
-            <div class="spec-item-title">Декодер ITU и честные паузы</div>
+            <div class="spec-item-title">Умный декодер слитных знаков и пауз ITU</div>
             <div class="spec-item-desc">
-                Жадный парсер (Greedy Segmentation) расшифровывает буквы даже при беглой слитной передаче. Строгий контроль межсловных пауз по формуле 7T выдаёт ровно один пробел между словами без спама и артефактов в Serial-порт.
+                Автоматический алгоритм сегментации расшифровывает символы, даже если буквы переданы без идеальной паузы (например, R9 или CQ не превращаются в ошибку). Контроль межсловных пауз 7T выдаёт честные пробелы без спама.
             </div>
         </div>
     </div>
@@ -329,17 +329,17 @@ include __DIR__ . '/includes/header.php';
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Связь с ПК и браузером</td>
                         <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет (только автономный манипулятор трансивера)</td>
-                        <td style="padding:12px; color:#4fd8c4; font-weight:600;"><span style="color:#10b981;">✓</span> Прямой WebSerial по USB (эхо-тренажёр в браузере, терминал, логгеры)</td>
+                        <td style="padding:12px; color:#4fd8c4; font-weight:600;"><span style="color:#10b981;">✓</span> <b>Прямой WebSerial по USB</b> (наш современный тренажёр в браузере, терминал, логгеры, возможность поддержки протокола Winkeyer для логгеров типа N1MM)</td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Экран и визуализация</td>
                         <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет экрана (настройка вслепую писком через звуковое меню)</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>OLED 0.96" (400 кГц)</b>: живой WPM, тон, большой знак Морзе и бегущая строка</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>OLED 0.96" (400 кГц)</b>: живой WPM, тон, большой расшифрованный введённый символ и бегущая строка с введённым текстом</td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Регулировка скорости и тона</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);">Регулировка скорости, тона и громкости</td>
                         <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Только кнопками или через сервисное меню</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>2 аналоговые ручки</b>: мгновенная плавная смена WPM и тона прямо во время передачи</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>3 аналоговые ручки</b>: плавная регулировка WPM (скорость), тона и громкости прямо во время передачи</td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Качество звука самоконтроля</td>
@@ -354,12 +354,12 @@ include __DIR__ . '/includes/header.php';
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Защита от дребезга контактов</td>
                         <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Базовая, сбоит на скоростных веслах с узким зазором</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Двухкаскадный антидребезг</b> (Pull-up + цифровой гистерезис в автомате состояний)</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Аппаратный и цифровой антидребезг</b> (чистая передача без ложных точек даже на ультрамалых зазорах)</td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Встроенный декодер Морзе</td>
                         <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Отсутствует</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Жадный декодер ITU</b> с авторазделением знаков и однократными пробелами 7T</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Умный декодер ITU</b>: защита от склеек знаков и автоматические честные пробелы 7T</td>
                     </tr>
                     <tr>
                         <td style="padding:12px; font-weight:600; color:var(--text);">Открытость и калибровка</td>
