@@ -1,5 +1,5 @@
 # CW Keyer: Полное руководство, Список компонентов и Схемотехника
-> Arduino Uno / Nano (ATmega328P) · Спортивное весло (СРТ) · MorseWave Pro Edition v1.5
+> Arduino Uno / Nano (ATmega328P) · Двухрычажный манипулятор (Ямбик B) / Однорычажное весло · MorseWave Pro Edition v1.7
 
 ---
 

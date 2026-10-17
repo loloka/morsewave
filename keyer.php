@@ -194,7 +194,7 @@ include __DIR__ . '/includes/header.php';
     <div class="card-eyebrow">ИНЖЕНЕРНАЯ АРХИТЕКТУРА</div>
     <h2>Что внутри электронного блока MorseWave Pro (R9OGL Edition)</h2>
     <p class="muted">
-        Схемотехника и прошивка разработаны радиолюбителем с учётом требований скоростной радиотелеграфии (СРТ):
+        Схемотехника и прошивка разработаны радиолюбителем с упором на ямбический режим B и комфортную работу с любым манипулятором:
     </p>
 
     <div class="specs-grid">
@@ -239,7 +239,6 @@ include __DIR__ . '/includes/header.php';
             </p>
         </div>
         <div style="display:flex; gap:10px;">
-            <a href="keyhardware.php" class="btn btn-secondary">Старый гайд (HID пробел)</a>
             <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px;">
                 <span>Исходники на GitHub ↗</span>
             </a>
@@ -248,71 +247,35 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- =========================================================
-     ФОРМА ПРЕДЗАКАЗА АВТОРСКОГО ЭЛЕКТРОННОГО БЛОКА
+     РАЗДЕЛ ЗАКАЗА АВТОРСКОГО ЭЛЕКТРОННОГО БЛОКА
      ========================================================= -->
 <div class="order-section-card" id="preorder-section">
-    <div class="card-eyebrow">МАСТЕРСКАЯ R9OGL</div>
-    <h2 style="margin: 0 0 6px;">Заказать электронный блок MorseWave Pro</h2>
-    <p class="muted" style="max-width: 720px; font-size: 15px;">
-        Электронный блок подключается к любому вашему манипулятору (двухрычажному или однорычажному веслу СРТ) через стандартный разъём Jack 3.5 мм. 
-        Каждый экземпляр собирается вручную радиолюбителем, индивидуально калибруется по тону и питанию, 
-        проверяется на спортивном манипуляторе мастера спорта и комплектуется прошивкой v1.7. 
-        Оставьте предварительную заявку, и мы свяжемся с вами для уточнения деталей.
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+        <div>
+            <div class="card-eyebrow">МАСТЕРСКАЯ R9OGL</div>
+            <h2 style="margin: 0 0 6px;">Электронный блок MorseWave Pro</h2>
+        </div>
+        <span class="badge" style="background:rgba(232, 163, 61, 0.15); color:#e8a33d; border:1px solid rgba(232, 163, 61, 0.4); padding:6px 14px; border-radius:20px; font-weight:700; font-size:12px;">
+            🔒 ЗАКАЗ ВРЕМЕННО НЕДОСТУПЕН
+        </span>
+    </div>
+
+    <p class="muted" style="max-width: 780px; font-size: 15px; line-height:1.6;">
+        Электронный блок подключается к любому манипулятору — двухрычажному ямбическому (режим B) или однорычажному веслу — через стандартный разъём Jack 3.5 мм (поддержка классического прямого ключа-клоподава будет добавлена в следующих версиях).
     </p>
 
-    <form id="keyer-order-form">
-        <div class="order-form-grid">
-            <div class="form-field">
-                <label for="order-callsign">Ваш позывной или имя *</label>
-                <input type="text" id="order-callsign" placeholder="Например: R9OGL или Иван" required>
-            </div>
-
-            <div class="form-field">
-                <label for="order-contact">Telegram, WhatsApp или Email для связи *</label>
-                <input type="text" id="order-contact" placeholder="@username или +7 999 000-00-00" required>
-            </div>
-
-            <div class="form-field">
-                <label for="order-kit">Вариант комплектации</label>
-                <select id="order-kit">
-                    <option value="assembled" selected>Электронный блок ключа в корпусе (с OLED 0.96", динамиком, ручками настройки и гнездом 3.5 мм под ваш манипулятор)</option>
-                    <option value="board">Плата управления в сборе (для самостоятельной установки в свой корпус)</option>
-                </select>
-            </div>
-
-            <div class="form-field">
-                <label for="order-city">Город доставки (СДЭК / Почта России)</label>
-                <input type="text" id="order-city" placeholder="Например: Новосибирск, Омск, Москва">
-            </div>
-
-            <div class="form-field" style="grid-column: 1 / -1;">
-                <label for="order-notes">Пожелания к сборке (цвет корпуса, разъёмы, длина кабеля питания и т.д.)</label>
-                <textarea id="order-notes" rows="3" placeholder="Любые индивидуальные пожелания к вашему будущему электронному блоку..."></textarea>
+    <div class="alert mt-3" style="background: var(--surface-2); border: 1px dashed var(--border); border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap;">
+        <div style="font-size: 32px;">🛠</div>
+        <div style="flex: 1; min-width: 260px;">
+            <div style="font-weight: 700; font-size: 16px; margin-bottom: 4px;">Приём заявок временно приостановлен</div>
+            <div style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">
+                В данный момент идёт финальная доводка прошивки и подготовка первой авторской серии блоков. 
+                Вы можете собрать такой ключ самостоятельно по схеме и прошивке из репозитория — все чертежи и инструкции полностью открыты!
             </div>
         </div>
-
-        <div style="margin-top: 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;">
-            <div style="font-size: 13px; color: var(--text-faint);">
-                🔒 Заявка ни к чему не обязывает — это предзаказ для формирования первой авторской партии.
-            </div>
-            <button type="submit" class="btn-usb-connect" style="padding: 12px 28px;">
-                <span>Оставить заявку на блок ключа</span>
-                <span>→</span>
-            </button>
-        </div>
-    </form>
-</div>
-
-<!-- Модальное окно подтверждения заявки -->
-<div class="modal-overlay" id="order-modal-overlay">
-    <div class="modal-content">
-        <div style="font-size: 42px; margin-bottom: 12px;">📻</div>
-        <h3 style="margin: 0 0 8px;">Заявка принята!</h3>
-        <p class="muted" style="font-size: 14px; line-height: 1.6; margin-bottom: 18px;">
-            Ваш номер предзаказа: <b id="modal-order-id" style="color:var(--accent);">R9OGL-001</b>.<br>
-            Спасибо за интерес к проекту MorseWave Pro! Данные сохранены. В дальнейшем на этой странице появится прямая интеграция с ботом мастерской и оплата.
-        </p>
-        <button id="modal-close-btn" class="btn btn-primary" style="width: 100%;">Отлично, спасибо!</button>
+        <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-primary" style="background:#4fd8c4; color:#0b0f12; font-weight:700; padding:10px 20px; text-decoration:none; border-radius:8px;">
+            Собрать своими руками (GitHub) ↗
+        </a>
     </div>
 </div>
 
