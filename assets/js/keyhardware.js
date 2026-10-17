@@ -157,9 +157,7 @@
     let incomingBuffer = '';
 
     function parseIncomingStream(chunk) {
-        incomingBuffer += chunk;
-
-        // Посимвольный разбор точек и тире
+        // 1. Посимвольный разбор точек и тире для живой индикации
         for (let i = 0; i < chunk.length; i++) {
             const ch = chunk[i];
             if (ch === '.') {
@@ -173,41 +171,63 @@
             }
         }
 
-        // Выделение декодированных букв вида [A] или [=] или [<SK>]
-        const bracketRegex = /\[(.*?)\]/g;
-        let match;
-        while ((match = bracketRegex.exec(incomingBuffer)) !== null) {
-            const decoded = match[1];
-            appendDecodedChar(decoded);
-            appendTerminal(` [${decoded}] `, 'char');
-            setTimeout(() => {
-                if (oledMorse && (oledMorse.textContent === '.' || oledMorse.textContent === '-')) {
-                    oledMorse.textContent = '- READY -';
-                }
-            }, 300);
-        }
+        incomingBuffer += chunk;
 
-        // Выделение обновлений скорости [SPEED] 24 WPM
-        const speedMatch = incomingBuffer.match(/\[SPEED\]\s*(\d+)\s*WPM/i);
-        if (speedMatch) {
+        // 2. Обработка сервисных сообщений скорости и тона
+        let speedMatch;
+        while ((speedMatch = incomingBuffer.match(/\[SPEED\]\s*(\d+)\s*WPM/i)) !== null) {
             updateOledHeader(speedMatch[1], null);
+            const idx = incomingBuffer.indexOf(speedMatch[0]);
+            incomingBuffer = incomingBuffer.substring(idx + speedMatch[0].length);
         }
 
-        // Выделение обновлений тона [TONE] 750 Hz
-        const toneMatch = incomingBuffer.match(/\[TONE\]\s*(\d+)\s*Hz/i);
-        if (toneMatch) {
+        let toneMatch;
+        while ((toneMatch = incomingBuffer.match(/\[TONE\]\s*(\d+)\s*Hz/i)) !== null) {
             updateOledHeader(null, toneMatch[1]);
+            const idx = incomingBuffer.indexOf(toneMatch[0]);
+            incomingBuffer = incomingBuffer.substring(idx + toneMatch[0].length);
         }
 
-        // Выделение пробела
-        if (chunk.includes('\n') || chunk.includes('  ')) {
-            appendDecodedChar(' ');
-            appendTerminal('\n', 'sys');
+        // 3. Выделение декодированных букв вида [A], [9], [=], [<SK>] и т.д.
+        // Ищем скобки и обязательно СРЕЗАЕМ их из буфера, чтобы они НИКОГДА не парсились повторно!
+        let openIdx = incomingBuffer.indexOf('[');
+        let closeIdx = incomingBuffer.indexOf(']', openIdx);
+
+        while (openIdx !== -1 && closeIdx !== -1) {
+            const token = incomingBuffer.substring(openIdx + 1, closeIdx).trim();
+            // Срезаем всё до позиции после закрывающей скобки
+            incomingBuffer = incomingBuffer.substring(closeIdx + 1);
+
+            // Игнорируем псевдографические шкалы прогресс-бара [======>  ] и сервисные теги
+            if (!token.includes('>') && !token.startsWith('SPEED') && !token.startsWith('TONE') && !token.startsWith('CW')) {
+                if (token.length > 0) {
+                    appendDecodedChar(token);
+                    appendTerminal(` [${token}] `, 'char');
+                    setTimeout(() => {
+                        if (oledMorse && (oledMorse.textContent === '.' || oledMorse.textContent === '-')) {
+                            oledMorse.textContent = '- READY -';
+                        }
+                    }, 300);
+                }
+            }
+
+            openIdx = incomingBuffer.indexOf('[');
+            closeIdx = incomingBuffer.indexOf(']', openIdx);
         }
 
-        // Ограничение размера входного буфера
+        // 4. Межсловный пробел при переходе на новую строку
+        if (incomingBuffer.includes('\n')) {
+            const lines = incomingBuffer.split('\n');
+            if (lines.length > 1) {
+                appendDecodedChar(' ');
+                appendTerminal('\n', 'sys');
+                incomingBuffer = lines[lines.length - 1];
+            }
+        }
+
+        // Защита от переполнения остаточного мусора
         if (incomingBuffer.length > 256) {
-            incomingBuffer = incomingBuffer.substring(incomingBuffer.length - 128);
+            incomingBuffer = incomingBuffer.substring(incomingBuffer.length - 64);
         }
     }
 
@@ -423,6 +443,7 @@
 
         if (char === ' ' && userEchoBuffer.length === 0) return;
         if (char === ' ' && userEchoBuffer.endsWith(' ')) return;
+        if (char === ' ' && !target.includes(' ')) return;
 
         userEchoBuffer += (char === ' ') ? ' ' : char.trim();
 
