@@ -1,3 +1,8 @@
+"""
+MorseWave Pro Keyer (R9OGL Edition v2.0)
+Precision Automated KiCad Schematic Generator
+Uses exact pin coordinate calculations from KiCad symbol library.
+"""
 import os
 import re
 import uuid
@@ -8,81 +13,132 @@ def new_uuid():
 
 SYM_DIR = r"C:\Program Files\KiCad\10.0\share\kicad\symbols"
 
-def extract_sym(lib_name, sym_name):
+sym_cache = {}
+
+def load_sym_pins(lib_name, sym_name):
+    key = f"{lib_name}:{sym_name}"
+    if key in sym_cache:
+        return sym_cache[key]
+    
     path = os.path.join(SYM_DIR, f"{lib_name}.kicad_sym")
     with open(path, "r", encoding="utf-8") as f:
         text = f.read()
     start = text.find(f'(symbol "{sym_name}"')
     if start == -1:
-        raise ValueError(f"Symbol {sym_name} not found in {lib_name}")
+        raise ValueError(f"Not found: {sym_name} in {lib_name}")
     depth = 0
+    end = len(text)
     for i in range(start, len(text)):
         if text[i] == '(': depth += 1
         elif text[i] == ')':
             depth -= 1
             if depth == 0:
-                block = text[start:i+1]
-                # extract pins
-                pins = re.findall(r'\(number\s+"([^"]+)"', block)
-                pins = list(dict.fromkeys(pins))
-                return block, pins
-    return "", []
+                end = i + 1
+                break
+    block = text[start:end]
+    m_ext = re.search(r'\(extends\s+"([^"]+)"\)', block)
+    if m_ext:
+        base_name = m_ext.group(1)
+        pins = load_sym_pins(lib_name, base_name)
+        sym_cache[key] = pins
+        return pins
 
-# Extract all required symbols
-nano2_block, nano_pins = extract_sym("MCU_Module", "Arduino_Nano_v2.x")
-nano3_block, _ = extract_sym("MCU_Module", "Arduino_Nano_v3.x")
-bc546_block, bc_pins = extract_sym("Transistor_BJT", "BC546")
-bc547_block, _ = extract_sym("Transistor_BJT", "BC547")
-pc817_block, pc817_pins = extract_sym("Isolator", "PC817")
-conn2_block, conn2_pins = extract_sym("Connector", "Conn_01x02_Pin")
-conn3_block, conn3_pins = extract_sym("Connector", "Conn_01x03_Pin")
-conn4_block, conn4_pins = extract_sym("Connector", "Conn_01x04_Pin")
-r_block, r_pins = extract_sym("Device", "R")
-c_block, c_pins = extract_sym("Device", "C")
-cp_block, cp_pins = extract_sym("Device", "C_Polarized")
-pot_block, pot_pins = extract_sym("Device", "R_Potentiometer")
-led_block, led_pins = extract_sym("Device", "LED")
-d_block, d_pins = extract_sym("Device", "D")
-gnd_block, gnd_pins = extract_sym("power", "GND")
-vcc_block, vcc_pins = extract_sym("power", "+5V")
+    pins = {}
+    matches = re.finditer(r'\(pin\s+\S+\s+\S+\s+\(at\s+([-\d.]+)\s+([-\d.]+)(?:\s+([-\d.]+))?\).*?\(name\s+"([^"]*)".*?\(number\s+"([^"]+)"', block, re.DOTALL)
+    for m in matches:
+        px, py, prot, name, num = m.groups()
+        pins[str(num)] = (float(px), float(py), float(prot or 0), name)
+    sym_cache[key] = pins
+    return pins
 
-lib_symbols_list = [
-    nano2_block, nano3_block,
-    bc546_block, bc547_block,
-    pc817_block,
-    conn2_block, conn3_block, conn4_block,
-    r_block, c_block, cp_block, pot_block, led_block, d_block,
-    gnd_block, vcc_block
+def extract_sym_block(lib_name, sym_name):
+    path = os.path.join(SYM_DIR, f"{lib_name}.kicad_sym")
+    with open(path, "r", encoding="utf-8") as f:
+        text = f.read()
+    start = text.find(f'(symbol "{sym_name}"')
+    depth = 0
+    end = len(text)
+    for i in range(start, len(text)):
+        if text[i] == '(': depth += 1
+        elif text[i] == ')':
+            depth -= 1
+            if depth == 0:
+                end = i + 1
+                break
+    block = text[start:end]
+    full_name = f"{lib_name}:{sym_name}"
+    m_ext = re.search(r'\(extends\s+"([^"]+)"\)', block)
+    if m_ext:
+        base_name = m_ext.group(1)
+        base_block = extract_sym_block(lib_name, base_name)
+        base_full = f"{lib_name}:{base_name}"
+        flat_block = base_block.replace(f'(symbol "{base_full}"', f'(symbol "{full_name}"')
+        flat_block = flat_block.replace(f'"{base_name}_', f'"{sym_name}_')
+        return flat_block
+    
+    block = f'(symbol "{full_name}"' + block[len(f'(symbol "{sym_name}"'):]
+    return block
+
+
+
+def get_pin(lib_name, sym_name, sym_x, sym_y, rot, pin_num):
+    pins = load_sym_pins(lib_name, sym_name)
+    px, py, _, _ = pins[str(pin_num)]
+    if rot == 0:
+        x_sch = sym_x + px
+        y_sch = sym_y - py
+    elif rot == 90:
+        x_sch = sym_x - py
+        y_sch = sym_y - px
+    elif rot == 180:
+        x_sch = sym_x - px
+        y_sch = sym_y + py
+    elif rot == 270:
+        x_sch = sym_x + py
+        y_sch = sym_y + px
+    else:
+        raise ValueError(f"Unsupported rotation: {rot}")
+    return round(x_sch, 2), round(y_sch, 2)
+
+
+# Build embedded library symbols with full prefixes
+embedded_symbols = [
+    extract_sym_block("MCU_Module", "Arduino_Nano_v2.x"),
+    extract_sym_block("MCU_Module", "Arduino_Nano_v3.x"),
+    extract_sym_block("Transistor_BJT", "Q_NPN_CBE"),
+    extract_sym_block("Transistor_BJT", "BC547"),
+    extract_sym_block("Isolator", "PC817"),
+    extract_sym_block("Connector", "Conn_01x02_Pin"),
+    extract_sym_block("Connector", "Conn_01x03_Pin"),
+    extract_sym_block("Connector", "Conn_01x04_Pin"),
+    extract_sym_block("Device", "R"),
+    extract_sym_block("Device", "C"),
+    extract_sym_block("Device", "C_Polarized"),
+    extract_sym_block("Device", "R_Potentiometer"),
+    extract_sym_block("Device", "LED"),
+    extract_sym_block("Device", "D"),
+    extract_sym_block("power", "GND"),
+    extract_sym_block("power", "+5V"),
+    extract_sym_block("power", "PWR_FLAG"),
 ]
-
-pins_map = {
-    "Arduino_Nano_v3.x": nano_pins,
-    "BC547": bc_pins,
-    "PC817": pc817_pins,
-    "Conn_01x02_Pin": conn2_pins,
-    "Conn_01x03_Pin": conn3_pins,
-    "Conn_01x04_Pin": conn4_pins,
-    "R": r_pins,
-    "C": c_pins,
-    "C_Polarized": cp_pins,
-    "R_Potentiometer": pot_pins,
-    "LED": led_pins,
-    "D": d_pins,
-    "GND": gnd_pins,
-    "+5V": vcc_pins,
-}
 
 SHEET_UUID = "2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
 
-def sym(ref, val, footprint, lib_id, x, y, rot=0):
-    u = new_uuid()
-    pins = pins_map.get(lib_id, [])
-    pin_str = "\n".join([f'\t\t(pin "{p}" (uuid "{new_uuid()}"))' for p in pins])
-    hide_ref = ' (hide yes)' if ref.startswith('#PWR') else ''
-    
-    return f"""\t(symbol
+class Schematic:
+    def __init__(self):
+        self.items = []
+        self.sym_registry = {}
+
+    def sym(self, ref, val, footprint, lib_name, sym_name, x, y, rot=0):
+        lib_id = f"{lib_name}:{sym_name}"
+        pins = load_sym_pins(lib_name, sym_name)
+        pin_str = "\n".join([f'\t\t(pin "{p}" (uuid "{new_uuid()}"))' for p in pins.keys()])
+        hide_ref = ' (hide yes)' if ref.startswith('#PWR') else ''
+        
+        u = new_uuid()
+        self.items.append(f"""\t(symbol
 \t\t(lib_id "{lib_id}")
-\t\t(at {x} {y} {rot})
+\t\t(at {x:.2f} {y:.2f} {rot})
 \t\t(unit 1)
 \t\t(exclude_from_sim no)
 \t\t(in_bom yes)
@@ -90,15 +146,15 @@ def sym(ref, val, footprint, lib_id, x, y, rot=0):
 \t\t(dnp no)
 \t\t(uuid "{u}")
 \t\t(property "Reference" "{ref}"
-\t\t\t(at {x} {y - 4} 0){hide_ref}
+\t\t\t(at {x:.2f} {y - 4:.2f} 0){hide_ref}
 \t\t\t(effects (font (size 1.27 1.27)))
 \t\t)
 \t\t(property "Value" "{val}"
-\t\t\t(at {x} {y + 4} 0)
+\t\t\t(at {x:.2f} {y + 4:.2f} 0)
 \t\t\t(effects (font (size 1.27 1.27)))
 \t\t)
 \t\t(property "Footprint" "{footprint}"
-\t\t\t(at {x} {y} 0)
+\t\t\t(at {x:.2f} {y:.2f} 0)
 \t\t\t(hide yes)
 \t\t\t(effects (font (size 1.27 1.27)))
 \t\t)
@@ -111,273 +167,550 @@ def sym(ref, val, footprint, lib_id, x, y, rot=0):
 \t\t\t\t)
 \t\t\t)
 \t\t)
-\t)"""
+\t)""")
+        self.sym_registry[ref] = (lib_name, sym_name, x, y, rot)
 
-def pwr_sym(val, x, y, rot=0):
-    ref = "#PWR" + new_uuid()[:6].upper()
-    return sym(ref, val, "", val, x, y, rot)
+    def pwr(self, val, x, y, rot=0):
+        ref = "#PWR" + new_uuid()[:6].upper()
+        self.sym(ref, val, "", "power", val, x, y, rot)
 
-def lbl(name, x, y, rot=0, justify="left bottom"):
-    u = new_uuid()
-    return f"""\t(label "{name}"
-\t\t(at {x} {y} {rot})
+    def lbl(self, name, x, y, rot=0, justify="left bottom"):
+        u = new_uuid()
+        self.items.append(f"""\t(label "{name}"
+\t\t(at {x:.2f} {y:.2f} {rot})
 \t\t(effects
 \t\t\t(font (size 1.27 1.27))
 \t\t\t(justify {justify})
 \t\t)
 \t\t(uuid "{u}")
-\t)"""
+\t)""")
 
-def wr(x1, y1, x2, y2):
-    u = new_uuid()
-    return f"""\t(wire
+    def wr(self, x1, y1, x2, y2):
+        if round(x1, 2) == round(x2, 2) and round(y1, 2) == round(y2, 2):
+            return
+        u = new_uuid()
+        self.items.append(f"""\t(wire
 \t\t(pts
-\t\t\t(xy {x1} {y1}) (xy {x2} {y2})
+\t\t\t(xy {x1:.2f} {y1:.2f}) (xy {x2:.2f} {y2:.2f})
 \t\t)
 \t\t(stroke (width 0) (type default))
 \t\t(uuid "{u}")
-\t)"""
+\t)""")
 
-def txt(text, x, y, size=2.5):
-    u = new_uuid()
-    clean_text = text.replace('"', '\\"')
-    return f"""\t(text "{clean_text}"
-\t\t(at {x} {y} 0)
+    def junc(self, x, y):
+        u = new_uuid()
+        self.items.append(f"""\t(junction
+\t\t(at {x:.2f} {y:.2f})
+\t\t(diameter 1.016)
+\t\t(color 0 0 0 0)
+\t\t(uuid "{u}")
+\t)""")
+
+    def no_connect(self, x, y):
+        u = new_uuid()
+        self.items.append(f"""\t(no_connect
+\t\t(at {x:.2f} {y:.2f})
+\t\t(uuid "{u}")
+\t)""")
+
+    def txt(self, text, x, y, size=2.5):
+        u = new_uuid()
+        clean = text.replace('"', '\\"')
+        self.items.append(f"""\t(text "{clean}"
+\t\t(at {x:.2f} {y:.2f} 0)
 \t\t(effects
 \t\t\t(font (size {size} {size}) (bold yes))
 \t\t\t(justify left bottom)
 \t\t)
 \t\t(uuid "{u}")
-\t)"""
+\t)""")
 
-items = []
+    def pin_pos(self, ref, pin_num):
+        lib_name, sym_name, x, y, rot = self.sym_registry[ref]
+        return get_pin(lib_name, sym_name, x, y, rot, pin_num)
 
-# 1. Arduino Nano v3 (Center)
-N_X = 170.0
-N_Y = 130.0
-items.append(txt("1. МИКРОКОНТРОЛЛЕР ARDUINO NANO (ATmega328P)", N_X - 40, N_Y - 32))
-items.append(sym("A1", "Arduino_Nano_v3.x", "Module:Arduino_Nano", "Arduino_Nano_v3.x", N_X, N_Y))
+s = Schematic()
 
-# Left pins:
-items.append(wr(N_X - 10.16, 119.84, N_X - 15.24, 119.84))
-items.append(pwr_sym("GND", N_X - 15.24, 119.84, 90))
+# ==============================================================================
+# SECTION 1: ARDUINO NANO v3 (CENTER)
+# ==============================================================================
+N_X = 167.64
+N_Y = 129.54
 
-items.append(wr(N_X - 10.16, 122.38, N_X - 15.24, 122.38))
-items.append(lbl("DIT", N_X - 15.24, 122.38, 0, "right bottom"))
+s.txt("1. МИКРОКОНТРОЛЛЕР ARDUINO NANO (ATmega328P)", N_X - 45.72, N_Y - 35.56)
+s.sym("A1", "Arduino_Nano_v3.x", "Module:Arduino_Nano", "MCU_Module", "Arduino_Nano_v3.x", N_X, N_Y, 0)
 
-items.append(wr(N_X - 10.16, 124.92, N_X - 15.24, 124.92))
-items.append(lbl("DAH", N_X - 15.24, 124.92, 0, "right bottom"))
+# Connect Left pins:
+# D0, D1 (no connect)
+s.no_connect(*s.pin_pos("A1", 2))
+s.no_connect(*s.pin_pos("A1", 1))
 
-items.append(wr(N_X - 10.16, 127.46, N_X - 15.24, 127.46))
-items.append(lbl("PS2_DATA", N_X - 15.24, 127.46, 0, "right bottom"))
+# D2 (DIT)
+p_d2 = s.pin_pos("A1", 5)
+s.wr(p_d2[0], p_d2[1], p_d2[0] - 12.70, p_d2[1])
+s.lbl("DIT", p_d2[0] - 12.70, p_d2[1], 0, "right bottom")
 
-items.append(wr(N_X - 10.16, 130.00, N_X - 15.24, 130.00))
-items.append(lbl("PS2_CLK", N_X - 15.24, 130.00, 0, "right bottom"))
+# D3 (DAH)
+p_d3 = s.pin_pos("A1", 6)
+s.wr(p_d3[0], p_d3[1], p_d3[0] - 12.70, p_d3[1])
+s.lbl("DAH", p_d3[0] - 12.70, p_d3[1], 0, "right bottom")
 
-items.append(wr(N_X - 10.16, 132.54, N_X - 15.24, 132.54))
-items.append(lbl("AUDIO_PWM", N_X - 15.24, 132.54, 0, "right bottom"))
+# D4 (PS2_DATA)
+p_d4 = s.pin_pos("A1", 7)
+s.wr(p_d4[0], p_d4[1], p_d4[0] - 12.70, p_d4[1])
+s.lbl("PS2_DATA", p_d4[0] - 12.70, p_d4[1], 0, "right bottom")
 
-items.append(wr(N_X - 10.16, 135.08, N_X - 15.24, 135.08))
-items.append(lbl("KEY_OUT_CTRL", N_X - 15.24, 135.08, 0, "right bottom"))
+# D5 (PS2_CLK)
+p_d5 = s.pin_pos("A1", 8)
+s.wr(p_d5[0], p_d5[1], p_d5[0] - 12.70, p_d5[1])
+s.lbl("PS2_CLK", p_d5[0] - 12.70, p_d5[1], 0, "right bottom")
 
-items.append(wr(N_X - 10.16, 137.62, N_X - 15.24, 137.62))
-items.append(lbl("LED_KEY", N_X - 15.24, 137.62, 0, "right bottom"))
+# D6, D7, D8 (no connect)
+s.no_connect(*s.pin_pos("A1", 9))
+s.no_connect(*s.pin_pos("A1", 10))
+s.no_connect(*s.pin_pos("A1", 11))
 
-items.append(wr(N_X - 10.16, 140.16, N_X - 15.24, 140.16))
-items.append(lbl("PTT_OUT_CTRL", N_X - 15.24, 140.16, 0, "right bottom"))
+# D9 (AUDIO_PWM)
+p_d9 = s.pin_pos("A1", 12)
+s.wr(p_d9[0], p_d9[1], p_d9[0] - 12.70, p_d9[1])
+s.lbl("AUDIO_PWM", p_d9[0] - 12.70, p_d9[1], 0, "right bottom")
 
-# Right pins:
-items.append(wr(N_X + 10.16, 114.76, N_X + 15.24, 114.76))
-items.append(pwr_sym("GND", N_X + 15.24, 114.76, 270))
+# D10 (KEY_OUT_CTRL)
+p_d10 = s.pin_pos("A1", 13)
+s.wr(p_d10[0], p_d10[1], p_d10[0] - 12.70, p_d10[1])
+s.lbl("KEY_OUT_CTRL", p_d10[0] - 12.70, p_d10[1], 0, "right bottom")
 
-items.append(wr(N_X + 10.16, 119.84, N_X + 15.24, 119.84))
-items.append(pwr_sym("+5V", N_X + 15.24, 119.84, 270))
+# D11 (PTT_OUT_CTRL)
+p_d11 = s.pin_pos("A1", 14)
+s.wr(p_d11[0], p_d11[1], p_d11[0] - 12.70, p_d11[1])
+s.lbl("PTT_OUT_CTRL", p_d11[0] - 12.70, p_d11[1], 0, "right bottom")
 
-items.append(wr(N_X + 10.16, 127.46, N_X + 15.24, 127.46))
-items.append(lbl("OLED_SCL", N_X + 15.24, 127.46, 0, "left bottom"))
+# D12 (no connect)
+s.no_connect(*s.pin_pos("A1", 15))
 
-items.append(wr(N_X + 10.16, 130.00, N_X + 15.24, 130.00))
-items.append(lbl("OLED_SDA", N_X + 15.24, 130.00, 0, "left bottom"))
+# D13 (LED_KEY)
+p_d13 = s.pin_pos("A1", 16)
+s.wr(p_d13[0], p_d13[1], p_d13[0] - 12.70, p_d13[1])
+s.lbl("LED_KEY", p_d13[0] - 12.70, p_d13[1], 0, "right bottom")
 
-items.append(wr(N_X + 10.16, 137.62, N_X + 15.24, 137.62))
-items.append(lbl("POT_TONE", N_X + 15.24, 137.62, 0, "left bottom"))
+# Right pins of Nano:
+s.no_connect(*s.pin_pos("A1", 28))
+s.no_connect(*s.pin_pos("A1", 3))
+s.no_connect(*s.pin_pos("A1", 18))
 
-items.append(wr(N_X + 10.16, 140.16, N_X + 15.24, 140.16))
-items.append(lbl("POT_SPEED", N_X + 15.24, 140.16, 0, "left bottom"))
+# A0 (POT_SPEED)
+p_a0 = s.pin_pos("A1", 19)
+s.wr(p_a0[0], p_a0[1], p_a0[0] + 12.70, p_a0[1])
+s.lbl("POT_SPEED", p_a0[0] + 12.70, p_a0[1], 0, "left bottom")
 
+# A1 (POT_TONE)
+p_a1 = s.pin_pos("A1", 20)
+s.wr(p_a1[0], p_a1[1], p_a1[0] + 12.70, p_a1[1])
+s.lbl("POT_TONE", p_a1[0] + 12.70, p_a1[1], 0, "left bottom")
 
-# 2. Paddle Input Module (Top-Left)
-items.append(txt("2. ВХОД МАНИПУЛЯТОРА (3.5mm JACK) С ФИЛЬТРАЦИЕЙ", 30, 40))
-items.append(sym("J1", "PADDLE_3.5mm", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Conn_01x03_Pin", 45, 55))
-items.append(lbl("DIT", 52, 52.46, 0, "left bottom"))
-items.append(lbl("DAH", 52, 55.00, 0, "left bottom"))
-items.append(pwr_sym("GND", 52, 57.54, 270))
+# A2, A3 (no connect)
+s.no_connect(*s.pin_pos("A1", 21))
+s.no_connect(*s.pin_pos("A1", 22))
 
-items.append(sym("C1", "10nF", "Capacitor_SMD:C_0805_2012Metric", "C", 70, 52.46, 90))
-items.append(wr(52, 52.46, 66.19, 52.46))
-items.append(wr(73.81, 52.46, 78, 52.46))
-items.append(pwr_sym("GND", 78, 52.46, 270))
+# A4 (OLED_SDA)
+p_a4 = s.pin_pos("A1", 23)
+s.wr(p_a4[0], p_a4[1], p_a4[0] + 12.70, p_a4[1])
+s.lbl("OLED_SDA", p_a4[0] + 12.70, p_a4[1], 0, "left bottom")
 
-items.append(sym("C2", "10nF", "Capacitor_SMD:C_0805_2012Metric", "C", 70, 57.54, 90))
-items.append(wr(52, 55.00, 66.19, 57.54))
-items.append(wr(73.81, 57.54, 78, 57.54))
-items.append(pwr_sym("GND", 78, 57.54, 270))
+# A5 (OLED_SCL)
+p_a5 = s.pin_pos("A1", 24)
+s.wr(p_a5[0], p_a5[1], p_a5[0] + 12.70, p_a5[1])
+s.lbl("OLED_SCL", p_a5[0] + 12.70, p_a5[1], 0, "left bottom")
 
+# A6, A7 (no connect)
+s.no_connect(*s.pin_pos("A1", 25))
+s.no_connect(*s.pin_pos("A1", 26))
 
-# 3. Transceiver Isolated Key Out & PTT (Top-Right)
-items.append(txt("3. ГАЛЬВАНИЧЕСКАЯ РАЗВЯЗКА К ТРАНСИВЕРУ (KEY & PTT OUT)", 240, 40))
+# Top & Bottom power pins of Nano:
+s.no_connect(*s.pin_pos("A1", 30))  # VIN
+s.no_connect(*s.pin_pos("A1", 17))  # 3V3
 
-# Key Out U2 (PC817)
-items.append(sym("U2", "PC817", "Package_DIP:DIP-4_W7.62mm", "PC817", 265, 55))
-items.append(sym("R4", "330R", "Resistor_SMD:R_0805_2012Metric", "R", 248, 52.46, 90))
-items.append(lbl("KEY_OUT_CTRL", 238, 52.46, 0, "right bottom"))
-items.append(wr(238, 52.46, 244.19, 52.46))
-items.append(wr(251.81, 52.46, 259.92, 52.46))
-items.append(wr(259.92, 57.54, 255, 57.54))
-items.append(pwr_sym("GND", 255, 57.54, 90))
+# Pin 27 (+5V)
+p_5v = s.pin_pos("A1", 27)
+s.wr(p_5v[0], p_5v[1], p_5v[0], p_5v[1] - 5.08)
+s.pwr("+5V", p_5v[0], p_5v[1] - 5.08, 0)
 
-items.append(sym("J2", "KEY_OUT_3.5mm", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Conn_01x02_Pin", 295, 55))
-items.append(wr(270.08, 52.46, 291.19, 52.46))
-items.append(wr(270.08, 57.54, 291.19, 55.00))
-items.append(sym("D2", "1N4148", "Diode_SMD:D_SOD-123", "D", 280, 55, 270))
+# Pin 4 (GND)
+p_gnd = s.pin_pos("A1", 4)
+s.wr(p_gnd[0], p_gnd[1], p_gnd[0], p_gnd[1] + 5.08)
+s.pwr("GND", p_gnd[0], p_gnd[1] + 5.08, 0)
 
-# PTT Out U3 (PC817)
-items.append(sym("U3", "PC817", "Package_DIP:DIP-4_W7.62mm", "PC817", 265, 80))
-items.append(sym("R5", "330R", "Resistor_SMD:R_0805_2012Metric", "R", 248, 77.46, 90))
-items.append(lbl("PTT_OUT_CTRL", 238, 77.46, 0, "right bottom"))
-items.append(wr(238, 77.46, 244.19, 77.46))
-items.append(wr(251.81, 77.46, 259.92, 77.46))
-items.append(wr(259.92, 82.54, 255, 82.54))
-items.append(pwr_sym("GND", 255, 82.54, 90))
-
-items.append(sym("J3", "PTT_OUT_RCA", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Conn_01x02_Pin", 295, 80))
-items.append(wr(270.08, 77.46, 291.19, 77.46))
-items.append(wr(270.08, 82.54, 291.19, 80.00))
+s.no_connect(*s.pin_pos("A1", 29))  # GND pin 29
 
 
-# 4. Analog Audio Stage (Two-Stage Butterworth Low-Pass Filter & Soft Tone Driver)
-items.append(txt("4. АНАЛОГОВЫЙ ЗВУКОВОЙ ТРАКТ: 2-ЗВЕННЫЙ ФНЧ + BC547", 30, 175))
-items.append(lbl("AUDIO_PWM", 35, 190, 0, "right bottom"))
-items.append(wr(35, 190, 42, 190))
+# ==============================================================================
+# SECTION 2: PADDLE INPUT (3.5mm JACK) WITH RF FILTER (TOP-LEFT)
+# ==============================================================================
+s.txt("2. ВХОД МАНИПУЛЯТОРА (3.5mm JACK) С ФИЛЬТРАЦИЕЙ", 30.48, 40.64)
 
-# 1-е звено RC: R1 (1k) + C3 (100nF)
-items.append(sym("R1", "1k", "Resistor_SMD:R_0805_2012Metric", "R", 46, 190, 90))
-items.append(wr(49.81, 190, 58, 190))
-items.append(sym("C3", "100nF", "Capacitor_SMD:C_0805_2012Metric", "C", 58, 198, 0))
-items.append(wr(58, 190, 58, 194.19))
-items.append(wr(58, 201.81, 58, 206))
-items.append(pwr_sym("GND", 58, 206))
+J1_X = 45.72
+J1_Y = 55.88
+s.sym("J1", "PADDLE_3.5mm", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", J1_X, J1_Y, 0)
 
-# 2-е звено RC: R2 (1k) + C4 (47nF)
-items.append(wr(58, 190, 66, 190))
-items.append(sym("R2", "1k", "Resistor_SMD:R_0805_2012Metric", "R", 70, 190, 90))
-items.append(wr(73.81, 190, 82, 190))
-items.append(sym("C4", "47nF", "Capacitor_SMD:C_0805_2012Metric", "C", 82, 198, 0))
-items.append(wr(82, 190, 82, 194.19))
-items.append(wr(82, 201.81, 82, 206))
-items.append(pwr_sym("GND", 82, 206))
+p_j1_1 = s.pin_pos("J1", 1)  # DIT
+p_j1_2 = s.pin_pos("J1", 2)  # DAH
+p_j1_3 = s.pin_pos("J1", 3)  # GND
+
+# DIT line
+s.wr(p_j1_1[0], p_j1_1[1], 76.20, p_j1_1[1])
+s.lbl("DIT", 76.20, p_j1_1[1], 0, "left bottom")
+
+# C1 shunt across DIT to GND:
+# Place C1 so Pin 1 touches p_j1_1[1] (53.34)
+# In Device:C rot=0: Pin 1 is at y - 3.81. So y = 53.34 + 3.81 = 57.15
+s.sym("C1", "10nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 63.50, 57.15, 0)
+p_c1_1 = s.pin_pos("C1", 1)
+p_c1_2 = s.pin_pos("C1", 2)
+s.junc(p_c1_1[0], p_c1_1[1])
+s.wr(p_c1_2[0], p_c1_2[1], p_c1_2[0], p_c1_2[1] + 5.08)
+s.pwr("GND", p_c1_2[0], p_c1_2[1] + 5.08, 0)
+
+# DAH line: route down to 76.20
+s.wr(p_j1_2[0], p_j1_2[1], 55.88, p_j1_2[1])
+s.wr(55.88, p_j1_2[1], 55.88, 76.20)
+s.wr(55.88, 76.20, 76.20, 76.20)
+s.lbl("DAH", 76.20, 76.20, 0, "left bottom")
+
+# C2 shunt across DAH to GND:
+s.sym("C2", "10nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 63.50, 80.01, 0)
+p_c2_1 = s.pin_pos("C2", 1)
+p_c2_2 = s.pin_pos("C2", 2)
+s.junc(p_c2_1[0], p_c2_1[1])
+s.wr(p_c2_2[0], p_c2_2[1], p_c2_2[0], p_c2_2[1] + 5.08)
+s.pwr("GND", p_c2_2[0], p_c2_2[1] + 5.08, 0)
+
+# GND of J1
+s.wr(p_j1_3[0], p_j1_3[1], p_j1_3[0], p_j1_3[1] + 7.62)
+s.pwr("GND", p_j1_3[0], p_j1_3[1] + 7.62, 0)
+
+
+# ==============================================================================
+# SECTION 3: GALVANIC ISOLATION (KEY & PTT OUT) TO TRANSCEIVER (TOP-RIGHT)
+# ==============================================================================
+s.txt("3. ГАЛЬВАНИЧЕСКАЯ РАЗВЯЗКА К ТРАНСИВЕРУ (KEY & PTT OUT)", 233.68, 40.64)
+
+# --- KEY OUT: U2 (PC817) ---
+s.sym("U2", "PC817", "Package_DIP:DIP-4_W7.62mm", "Isolator", "PC817", 264.16, 55.88, 0)
+p_u2_1 = s.pin_pos("U2", 1)  # Anode
+p_u2_2 = s.pin_pos("U2", 2)  # Cathode
+p_u2_3 = s.pin_pos("U2", 3)  # Emitter
+p_u2_4 = s.pin_pos("U2", 4)  # Collector
+
+# R4 (330R) horizontal rot=90: Pin 2 at p_u2_1[0], Pin 1 to the left
+# In Device:R rot=90: Pin 2 is at x + 3.81. We want Pin 2 at p_u2_1[0] - 6.35
+s.sym("R4", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 246.38, p_u2_1[1], 90)
+p_r4_1 = s.pin_pos("R4", 1)
+p_r4_2 = s.pin_pos("R4", 2)
+
+s.wr(p_r4_2[0], p_r4_2[1], p_u2_1[0], p_u2_1[1])
+s.wr(p_r4_1[0], p_r4_1[1], p_r4_1[0] - 6.35, p_r4_1[1])
+s.lbl("KEY_OUT_CTRL", p_r4_1[0] - 6.35, p_r4_1[1], 0, "right bottom")
+
+# Cathode to GND
+s.wr(p_u2_2[0], p_u2_2[1], p_u2_2[0], p_u2_2[1] + 5.08)
+s.pwr("GND", p_u2_2[0], p_u2_2[1] + 5.08, 0)
+
+# Output connector J2: Conn_01x02_Pin at (299.72, 55.88) rot=180
+s.sym("J2", "KEY_OUT_3.5mm", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 299.72, 55.88, 180)
+p_j2_1 = s.pin_pos("J2", 1)
+p_j2_2 = s.pin_pos("J2", 2)
+
+# Collector to J2 Pin 2 (top pin at 53.34)
+s.wr(p_u2_4[0], p_u2_4[1], p_j2_2[0], p_u2_4[1])
+s.wr(p_j2_2[0], p_u2_4[1], p_j2_2[0], p_j2_2[1])
+
+# Emitter to J2 Pin 1 (bottom pin at 55.88)
+s.wr(p_u2_3[0], p_u2_3[1], 284.48, p_u2_3[1])
+s.wr(284.48, p_u2_3[1], 284.48, p_j2_1[1])
+s.wr(284.48, p_j2_1[1], p_j2_1[0], p_j2_1[1])
+
+# Flyback Diode D2 (1N4148):
+# Place D2 vertical rot=270 between Collector and Emitter at x=279.40
+s.sym("D2", "1N4148", "Diode_SMD:D_SOD-123", "Device", "D", 279.40, 55.88, 270)
+p_d2_1 = s.pin_pos("D2", 1)  # Cathode (top)
+p_d2_2 = s.pin_pos("D2", 2)  # Anode (bottom)
+
+s.wr(p_d2_1[0], p_d2_1[1], p_d2_1[0], p_u2_4[1])
+s.junc(p_d2_1[0], p_u2_4[1])
+s.wr(p_d2_2[0], p_d2_2[1], p_d2_2[0], p_u2_3[1])
+s.junc(p_d2_2[0], p_u2_3[1])
+
+
+# --- PTT OUT: U3 (PC817) ---
+s.sym("U3", "PC817", "Package_DIP:DIP-4_W7.62mm", "Isolator", "PC817", 264.16, 81.28, 0)
+p_u3_1 = s.pin_pos("U3", 1)
+p_u3_2 = s.pin_pos("U3", 2)
+p_u3_3 = s.pin_pos("U3", 3)
+p_u3_4 = s.pin_pos("U3", 4)
+
+s.sym("R5", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 246.38, p_u3_1[1], 90)
+p_r5_1 = s.pin_pos("R5", 1)
+p_r5_2 = s.pin_pos("R5", 2)
+
+s.wr(p_r5_2[0], p_r5_2[1], p_u3_1[0], p_u3_1[1])
+s.wr(p_r5_1[0], p_r5_1[1], p_r5_1[0] - 6.35, p_r5_1[1])
+s.lbl("PTT_OUT_CTRL", p_r5_1[0] - 6.35, p_r5_1[1], 0, "right bottom")
+
+s.wr(p_u3_2[0], p_u3_2[1], p_u3_2[0], p_u3_2[1] + 5.08)
+s.pwr("GND", p_u3_2[0], p_u3_2[1] + 5.08, 0)
+
+s.sym("J3", "PTT_OUT_RCA", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 299.72, 81.28, 180)
+p_j3_1 = s.pin_pos("J3", 1)
+p_j3_2 = s.pin_pos("J3", 2)
+
+s.wr(p_u3_4[0], p_u3_4[1], p_j3_2[0], p_u3_4[1])
+s.wr(p_j3_2[0], p_u3_4[1], p_j3_2[0], p_j3_2[1])
+
+s.wr(p_u3_3[0], p_u3_3[1], 284.48, p_u3_3[1])
+s.wr(284.48, p_u3_3[1], 284.48, p_j3_1[1])
+s.wr(284.48, p_j3_1[1], p_j3_1[0], p_j3_1[1])
+
+
+# ==============================================================================
+# SECTION 4: ANALOG AUDIO STAGE (TWO-STAGE BUTTERWORTH LOW-PASS + BC547)
+# ==============================================================================
+s.txt("4. АНАЛОГОВЫЙ ЗВУКОВОЙ ТРАКТ: 2-ЗВЕННЫЙ ФНЧ + BC547", 30.48, 172.72)
+
+AUDIO_Y = 190.50
+
+# R1 (1k) horizontal rot=90
+s.sym("R1", "1k", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 45.72, AUDIO_Y, 90)
+p_r1_1 = s.pin_pos("R1", 1)
+p_r1_2 = s.pin_pos("R1", 2)
+
+s.lbl("AUDIO_PWM", p_r1_1[0] - 7.62, p_r1_1[1], 0, "right bottom")
+s.wr(p_r1_1[0] - 7.62, p_r1_1[1], p_r1_1[0], p_r1_1[1])
+
+# C3 (100nF) shunt to GND
+s.sym("C3", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 58.42, AUDIO_Y + 3.81, 0)
+p_c3_1 = s.pin_pos("C3", 1)
+p_c3_2 = s.pin_pos("C3", 2)
+
+s.wr(p_r1_2[0], p_r1_2[1], p_c3_1[0], p_c3_1[1])
+s.junc(p_c3_1[0], p_c3_1[1])
+s.wr(p_c3_2[0], p_c3_2[1], p_c3_2[0], p_c3_2[1] + 5.08)
+s.pwr("GND", p_c3_2[0], p_c3_2[1] + 5.08, 0)
+
+# R2 (1k) horizontal rot=90
+s.sym("R2", "1k", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 72.39, AUDIO_Y, 90)
+p_r2_1 = s.pin_pos("R2", 1)
+p_r2_2 = s.pin_pos("R2", 2)
+
+s.wr(p_c3_1[0], p_c3_1[1], p_r2_1[0], p_r2_1[1])
+
+# C4 (47nF) shunt to GND
+s.sym("C4", "47nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 85.09, AUDIO_Y + 3.81, 0)
+p_c4_1 = s.pin_pos("C4", 1)
+p_c4_2 = s.pin_pos("C4", 2)
+
+s.wr(p_r2_2[0], p_r2_2[1], p_c4_1[0], p_c4_1[1])
+s.junc(p_c4_1[0], p_c4_1[1])
+s.wr(p_c4_2[0], p_c4_2[1], p_c4_2[0], p_c4_2[1] + 5.08)
+s.pwr("GND", p_c4_2[0], p_c4_2[1] + 5.08, 0)
 
 # Volume Potentiometer RV3 (10k)
-items.append(sym("RV3", "10k (Volume)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "R_Potentiometer", 96, 190, 0))
-items.append(wr(82, 190, 96, 184.92))
-items.append(wr(96, 195.08, 96, 202))
-items.append(pwr_sym("GND", 96, 202))
+s.sym("RV3", "10k (Volume)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 99.06, AUDIO_Y + 3.81, 0)
+p_rv3_1 = s.pin_pos("RV3", 1)
+p_rv3_2 = s.pin_pos("RV3", 2)
+p_rv3_3 = s.pin_pos("RV3", 3)
 
-# R6 (470R)
-items.append(wr(99.81, 190, 106, 190))
-items.append(sym("R6", "470R", "Resistor_SMD:R_0805_2012Metric", "R", 110, 190, 90))
+s.wr(p_c4_1[0], p_c4_1[1], p_rv3_1[0], p_rv3_1[1])
+s.wr(p_rv3_3[0], p_rv3_3[1], p_rv3_3[0], p_rv3_3[1] + 5.08)
+s.pwr("GND", p_rv3_3[0], p_rv3_3[1] + 5.08, 0)
 
-# Q1 (BC547)
-items.append(wr(113.81, 190, 120, 190))
-items.append(sym("Q1", "BC547", "Package_TO_SOT_THT:TO-92_Inline", "BC547", 125, 190))
-items.append(wr(127.54, 192.54, 127.54, 202))
-items.append(pwr_sym("GND", 127.54, 202))
+# R6 (470R) horizontal rot=90: Base resistor for Q1
+s.sym("R6", "470R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 110.49, p_rv3_2[1], 90)
+p_r6_1 = s.pin_pos("R6", 1)
+p_r6_2 = s.pin_pos("R6", 2)
 
-# Speaker J4 + Damping C5 + R7 (33R 1W)
-items.append(sym("J4", "SPEAKER_8R", "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical", "Conn_01x02_Pin", 148, 185))
-items.append(wr(127.54, 187.46, 144.19, 187.46))
+s.wr(p_rv3_2[0], p_rv3_2[1], p_r6_1[0], p_r6_1[1])
 
-items.append(sym("C5", "100nF", "Capacitor_SMD:C_0805_2012Metric", "C", 137, 197, 0))
-items.append(wr(127.54, 187.46, 137, 193.19))
-items.append(wr(137, 200.81, 137, 206))
-items.append(pwr_sym("GND", 137, 206))
+# Q1 (BC547):
+s.sym("Q1", "BC547", "Package_TO_SOT_THT:TO-92_Inline", "Transistor_BJT", "BC547", 124.46, p_rv3_2[1], 0)
+p_q1_c = s.pin_pos("Q1", 1)
+p_q1_b = s.pin_pos("Q1", 2)
+p_q1_e = s.pin_pos("Q1", 3)
 
-items.append(wr(144.19, 182.54, 144.19, 175))
-items.append(sym("R7", "33R (1W)", "Resistor_SMD:R_1206_3216Metric", "R", 152, 175, 90))
-items.append(wr(155.81, 175, 162, 175))
-items.append(pwr_sym("+5V", 162, 175, 270))
+s.wr(p_r6_2[0], p_r6_2[1], p_q1_b[0], p_q1_b[1])
+s.wr(p_q1_e[0], p_q1_e[1], p_q1_e[0], p_q1_e[1] + 3.81)
+s.pwr("GND", p_q1_e[0], p_q1_e[1] + 3.81, 0)
 
+# Collector node:
+# C5 (100nF) damping cap to GND
+s.sym("C5", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 137.16, p_q1_c[1] + 3.81, 0)
+p_c5_1 = s.pin_pos("C5", 1)
+p_c5_2 = s.pin_pos("C5", 2)
 
-# 5. Front Panel Controls (Speed, Tone, LED Key)
-items.append(txt("5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ", 210, 175))
+s.wr(p_q1_c[0], p_q1_c[1], p_c5_1[0], p_c5_1[1])
+s.junc(p_c5_1[0], p_c5_1[1])
+s.wr(p_c5_2[0], p_c5_2[1], p_c5_2[0], p_c5_2[1] + 5.08)
+s.pwr("GND", p_c5_2[0], p_c5_2[1] + 5.08, 0)
 
-# Speed Pot RV1 (10k)
-items.append(sym("RV1", "10k (Speed)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "R_Potentiometer", 220, 190))
-items.append(pwr_sym("+5V", 220, 183, 0))
-items.append(pwr_sym("GND", 220, 197, 0))
-items.append(wr(223.81, 190, 230, 190))
-items.append(lbl("POT_SPEED", 230, 190, 0, "left bottom"))
+# Speaker connector J4 (Conn_01x02_Pin) rot=180:
+s.sym("J4", "SPEAKER_8R", "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical", "Connector", "Conn_01x02_Pin", 154.94, p_q1_c[1], 180)
+p_j4_1 = s.pin_pos("J4", 1)  # Bottom pin (at p_q1_c[1] = 189.23)
+p_j4_2 = s.pin_pos("J4", 2)  # Top pin (at 186.69)
 
-# Tone Pot RV2 (10k)
-items.append(sym("RV2", "10k (Tone)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "R_Potentiometer", 245, 190))
-items.append(pwr_sym("+5V", 245, 183, 0))
-items.append(pwr_sym("GND", 245, 197, 0))
-items.append(wr(248.81, 190, 255, 190))
-items.append(lbl("POT_TONE", 255, 190, 0, "left bottom"))
+s.wr(p_c5_1[0], p_c5_1[1], p_j4_1[0], p_j4_1[1])
 
-# LED Key D1 + R3
-items.append(lbl("LED_KEY", 270, 185, 0, "right bottom"))
-items.append(wr(270, 185, 274, 185))
-items.append(sym("R3", "330R", "Resistor_SMD:R_0805_2012Metric", "R", 278, 185, 90))
-items.append(wr(281.81, 185, 286, 185))
-items.append(sym("D1", "LED_KEY", "LED_THT:LED_D3.0mm", "LED", 290, 185, 90))
-items.append(wr(293.81, 185, 298, 185))
-items.append(pwr_sym("GND", 298, 185, 270))
+# J4 Pin 2 connects through R7 (33R 1W) to +5V:
+R7_Y = 175.26
+s.wr(p_j4_2[0], p_j4_2[1], p_j4_2[0], R7_Y)
 
+s.sym("R7", "33R (1W)", "Resistor_SMD:R_1206_3216Metric", "Device", "R", 158.75, R7_Y, 90)
+p_r7_1 = s.pin_pos("R7", 1)
+p_r7_2 = s.pin_pos("R7", 2)
 
-# 6. OLED 0.96" I2C Header
-items.append(txt("6. ЭКРАН OLED 0.96 ДЮЙМА I2C FAST", 30, 95))
-items.append(sym("J5", "OLED_0.96_I2C", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Conn_01x04_Pin", 45, 115))
-items.append(wr(41.19, 111.18, 35, 111.18))
-items.append(pwr_sym("GND", 35, 111.18, 90))
-items.append(wr(41.19, 113.72, 35, 113.72))
-items.append(pwr_sym("+5V", 35, 113.72, 90))
-items.append(wr(41.19, 116.26, 35, 116.26))
-items.append(lbl("OLED_SCL", 35, 116.26, 0, "right bottom"))
-items.append(wr(41.19, 118.80, 35, 118.80))
-items.append(lbl("OLED_SDA", 35, 118.80, 0, "right bottom"))
+s.wr(p_j4_2[0], R7_Y, p_r7_1[0], p_r7_1[1])
+s.wr(p_r7_2[0], p_r7_2[1], p_r7_2[0] + 5.08, p_r7_2[1])
+s.pwr("+5V", p_r7_2[0] + 5.08, p_r7_2[1], 270)
 
 
-# 7. PS/2 Keyboard Expansion Header
-items.append(txt("7. РАЗЪЁМ PS/2 КЛАВИАТУРЫ (ОПЦИЯ)", 240, 105))
-items.append(sym("J6", "PS2_KEYBOARD", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Conn_01x04_Pin", 255, 125))
-items.append(wr(251.19, 121.18, 245, 121.18))
-items.append(pwr_sym("+5V", 245, 121.18, 90))
-items.append(wr(251.19, 123.72, 245, 123.72))
-items.append(power_sym_2 := pwr_sym("GND", 245, 123.72, 90))
-items.append(wr(251.19, 126.26, 245, 126.26))
-items.append(lbl("PS2_DATA", 245, 126.26, 0, "right bottom"))
-items.append(wr(251.19, 128.80, 245, 128.80))
-items.append(lbl("PS2_CLK", 245, 128.80, 0, "right bottom"))
+# ==============================================================================
+# SECTION 5: FRONT PANEL CONTROLS (SPEED, TONE, LED KEY)
+# ==============================================================================
+s.txt("5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ", 215.90, 172.72)
+
+# RV1 Speed (10k)
+s.sym("RV1", "10k (Speed)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 228.60, 190.50, 0)
+p_rv1_1 = s.pin_pos("RV1", 1)
+p_rv1_2 = s.pin_pos("RV1", 2)
+p_rv1_3 = s.pin_pos("RV1", 3)
+
+s.wr(p_rv1_1[0], p_rv1_1[1], p_rv1_1[0], p_rv1_1[1] - 5.08)
+s.pwr("+5V", p_rv1_1[0], p_rv1_1[1] - 5.08, 0)
+
+s.wr(p_rv1_3[0], p_rv1_3[1], p_rv1_3[0], p_rv1_3[1] + 5.08)
+s.pwr("GND", p_rv1_3[0], p_rv1_3[1] + 5.08, 0)
+
+s.wr(p_rv1_2[0], p_rv1_2[1], p_rv1_2[0] + 6.35, p_rv1_2[1])
+s.lbl("POT_SPEED", p_rv1_2[0] + 6.35, p_rv1_2[1], 0, "left bottom")
+
+# RV2 Tone (10k)
+s.sym("RV2", "10k (Tone)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 254.00, 190.50, 0)
+p_rv2_1 = s.pin_pos("RV2", 1)
+p_rv2_2 = s.pin_pos("RV2", 2)
+p_rv2_3 = s.pin_pos("RV2", 3)
+
+s.wr(p_rv2_1[0], p_rv2_1[1], p_rv2_1[0], p_rv2_1[1] - 5.08)
+s.pwr("+5V", p_rv2_1[0], p_rv2_1[1] - 5.08, 0)
+
+s.wr(p_rv2_3[0], p_rv2_3[1], p_rv2_3[0], p_rv2_3[1] + 5.08)
+s.pwr("GND", p_rv2_3[0], p_rv2_3[1] + 5.08, 0)
+
+s.wr(p_rv2_2[0], p_rv2_2[1], p_rv2_2[0] + 6.35, p_rv2_2[1])
+s.lbl("POT_TONE", p_rv2_2[0] + 6.35, p_rv2_2[1], 0, "left bottom")
+
+# LED Key: D1 + R3
+s.sym("R3", "330R", "Resistor_SMD:R_0805_2012Metric", "Device", "R", 283.21, 190.50, 90)
+p_r3_1 = s.pin_pos("R3", 1)
+p_r3_2 = s.pin_pos("R3", 2)
+
+s.lbl("LED_KEY", p_r3_1[0] - 6.35, p_r3_1[1], 0, "right bottom")
+s.wr(p_r3_1[0] - 6.35, p_r3_1[1], p_r3_1[0], p_r3_1[1])
+
+# D1 rot=180: Anode (pin 2) on left at x - 3.81, Cathode (pin 1) on right at x + 3.81
+s.sym("D1", "LED_KEY", "LED_THT:LED_D3.0mm", "Device", "LED", 294.64, 190.50, 180)
+p_d1_k = s.pin_pos("D1", 1)
+p_d1_a = s.pin_pos("D1", 2)
+
+s.wr(p_r3_2[0], p_r3_2[1], p_d1_a[0], p_d1_a[1])
+s.wr(p_d1_k[0], p_d1_k[1], p_d1_k[0] + 5.08, p_d1_k[1])
+s.pwr("GND", p_d1_k[0] + 5.08, p_d1_k[1], 270)
 
 
-# 8. Power Decoupling Block
-items.append(txt("8. ФИЛЬТРАЦИЯ ШИНЫ ПИТАНИЯ +5V", 220, 225))
-items.append(pwr_sym("+5V", 230, 235))
-items.append(wr(230, 235, 240, 235))
-items.append(sym("C6", "100uF", "Capacitor_SMD:CP_Elec_6.3x5.4", "C_Polarized", 240, 245, 0))
-items.append(wr(240, 235, 240, 241.19))
-items.append(wr(240, 248.81, 240, 255))
-items.append(pwr_sym("GND", 240, 255))
+# ==============================================================================
+# SECTION 6: OLED 0.96" I2C CONNECTOR HEADER
+# ==============================================================================
+s.txt("6. ЭКРАН OLED 0.96 ДЮЙМА I2C FAST", 30.48, 106.68)
 
-items.append(wr(240, 235, 255, 235))
-items.append(sym("C7", "100nF", "Capacitor_SMD:C_0805_2012Metric", "C", 255, 245, 0))
-items.append(wr(255, 235, 255, 241.19))
-items.append(wr(255, 248.81, 255, 255))
-items.append(pwr_sym("GND", 255, 255))
+# J5 (Conn_01x04_Pin) rot=180:
+# Pins calculated dynamically via pin_pos!
+s.sym("J5", "OLED_0.96_I2C", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Connector", "Conn_01x04_Pin", 55.88, 121.92, 180)
+p_j5_1 = s.pin_pos("J5", 1)  # GND
+p_j5_2 = s.pin_pos("J5", 2)  # +5V
+p_j5_3 = s.pin_pos("J5", 3)  # OLED_SCL
+p_j5_4 = s.pin_pos("J5", 4)  # OLED_SDA
 
-lib_str = "\n".join(lib_symbols_list)
-items_str = "\n".join(items)
+# Pin 1: GND
+s.wr(p_j5_1[0], p_j5_1[1], p_j5_1[0] - 7.62, p_j5_1[1])
+s.pwr("GND", p_j5_1[0] - 7.62, p_j5_1[1], 90)
+
+# Pin 2: +5V
+s.wr(p_j5_2[0], p_j5_2[1], p_j5_2[0] - 7.62, p_j5_2[1])
+s.pwr("+5V", p_j5_2[0] - 7.62, p_j5_2[1], 90)
+
+# Pin 3: OLED_SCL
+s.wr(p_j5_3[0], p_j5_3[1], p_j5_3[0] - 7.62, p_j5_3[1])
+s.lbl("OLED_SCL", p_j5_3[0] - 7.62, p_j5_3[1], 0, "right bottom")
+
+# Pin 4: OLED_SDA
+s.wr(p_j5_4[0], p_j5_4[1], p_j5_4[0] - 7.62, p_j5_4[1])
+s.lbl("OLED_SDA", p_j5_4[0] - 7.62, p_j5_4[1], 0, "right bottom")
+
+
+# ==============================================================================
+# SECTION 7: PS/2 KEYBOARD EXPANSION HEADER (OPTION)
+# ==============================================================================
+s.txt("7. РАЗЪЁМ PS/2 КЛАВИАТУРЫ (ОПЦИЯ)", 233.68, 106.68)
+
+s.sym("J6", "PS2_KEYBOARD", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Connector", "Conn_01x04_Pin", 259.08, 121.92, 180)
+p_j6_1 = s.pin_pos("J6", 1)  # +5V
+p_j6_2 = s.pin_pos("J6", 2)  # GND
+p_j6_3 = s.pin_pos("J6", 3)  # PS2_DATA
+p_j6_4 = s.pin_pos("J6", 4)  # PS2_CLK
+
+s.wr(p_j6_1[0], p_j6_1[1], p_j6_1[0] - 7.62, p_j6_1[1])
+s.pwr("+5V", p_j6_1[0] - 7.62, p_j6_1[1], 90)
+
+s.wr(p_j6_2[0], p_j6_2[1], p_j6_2[0] - 7.62, p_j6_2[1])
+s.pwr("GND", p_j6_2[0] - 7.62, p_j6_2[1], 90)
+
+s.wr(p_j6_3[0], p_j6_3[1], p_j6_3[0] - 7.62, p_j6_3[1])
+s.lbl("PS2_DATA", p_j6_3[0] - 7.62, p_j6_3[1], 0, "right bottom")
+
+s.wr(p_j6_4[0], p_j6_4[1], p_j6_4[0] - 7.62, p_j6_4[1])
+s.lbl("PS2_CLK", p_j6_4[0] - 7.62, p_j6_4[1], 0, "right bottom")
+
+
+# ==============================================================================
+# SECTION 8: POWER RAIL DECOUPLING & PWR_FLAG
+# ==============================================================================
+s.txt("8. ФИЛЬТРАЦИЯ ШИНЫ ПИТАНИЯ +5V", 228.60, 223.52)
+
+PWR_LINE_Y = 233.68
+
+# C6 (100uF Electrolytic)
+s.sym("C6", "100uF", "Capacitor_SMD:CP_Elec_6.3x5.4", "Device", "C_Polarized", 246.38, PWR_LINE_Y + 3.81, 0)
+p_c6_1 = s.pin_pos("C6", 1)
+p_c6_2 = s.pin_pos("C6", 2)
+
+# C7 (100nF Ceramic)
+s.sym("C7", "100nF", "Capacitor_SMD:C_0805_2012Metric", "Device", "C", 261.62, PWR_LINE_Y + 3.81, 0)
+p_c7_1 = s.pin_pos("C7", 1)
+p_c7_2 = s.pin_pos("C7", 2)
+
+s.pwr("+5V", p_c6_1[0], PWR_LINE_Y, 0)
+s.wr(p_c6_1[0], PWR_LINE_Y, p_c7_1[0], PWR_LINE_Y)
+
+s.wr(p_c6_2[0], p_c6_2[1], p_c6_2[0], p_c6_2[1] + 5.08)
+s.pwr("GND", p_c6_2[0], p_c6_2[1] + 5.08, 0)
+
+s.wr(p_c7_2[0], p_c7_2[1], p_c7_2[0], p_c7_2[1] + 5.08)
+s.pwr("GND", p_c7_2[0], p_c7_2[1] + 5.08, 0)
+s.sym("FLG_GND", "PWR_FLAG", "", "power", "PWR_FLAG", p_c7_2[0], p_c7_2[1] + 5.08, 0)
+
+
+
+
+# Output schematic
+lib_str = "\n".join(embedded_symbols)
+items_str = "\n".join(s.items)
 
 final_sch = f"""(kicad_sch
 \t(version 20260101)
@@ -408,10 +741,7 @@ out_file = r"e:\dev\morse-trainer\hardware\MorseWave_Pro\MorseWave_Pro\MorseWave
 with open(out_file, "w", encoding="utf-8") as f:
     f.write(final_sch)
 
-print(f"Final schematic written: {out_file} ({len(final_sch)} bytes)")
+print(f"Schematic generated: {out_file} ({len(final_sch)} bytes)")
 
-# Test with kicad-cli
-cmd = [r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe", "sch", "export", "svg", out_file]
-res = subprocess.run(cmd, capture_output=True, text=True)
-print("Export exit code:", res.returncode)
-print("Output:", res.stdout + res.stderr)
+res = subprocess.run([r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe", "sch", "erc", out_file], capture_output=True, text=True)
+print("ERC Output:", res.stdout + res.stderr)

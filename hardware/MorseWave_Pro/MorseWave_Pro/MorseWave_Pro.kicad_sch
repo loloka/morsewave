@@ -12,7 +12,7 @@
 		(comment 1 "CW Keyer with Curtis Lookahead, 2-Stage Filter & Transceiver Isolation")
 	)
 	(lib_symbols
-(symbol "Arduino_Nano_v2.x"
+(symbol "MCU_Module:Arduino_Nano_v2.x"
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -653,8 +653,12 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "Arduino_Nano_v3.x"
-		(extends "Arduino_Nano_v2.x")
+(symbol "MCU_Module:Arduino_Nano_v3.x"
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "A"
 			(at -10.16 23.495 0)
 			(show_name no)
@@ -666,7 +670,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "Arduino_Nano_v3.x"
+		(property "Value" "Arduino_Nano_v2.x"
 			(at 5.08 -24.13 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -689,7 +693,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "http://www.mouser.com/pdfdocs/Gravitech_Arduino_Nano3_0.pdf"
+		(property "Datasheet" "https://www.arduino.cc/en/uploads/Main/ArduinoNanoManual23.pdf"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -700,7 +704,7 @@
 				)
 			)
 		)
-		(property "Description" "Arduino Nano v3.x"
+		(property "Description" "Arduino Nano v2.x"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -733,12 +737,575 @@
 				)
 			)
 		)
+		(symbol "Arduino_Nano_v3.x_0_1"
+			(rectangle
+				(start -10.16 22.86)
+				(end 10.16 -22.86)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+		)
+		(symbol "Arduino_Nano_v3.x_1_1"
+			(pin bidirectional line
+				(at -12.7 12.7 0)
+				(length 2.54)
+				(name "D1/TX"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 15.24 0)
+				(length 2.54)
+				(name "D0/RX"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 12.7 12.7 180)
+				(length 2.54)
+				(name "~{RESET}"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 0 -25.4 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 10.16 0)
+				(length 2.54)
+				(name "D2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 7.62 0)
+				(length 2.54)
+				(name "D3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 5.08 0)
+				(length 2.54)
+				(name "D4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 2.54 0)
+				(length 2.54)
+				(name "D5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 0 0)
+				(length 2.54)
+				(name "D6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -2.54 0)
+				(length 2.54)
+				(name "D7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -5.08 0)
+				(length 2.54)
+				(name "D8"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -7.62 0)
+				(length 2.54)
+				(name "D9"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -10.16 0)
+				(length 2.54)
+				(name "D10"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -12.7 0)
+				(length 2.54)
+				(name "D11"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -15.24 0)
+				(length 2.54)
+				(name "D12"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -12.7 -17.78 0)
+				(length 2.54)
+				(name "D13"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 2.54 25.4 270)
+				(length 2.54)
+				(name "3V3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 12.7 5.08 180)
+				(length 2.54)
+				(name "AREF"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "18"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 0 180)
+				(length 2.54)
+				(name "A0"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "19"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -2.54 180)
+				(length 2.54)
+				(name "A1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "20"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -5.08 180)
+				(length 2.54)
+				(name "A2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "21"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -7.62 180)
+				(length 2.54)
+				(name "A3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "22"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -10.16 180)
+				(length 2.54)
+				(name "A4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "23"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -12.7 180)
+				(length 2.54)
+				(name "A5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "24"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -15.24 180)
+				(length 2.54)
+				(name "A6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "25"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 12.7 -17.78 180)
+				(length 2.54)
+				(name "A7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "26"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at 5.08 25.4 270)
+				(length 2.54)
+				(name "+5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "27"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 12.7 15.24 180)
+				(length 2.54)
+				(name "~{RESET}"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "28"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at 2.54 -25.4 90)
+				(length 2.54)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "29"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -2.54 25.4 270)
+				(length 2.54)
+				(name "VIN"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "30"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
 		(embedded_fonts no)
 	)
-(symbol "BC546"
-		(extends "Q_NPN_CBE")
+(symbol "Transistor_BJT:Q_NPN_CBE"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "Q"
-			(at 5.08 1.905 0)
+			(at 5.08 1.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -748,8 +1315,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "BC546"
-			(at 5.08 0 0)
+		(property "Value" "Q_NPN_CBE"
+			(at 5.08 -1.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -759,21 +1326,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
-			(at 5.08 -1.905 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/BC550-D.pdf"
-			(at 0 0 0)
+		(property "Footprint" ""
+			(at 5.08 2.54 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -781,10 +1335,9 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Description" "0.1A Ic, 65V Vce, Small Signal NPN Transistor, TO-92"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -795,7 +1348,7 @@
 				)
 			)
 		)
-		(property "ki_keywords" "NPN Transistor"
+		(property "Description" "NPN transistor, collector/base/emitter"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -806,7 +1359,7 @@
 				)
 			)
 		)
-		(property "ki_fp_filters" "TO?92*"
+		(property "Sim.Device" "NPN"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -814,15 +1367,174 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=C 2=B 3=E"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "BJT"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "Q_NPN_CBE_0_1"
+			(polyline
+				(pts
+					(xy -2.54 0) (xy 0.635 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 1.905) (xy 0.635 -1.905)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 1.27 0)
+				(radius 2.8194)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "Q_NPN_CBE_1_1"
+			(polyline
+				(pts
+					(xy 0.635 0.635) (xy 2.54 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 -0.635) (xy 2.54 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -1.778) (xy 1.778 -1.27) (xy 2.286 -2.286) (xy 1.27 -1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "C"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 -5.08 90)
+				(length 2.54)
+				(name "E"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
 				)
 			)
 		)
 		(embedded_fonts no)
 	)
-(symbol "BC547"
-		(extends "Q_NPN_CBE")
+(symbol "Transistor_BJT:BC547"
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
 		(property "Reference" "Q"
-			(at 5.08 1.905 0)
+			(at 5.08 1.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -832,8 +1544,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "BC547"
-			(at 5.08 0 0)
+		(property "Value" "Q_NPN_CBE"
+			(at 5.08 -1.27 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -843,21 +1555,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
-			(at 5.08 -1.905 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-					(italic yes)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/BC550-D.pdf"
-			(at 0 0 0)
+		(property "Footprint" ""
+			(at 5.08 2.54 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(hide yes)
@@ -865,10 +1564,9 @@
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Description" "0.1A Ic, 45V Vce, Small Signal NPN Transistor, TO-92"
+		(property "Datasheet" ""
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -879,7 +1577,7 @@
 				)
 			)
 		)
-		(property "ki_keywords" "NPN Transistor"
+		(property "Description" "NPN transistor, collector/base/emitter"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -890,7 +1588,7 @@
 				)
 			)
 		)
-		(property "ki_fp_filters" "TO?92*"
+		(property "Sim.Device" "NPN"
 			(at 0 0 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -898,12 +1596,163 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Pins" "1=C 2=B 3=E"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "BJT"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "BC547_0_1"
+			(polyline
+				(pts
+					(xy -2.54 0) (xy 0.635 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 1.905) (xy 0.635 -1.905)
+				)
+				(stroke
+					(width 0.508)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 1.27 0)
+				(radius 2.8194)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "BC547_1_1"
+			(polyline
+				(pts
+					(xy 0.635 0.635) (xy 2.54 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 0.635 -0.635) (xy 2.54 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 -1.778) (xy 1.778 -1.27) (xy 2.286 -2.286) (xy 1.27 -1.778)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(pin passive line
+				(at 2.54 5.08 270)
+				(length 2.54)
+				(name "C"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at -5.08 0 0)
+				(length 2.54)
+				(name "B"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 2.54 -5.08 90)
+				(length 2.54)
+				(name "E"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
 				)
 			)
 		)
 		(embedded_fonts no)
 	)
-(symbol "PC817"
+(symbol "Isolator:PC817"
 		(pin_names
 			(offset 1.016)
 		)
@@ -1225,7 +2074,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "Conn_01x02_Pin"
+(symbol "Connector:Conn_01x02_Pin"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -1406,7 +2255,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "Conn_01x03_Pin"
+(symbol "Connector:Conn_01x03_Pin"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -1628,7 +2477,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "Conn_01x04_Pin"
+(symbol "Connector:Conn_01x04_Pin"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -1891,7 +2740,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "R"
+(symbol "Device:R"
 		(pin_numbers
 			(hide yes)
 		)
@@ -2031,7 +2880,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "C"
+(symbol "Device:C"
 		(pin_numbers
 			(hide yes)
 		)
@@ -2186,7 +3035,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "C_Polarized"
+(symbol "Device:C_Polarized"
 		(pin_numbers
 			(hide yes)
 		)
@@ -2363,7 +3212,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "R_Potentiometer"
+(symbol "Device:R_Potentiometer"
 		(pin_names
 			(offset 1.016)
 			(hide yes)
@@ -2576,7 +3425,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "LED"
+(symbol "Device:LED"
 		(pin_numbers
 			(hide yes)
 		)
@@ -2777,7 +3626,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "D"
+(symbol "Device:D"
 		(pin_numbers
 			(hide yes)
 		)
@@ -2965,7 +3814,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "GND"
+(symbol "power:GND"
 		(power global)
 		(pin_numbers
 			(hide yes)
@@ -3080,7 +3929,7 @@
 		)
 		(embedded_fonts no)
 	)
-(symbol "+5V"
+(symbol "power:+5V"
 		(power global)
 		(pin_numbers
 			(hide yes)
@@ -3219,67 +4068,182 @@
 		)
 		(embedded_fonts no)
 	)
+(symbol "power:PWR_FLAG"
+		(power global)
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+			(hide yes)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers no)
+		(property "Reference" "#FLG"
+			(at 0 1.905 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 0 3.81 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "flag power"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "PWR_FLAG_0_0"
+			(pin power_out line
+				(at 0 0 90)
+				(length 0)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+		(symbol "PWR_FLAG_0_1"
+			(polyline
+				(pts
+					(xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
 	)
 	(text "1. МИКРОКОНТРОЛЛЕР ARDUINO NANO (ATmega328P)"
-		(at 130.0 98.0 0)
+		(at 121.92 93.98 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "90b22711-bf47-4df9-b891-83913cf187e2")
+		(uuid "e9929be3-cec3-4350-a341-5b798405bb2a")
 	)
 	(symbol
-		(lib_id "Arduino_Nano_v3.x")
-		(at 170.0 130.0 0)
+		(lib_id "MCU_Module:Arduino_Nano_v3.x")
+		(at 167.64 129.54 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c64cf74a-7d0d-4084-bad0-1f690beb0e5b")
+		(uuid "031fa189-e693-4144-b6ea-40bf1e98a0cd")
 		(property "Reference" "A1"
-			(at 170.0 126.0 0)
+			(at 167.64 125.54 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "Arduino_Nano_v3.x"
-			(at 170.0 134.0 0)
+			(at 167.64 133.54 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Module:Arduino_Nano"
-			(at 170.0 130.0 0)
+			(at 167.64 129.54 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "e2dcf1a3-8b1c-4b27-a40c-67ec1190d910"))
-		(pin "2" (uuid "db0a62d9-4176-4fa5-a522-212b93c24127"))
-		(pin "3" (uuid "e50c7e1a-3a8b-4127-aa04-c50586d35320"))
-		(pin "4" (uuid "36f1664d-5923-4b35-b9fe-d5539c725b55"))
-		(pin "5" (uuid "95a57587-6084-41a8-9078-fafca2a83a48"))
-		(pin "6" (uuid "fe21180c-df61-4d70-82dd-7a50459c5ffa"))
-		(pin "7" (uuid "490074dd-ced2-4680-bfb2-71294a2c29db"))
-		(pin "8" (uuid "069530f5-842b-467b-bd38-30d3b358362b"))
-		(pin "9" (uuid "d36bae85-0096-4c34-8384-1e9d6235e97a"))
-		(pin "10" (uuid "6ea14fba-0c6a-4b43-934f-1d920f69142d"))
-		(pin "11" (uuid "b367b928-2d8d-4c34-9fac-9d186630be86"))
-		(pin "12" (uuid "795e62a6-616a-4660-86b5-6c31e85309c6"))
-		(pin "13" (uuid "11173867-4f7f-4190-b92b-3acf11491c3a"))
-		(pin "14" (uuid "d9ebf61d-7d0b-4bc0-bd52-c4b298783fe1"))
-		(pin "15" (uuid "dc541568-f352-4cab-a1a7-99f2b058ad42"))
-		(pin "16" (uuid "d542019f-328e-4fa4-a457-e4b5e263a6d1"))
-		(pin "17" (uuid "9b16474b-d004-4ffc-af93-2d151bc95083"))
-		(pin "18" (uuid "0223f262-2da2-407b-ab38-dfe4c6f4c383"))
-		(pin "19" (uuid "4e9aeadf-17d0-4973-8fbb-5844dbd50e09"))
-		(pin "20" (uuid "99cfba62-d500-499b-84ab-fa96c84acf22"))
-		(pin "21" (uuid "75bff465-2ef8-4d8c-812a-22c74de8627d"))
-		(pin "22" (uuid "cdc120d3-7ac8-49a7-b000-90f5e284b88e"))
-		(pin "23" (uuid "db138950-4cef-4611-bfe5-c98083bdf6e0"))
-		(pin "24" (uuid "78898d86-073d-4eb5-8062-85526030e877"))
-		(pin "25" (uuid "18a5ed8c-f1b1-4364-9b37-7075efaa8349"))
-		(pin "26" (uuid "27806299-55da-49c2-9de1-0b90e0e20d9e"))
-		(pin "27" (uuid "db4832e6-d9cc-4bcf-b02c-4e14cc87b9dd"))
-		(pin "28" (uuid "98e8d3d7-d35b-4eae-a8d4-6a23fa4924cd"))
-		(pin "29" (uuid "54129c94-90b0-4832-8bb9-eec9decb6e05"))
-		(pin "30" (uuid "9733cc03-122a-4f41-bef9-586c4f9ab752"))
+		(pin "1" (uuid "da5647d1-7511-4760-bfd8-8b49df5e3e67"))
+		(pin "2" (uuid "db5eda5c-d761-472a-9957-820a177a99f6"))
+		(pin "3" (uuid "e78677fe-8e87-4314-877b-3f254f8d942d"))
+		(pin "4" (uuid "044f5c16-ea63-4e4a-85ea-e92cab0b4f90"))
+		(pin "5" (uuid "f21ee607-2117-4ac7-94b8-8b2a85452922"))
+		(pin "6" (uuid "aaaf9877-b0c7-43b1-89a4-b85411672007"))
+		(pin "7" (uuid "43295363-5c5f-4ccd-bbce-3039396bd8d0"))
+		(pin "8" (uuid "71510344-55f6-4a9f-b350-f82cb0a37fe9"))
+		(pin "9" (uuid "27304b15-4212-4511-82c0-3f42ce645dcd"))
+		(pin "10" (uuid "6052a118-16e5-4d9a-aab2-3e46614b7f3c"))
+		(pin "11" (uuid "bf2dca71-0fb2-46d7-bc56-005faea15384"))
+		(pin "12" (uuid "bce41f93-c7c7-444b-a28f-9c809c6542ff"))
+		(pin "13" (uuid "2d833c1d-e17e-4e15-a880-2dc7970a59c1"))
+		(pin "14" (uuid "fc577b5f-e6bb-4868-9eb4-34025a71edd4"))
+		(pin "15" (uuid "0744583b-c0fd-4f95-a84c-4da122be487d"))
+		(pin "16" (uuid "eba1b3f0-1243-453c-ad1e-f802437ce2b6"))
+		(pin "17" (uuid "e478e2ba-184b-4180-954c-d06b8ee51db7"))
+		(pin "18" (uuid "2c898e33-7701-4c2f-8c1f-6e6acd2b52f6"))
+		(pin "19" (uuid "17314dad-3b2d-4d38-87b3-7624587089a9"))
+		(pin "20" (uuid "7b8c522b-b565-4d84-8d4d-2bbce2ce1ece"))
+		(pin "21" (uuid "c9c11097-4926-4ef1-975d-3d7b24ba9ffb"))
+		(pin "22" (uuid "875c4688-e2fd-4a34-a40c-833a5cd832fd"))
+		(pin "23" (uuid "afc01fdb-706b-44e6-9394-ff4e97342a2a"))
+		(pin "24" (uuid "bc063070-2371-4781-aeb3-1655fdd5a0d2"))
+		(pin "25" (uuid "f57b2049-2712-4c6b-98ba-dd4b52c8414c"))
+		(pin "26" (uuid "93f73a4e-52c3-4af2-8aa4-6996a951e71d"))
+		(pin "27" (uuid "5eef1d46-3d3d-4ba3-9ef1-4ed5f027e4c7"))
+		(pin "28" (uuid "a8dfe776-5501-464a-99df-2acb49925128"))
+		(pin "29" (uuid "624c4a81-1120-4b56-ba77-342e4b5f5545"))
+		(pin "30" (uuid "3b13bc7f-40ee-4399-a0f2-d23b4f18cf6c"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3289,238 +4253,280 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 159.84 119.84) (xy 154.76 119.84)
-		)
-		(stroke (width 0) (type default))
-		(uuid "bcd37c78-1b8f-4f9d-9f08-23994f1b13a2")
+	(no_connect
+		(at 154.94 114.30)
+		(uuid "6a86306b-0873-4e59-9b13-c954778f4779")
 	)
-	(symbol
-		(lib_id "GND")
-		(at 154.76 119.84 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "469a0e7b-e8e0-4e44-99f6-1de2609172ec")
-		(property "Reference" "#PWREF654D"
-			(at 154.76 115.84 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 154.76 123.84 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 154.76 119.84 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "949a9bcf-8302-4afb-8bf0-c0dfaf35d4ac"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWREF654D")
-					(unit 1)
-				)
-			)
-		)
+	(no_connect
+		(at 154.94 116.84)
+		(uuid "73de742e-2f1b-4bea-9975-a2d233351dbc")
 	)
 	(wire
 		(pts
-			(xy 159.84 122.38) (xy 154.76 122.38)
+			(xy 154.94 119.38) (xy 142.24 119.38)
 		)
 		(stroke (width 0) (type default))
-		(uuid "3fb99392-74c2-4e74-9819-3bd70a492b22")
+		(uuid "93fa5893-bb64-4460-a080-de6c30956feb")
 	)
 	(label "DIT"
-		(at 154.76 122.38 0)
+		(at 142.24 119.38 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "7d7b7931-6b28-4d3b-819a-0b653614946e")
+		(uuid "06672c63-ca56-42cb-940c-6851925c4077")
 	)
 	(wire
 		(pts
-			(xy 159.84 124.92) (xy 154.76 124.92)
+			(xy 154.94 121.92) (xy 142.24 121.92)
 		)
 		(stroke (width 0) (type default))
-		(uuid "f3474ca5-5e6d-430b-bc23-d83f9c3b8936")
+		(uuid "d93ffcfa-6b40-4adb-bd4d-cc89429a24ba")
 	)
 	(label "DAH"
-		(at 154.76 124.92 0)
+		(at 142.24 121.92 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "dafb0266-332d-4706-9375-53482bdc3516")
+		(uuid "339410e7-a84b-4099-b40d-edaa578a8610")
 	)
 	(wire
 		(pts
-			(xy 159.84 127.46) (xy 154.76 127.46)
+			(xy 154.94 124.46) (xy 142.24 124.46)
 		)
 		(stroke (width 0) (type default))
-		(uuid "ac817ca9-189d-4741-a949-4d2cb0877be6")
+		(uuid "799ccd9b-598a-448c-abcf-3fbe5ccf2548")
 	)
 	(label "PS2_DATA"
-		(at 154.76 127.46 0)
+		(at 142.24 124.46 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "e2705a70-ab04-4478-abe9-3377f875c7ce")
+		(uuid "2e465d28-43cc-4d58-8250-cddd72983e0c")
 	)
 	(wire
 		(pts
-			(xy 159.84 130.0) (xy 154.76 130.0)
+			(xy 154.94 127.00) (xy 142.24 127.00)
 		)
 		(stroke (width 0) (type default))
-		(uuid "7cab8c6e-1d7f-40af-94a7-cfb352125c3a")
+		(uuid "82ade03f-5853-4f58-8aac-1ebfb7b8540e")
 	)
 	(label "PS2_CLK"
-		(at 154.76 130.0 0)
+		(at 142.24 127.00 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "1a3fe687-88bf-43a6-bc8e-9c07987f5083")
+		(uuid "7598b845-0871-46da-851e-7d2b0d382a0e")
+	)
+	(no_connect
+		(at 154.94 129.54)
+		(uuid "d4ec804d-dd19-4ea2-9cbb-6deee8a166d7")
+	)
+	(no_connect
+		(at 154.94 132.08)
+		(uuid "76cdab63-d99a-4e82-badf-d69555ad1975")
+	)
+	(no_connect
+		(at 154.94 134.62)
+		(uuid "cf9f990c-9476-4b8e-ac8f-a32e4b98d3c1")
 	)
 	(wire
 		(pts
-			(xy 159.84 132.54) (xy 154.76 132.54)
+			(xy 154.94 137.16) (xy 142.24 137.16)
 		)
 		(stroke (width 0) (type default))
-		(uuid "01d9b665-5131-471e-b5cd-eefee008180f")
+		(uuid "3940c090-2ccb-4121-a6ec-30e0a26fdd93")
 	)
 	(label "AUDIO_PWM"
-		(at 154.76 132.54 0)
+		(at 142.24 137.16 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "3748b4ff-66a6-44fb-bcbb-e5cac3e11d3e")
+		(uuid "10d43c6a-0f1d-41d6-ac6f-2cc8235999b0")
 	)
 	(wire
 		(pts
-			(xy 159.84 135.08) (xy 154.76 135.08)
+			(xy 154.94 139.70) (xy 142.24 139.70)
 		)
 		(stroke (width 0) (type default))
-		(uuid "327ec0bd-b2f7-4e0f-9adb-cc890970d49b")
+		(uuid "6a6cfecb-fba8-4154-b242-651bbae4afe8")
 	)
 	(label "KEY_OUT_CTRL"
-		(at 154.76 135.08 0)
+		(at 142.24 139.70 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "de978f07-4169-49ff-a717-0d495ba1e564")
+		(uuid "fae107a1-c87d-4e31-99c6-f0fda237fab4")
 	)
 	(wire
 		(pts
-			(xy 159.84 137.62) (xy 154.76 137.62)
+			(xy 154.94 142.24) (xy 142.24 142.24)
 		)
 		(stroke (width 0) (type default))
-		(uuid "5b394409-e2c0-47bb-ab5c-bea59d61ecfa")
-	)
-	(label "LED_KEY"
-		(at 154.76 137.62 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify right bottom)
-		)
-		(uuid "422f7f56-4aeb-4d3e-8252-f49a1102576b")
-	)
-	(wire
-		(pts
-			(xy 159.84 140.16) (xy 154.76 140.16)
-		)
-		(stroke (width 0) (type default))
-		(uuid "cc5f5748-4613-4d7d-9f88-0ccbd2ae6cf2")
+		(uuid "a60fab46-0b89-4504-b922-7e0dd880cc7b")
 	)
 	(label "PTT_OUT_CTRL"
-		(at 154.76 140.16 0)
+		(at 142.24 142.24 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "b217a099-abb8-4474-b206-b28c23c1b718")
+		(uuid "4b856ba4-edf5-4977-bf7b-aa9f43165882")
+	)
+	(no_connect
+		(at 154.94 144.78)
+		(uuid "02c53e3f-d6df-42a0-a08d-d047fc65ecc7")
 	)
 	(wire
 		(pts
-			(xy 180.16 114.76) (xy 185.24 114.76)
+			(xy 154.94 147.32) (xy 142.24 147.32)
 		)
 		(stroke (width 0) (type default))
-		(uuid "348ea372-67da-4563-a0f7-f41d78ff12de")
+		(uuid "217087b4-5445-4247-82ac-fe8bbc760981")
+	)
+	(label "LED_KEY"
+		(at 142.24 147.32 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right bottom)
+		)
+		(uuid "3240378a-f9f0-4719-b41a-049410938f8e")
+	)
+	(no_connect
+		(at 180.34 114.30)
+		(uuid "a3c4860f-4c0b-4a62-87b6-bb993beac8ba")
+	)
+	(no_connect
+		(at 180.34 116.84)
+		(uuid "6c9708d8-604e-43a2-9bcd-4e31ec76ef93")
+	)
+	(no_connect
+		(at 180.34 124.46)
+		(uuid "b31d0be1-e3c4-417f-b1c7-0fcb2767dd1c")
+	)
+	(wire
+		(pts
+			(xy 180.34 129.54) (xy 193.04 129.54)
+		)
+		(stroke (width 0) (type default))
+		(uuid "cb2e053e-ded2-4749-9f4d-79855ebe8641")
+	)
+	(label "POT_SPEED"
+		(at 193.04 129.54 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "46ebba29-e1c2-4c96-be91-df14f2c06cc6")
+	)
+	(wire
+		(pts
+			(xy 180.34 132.08) (xy 193.04 132.08)
+		)
+		(stroke (width 0) (type default))
+		(uuid "853fa232-9c6c-4167-8fd8-9bb5ca454d6c")
+	)
+	(label "POT_TONE"
+		(at 193.04 132.08 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "7d6dbe7c-f1b7-4af9-9498-172e83e6b8ec")
+	)
+	(no_connect
+		(at 180.34 134.62)
+		(uuid "e72166c2-e9a7-486e-8831-a247af6e555b")
+	)
+	(no_connect
+		(at 180.34 137.16)
+		(uuid "a484e7e9-66b9-468c-9f53-3a5ca5a3103b")
+	)
+	(wire
+		(pts
+			(xy 180.34 139.70) (xy 193.04 139.70)
+		)
+		(stroke (width 0) (type default))
+		(uuid "472a3514-499d-4d8f-85b1-55f53d7c9c90")
+	)
+	(label "OLED_SDA"
+		(at 193.04 139.70 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "3af28e65-40c6-47c5-bcf8-c2b01d2540f3")
+	)
+	(wire
+		(pts
+			(xy 180.34 142.24) (xy 193.04 142.24)
+		)
+		(stroke (width 0) (type default))
+		(uuid "7fb7be4d-15d4-4cec-9513-1f937dbbf08e")
+	)
+	(label "OLED_SCL"
+		(at 193.04 142.24 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "0b42292c-0389-4029-be90-7f402a752a46")
+	)
+	(no_connect
+		(at 180.34 144.78)
+		(uuid "654bcfc6-5e2b-4968-8b85-6894a2974834")
+	)
+	(no_connect
+		(at 180.34 147.32)
+		(uuid "2084c930-cbf3-4af8-9e00-ee1d84c03802")
+	)
+	(no_connect
+		(at 165.10 104.14)
+		(uuid "e8721820-9a9d-46e3-a6b0-fe5111887970")
+	)
+	(no_connect
+		(at 170.18 104.14)
+		(uuid "05a88d3d-b0bf-4cd7-9bd0-105f4332e134")
+	)
+	(wire
+		(pts
+			(xy 172.72 104.14) (xy 172.72 99.06)
+		)
+		(stroke (width 0) (type default))
+		(uuid "25cffb0b-d830-4ddb-908a-c555b887e963")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 185.24 114.76 270)
+		(lib_id "power:+5V")
+		(at 172.72 99.06 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7a89d27f-3fdc-45fa-96cc-da02dfa1a93f")
-		(property "Reference" "#PWRD87462"
-			(at 185.24 110.76 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 185.24 118.76 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 185.24 114.76 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "612a8950-0642-4b7d-8322-4d44b3d6cc08"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRD87462")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 180.16 119.84) (xy 185.24 119.84)
-		)
-		(stroke (width 0) (type default))
-		(uuid "6c86db18-f5f6-491e-8ff4-55814e4d790e")
-	)
-	(symbol
-		(lib_id "+5V")
-		(at 185.24 119.84 270)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "70293936-33f8-47a7-a1bc-5279aac8c110")
-		(property "Reference" "#PWRBB9559"
-			(at 185.24 115.84 0) (hide yes)
+		(uuid "5d71651c-5a0c-4655-bbbc-36e5887724d5")
+		(property "Reference" "#PWR5ACCA8"
+			(at 172.72 95.06 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 185.24 123.84 0)
+			(at 172.72 103.06 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 185.24 119.84 0)
+			(at 172.72 99.06 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "8ce60947-4f00-45e9-835f-cac85b7aad23"))
+		(pin "1" (uuid "5996edc3-15c4-4a74-98ef-48140dd9b8c7"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRBB9559")
+					(reference "#PWR5ACCA8")
 					(unit 1)
 				)
 			)
@@ -3528,97 +4534,80 @@
 	)
 	(wire
 		(pts
-			(xy 180.16 127.46) (xy 185.24 127.46)
+			(xy 167.64 154.94) (xy 167.64 160.02)
 		)
 		(stroke (width 0) (type default))
-		(uuid "5707b820-adc9-4b27-b55c-9d26741109b3")
+		(uuid "e1e350bd-9ce9-4d9b-8aef-37d46b12d463")
 	)
-	(label "OLED_SCL"
-		(at 185.24 127.46 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
+	(symbol
+		(lib_id "power:GND")
+		(at 167.64 160.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1834d5a1-b815-446a-956b-b0ce3c9ab940")
+		(property "Reference" "#PWR88C8FA"
+			(at 167.64 156.02 0) (hide yes)
+			(effects (font (size 1.27 1.27)))
 		)
-		(uuid "1d96f2ad-201f-4f38-a8ac-4aecd018fb18")
+		(property "Value" "GND"
+			(at 167.64 164.02 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 167.64 160.02 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "e08dc83f-d07e-40f6-8719-e9301867fc69"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWR88C8FA")
+					(unit 1)
+				)
+			)
+		)
 	)
-	(wire
-		(pts
-			(xy 180.16 130.0) (xy 185.24 130.0)
-		)
-		(stroke (width 0) (type default))
-		(uuid "1fca018d-7b34-4dfa-af7f-aeedf15edee2")
-	)
-	(label "OLED_SDA"
-		(at 185.24 130.0 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
-		)
-		(uuid "0579ad1d-e392-4572-b5b5-ec74ea9a4e0e")
-	)
-	(wire
-		(pts
-			(xy 180.16 137.62) (xy 185.24 137.62)
-		)
-		(stroke (width 0) (type default))
-		(uuid "b793cff5-78ad-4da1-bf5a-93dd74eec23c")
-	)
-	(label "POT_TONE"
-		(at 185.24 137.62 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
-		)
-		(uuid "42a1b30f-8af6-4ee7-9729-2d2750d1735e")
-	)
-	(wire
-		(pts
-			(xy 180.16 140.16) (xy 185.24 140.16)
-		)
-		(stroke (width 0) (type default))
-		(uuid "b3e215f7-4d4f-4536-b750-cd3ee5c4f343")
-	)
-	(label "POT_SPEED"
-		(at 185.24 140.16 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
-		)
-		(uuid "b44a72e6-7b0f-45a5-8320-4805e3ca5f68")
+	(no_connect
+		(at 170.18 154.94)
+		(uuid "928dea5c-28f7-47e4-a550-76f6f3e0c5f7")
 	)
 	(text "2. ВХОД МАНИПУЛЯТОРА (3.5mm JACK) С ФИЛЬТРАЦИЕЙ"
-		(at 30 40 0)
+		(at 30.48 40.64 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "fb750db1-fe06-4897-b606-4546111be811")
+		(uuid "1e4ecb73-03ed-4dd9-ab87-b42be91d63b4")
 	)
 	(symbol
-		(lib_id "Conn_01x03_Pin")
-		(at 45 55 0)
+		(lib_id "Connector:Conn_01x03_Pin")
+		(at 45.72 55.88 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2307ba89-905c-43b8-b631-27e5ab114d46")
+		(uuid "abf59714-bbba-46cd-bfe1-f39047d4989b")
 		(property "Reference" "J1"
-			(at 45 51 0)
+			(at 45.72 51.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "PADDLE_3.5mm"
-			(at 45 59 0)
+			(at 45.72 59.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
-			(at 45 55 0)
+			(at 45.72 55.88 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "326eb5fa-7fed-41c0-952f-ddbc177b1870"))
-		(pin "2" (uuid "0ccd6abe-9d75-4dd7-bbf3-6105ea2a4135"))
-		(pin "3" (uuid "730ca8ca-7cb4-4f21-b13f-25ddcec60c52"))
+		(pin "1" (uuid "03ba5140-21ee-4b28-924f-2eb5be8411b0"))
+		(pin "2" (uuid "98505e61-c6ad-4155-be56-eeca600e7c63"))
+		(pin "3" (uuid "a4de11c3-e992-493d-97b5-9f7f93dcd35c"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3628,78 +4617,45 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 50.80 53.34) (xy 76.20 53.34)
+		)
+		(stroke (width 0) (type default))
+		(uuid "657c874c-dcce-4664-9fbb-63331bae2c53")
+	)
 	(label "DIT"
-		(at 52 52.46 0)
+		(at 76.20 53.34 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify left bottom)
 		)
-		(uuid "3598879f-6bd0-40fa-874e-05cec5339273")
-	)
-	(label "DAH"
-		(at 52 55.0 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
-		)
-		(uuid "c2c24b72-fbfb-4585-aef5-b331d1abcd3a")
+		(uuid "ef2b5da5-3767-41e9-a6c9-3698a7cd03db")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 52 57.54 270)
+		(lib_id "Device:C")
+		(at 63.50 57.15 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a4845bfa-e027-4013-a0e3-80657a1221db")
-		(property "Reference" "#PWR857F61"
-			(at 52 53.54 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 52 61.54 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 52 57.54 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "a81eef45-f4d7-4733-92e4-80484726aa37"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR857F61")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "C")
-		(at 70 52.46 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f62aa96b-1ba7-4a9e-848d-211c49d50c43")
+		(uuid "2c6b6be5-074a-4783-be6a-8a904919ad74")
 		(property "Reference" "C1"
-			(at 70 48.46 0)
+			(at 63.50 53.15 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "10nF"
-			(at 70 56.46 0)
+			(at 63.50 61.15 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 70 52.46 0)
+			(at 63.50 57.15 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "000a0830-be35-4034-8e5e-34be99354791"))
-		(pin "2" (uuid "3a9828fa-1578-4826-94f9-e775832be70d"))
+		(pin "1" (uuid "052b642f-f75f-4646-ae16-78a658d0d0da"))
+		(pin "2" (uuid "8022f8be-18e4-4112-b8ca-a33413e7bc6f"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3709,76 +4665,104 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 52 52.46) (xy 66.19 52.46)
-		)
-		(stroke (width 0) (type default))
-		(uuid "5c883f40-6aa6-4e72-89ba-9f27a637074e")
+	(junction
+		(at 63.50 53.34)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "47fb3ca3-b72a-4d66-af9a-d51306f12e5a")
 	)
 	(wire
 		(pts
-			(xy 73.81 52.46) (xy 78 52.46)
+			(xy 63.50 60.96) (xy 63.50 66.04)
 		)
 		(stroke (width 0) (type default))
-		(uuid "63c3b04e-7b44-4ace-a06a-1cdeca781832")
+		(uuid "17faa5c7-df73-4d3d-bddf-1ba3117e0d57")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 78 52.46 270)
+		(lib_id "power:GND")
+		(at 63.50 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "50a4dfca-e3d1-430a-afa1-e702ad2fbdb3")
-		(property "Reference" "#PWR7F911D"
-			(at 78 48.46 0) (hide yes)
+		(uuid "22e97212-33bf-41fa-94bd-233f664bdbc7")
+		(property "Reference" "#PWRB8F4DC"
+			(at 63.50 62.04 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 78 56.46 0)
+			(at 63.50 70.04 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 78 52.46 0)
+			(at 63.50 66.04 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "fb693812-a008-4c9b-a7c2-a992d53aa4e9"))
+		(pin "1" (uuid "6c2ff549-c613-429c-b0d4-e700d86866ee"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR7F911D")
+					(reference "#PWRB8F4DC")
 					(unit 1)
 				)
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 50.80 55.88) (xy 55.88 55.88)
+		)
+		(stroke (width 0) (type default))
+		(uuid "8814cd99-1219-4aab-b8b5-2106be0306e1")
+	)
+	(wire
+		(pts
+			(xy 55.88 55.88) (xy 55.88 76.20)
+		)
+		(stroke (width 0) (type default))
+		(uuid "a7c05947-08bf-440e-94b3-2d2dcc0b753b")
+	)
+	(wire
+		(pts
+			(xy 55.88 76.20) (xy 76.20 76.20)
+		)
+		(stroke (width 0) (type default))
+		(uuid "b03e364b-e8a4-435f-a32e-2ff0369788c6")
+	)
+	(label "DAH"
+		(at 76.20 76.20 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "ea9e61ae-3655-427d-bf93-47f967d21519")
+	)
 	(symbol
-		(lib_id "C")
-		(at 70 57.54 90)
+		(lib_id "Device:C")
+		(at 63.50 80.01 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "301c08d9-6d38-452d-b6d6-d7963e5cc724")
+		(uuid "687ea0c2-7aa3-491b-9107-3f371499c61f")
 		(property "Reference" "C2"
-			(at 70 53.54 0)
+			(at 63.50 76.01 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "10nF"
-			(at 70 61.54 0)
+			(at 63.50 84.01 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 70 57.54 0)
+			(at 63.50 80.01 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "f90b2adf-5926-438d-91af-28f0798ba867"))
-		(pin "2" (uuid "126d1176-cd9a-4e5b-8633-717901cd2b74"))
+		(pin "1" (uuid "e8fadd0e-e959-466e-944f-3a7e452df62c"))
+		(pin "2" (uuid "47d737e9-6365-47de-a0e6-2aa2e7f96f60"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3788,86 +4772,124 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 52 55.0) (xy 66.19 57.54)
-		)
-		(stroke (width 0) (type default))
-		(uuid "fdda50a0-ec4a-492f-87c7-182825d80377")
+	(junction
+		(at 63.50 76.20)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "5192cdd4-2b71-4940-85a6-824f098d0310")
 	)
 	(wire
 		(pts
-			(xy 73.81 57.54) (xy 78 57.54)
+			(xy 63.50 83.82) (xy 63.50 88.90)
 		)
 		(stroke (width 0) (type default))
-		(uuid "87741028-12ca-4e92-b679-1790f30c94cc")
+		(uuid "85d05de0-bb9f-4421-9012-13388026bfcf")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 78 57.54 270)
+		(lib_id "power:GND")
+		(at 63.50 88.90 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7cac5d5b-ea42-40af-b9ec-c197ce8025ae")
-		(property "Reference" "#PWR63A3BA"
-			(at 78 53.54 0) (hide yes)
+		(uuid "b075faee-1428-4535-8bbb-7ff332a30819")
+		(property "Reference" "#PWR1F7E25"
+			(at 63.50 84.90 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 78 61.54 0)
+			(at 63.50 92.90 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 78 57.54 0)
+			(at 63.50 88.90 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "a49c908a-96ff-44ab-8f53-cc791d411550"))
+		(pin "1" (uuid "65f646df-1628-43d3-aeea-ee97b3a17866"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR63A3BA")
+					(reference "#PWR1F7E25")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 50.80 58.42) (xy 50.80 66.04)
+		)
+		(stroke (width 0) (type default))
+		(uuid "230199af-838a-4161-8223-17d33b5de508")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 50.80 66.04 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f63d686a-bf35-4636-ac4d-ef098b983033")
+		(property "Reference" "#PWR095F7D"
+			(at 50.80 62.04 0) (hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "GND"
+			(at 50.80 70.04 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 50.80 66.04 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "74401d01-fdf8-4115-b978-1f73ba0874c4"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWR095F7D")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(text "3. ГАЛЬВАНИЧЕСКАЯ РАЗВЯЗКА К ТРАНСИВЕРУ (KEY & PTT OUT)"
-		(at 240 40 0)
+		(at 233.68 40.64 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "1be09602-576a-4ec8-a8a6-a29f823ffdfe")
+		(uuid "aaa476cd-ca72-4876-8fd7-8a7bb4a8f5bf")
 	)
 	(symbol
-		(lib_id "PC817")
-		(at 265 55 0)
+		(lib_id "Isolator:PC817")
+		(at 264.16 55.88 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8f50e2e7-eca8-4a84-8ecb-c27029cb9602")
+		(uuid "7df52968-e0bf-48c0-9264-7537b3be9222")
 		(property "Reference" "U2"
-			(at 265 51 0)
+			(at 264.16 51.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "PC817"
-			(at 265 59 0)
+			(at 264.16 59.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Package_DIP:DIP-4_W7.62mm"
-			(at 265 55 0)
+			(at 264.16 55.88 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "3c84d986-e24a-4b53-9b30-b06dfe541987"))
-		(pin "2" (uuid "a15b68d2-ff59-45af-8f18-64669593f369"))
-		(pin "3" (uuid "0e03b900-3318-4b04-a99a-234f13678df4"))
-		(pin "4" (uuid "e8a89c5f-e42a-4aaf-9db0-b47a01fd27b0"))
+		(pin "1" (uuid "a5296001-771f-46c6-8c3a-c9e8da7fafed"))
+		(pin "2" (uuid "e70f8651-e7f9-48e5-a6b5-a1295376c09b"))
+		(pin "3" (uuid "890b568e-9674-4a96-b0b3-35a04d7c9420"))
+		(pin "4" (uuid "143709b7-187b-40e4-a2a6-cdd391bbd428"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3878,29 +4900,29 @@
 		)
 	)
 	(symbol
-		(lib_id "R")
-		(at 248 52.46 90)
+		(lib_id "Device:R")
+		(at 246.38 53.34 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ec0f713d-8871-4b00-b18e-166b2f4d799a")
+		(uuid "650f5e77-70ce-4a78-9689-b0cd141fdc8e")
 		(property "Reference" "R4"
-			(at 248 48.46 0)
+			(at 246.38 49.34 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "330R"
-			(at 248 56.46 0)
+			(at 246.38 57.34 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 248 52.46 0)
+			(at 246.38 53.34 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "edf88fe0-0475-4cc8-a4bb-bdac901e8f19"))
-		(pin "2" (uuid "dd03cd6b-758a-48f3-84bf-116d425af33a"))
+		(pin "1" (uuid "c37c2903-220a-42a6-b410-b63010df4b60"))
+		(pin "2" (uuid "c9893d9e-ae07-4aa8-b3ff-26474806d8c0"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -3910,91 +4932,91 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 250.19 53.34) (xy 256.54 53.34)
+		)
+		(stroke (width 0) (type default))
+		(uuid "96450d8a-82a5-48cf-bbc5-9d545a1d9782")
+	)
+	(wire
+		(pts
+			(xy 242.57 53.34) (xy 236.22 53.34)
+		)
+		(stroke (width 0) (type default))
+		(uuid "e23ee574-803a-4aa7-a610-b1757796c465")
+	)
 	(label "KEY_OUT_CTRL"
-		(at 238 52.46 0)
+		(at 236.22 53.34 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "dde839e3-e022-47fb-a316-fa648f474fab")
+		(uuid "cec2092a-62a5-40e2-9b23-9eff8a6db3c8")
 	)
 	(wire
 		(pts
-			(xy 238 52.46) (xy 244.19 52.46)
+			(xy 256.54 58.42) (xy 256.54 63.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "d8eaa7d5-d65a-46e1-af23-f874fb6ce4e9")
-	)
-	(wire
-		(pts
-			(xy 251.81 52.46) (xy 259.92 52.46)
-		)
-		(stroke (width 0) (type default))
-		(uuid "a9230b00-217e-4934-8062-9f55c80a23d5")
-	)
-	(wire
-		(pts
-			(xy 259.92 57.54) (xy 255 57.54)
-		)
-		(stroke (width 0) (type default))
-		(uuid "30af28ce-b8ed-48be-a8c1-447ccbd64007")
+		(uuid "0a1a5424-0f1e-437e-8fd8-2337a856289a")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 255 57.54 90)
+		(lib_id "power:GND")
+		(at 256.54 63.50 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "c301eece-3e2e-4960-a13f-3edd19495c85")
-		(property "Reference" "#PWR6E6849"
-			(at 255 53.54 0) (hide yes)
+		(uuid "eb133a21-2958-4ea8-b3b4-cd7db679850f")
+		(property "Reference" "#PWRAB9384"
+			(at 256.54 59.50 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 255 61.54 0)
+			(at 256.54 67.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 255 57.54 0)
+			(at 256.54 63.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "09734a37-2269-4cfe-afc5-5ab502b604aa"))
+		(pin "1" (uuid "58885236-c5e6-4393-ae4e-11233dc23f49"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR6E6849")
+					(reference "#PWRAB9384")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Conn_01x02_Pin")
-		(at 295 55 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 299.72 55.88 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a059fbb0-994c-4d6a-aea0-6f7b9ac04a83")
+		(uuid "feab16fa-85ad-47e8-b3d9-e28473d2816f")
 		(property "Reference" "J2"
-			(at 295 51 0)
+			(at 299.72 51.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "KEY_OUT_3.5mm"
-			(at 295 59 0)
+			(at 299.72 59.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 295 55 0)
+			(at 299.72 55.88 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "2947f1f6-e1cd-4090-b873-e6a3073a2956"))
-		(pin "2" (uuid "0b9034fd-a6e0-4361-be15-ccb1002ef91a"))
+		(pin "1" (uuid "4ed8315e-74ac-4b7a-a759-590386abf73b"))
+		(pin "2" (uuid "1cd73b0a-4ed3-477a-bbbf-37ee178122ff"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4006,42 +5028,56 @@
 	)
 	(wire
 		(pts
-			(xy 270.08 52.46) (xy 291.19 52.46)
+			(xy 271.78 53.34) (xy 294.64 53.34)
 		)
 		(stroke (width 0) (type default))
-		(uuid "5e1a6154-143d-4c4b-80c0-2b3d41312676")
+		(uuid "ef1a6fc5-fe62-4e98-9d1f-4b35a1ab1ec4")
 	)
 	(wire
 		(pts
-			(xy 270.08 57.54) (xy 291.19 55.0)
+			(xy 271.78 58.42) (xy 284.48 58.42)
 		)
 		(stroke (width 0) (type default))
-		(uuid "932e449d-1a5f-4a0c-ac7d-476d863b2c3d")
+		(uuid "befc171d-bd61-40f6-911c-0031de2bf4f4")
+	)
+	(wire
+		(pts
+			(xy 284.48 58.42) (xy 284.48 55.88)
+		)
+		(stroke (width 0) (type default))
+		(uuid "6af321d7-4d69-4b2b-b947-835ee5a85e9e")
+	)
+	(wire
+		(pts
+			(xy 284.48 55.88) (xy 294.64 55.88)
+		)
+		(stroke (width 0) (type default))
+		(uuid "6ef36205-600a-4551-a89e-99a787180e7a")
 	)
 	(symbol
-		(lib_id "D")
-		(at 280 55 270)
+		(lib_id "Device:D")
+		(at 279.40 55.88 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e9dd39d2-df25-4b75-afce-dc54aa8caa5d")
+		(uuid "c0ff65b4-ee57-4962-81cf-d2c722c3742e")
 		(property "Reference" "D2"
-			(at 280 51 0)
+			(at 279.40 51.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "1N4148"
-			(at 280 59 0)
+			(at 279.40 59.88 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Diode_SMD:D_SOD-123"
-			(at 280 55 0)
+			(at 279.40 55.88 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "daed199e-0066-4ca5-bf89-499410a08fd1"))
-		(pin "2" (uuid "d94a26e6-923c-4539-89ee-d22c0af5588e"))
+		(pin "1" (uuid "4d5bc20d-6661-419f-a476-08dc7cf22a93"))
+		(pin "2" (uuid "adaafb3c-a4e6-444d-aabd-04ebe8ebf50c"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4051,32 +5087,58 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 279.40 52.07) (xy 279.40 53.34)
+		)
+		(stroke (width 0) (type default))
+		(uuid "2f010482-f8f5-4e3b-9db0-3552817b4600")
+	)
+	(junction
+		(at 279.40 53.34)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "5f378761-17e0-45cd-8e21-e35d80c03f18")
+	)
+	(wire
+		(pts
+			(xy 279.40 59.69) (xy 279.40 58.42)
+		)
+		(stroke (width 0) (type default))
+		(uuid "0b8c2cf1-c80b-4f43-8891-2e3a8a019d75")
+	)
+	(junction
+		(at 279.40 58.42)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "03e77c28-5e29-4753-97e2-e19dd0b6fc34")
+	)
 	(symbol
-		(lib_id "PC817")
-		(at 265 80 0)
+		(lib_id "Isolator:PC817")
+		(at 264.16 81.28 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7bae8061-6c6a-4975-82a6-d8a0c5701f4a")
+		(uuid "a2b71f3a-92ce-4b7e-b77e-3003b286e696")
 		(property "Reference" "U3"
-			(at 265 76 0)
+			(at 264.16 77.28 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "PC817"
-			(at 265 84 0)
+			(at 264.16 85.28 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Package_DIP:DIP-4_W7.62mm"
-			(at 265 80 0)
+			(at 264.16 81.28 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "12f9645e-50ab-42b5-b666-5cb6e4ddb405"))
-		(pin "2" (uuid "ea826f1b-9c49-4634-ab36-c2429aa212dc"))
-		(pin "3" (uuid "1274c7c6-d32f-42e0-b2b8-4736f3669ffb"))
-		(pin "4" (uuid "70f53053-c702-4268-ab64-c4abaf8e9aa8"))
+		(pin "1" (uuid "bdf4ce17-bc9d-4b7a-88ca-e394264fe935"))
+		(pin "2" (uuid "09f0388a-2c7b-4afc-a60c-5e0f5335bb48"))
+		(pin "3" (uuid "1338ff91-0fdc-4729-aac3-ac97eeacc33a"))
+		(pin "4" (uuid "d6a0952c-f0f0-4ebf-970d-812d5e4e9197"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4087,29 +5149,29 @@
 		)
 	)
 	(symbol
-		(lib_id "R")
-		(at 248 77.46 90)
+		(lib_id "Device:R")
+		(at 246.38 78.74 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d886845a-6d98-402a-9653-0d19f4e7f8bc")
+		(uuid "86f5d2e8-6e39-494a-9a50-87e2e1067906")
 		(property "Reference" "R5"
-			(at 248 73.46 0)
+			(at 246.38 74.74 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "330R"
-			(at 248 81.46 0)
+			(at 246.38 82.74 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 248 77.46 0)
+			(at 246.38 78.74 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "b1c24f3e-9322-4179-a112-7c2044db4aa3"))
-		(pin "2" (uuid "0e27a5e0-3cde-4ee6-b1ed-c82128f9cff0"))
+		(pin "1" (uuid "9f017e1f-6af3-4ad5-9ec3-bff49fcb965c"))
+		(pin "2" (uuid "400b94a8-8807-4493-9d10-1f6974fe1a4c"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4119,91 +5181,91 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 250.19 78.74) (xy 256.54 78.74)
+		)
+		(stroke (width 0) (type default))
+		(uuid "d30ebaca-dd33-4a40-9ac6-67fd6b07cdb0")
+	)
+	(wire
+		(pts
+			(xy 242.57 78.74) (xy 236.22 78.74)
+		)
+		(stroke (width 0) (type default))
+		(uuid "125cb59f-e20b-4646-b728-709faf76937c")
+	)
 	(label "PTT_OUT_CTRL"
-		(at 238 77.46 0)
+		(at 236.22 78.74 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "5b1ab8d5-2bd3-4964-a99e-8141dbee65b2")
+		(uuid "1620f77a-c625-4752-932b-4c4bbca42ccc")
 	)
 	(wire
 		(pts
-			(xy 238 77.46) (xy 244.19 77.46)
+			(xy 256.54 83.82) (xy 256.54 88.90)
 		)
 		(stroke (width 0) (type default))
-		(uuid "3869e2bd-4829-422d-9b10-79da5cb7d7c0")
-	)
-	(wire
-		(pts
-			(xy 251.81 77.46) (xy 259.92 77.46)
-		)
-		(stroke (width 0) (type default))
-		(uuid "8f306e77-2dd4-4a7f-b548-5026fd5b4b5a")
-	)
-	(wire
-		(pts
-			(xy 259.92 82.54) (xy 255 82.54)
-		)
-		(stroke (width 0) (type default))
-		(uuid "9fac6e3d-3444-4283-82e5-571cc8f9bb1a")
+		(uuid "b7dadccd-5054-4021-850b-972f6f61289a")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 255 82.54 90)
+		(lib_id "power:GND")
+		(at 256.54 88.90 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3d290d0f-3432-42bd-bd8b-a84ec1fb4099")
-		(property "Reference" "#PWR30E6E4"
-			(at 255 78.54 0) (hide yes)
+		(uuid "53328ad1-1564-4241-8b6c-1f629396a96a")
+		(property "Reference" "#PWR8B4B64"
+			(at 256.54 84.90 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 255 86.54 0)
+			(at 256.54 92.90 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 255 82.54 0)
+			(at 256.54 88.90 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "3b9bede2-3719-4afc-ba03-26fe00664ffa"))
+		(pin "1" (uuid "2c10cda2-ffbf-417b-8572-d89d721c4d90"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR30E6E4")
+					(reference "#PWR8B4B64")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "Conn_01x02_Pin")
-		(at 295 80 0)
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 299.72 81.28 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8d4ce868-e5c0-45b7-9b78-8a82438e7606")
+		(uuid "1dc1a7e1-a548-4988-8197-2b8ea1a612c6")
 		(property "Reference" "J3"
-			(at 295 76 0)
+			(at 299.72 77.28 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "PTT_OUT_RCA"
-			(at 295 84 0)
+			(at 299.72 85.28 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 295 80 0)
+			(at 299.72 81.28 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "6d447fe2-f325-4a57-bbea-e6d3cda37666"))
-		(pin "2" (uuid "6d9692fd-bb30-4218-9929-9d7900bbd06b"))
+		(pin "1" (uuid "55a5f640-f31b-41f8-a9f1-e11cd13f19f2"))
+		(pin "2" (uuid "e18818b4-4648-461b-96f1-8afacbaa208c"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4215,65 +5277,64 @@
 	)
 	(wire
 		(pts
-			(xy 270.08 77.46) (xy 291.19 77.46)
+			(xy 271.78 78.74) (xy 294.64 78.74)
 		)
 		(stroke (width 0) (type default))
-		(uuid "53f7cdbb-5f3a-41ec-8343-b89621255512")
+		(uuid "e714ffb1-c350-4f1d-aa90-9a3433dafa34")
 	)
 	(wire
 		(pts
-			(xy 270.08 82.54) (xy 291.19 80.0)
+			(xy 271.78 83.82) (xy 284.48 83.82)
 		)
 		(stroke (width 0) (type default))
-		(uuid "2390e5b4-4160-4c29-b3ef-2202927c6200")
+		(uuid "1ec5d22f-dfa0-468f-b9a2-739b5ecdc918")
+	)
+	(wire
+		(pts
+			(xy 284.48 83.82) (xy 284.48 81.28)
+		)
+		(stroke (width 0) (type default))
+		(uuid "d24265c0-119f-4c06-bd9d-409f884065ad")
+	)
+	(wire
+		(pts
+			(xy 284.48 81.28) (xy 294.64 81.28)
+		)
+		(stroke (width 0) (type default))
+		(uuid "ad2791de-fbb8-476d-9f48-eeea2396cec4")
 	)
 	(text "4. АНАЛОГОВЫЙ ЗВУКОВОЙ ТРАКТ: 2-ЗВЕННЫЙ ФНЧ + BC547"
-		(at 30 175 0)
+		(at 30.48 172.72 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "c4a72ab7-cc7f-4835-a08a-6b83cf1eabac")
-	)
-	(label "AUDIO_PWM"
-		(at 35 190 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify right bottom)
-		)
-		(uuid "47dfce5c-da9d-4118-8af0-8b66f1ee9300")
-	)
-	(wire
-		(pts
-			(xy 35 190) (xy 42 190)
-		)
-		(stroke (width 0) (type default))
-		(uuid "5a405c13-2bbd-489b-a08c-1aa0ec8108aa")
+		(uuid "6f6c0fea-428f-4b02-9713-18d97b800e54")
 	)
 	(symbol
-		(lib_id "R")
-		(at 46 190 90)
+		(lib_id "Device:R")
+		(at 45.72 190.50 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "0862977d-b739-48fa-bf97-35bb89451cda")
+		(uuid "348ac209-fa24-4c17-a9cb-de7bf22fe5ef")
 		(property "Reference" "R1"
-			(at 46 186 0)
+			(at 45.72 186.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "1k"
-			(at 46 194 0)
+			(at 45.72 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 46 190 0)
+			(at 45.72 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "7aa682b2-ecfa-4ce7-8352-92a712b5f737"))
-		(pin "2" (uuid "8e5b618e-a314-4c29-8100-45f261df097e"))
+		(pin "1" (uuid "35d28768-ad05-47d8-924c-e57721eaf453"))
+		(pin "2" (uuid "19aa6036-b8dd-4389-bc60-2e70c34155f2"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4283,37 +5344,45 @@
 			)
 		)
 	)
+	(label "AUDIO_PWM"
+		(at 34.29 190.50 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right bottom)
+		)
+		(uuid "caf3eda9-c641-420b-906f-39abca941421")
+	)
 	(wire
 		(pts
-			(xy 49.81 190) (xy 58 190)
+			(xy 34.29 190.50) (xy 41.91 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "541c6473-3cdb-4dd8-be4e-848bac528b8b")
+		(uuid "59a7e5ab-a1a4-4852-846f-0af0806387eb")
 	)
 	(symbol
-		(lib_id "C")
-		(at 58 198 0)
+		(lib_id "Device:C")
+		(at 58.42 194.31 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "eea8a01a-90b4-4680-9323-663aeb34511d")
+		(uuid "7f0c1261-b822-4626-9ace-f7e80880e737")
 		(property "Reference" "C3"
-			(at 58 194 0)
+			(at 58.42 190.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "100nF"
-			(at 58 202 0)
+			(at 58.42 198.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 58 198 0)
+			(at 58.42 194.31 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "17e6b2f7-6a08-4a4d-83f8-61d7247287f3"))
-		(pin "2" (uuid "8a905334-31ab-4c1a-b07d-8211714c406e"))
+		(pin "1" (uuid "5664253e-4dc8-454b-b262-b6b5fc31921a"))
+		(pin "2" (uuid "eca02d1f-7699-42e9-b839-c4edf7558fc8"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4325,81 +5394,80 @@
 	)
 	(wire
 		(pts
-			(xy 58 190) (xy 58 194.19)
+			(xy 49.53 190.50) (xy 58.42 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "3b8835d1-bcb1-4e91-b4c6-5cd08c8b1ede")
+		(uuid "472b26be-8d11-4639-977a-e1d92dce89cd")
+	)
+	(junction
+		(at 58.42 190.50)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "acba3351-00bd-4deb-96fc-a5281a6868b5")
 	)
 	(wire
 		(pts
-			(xy 58 201.81) (xy 58 206)
+			(xy 58.42 198.12) (xy 58.42 203.20)
 		)
 		(stroke (width 0) (type default))
-		(uuid "3a2bcf52-cb3b-4c4b-8df6-f8a9e33551a7")
+		(uuid "9c02f656-5d87-429e-9094-68e0e644cb6f")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 58 206 0)
+		(lib_id "power:GND")
+		(at 58.42 203.20 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ad17e8b8-0f40-4d83-8cec-3f915df18794")
-		(property "Reference" "#PWR4221DD"
-			(at 58 202 0) (hide yes)
+		(uuid "dce34bb3-3245-4796-a17d-df90b67e9516")
+		(property "Reference" "#PWR422BA5"
+			(at 58.42 199.20 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 58 210 0)
+			(at 58.42 207.20 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 58 206 0)
+			(at 58.42 203.20 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "1785df59-9320-4670-89bb-b3a64ab75a14"))
+		(pin "1" (uuid "00360682-31a2-4479-bd75-975893a33108"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR4221DD")
+					(reference "#PWR422BA5")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 58 190) (xy 66 190)
-		)
-		(stroke (width 0) (type default))
-		(uuid "f997b194-7d67-4602-9288-ff8f4b358a8a")
-	)
 	(symbol
-		(lib_id "R")
-		(at 70 190 90)
+		(lib_id "Device:R")
+		(at 72.39 190.50 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2f61894b-2dac-4061-9a61-d6966b98154b")
+		(uuid "d553a13d-3e62-43f8-88bc-07cf62b749da")
 		(property "Reference" "R2"
-			(at 70 186 0)
+			(at 72.39 186.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "1k"
-			(at 70 194 0)
+			(at 72.39 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 70 190 0)
+			(at 72.39 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "868ef60f-ff26-4d37-a6c2-201b9b4fe63a"))
-		(pin "2" (uuid "af6debf1-a84a-46db-afd3-833d615e4cb2"))
+		(pin "1" (uuid "2890b1ab-e11c-49bf-96f5-519d3f550728"))
+		(pin "2" (uuid "4a2fb6da-3f44-4a77-88f8-14fade8ba6db"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4411,35 +5479,35 @@
 	)
 	(wire
 		(pts
-			(xy 73.81 190) (xy 82 190)
+			(xy 58.42 190.50) (xy 68.58 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "4bcf8dde-93e8-4b03-9365-87b2c5058693")
+		(uuid "4bc05cb0-d162-4be3-a1a7-5d6a92184d23")
 	)
 	(symbol
-		(lib_id "C")
-		(at 82 198 0)
+		(lib_id "Device:C")
+		(at 85.09 194.31 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d2929ad8-2721-45e5-b3b1-c22fe29c84ce")
+		(uuid "69adbbbb-b564-4a2b-9de5-f114a764fb7d")
 		(property "Reference" "C4"
-			(at 82 194 0)
+			(at 85.09 190.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "47nF"
-			(at 82 202 0)
+			(at 85.09 198.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 82 198 0)
+			(at 85.09 194.31 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "bf415bc3-ce23-46a0-bb0e-303ccb6e95fc"))
-		(pin "2" (uuid "9eb3cb2d-2a1f-4c52-9bf8-8089808d254b"))
+		(pin "1" (uuid "1d436982-2ca4-4a89-9e28-4939cdb0bd53"))
+		(pin "2" (uuid "c9a772ef-c54c-4116-8155-fd89645d2813"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4451,75 +5519,81 @@
 	)
 	(wire
 		(pts
-			(xy 82 190) (xy 82 194.19)
+			(xy 76.20 190.50) (xy 85.09 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "d78bda18-1e7f-426b-980f-62a6b964cf17")
+		(uuid "db611d9f-0763-4e65-8be3-f92a4031856d")
+	)
+	(junction
+		(at 85.09 190.50)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "d0ea7239-3317-4f41-9dfc-befedd91b173")
 	)
 	(wire
 		(pts
-			(xy 82 201.81) (xy 82 206)
+			(xy 85.09 198.12) (xy 85.09 203.20)
 		)
 		(stroke (width 0) (type default))
-		(uuid "d2f9e050-0066-47f2-9ca6-ca1684a27594")
+		(uuid "1325884b-1c23-4239-b665-9269732315fb")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 82 206 0)
+		(lib_id "power:GND")
+		(at 85.09 203.20 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "58020671-bdeb-462f-8aad-299761ee9d28")
-		(property "Reference" "#PWR64F9E7"
-			(at 82 202 0) (hide yes)
+		(uuid "4f10738e-d81e-4d2e-a606-9ecba3948074")
+		(property "Reference" "#PWR7747C5"
+			(at 85.09 199.20 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 82 210 0)
+			(at 85.09 207.20 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 82 206 0)
+			(at 85.09 203.20 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "7bfd7291-2709-44cf-8b93-68c41b7c88e2"))
+		(pin "1" (uuid "354487dc-303c-409f-80f9-f7be284eaccc"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR64F9E7")
+					(reference "#PWR7747C5")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(symbol
-		(lib_id "R_Potentiometer")
-		(at 96 190 0)
+		(lib_id "Device:R_Potentiometer")
+		(at 99.06 194.31 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d8b86aff-fb3c-4bbb-a749-1626be171d73")
+		(uuid "54379cd3-bbc9-4137-8af6-6c356e8135b7")
 		(property "Reference" "RV3"
-			(at 96 186 0)
+			(at 99.06 190.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "10k (Volume)"
-			(at 96 194 0)
+			(at 99.06 198.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical"
-			(at 96 190 0)
+			(at 99.06 194.31 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "24356d72-bf64-4c84-8353-85ccbe5117ed"))
-		(pin "2" (uuid "8eee5d09-3546-4821-84a9-feb8ee1dc0d8"))
-		(pin "3" (uuid "97ce1dc6-3bdb-44a4-adf2-192ce7eb3021"))
+		(pin "1" (uuid "b27e8c64-1df6-4674-a1d6-aa47db834264"))
+		(pin "2" (uuid "89e51f31-4c61-4f86-856b-1faf9e1de2ff"))
+		(pin "3" (uuid "8e0384f4-478e-46ab-b41c-021139a5aafe"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4531,81 +5605,74 @@
 	)
 	(wire
 		(pts
-			(xy 82 190) (xy 96 184.92)
+			(xy 85.09 190.50) (xy 99.06 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "2ec1c266-0235-42f5-9d40-6821aaa7697a")
+		(uuid "9365fd84-1ef3-436a-b2d3-749b546839f4")
 	)
 	(wire
 		(pts
-			(xy 96 195.08) (xy 96 202)
+			(xy 99.06 198.12) (xy 99.06 203.20)
 		)
 		(stroke (width 0) (type default))
-		(uuid "0ceec68c-325e-4469-b447-c41209fd127c")
+		(uuid "9f2f37ad-56cb-40df-8c2d-18a559034ce8")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 96 202 0)
+		(lib_id "power:GND")
+		(at 99.06 203.20 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1715b97e-042b-4d59-8b4d-da649ac283d6")
-		(property "Reference" "#PWR69FB67"
-			(at 96 198 0) (hide yes)
+		(uuid "460b4b9a-6f45-4732-a3b2-a32d88e1b55d")
+		(property "Reference" "#PWRE5A5DC"
+			(at 99.06 199.20 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 96 206 0)
+			(at 99.06 207.20 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 96 202 0)
+			(at 99.06 203.20 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "7fa25dfb-486b-46f3-b38e-eca5a3ca37d6"))
+		(pin "1" (uuid "305694ac-8422-4019-b366-5500de5c40eb"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR69FB67")
+					(reference "#PWRE5A5DC")
 					(unit 1)
 				)
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 99.81 190) (xy 106 190)
-		)
-		(stroke (width 0) (type default))
-		(uuid "88b5d0e7-f46c-4489-88ef-5168584a562e")
-	)
 	(symbol
-		(lib_id "R")
-		(at 110 190 90)
+		(lib_id "Device:R")
+		(at 110.49 194.31 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a0b51b4f-2c0f-41cf-96d9-23fa9f1ea16c")
+		(uuid "a6803664-36c9-4946-9725-aaa974768a2b")
 		(property "Reference" "R6"
-			(at 110 186 0)
+			(at 110.49 190.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "470R"
-			(at 110 194 0)
+			(at 110.49 198.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 110 190 0)
+			(at 110.49 194.31 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "3465a808-dec1-4a2d-852e-75e0dc30d1d6"))
-		(pin "2" (uuid "333a9c03-e5e2-4ede-8977-3608247cc00d"))
+		(pin "1" (uuid "8dc5771c-12e0-44c4-9abb-ab9739b6b0a8"))
+		(pin "2" (uuid "5f807c2c-72df-4771-a745-eb9f127cc388"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4617,34 +5684,36 @@
 	)
 	(wire
 		(pts
-			(xy 113.81 190) (xy 120 190)
+			(xy 102.87 194.31) (xy 106.68 194.31)
 		)
 		(stroke (width 0) (type default))
-		(uuid "7fccd675-848e-427b-9980-3c2a74fbb205")
+		(uuid "335d0d0f-bd09-4445-a376-9f79f099004c")
 	)
 	(symbol
-		(lib_id "BC547")
-		(at 125 190 0)
+		(lib_id "Transistor_BJT:BC547")
+		(at 124.46 194.31 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "a188ff5c-8d2a-4142-8925-ee553743edd3")
+		(uuid "290aabca-7be2-4818-96da-4335b267171d")
 		(property "Reference" "Q1"
-			(at 125 186 0)
+			(at 124.46 190.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "BC547"
-			(at 125 194 0)
+			(at 124.46 198.31 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Package_TO_SOT_THT:TO-92_Inline"
-			(at 125 190 0)
+			(at 124.46 194.31 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-
+		(pin "1" (uuid "0ad00e87-5593-4e27-a08b-3410f1ed9edc"))
+		(pin "2" (uuid "1836542c-3af9-41eb-b5e9-18a59b2df526"))
+		(pin "3" (uuid "0dc5d30a-eced-4956-ac44-12b7900a5341"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4656,107 +5725,74 @@
 	)
 	(wire
 		(pts
-			(xy 127.54 192.54) (xy 127.54 202)
+			(xy 114.30 194.31) (xy 119.38 194.31)
 		)
 		(stroke (width 0) (type default))
-		(uuid "66b9a69a-da47-4a1a-8c90-8adf6f9ebc15")
-	)
-	(symbol
-		(lib_id "GND")
-		(at 127.54 202 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "c201569b-b77b-498e-accc-288b5da01b12")
-		(property "Reference" "#PWRA14442"
-			(at 127.54 198 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 127.54 206 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 127.54 202 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "1a00f6af-c421-4882-9033-7d03e1cbb555"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRA14442")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Conn_01x02_Pin")
-		(at 148 185 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "5732f961-8c2a-4793-bc4d-07a5317ebba1")
-		(property "Reference" "J4"
-			(at 148 181 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "SPEAKER_8R"
-			(at 148 189 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
-			(at 148 185 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "735f3f6d-eff4-4f8e-9dfb-addc8d9a4e5e"))
-		(pin "2" (uuid "315e1795-9e62-468f-9b23-e3d209d8d81e"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "J4")
-					(unit 1)
-				)
-			)
-		)
+		(uuid "41c6338e-b3d8-4208-bc7d-9d464a160063")
 	)
 	(wire
 		(pts
-			(xy 127.54 187.46) (xy 144.19 187.46)
+			(xy 127.00 199.39) (xy 127.00 203.20)
 		)
 		(stroke (width 0) (type default))
-		(uuid "c3b2bb2a-2fb3-4b67-b737-da8fe3ad004a")
+		(uuid "7c46d471-343a-4ae9-a383-a3bc23f02f84")
 	)
 	(symbol
-		(lib_id "C")
-		(at 137 197 0)
+		(lib_id "power:GND")
+		(at 127.00 203.20 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "f0a300de-5583-4658-a4bc-de14c426ba21")
-		(property "Reference" "C5"
-			(at 137 193 0)
+		(uuid "7219e2b6-dd0f-4881-8ecd-4ff45e7629e2")
+		(property "Reference" "#PWR68F53D"
+			(at 127.00 199.20 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "100nF"
-			(at 137 201 0)
+		(property "Value" "GND"
+			(at 127.00 207.20 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 137 197 0)
+		(property "Footprint" ""
+			(at 127.00 203.20 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "919571d0-3138-4739-ab52-a05f85adcb3b"))
-		(pin "2" (uuid "1514ec45-0d96-4473-ac08-cfbfdb075c1e"))
+		(pin "1" (uuid "b4a75092-3d29-4ca5-930f-c49b4d1862eb"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWR68F53D")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 137.16 193.04 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "8e0c958b-8b31-48cf-b00f-dc00793b5993")
+		(property "Reference" "C5"
+			(at 137.16 189.04 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "100nF"
+			(at 137.16 197.04 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 137.16 193.04 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "1a76ca3e-88a9-42f9-b0da-4f8c1d3d603a"))
+		(pin "2" (uuid "270c5b99-52d5-45e5-998f-8332777bad80"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4768,45 +5804,84 @@
 	)
 	(wire
 		(pts
-			(xy 127.54 187.46) (xy 137 193.19)
+			(xy 127.00 189.23) (xy 137.16 189.23)
 		)
 		(stroke (width 0) (type default))
-		(uuid "06132f26-6ae9-4566-92c2-29188fcedbc1")
+		(uuid "752b1a26-a09f-4a4d-9b11-3a0947ef5a9d")
+	)
+	(junction
+		(at 137.16 189.23)
+		(diameter 1.016)
+		(color 0 0 0 0)
+		(uuid "4bfc577f-ac1d-415d-8185-9135dac16296")
 	)
 	(wire
 		(pts
-			(xy 137 200.81) (xy 137 206)
+			(xy 137.16 196.85) (xy 137.16 201.93)
 		)
 		(stroke (width 0) (type default))
-		(uuid "1878e990-319a-4370-8110-7a20266da359")
+		(uuid "b088cbc3-1d6e-4d32-9582-b2b24b4bed4f")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 137 206 0)
+		(lib_id "power:GND")
+		(at 137.16 201.93 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b1d4314a-ee5f-4741-b78e-1f334f24c0e0")
-		(property "Reference" "#PWRD39BA7"
-			(at 137 202 0) (hide yes)
+		(uuid "8f45827c-3711-47a0-84ed-23b781f26593")
+		(property "Reference" "#PWRC77FB5"
+			(at 137.16 197.93 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 137 210 0)
+			(at 137.16 205.93 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 137 206 0)
+			(at 137.16 201.93 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "818b8b08-10d8-47db-9fed-fd356993b6d9"))
+		(pin "1" (uuid "c0e0abd8-fcda-420e-934e-8a1a328f1f19"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRD39BA7")
+					(reference "#PWRC77FB5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Conn_01x02_Pin")
+		(at 154.94 189.23 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fc17201a-bf0e-4a01-9ed3-03d9b0f554df")
+		(property "Reference" "J4"
+			(at 154.94 185.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "SPEAKER_8R"
+			(at 154.94 193.23 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
+			(at 154.94 189.23 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "72b09ca3-f5df-49c8-86df-86d2a59a6336"))
+		(pin "2" (uuid "53d05954-f937-4666-b061-1ee99de9d176"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -4814,35 +5889,42 @@
 	)
 	(wire
 		(pts
-			(xy 144.19 182.54) (xy 144.19 175)
+			(xy 137.16 189.23) (xy 149.86 189.23)
 		)
 		(stroke (width 0) (type default))
-		(uuid "e5533b09-4730-427c-bd21-c58046ecbcb0")
+		(uuid "0fd655b6-cf2b-478f-bcfc-e8163a1cb275")
+	)
+	(wire
+		(pts
+			(xy 149.86 186.69) (xy 149.86 175.26)
+		)
+		(stroke (width 0) (type default))
+		(uuid "d7bd73ed-730d-41f4-8d84-dde1dd517dac")
 	)
 	(symbol
-		(lib_id "R")
-		(at 152 175 90)
+		(lib_id "Device:R")
+		(at 158.75 175.26 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "5db834b3-a79b-48a4-9477-b0eeced3d1d4")
+		(uuid "588706bc-c981-4b71-9028-f410568209d6")
 		(property "Reference" "R7"
-			(at 152 171 0)
+			(at 158.75 171.26 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "33R (1W)"
-			(at 152 179 0)
+			(at 158.75 179.26 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
-			(at 152 175 0)
+			(at 158.75 175.26 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "ed511049-c46c-417a-8a71-a05228f2ecc8"))
-		(pin "2" (uuid "27b8c22d-21e2-4251-b8cf-a29c9f94d783"))
+		(pin "1" (uuid "8ae675bc-f8cb-4e44-b0aa-d73c74e7243b"))
+		(pin "2" (uuid "7b1f7241-f054-4518-b90b-fe02023b3641"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4854,76 +5936,83 @@
 	)
 	(wire
 		(pts
-			(xy 155.81 175) (xy 162 175)
+			(xy 149.86 175.26) (xy 154.94 175.26)
 		)
 		(stroke (width 0) (type default))
-		(uuid "292e482a-8ee2-4017-a7a7-3cc392e31453")
+		(uuid "a7b7449f-3e36-4fbc-89bb-6588b407f4af")
+	)
+	(wire
+		(pts
+			(xy 162.56 175.26) (xy 167.64 175.26)
+		)
+		(stroke (width 0) (type default))
+		(uuid "3487f53a-b94f-4e5d-acc1-bd8182262e1b")
 	)
 	(symbol
-		(lib_id "+5V")
-		(at 162 175 270)
+		(lib_id "power:+5V")
+		(at 167.64 175.26 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7dbcaa87-90d6-4d2c-acf7-e4f1e35bc406")
-		(property "Reference" "#PWRD13BCA"
-			(at 162 171 0) (hide yes)
+		(uuid "dd98e84b-9e63-463d-b236-6f2d47c18b31")
+		(property "Reference" "#PWR731E51"
+			(at 167.64 171.26 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 162 179 0)
+			(at 167.64 179.26 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 162 175 0)
+			(at 167.64 175.26 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "853ced04-e5cc-4ebf-9426-7c9cf1452e91"))
+		(pin "1" (uuid "de767f0f-0a8b-4c80-91f6-f454c7e582ce"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRD13BCA")
+					(reference "#PWR731E51")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(text "5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ"
-		(at 210 175 0)
+		(at 215.90 172.72 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "34368bf9-bd30-4985-a53f-ce6496f5cbf3")
+		(uuid "3cd39920-3ec9-462c-989b-ad74c7c1ac0c")
 	)
 	(symbol
-		(lib_id "R_Potentiometer")
-		(at 220 190 0)
+		(lib_id "Device:R_Potentiometer")
+		(at 228.60 190.50 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "160be84d-76e2-467e-8115-8c633a7ee2b0")
+		(uuid "ae8a2bc4-8041-4537-a1d9-9dcd840ee51c")
 		(property "Reference" "RV1"
-			(at 220 186 0)
+			(at 228.60 186.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "10k (Speed)"
-			(at 220 194 0)
+			(at 228.60 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical"
-			(at 220 190 0)
+			(at 228.60 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "d4aade68-32e8-478b-a951-0cfe9e57f90e"))
-		(pin "2" (uuid "b2a7fbf1-9134-4c19-bec6-38d45cbb0bd6"))
-		(pin "3" (uuid "b996eb4a-db80-4145-92dd-a66fef67c8b4"))
+		(pin "1" (uuid "c9f2f3aa-2dd9-4eb0-b406-06ba46ae046e"))
+		(pin "2" (uuid "b17ca3ad-90bd-423c-b3bf-bf0fbf5c7f41"))
+		(pin "3" (uuid "fe912349-41ce-4254-b029-23c371898ac6"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -4933,65 +6022,40 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 228.60 186.69) (xy 228.60 181.61)
+		)
+		(stroke (width 0) (type default))
+		(uuid "26f2cb00-f408-4e38-bc4d-b55ed6390c21")
+	)
 	(symbol
-		(lib_id "+5V")
-		(at 220 183 0)
+		(lib_id "power:+5V")
+		(at 228.60 181.61 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "63530610-3de2-4ecf-ac0d-b58eb8f14470")
-		(property "Reference" "#PWR63E1CA"
-			(at 220 179 0) (hide yes)
+		(uuid "de9dae7e-f9c9-49ee-8656-05c1bc21c87b")
+		(property "Reference" "#PWR2C2223"
+			(at 228.60 177.61 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 220 187 0)
+			(at 228.60 185.61 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 220 183 0)
+			(at 228.60 181.61 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "4ef5d9a7-0190-445a-869c-ba4dd80a8751"))
+		(pin "1" (uuid "c1339464-20e2-4f82-a4c8-9a15292f1099"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR63E1CA")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "GND")
-		(at 220 197 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "17fc3655-2e56-478f-96e8-4ff21c9e634b")
-		(property "Reference" "#PWRCBD02D"
-			(at 220 193 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 220 201 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 220 197 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "4834e8d8-b44e-4148-92fd-258b6af02ca1"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRCBD02D")
+					(reference "#PWR2C2223")
 					(unit 1)
 				)
 			)
@@ -4999,44 +6063,83 @@
 	)
 	(wire
 		(pts
-			(xy 223.81 190) (xy 230 190)
+			(xy 228.60 194.31) (xy 228.60 199.39)
 		)
 		(stroke (width 0) (type default))
-		(uuid "220a0fa7-ba98-49cd-93d4-8c56f7965488")
-	)
-	(label "POT_SPEED"
-		(at 230 190 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify left bottom)
-		)
-		(uuid "e23b9c47-8aa1-4944-bd89-e7a5ef63544e")
+		(uuid "c60e82ad-8056-4780-bc06-0bb578effac5")
 	)
 	(symbol
-		(lib_id "R_Potentiometer")
-		(at 245 190 0)
+		(lib_id "power:GND")
+		(at 228.60 199.39 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8f91184f-233d-43b1-9fd2-d4a6b1792b58")
-		(property "Reference" "RV2"
-			(at 245 186 0)
+		(uuid "c37e525e-8a11-4ffe-b1ac-7b2a612a9fd9")
+		(property "Reference" "#PWR61572B"
+			(at 228.60 195.39 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "10k (Tone)"
-			(at 245 194 0)
+		(property "Value" "GND"
+			(at 228.60 203.39 0)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Footprint" "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical"
-			(at 245 190 0)
+		(property "Footprint" ""
+			(at 228.60 199.39 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "52006ba5-7aff-4f1e-be9a-5363bbc981d2"))
-		(pin "2" (uuid "44d8dc34-4f71-4a22-8723-9192a53a8d49"))
-		(pin "3" (uuid "6bda2ef7-c08a-4249-9160-bfc062fd7e92"))
+		(pin "1" (uuid "3fcf2f96-19e0-4013-8a52-376ba1b2bdd9"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWR61572B")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 232.41 190.50) (xy 238.76 190.50)
+		)
+		(stroke (width 0) (type default))
+		(uuid "44375ffa-9ecb-4801-b974-ab341dfda53b")
+	)
+	(label "POT_SPEED"
+		(at 238.76 190.50 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify left bottom)
+		)
+		(uuid "d2d3557c-360b-4eeb-86dd-9d417b1a9687")
+	)
+	(symbol
+		(lib_id "Device:R_Potentiometer")
+		(at 254.00 190.50 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fb910b39-13f0-4bd3-9211-412295cb7991")
+		(property "Reference" "RV2"
+			(at 254.00 186.50 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "10k (Tone)"
+			(at 254.00 194.50 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical"
+			(at 254.00 190.50 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "816acf89-fd3c-4695-9319-bac6566f1796"))
+		(pin "2" (uuid "3664dd13-4631-46df-91a8-30ec0832e413"))
+		(pin "3" (uuid "bf78776f-d06b-4913-9d7a-688d617211d4"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5046,65 +6149,40 @@
 			)
 		)
 	)
+	(wire
+		(pts
+			(xy 254.00 186.69) (xy 254.00 181.61)
+		)
+		(stroke (width 0) (type default))
+		(uuid "ed3c75ee-35b7-4e55-b1ed-331a9d7af571")
+	)
 	(symbol
-		(lib_id "+5V")
-		(at 245 183 0)
+		(lib_id "power:+5V")
+		(at 254.00 181.61 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "156d0bd4-4acd-415d-9a1f-ec5bc1229a41")
-		(property "Reference" "#PWR026784"
-			(at 245 179 0) (hide yes)
+		(uuid "87937f1c-3c46-474e-8148-78f3a6720e41")
+		(property "Reference" "#PWRC1D884"
+			(at 254.00 177.61 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 245 187 0)
+			(at 254.00 185.61 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 245 183 0)
+			(at 254.00 181.61 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "e080734c-f369-419a-b715-60676ffa97df"))
+		(pin "1" (uuid "3a34ab2c-d374-411c-843a-76ce7585743f"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR026784")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "GND")
-		(at 245 197 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "55555a41-1504-4b13-a049-4335e3764c93")
-		(property "Reference" "#PWR2EF22D"
-			(at 245 193 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 245 201 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 245 197 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "4104cfc0-e4ef-4087-9173-2ba285dd355d"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR2EF22D")
+					(reference "#PWRC1D884")
 					(unit 1)
 				)
 			)
@@ -5112,58 +6190,82 @@
 	)
 	(wire
 		(pts
-			(xy 248.81 190) (xy 255 190)
+			(xy 254.00 194.31) (xy 254.00 199.39)
 		)
 		(stroke (width 0) (type default))
-		(uuid "48e65512-8d84-478b-96ee-1b6342ffc682")
+		(uuid "6b12ad2d-ae3b-4a44-9b40-fc78ef7535ae")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 254.00 199.39 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ff08fd6b-835f-4ded-9ee2-8a5f45b2d867")
+		(property "Reference" "#PWRA55736"
+			(at 254.00 195.39 0) (hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "GND"
+			(at 254.00 203.39 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 254.00 199.39 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "96f188ec-2cdb-4000-8cac-1ff5b0635ac8"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWRA55736")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 257.81 190.50) (xy 264.16 190.50)
+		)
+		(stroke (width 0) (type default))
+		(uuid "baaad060-3a8a-4f70-bee4-bf550d7e911a")
 	)
 	(label "POT_TONE"
-		(at 255 190 0)
+		(at 264.16 190.50 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify left bottom)
 		)
-		(uuid "f8be6215-d5c7-4132-bc80-05e19cc89c0c")
-	)
-	(label "LED_KEY"
-		(at 270 185 0)
-		(effects
-			(font (size 1.27 1.27))
-			(justify right bottom)
-		)
-		(uuid "2edaabbd-ba2d-4fe6-80c7-18e41811d24e")
-	)
-	(wire
-		(pts
-			(xy 270 185) (xy 274 185)
-		)
-		(stroke (width 0) (type default))
-		(uuid "892faa2d-d1d5-441b-b637-d97e38ec8858")
+		(uuid "591706ef-7e0d-4b6e-9dec-3e3968760481")
 	)
 	(symbol
-		(lib_id "R")
-		(at 278 185 90)
+		(lib_id "Device:R")
+		(at 283.21 190.50 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "e703dfd5-8f4e-4bc6-8406-7050ccbf4b3c")
+		(uuid "9b4c7e8f-a058-49fa-9318-1acb51678ce8")
 		(property "Reference" "R3"
-			(at 278 181 0)
+			(at 283.21 186.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "330R"
-			(at 278 189 0)
+			(at 283.21 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 278 185 0)
+			(at 283.21 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "37fba477-39b8-427d-9e58-8e37c5869793"))
-		(pin "2" (uuid "2bf6a67b-ad87-42c1-a14c-41d85687a8d9"))
+		(pin "1" (uuid "fc9e2696-a96f-48d6-a4c1-907540cf9581"))
+		(pin "2" (uuid "484c5cd9-c607-4c32-adaf-f7e498dadfc5"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5173,37 +6275,45 @@
 			)
 		)
 	)
+	(label "LED_KEY"
+		(at 273.05 190.50 0)
+		(effects
+			(font (size 1.27 1.27))
+			(justify right bottom)
+		)
+		(uuid "3de44408-01ef-4fe3-8111-e940a2fad4a9")
+	)
 	(wire
 		(pts
-			(xy 281.81 185) (xy 286 185)
+			(xy 273.05 190.50) (xy 279.40 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "2e822862-984f-4257-8e4c-a186a38dc02a")
+		(uuid "ae287b76-3976-447a-b56b-5ce6c91c7a89")
 	)
 	(symbol
-		(lib_id "LED")
-		(at 290 185 90)
+		(lib_id "Device:LED")
+		(at 294.64 190.50 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1dd28287-87d6-4bba-88b8-e5a429b3ca2e")
+		(uuid "26f0194f-c9ba-46b4-b1ef-1b8279304e40")
 		(property "Reference" "D1"
-			(at 290 181 0)
+			(at 294.64 186.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "LED_KEY"
-			(at 290 189 0)
+			(at 294.64 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "LED_THT:LED_D3.0mm"
-			(at 290 185 0)
+			(at 294.64 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "62b5ee34-8266-4f99-8d12-5917c9ac1ee7"))
-		(pin "2" (uuid "f7eab44c-8117-4057-8932-5e8d3a24bbc1"))
+		(pin "1" (uuid "76896559-b8b5-42d7-8312-6d3e0ca9f7e7"))
+		(pin "2" (uuid "f4989bf0-a226-4e5d-8cf4-11d787406658"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5215,77 +6325,84 @@
 	)
 	(wire
 		(pts
-			(xy 293.81 185) (xy 298 185)
+			(xy 287.02 190.50) (xy 290.83 190.50)
 		)
 		(stroke (width 0) (type default))
-		(uuid "fb10c19b-3f13-4a36-bfde-28f3c121f7cd")
+		(uuid "865d8cca-c896-4822-93e8-7f56564ba775")
+	)
+	(wire
+		(pts
+			(xy 298.45 190.50) (xy 303.53 190.50)
+		)
+		(stroke (width 0) (type default))
+		(uuid "affdc252-1c34-437c-a33f-b08d420aa92d")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 298 185 270)
+		(lib_id "power:GND")
+		(at 303.53 190.50 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "de815f90-ddd1-4671-9940-fd2abfd6b133")
-		(property "Reference" "#PWR8BA1EB"
-			(at 298 181 0) (hide yes)
+		(uuid "1c026660-3a6b-4de2-a30f-d795580fd3ce")
+		(property "Reference" "#PWRD690F8"
+			(at 303.53 186.50 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 298 189 0)
+			(at 303.53 194.50 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 298 185 0)
+			(at 303.53 190.50 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "eee86289-56f2-4127-870a-e4e4506d9238"))
+		(pin "1" (uuid "7ff8675a-b0a0-4b57-875b-116fb7a29fc1"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR8BA1EB")
+					(reference "#PWRD690F8")
 					(unit 1)
 				)
 			)
 		)
 	)
 	(text "6. ЭКРАН OLED 0.96 ДЮЙМА I2C FAST"
-		(at 30 95 0)
+		(at 30.48 106.68 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "9d8f62f1-e29d-43ed-875e-2d95ccd3b54e")
+		(uuid "61eeafa4-516b-4e20-93dc-cdbf09396947")
 	)
 	(symbol
-		(lib_id "Conn_01x04_Pin")
-		(at 45 115 0)
+		(lib_id "Connector:Conn_01x04_Pin")
+		(at 55.88 121.92 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "288e3965-3099-4a30-bcc5-edc4d7ca89a1")
+		(uuid "ddb9c89d-9c67-40cd-8e6c-953e6ad037bf")
 		(property "Reference" "J5"
-			(at 45 111 0)
+			(at 55.88 117.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "OLED_0.96_I2C"
-			(at 45 119 0)
+			(at 55.88 125.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
-			(at 45 115 0)
+			(at 55.88 121.92 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "f9faf21f-69a7-4cef-be31-b5a2747b6038"))
-		(pin "2" (uuid "ccd6e235-a2cf-41fa-95fc-aabfa6936df0"))
-		(pin "3" (uuid "4820d961-41a3-4efe-b8a6-c6287c7de7ce"))
-		(pin "4" (uuid "35589379-532c-4741-91b9-15292ef04b18"))
+		(pin "1" (uuid "9b2aba25-0fcc-42e5-b2c2-126bdc28c998"))
+		(pin "2" (uuid "42d45b8c-76ca-4469-9d2e-fe782926e004"))
+		(pin "3" (uuid "0ee61108-32fa-428e-b41e-097c9aa522cf"))
+		(pin "4" (uuid "503f77d1-d33d-4564-8a28-e1c3b69efaf7"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5297,38 +6414,38 @@
 	)
 	(wire
 		(pts
-			(xy 41.19 111.18) (xy 35 111.18)
+			(xy 50.80 124.46) (xy 43.18 124.46)
 		)
 		(stroke (width 0) (type default))
-		(uuid "3d3ab3da-2c70-4b50-af43-6b1b5aed8df1")
+		(uuid "18fdac55-c86c-49e0-94a1-e69ce26d83f5")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 35 111.18 90)
+		(lib_id "power:GND")
+		(at 43.18 124.46 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "8946f3ca-47b1-4e5a-a84f-2f4dc80f0f5c")
-		(property "Reference" "#PWR3425FE"
-			(at 35 107.18 0) (hide yes)
+		(uuid "0df6d750-3bde-46b0-811a-bcff12d43406")
+		(property "Reference" "#PWR5AB397"
+			(at 43.18 120.46 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 35 115.18 0)
+			(at 43.18 128.46 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 35 111.18 0)
+			(at 43.18 124.46 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "54296ff8-70c0-4c4a-8040-030e183d0d59"))
+		(pin "1" (uuid "28fe2d40-b3bf-4891-a1ba-c393db982c2a"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR3425FE")
+					(reference "#PWR5AB397")
 					(unit 1)
 				)
 			)
@@ -5336,38 +6453,38 @@
 	)
 	(wire
 		(pts
-			(xy 41.19 113.72) (xy 35 113.72)
+			(xy 50.80 121.92) (xy 43.18 121.92)
 		)
 		(stroke (width 0) (type default))
-		(uuid "2aac1283-e379-4cd6-a83a-2cca4741367d")
+		(uuid "0f2cda10-0855-4f8f-b05d-95684750490a")
 	)
 	(symbol
-		(lib_id "+5V")
-		(at 35 113.72 90)
+		(lib_id "power:+5V")
+		(at 43.18 121.92 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "2e7261ab-f0bc-4761-a1f2-30ce30669d56")
-		(property "Reference" "#PWRA5EC7E"
-			(at 35 109.72 0) (hide yes)
+		(uuid "d9ad9ac7-656d-49e6-a22a-c99f627e3d11")
+		(property "Reference" "#PWRFF2638"
+			(at 43.18 117.92 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 35 117.72 0)
+			(at 43.18 125.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 35 113.72 0)
+			(at 43.18 121.92 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "c952f91c-7542-4c9d-b822-1039cf033a57"))
+		(pin "1" (uuid "cc18289e-f29e-474f-ae7d-03baf24531e2"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRA5EC7E")
+					(reference "#PWRFF2638")
 					(unit 1)
 				)
 			)
@@ -5375,68 +6492,68 @@
 	)
 	(wire
 		(pts
-			(xy 41.19 116.26) (xy 35 116.26)
+			(xy 50.80 119.38) (xy 43.18 119.38)
 		)
 		(stroke (width 0) (type default))
-		(uuid "9ce7aa16-31e0-4ff7-8467-ca8da9613c87")
+		(uuid "0f416794-92d3-49c1-a3a7-fc9681b265ce")
 	)
 	(label "OLED_SCL"
-		(at 35 116.26 0)
+		(at 43.18 119.38 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "62b00330-70dc-40d1-b978-87c409142530")
+		(uuid "555acb97-24fd-4780-bb50-e875f283dc69")
 	)
 	(wire
 		(pts
-			(xy 41.19 118.8) (xy 35 118.8)
+			(xy 50.80 116.84) (xy 43.18 116.84)
 		)
 		(stroke (width 0) (type default))
-		(uuid "1905b4d9-518b-4e0f-8a24-03c461267fa8")
+		(uuid "83b7f480-5566-4e3c-8473-e35a0799bb70")
 	)
 	(label "OLED_SDA"
-		(at 35 118.8 0)
+		(at 43.18 116.84 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "b352fab6-b73d-4e47-ba1f-73bde61c695d")
+		(uuid "1fc36cd4-57ff-455f-8298-0806f17e04e9")
 	)
 	(text "7. РАЗЪЁМ PS/2 КЛАВИАТУРЫ (ОПЦИЯ)"
-		(at 240 105 0)
+		(at 233.68 106.68 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "0aebf25a-d2ed-48a9-bdf6-219b5e51c3f2")
+		(uuid "cee08697-614e-46fe-808e-500810255199")
 	)
 	(symbol
-		(lib_id "Conn_01x04_Pin")
-		(at 255 125 0)
+		(lib_id "Connector:Conn_01x04_Pin")
+		(at 259.08 121.92 180)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "d1af3cbe-c5f1-43a1-b0f3-3662c43ae042")
+		(uuid "2af3481d-f750-4553-bb8c-978b778bc913")
 		(property "Reference" "J6"
-			(at 255 121 0)
+			(at 259.08 117.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "PS2_KEYBOARD"
-			(at 255 129 0)
+			(at 259.08 125.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
-			(at 255 125 0)
+			(at 259.08 121.92 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "fcec98f6-9f95-4a25-b62e-edf663247e6f"))
-		(pin "2" (uuid "a591d4f9-963a-4190-abea-90f8e4d24694"))
-		(pin "3" (uuid "b1b03a2c-3d37-4ab8-a572-cfe3e4c6532a"))
-		(pin "4" (uuid "5370690e-856a-40ba-b231-a0206a6fe1d4"))
+		(pin "1" (uuid "c057401e-5e42-4820-9084-36e8708a8f49"))
+		(pin "2" (uuid "69307c6f-207b-4f97-a348-3a26db70973c"))
+		(pin "3" (uuid "1cdfe7bd-622a-4447-8946-d7ac8a0eb9d6"))
+		(pin "4" (uuid "25fa8995-4718-4def-8db9-8625cd1afc64"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5448,38 +6565,38 @@
 	)
 	(wire
 		(pts
-			(xy 251.19 121.18) (xy 245 121.18)
+			(xy 254.00 124.46) (xy 246.38 124.46)
 		)
 		(stroke (width 0) (type default))
-		(uuid "caa2a4fd-6ed5-432d-a89e-5471b760cf31")
+		(uuid "89de6316-c826-4b8e-8f79-082f89aa9ced")
 	)
 	(symbol
-		(lib_id "+5V")
-		(at 245 121.18 90)
+		(lib_id "power:+5V")
+		(at 246.38 124.46 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "1f893fef-f2e9-4914-8c52-6d318336ca50")
-		(property "Reference" "#PWR1DDD60"
-			(at 245 117.18 0) (hide yes)
+		(uuid "5a9e2a07-e021-406c-846f-6fc8f2c7cdb4")
+		(property "Reference" "#PWRBE5B0D"
+			(at 246.38 120.46 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "+5V"
-			(at 245 125.18 0)
+			(at 246.38 128.46 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 245 121.18 0)
+			(at 246.38 124.46 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "2d143e48-778c-4762-829b-b291ce7f5c2d"))
+		(pin "1" (uuid "d5eca24a-cb62-4a8e-851e-b0cd771c6be7"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR1DDD60")
+					(reference "#PWRBE5B0D")
 					(unit 1)
 				)
 			)
@@ -5487,38 +6604,38 @@
 	)
 	(wire
 		(pts
-			(xy 251.19 123.72) (xy 245 123.72)
+			(xy 254.00 121.92) (xy 246.38 121.92)
 		)
 		(stroke (width 0) (type default))
-		(uuid "0ee3fdcd-de59-4e1e-a68e-fa4bc9775b64")
+		(uuid "83da5a64-6ebb-4470-bd23-14c1e066504b")
 	)
 	(symbol
-		(lib_id "GND")
-		(at 245 123.72 90)
+		(lib_id "power:GND")
+		(at 246.38 121.92 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "3ef6ce9f-a570-45ff-a98c-4f8c026f2154")
-		(property "Reference" "#PWR201484"
-			(at 245 119.72 0) (hide yes)
+		(uuid "ac042365-179c-4138-bebb-2b86d2585723")
+		(property "Reference" "#PWRC1CD22"
+			(at 246.38 117.92 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "GND"
-			(at 245 127.72 0)
+			(at 246.38 125.92 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 245 123.72 0)
+			(at 246.38 121.92 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "06c0b10c-9b9b-4dee-b024-fdbe9db4834c"))
+		(pin "1" (uuid "0304a2c4-94df-4c28-b41b-998c36a46dea"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR201484")
+					(reference "#PWRC1CD22")
 					(unit 1)
 				)
 			)
@@ -5526,105 +6643,66 @@
 	)
 	(wire
 		(pts
-			(xy 251.19 126.26) (xy 245 126.26)
+			(xy 254.00 119.38) (xy 246.38 119.38)
 		)
 		(stroke (width 0) (type default))
-		(uuid "05f6465d-5465-4e25-9904-d133a97dc7b9")
+		(uuid "a3b21a23-2673-41a6-a7c3-f22747a7e64d")
 	)
 	(label "PS2_DATA"
-		(at 245 126.26 0)
+		(at 246.38 119.38 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "c37f0258-30ae-4d57-a42f-57bc4386a082")
+		(uuid "d0c33661-f43c-4379-8c71-d401bf0faef7")
 	)
 	(wire
 		(pts
-			(xy 251.19 128.8) (xy 245 128.8)
+			(xy 254.00 116.84) (xy 246.38 116.84)
 		)
 		(stroke (width 0) (type default))
-		(uuid "a935f6b9-ef39-489c-a32a-14574dd1dfa6")
+		(uuid "f10eea24-a8d6-4383-906a-c869ed1e4fd0")
 	)
 	(label "PS2_CLK"
-		(at 245 128.8 0)
+		(at 246.38 116.84 0)
 		(effects
 			(font (size 1.27 1.27))
 			(justify right bottom)
 		)
-		(uuid "6041657b-46dc-42c3-9c98-9a477b736b98")
+		(uuid "a321ebf9-58e7-400d-9f6f-02e951bcfdd6")
 	)
 	(text "8. ФИЛЬТРАЦИЯ ШИНЫ ПИТАНИЯ +5V"
-		(at 220 225 0)
+		(at 228.60 223.52 0)
 		(effects
 			(font (size 2.5 2.5) (bold yes))
 			(justify left bottom)
 		)
-		(uuid "cdbd56e9-6192-4e98-b041-6baad5707db6")
+		(uuid "c4effd0b-9b39-4b88-8f16-eab7d638e808")
 	)
 	(symbol
-		(lib_id "+5V")
-		(at 230 235 0)
+		(lib_id "Device:C_Polarized")
+		(at 246.38 237.49 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "ad0556e8-3e68-48ab-8242-9e7dc720d2c6")
-		(property "Reference" "#PWR7528EA"
-			(at 230 231 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "+5V"
-			(at 230 239 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 230 235 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "8ac6bdd4-9d93-4dc1-b8bb-4623b307d463"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR7528EA")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 230 235) (xy 240 235)
-		)
-		(stroke (width 0) (type default))
-		(uuid "968e418f-b2b1-4ae2-b80e-b21afa70ce91")
-	)
-	(symbol
-		(lib_id "C_Polarized")
-		(at 240 245 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "ee83c947-f7cb-4722-bd74-93ad22bd0fbc")
+		(uuid "7fc6d989-997f-4a39-8595-d85dcb46e06d")
 		(property "Reference" "C6"
-			(at 240 241 0)
+			(at 246.38 233.49 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "100uF"
-			(at 240 249 0)
+			(at 246.38 241.49 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:CP_Elec_6.3x5.4"
-			(at 240 245 0)
+			(at 246.38 237.49 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "f00f5abb-7c69-4fa9-8702-70c102ef8082"))
-		(pin "2" (uuid "8ddd4cd5-5d41-4a72-90c5-8ecfc7f8d39e"))
+		(pin "1" (uuid "4adae8c0-076d-4980-a025-13df78e5e8d4"))
+		(pin "2" (uuid "b1062ef7-15db-461e-8b9f-edc58dbf785f"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5634,83 +6712,30 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 240 235) (xy 240 241.19)
-		)
-		(stroke (width 0) (type default))
-		(uuid "5c960e36-6d9a-4907-bd10-f37788a46451")
-	)
-	(wire
-		(pts
-			(xy 240 248.81) (xy 240 255)
-		)
-		(stroke (width 0) (type default))
-		(uuid "c8eaba37-cf29-45d9-bee0-248f31eebd3e")
-	)
 	(symbol
-		(lib_id "GND")
-		(at 240 255 0)
+		(lib_id "Device:C")
+		(at 261.62 237.49 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "7d85c46b-3481-4c7f-9827-0294ea2e8511")
-		(property "Reference" "#PWR67E592"
-			(at 240 251 0) (hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Value" "GND"
-			(at 240 259 0)
-			(effects (font (size 1.27 1.27)))
-		)
-		(property "Footprint" ""
-			(at 240 255 0)
-			(hide yes)
-			(effects (font (size 1.27 1.27)))
-		)
-		(pin "1" (uuid "c28fb551-6447-4eb5-8a40-ece7efa3fc20"))
-		(instances
-			(project "MorseWave_Pro"
-				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWR67E592")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(wire
-		(pts
-			(xy 240 235) (xy 255 235)
-		)
-		(stroke (width 0) (type default))
-		(uuid "17101f3d-e640-4faa-96b4-223a2d702dac")
-	)
-	(symbol
-		(lib_id "C")
-		(at 255 245 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b2ea4b0d-0d69-47f8-8ed0-5adfba528e79")
+		(uuid "83e9cff5-149e-4070-b58c-2a4e3f2c0339")
 		(property "Reference" "C7"
-			(at 255 241 0)
+			(at 261.62 233.49 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Value" "100nF"
-			(at 255 249 0)
+			(at 261.62 241.49 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 255 245 0)
+			(at 261.62 237.49 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "fe58807c-b34c-4dc3-be78-ae244139d8b0"))
-		(pin "2" (uuid "3c62b2c9-6121-4745-a3cc-a8fecbc21842"))
+		(pin "1" (uuid "638bb701-a95f-4001-b88c-788525b563f3"))
+		(pin "2" (uuid "03aea607-25e9-46aa-87e3-aa8b1a478a44"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
@@ -5720,47 +6745,150 @@
 			)
 		)
 	)
-	(wire
-		(pts
-			(xy 255 235) (xy 255 241.19)
-		)
-		(stroke (width 0) (type default))
-		(uuid "8bd6a820-fc01-49a9-95d9-c6165cdd3244")
-	)
-	(wire
-		(pts
-			(xy 255 248.81) (xy 255 255)
-		)
-		(stroke (width 0) (type default))
-		(uuid "d69ced39-ec7a-4a3e-8c12-843cde48b09d")
-	)
 	(symbol
-		(lib_id "GND")
-		(at 255 255 0)
+		(lib_id "power:+5V")
+		(at 246.38 233.68 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(uuid "b53a8112-3f38-4ec2-a46d-93205de1a49d")
-		(property "Reference" "#PWRA6EAF5"
-			(at 255 251 0) (hide yes)
+		(uuid "718a6bbb-a29c-4df8-ab2a-f85668a2e436")
+		(property "Reference" "#PWR13EB87"
+			(at 246.38 229.68 0) (hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(property "Value" "GND"
-			(at 255 259 0)
+		(property "Value" "+5V"
+			(at 246.38 237.68 0)
 			(effects (font (size 1.27 1.27)))
 		)
 		(property "Footprint" ""
-			(at 255 255 0)
+			(at 246.38 233.68 0)
 			(hide yes)
 			(effects (font (size 1.27 1.27)))
 		)
-		(pin "1" (uuid "a1625499-963c-47cb-90e2-8c4f338a2d76"))
+		(pin "1" (uuid "2cd096dc-2ab8-4568-95cd-c702cb8fae64"))
 		(instances
 			(project "MorseWave_Pro"
 				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
-					(reference "#PWRA6EAF5")
+					(reference "#PWR13EB87")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 246.38 233.68) (xy 261.62 233.68)
+		)
+		(stroke (width 0) (type default))
+		(uuid "a8e6f78e-9d64-494c-9a9e-4d415872de48")
+	)
+	(wire
+		(pts
+			(xy 246.38 241.30) (xy 246.38 246.38)
+		)
+		(stroke (width 0) (type default))
+		(uuid "4723c1e4-d0e8-4066-a421-ed9582456234")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 246.38 246.38 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "f57a5a5f-115d-4bb6-9abe-f06b19ec53b4")
+		(property "Reference" "#PWREFB251"
+			(at 246.38 242.38 0) (hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "GND"
+			(at 246.38 250.38 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 246.38 246.38 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "32f9a856-60c4-44d2-a1b8-542077f48127"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWREFB251")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(wire
+		(pts
+			(xy 261.62 241.30) (xy 261.62 246.38)
+		)
+		(stroke (width 0) (type default))
+		(uuid "38b9ef65-078d-48ea-814a-24d4dee0f721")
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 261.62 246.38 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "93e5f715-d1d1-4b68-9dd1-b815d0e620a1")
+		(property "Reference" "#PWRAE4FA0"
+			(at 261.62 242.38 0) (hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "GND"
+			(at 261.62 250.38 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 261.62 246.38 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "0230f2d1-a1de-4094-9042-a16ed587907e"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "#PWRAE4FA0")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 261.62 246.38 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "04185e15-b80d-4ac9-adc4-fd61e1e9ab8b")
+		(property "Reference" "FLG_GND"
+			(at 261.62 242.38 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Value" "PWR_FLAG"
+			(at 261.62 250.38 0)
+			(effects (font (size 1.27 1.27)))
+		)
+		(property "Footprint" ""
+			(at 261.62 246.38 0)
+			(hide yes)
+			(effects (font (size 1.27 1.27)))
+		)
+		(pin "1" (uuid "9762ddbd-e4a5-43bf-b421-ca1fe64cea9c"))
+		(instances
+			(project "MorseWave_Pro"
+				(path "/2e45d1d2-c73f-46e5-98d6-3a9dc360bff5"
+					(reference "FLG_GND")
 					(unit 1)
 				)
 			)

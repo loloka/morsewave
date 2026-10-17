@@ -1,0 +1,3225 @@
+(export
+	(version "E")
+	(design
+		(source "e:\\dev\\morse-trainer\\hardware\\MorseWave_Pro\\MorseWave_Pro\\MorseWave_Pro.kicad_sch")
+		(date "2026-10-18T01:26:42")
+		(tool "Eeschema 10.0.7")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "MorseWave Pro Keyer (R9OGL Edition)")
+				(company "R9OGL Hardware Workshop")
+				(rev "v2.0 PCB")
+				(date "2026-10-18")
+				(source "MorseWave_Pro.kicad_sch")
+				(comment
+					(number "1")
+					(value "CW Keyer with Curtis Lookahead, 2-Stage Filter & Transceiver Isolation")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "A1")
+			(value "Arduino_Nano_v3.x")
+			(footprint "Module:Arduino_Nano")
+			(fields
+				(field
+					(name "Footprint") "Module:Arduino_Nano")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "MCU_Module")
+				(part "Arduino_Nano_v3.x")
+				(description "Arduino Nano v2.x")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "Arduino nano microcontroller module USB")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Arduino*Nano*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "031fa189-e693-4144-b6ea-40bf1e98a0cd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "30")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "25")
+						)
+						(pin
+							(num "26")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C1")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2c6b6be5-074a-4783-be6a-8a904919ad74")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C2")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "687ea0c2-7aa3-491b-9107-3f371499c61f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7f0c1261-b822-4626-9ace-f7e80880e737")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C4")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "69adbbbb-b564-4a2b-9de5-f114a764fb7d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C5")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8e0c958b-8b31-48cf-b00f-dc00793b5993")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C6")
+			(value "100uF")
+			(footprint "Capacitor_SMD:CP_Elec_6.3x5.4")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:CP_Elec_6.3x5.4")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C_Polarized")
+				(description "Polarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "CP_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7fc6d989-997f-4a39-8595-d85dcb46e06d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C7")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "83e9cff5-149e-4070-b58c-2a4e3f2c0339")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D1")
+			(value "LED_KEY")
+			(footprint "LED_THT:LED_D3.0mm")
+			(fields
+				(field
+					(name "Footprint") "LED_THT:LED_D3.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "26f0194f-c9ba-46b4-b1ef-1b8279304e40")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D2")
+			(value "1N4148")
+			(footprint "Diode_SMD:D_SOD-123")
+			(fields
+				(field
+					(name "Footprint") "Diode_SMD:D_SOD-123")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "D")
+				(description "Diode")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "TO-???* *_Diode_* *SingleDiode* D_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c0ff65b4-ee57-4962-81cf-d2c722c3742e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "FLG_GND")
+			(value "PWR_FLAG")
+			(fields
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "power")
+				(part "PWR_FLAG")
+				(description "Special symbol for telling ERC where power comes from")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "flag power")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "04185e15-b80d-4ac9-adc4-fd61e1e9ab8b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "PADDLE_3.5mm")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x03_Pin")
+				(description "Generic connector, single row, 01x03, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "abf59714-bbba-46cd-bfe1-f39047d4989b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J2")
+			(value "KEY_OUT_3.5mm")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x02_Pin")
+				(description "Generic connector, single row, 01x02, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "feab16fa-85ad-47e8-b3d9-e28473d2816f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J3")
+			(value "PTT_OUT_RCA")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x02_Pin")
+				(description "Generic connector, single row, 01x02, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1dc1a7e1-a548-4988-8197-2b8ea1a612c6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J4")
+			(value "SPEAKER_8R")
+			(footprint "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x02_Pin")
+				(description "Generic connector, single row, 01x02, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fc17201a-bf0e-4a01-9ed3-03d9b0f554df")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J5")
+			(value "OLED_0.96_I2C")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x04_Pin")
+				(description "Generic connector, single row, 01x04, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ddb9c89d-9c67-40cd-8e6c-953e6ad037bf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J6")
+			(value "PS2_KEYBOARD")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_01x04_Pin")
+				(description "Generic connector, single row, 01x04, script generated")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2af3481d-f750-4553-bb8c-978b778bc913")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Q1")
+			(value "BC547")
+			(footprint "Package_TO_SOT_THT:TO-92_Inline")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_THT:TO-92_Inline")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Transistor_BJT")
+				(part "BC547")
+				(description "NPN transistor, collector/base/emitter")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "BJT")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "290aabca-7be2-4818-96da-4335b267171d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "348ac209-fa24-4c17-a9cb-de7bf22fe5ef")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R2")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d553a13d-3e62-43f8-88bc-07cf62b749da")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "330R")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9b4c7e8f-a058-49fa-9318-1acb51678ce8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R4")
+			(value "330R")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "650f5e77-70ce-4a78-9689-b0cd141fdc8e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R5")
+			(value "330R")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "86f5d2e8-6e39-494a-9a50-87e2e1067906")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R6")
+			(value "470R")
+			(footprint "Resistor_SMD:R_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a6803664-36c9-4946-9725-aaa974768a2b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R7")
+			(value "33R (1W)")
+			(footprint "Resistor_SMD:R_1206_3216Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "588706bc-c981-4b71-9028-f410568209d6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "RV1")
+			(value "10k (Speed)")
+			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R_Potentiometer")
+				(description "Potentiometer")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "resistor variable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Potentiometer*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ae8a2bc4-8041-4537-a1d9-9dcd840ee51c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "RV2")
+			(value "10k (Tone)")
+			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R_Potentiometer")
+				(description "Potentiometer")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "resistor variable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Potentiometer*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fb910b39-13f0-4bd3-9211-412295cb7991")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "RV3")
+			(value "10k (Volume)")
+			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R_Potentiometer")
+				(description "Potentiometer")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "resistor variable")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Potentiometer*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "54379cd3-bbc9-4137-8af6-6c356e8135b7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U2")
+			(value "PC817")
+			(footprint "Package_DIP:DIP-4_W7.62mm")
+			(fields
+				(field
+					(name "Footprint") "Package_DIP:DIP-4_W7.62mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Isolator")
+				(part "PC817")
+				(description "DC Optocoupler, Vce 35V, CTR 50-300%, DIP-4")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "NPN DC Optocoupler")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DIP*W7.62mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7df52968-e0bf-48c0-9264-7537b3be9222")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U3")
+			(value "PC817")
+			(footprint "Package_DIP:DIP-4_W7.62mm")
+			(fields
+				(field
+					(name "Footprint") "Package_DIP:DIP-4_W7.62mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Isolator")
+				(part "PC817")
+				(description "DC Optocoupler, Vce 35V, CTR 50-300%, DIP-4")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "NPN DC Optocoupler")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DIP*W7.62mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a2b71f3a-92ce-4b7e-b77e-3003b286e696")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "Connector")
+			(part "Conn_01x02_Pin")
+			(description "Generic connector, single row, 01x02, script generated")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x02_Pin")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x02, script generated")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector")
+			(part "Conn_01x03_Pin")
+			(description "Generic connector, single row, 01x03, script generated")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x03_Pin")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x03, script generated")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector")
+			(part "Conn_01x04_Pin")
+			(description "Generic connector, single row, 01x04, script generated")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x04_Pin")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C_Polarized")
+			(description "Polarized capacitor")
+			(footprints
+				(fp "CP_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C_Polarized")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Polarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "D")
+			(description "Diode")
+			(footprints
+				(fp "TO-???*")
+				(fp "*_Diode_*")
+				(fp "*SingleDiode*")
+				(fp "D_*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "D")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Diode")
+				(field
+					(name "Sim.Device") "D")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "LED")
+			(description "Light emitting diode")
+			(footprints
+				(fp "LED*")
+				(fp "LED_SMD:*")
+				(fp "LED_THT:*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "LED")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+				(field
+					(name "Sim.Pins") "1=K 2=A")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R_Potentiometer")
+			(description "Potentiometer")
+			(footprints
+				(fp "Potentiometer*")
+			)
+			(fields
+				(field
+					(name "Reference") "RV")
+				(field
+					(name "Value") "R_Potentiometer")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Potentiometer")
+				(field
+					(name "Sim.Device") "R")
+				(field
+					(name "Sim.Type") "POT")
+				(field
+					(name "Sim.Pins") "1=r0 2=wiper 3=r1")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "3")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Isolator")
+			(part "PC817")
+			(description "DC Optocoupler, Vce 35V, CTR 50-300%, DIP-4")
+			(docs "http://www.soselectronic.cz/a_info/resource/d/pc817.pdf")
+			(footprints
+				(fp "DIP*W7.62mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "PC817")
+				(field
+					(name "Footprint") "Package_DIP:DIP-4_W7.62mm")
+				(field
+					(name "Datasheet") "http://www.soselectronic.cz/a_info/resource/d/pc817.pdf")
+				(field
+					(name "Description") "DC Optocoupler, Vce 35V, CTR 50-300%, DIP-4")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "MCU_Module")
+			(part "Arduino_Nano_v3.x")
+			(description "Arduino Nano v2.x")
+			(docs "https://www.arduino.cc/en/uploads/Main/ArduinoNanoManual23.pdf")
+			(footprints
+				(fp "Arduino*Nano*")
+			)
+			(fields
+				(field
+					(name "Reference") "A")
+				(field
+					(name "Value") "Arduino_Nano_v2.x")
+				(field
+					(name "Footprint") "Module:Arduino_Nano")
+				(field
+					(name "Datasheet") "https://www.arduino.cc/en/uploads/Main/ArduinoNanoManual23.pdf")
+				(field
+					(name "Description") "Arduino Nano v2.x")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "D1/TX")
+					(type "bidirectional")
+				)
+				(pin
+					(num "2")
+					(name "D0/RX")
+					(type "bidirectional")
+				)
+				(pin
+					(num "3")
+					(name "~{RESET}")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "D2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "D3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "D4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "D5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "D6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "10")
+					(name "D7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "D8")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "D9")
+					(type "bidirectional")
+				)
+				(pin
+					(num "13")
+					(name "D10")
+					(type "bidirectional")
+				)
+				(pin
+					(num "14")
+					(name "D11")
+					(type "bidirectional")
+				)
+				(pin
+					(num "15")
+					(name "D12")
+					(type "bidirectional")
+				)
+				(pin
+					(num "16")
+					(name "D13")
+					(type "bidirectional")
+				)
+				(pin
+					(num "17")
+					(name "3V3")
+					(type "power_out")
+				)
+				(pin
+					(num "18")
+					(name "AREF")
+					(type "input")
+				)
+				(pin
+					(num "19")
+					(name "A0")
+					(type "bidirectional")
+				)
+				(pin
+					(num "20")
+					(name "A1")
+					(type "bidirectional")
+				)
+				(pin
+					(num "21")
+					(name "A2")
+					(type "bidirectional")
+				)
+				(pin
+					(num "22")
+					(name "A3")
+					(type "bidirectional")
+				)
+				(pin
+					(num "23")
+					(name "A4")
+					(type "bidirectional")
+				)
+				(pin
+					(num "24")
+					(name "A5")
+					(type "bidirectional")
+				)
+				(pin
+					(num "25")
+					(name "A6")
+					(type "bidirectional")
+				)
+				(pin
+					(num "26")
+					(name "A7")
+					(type "bidirectional")
+				)
+				(pin
+					(num "27")
+					(name "+5V")
+					(type "power_out")
+				)
+				(pin
+					(num "28")
+					(name "~{RESET}")
+					(type "input")
+				)
+				(pin
+					(num "29")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "30")
+					(name "VIN")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Transistor_BJT")
+			(part "BC547")
+			(description "NPN transistor, collector/base/emitter")
+			(fields
+				(field
+					(name "Reference") "Q")
+				(field
+					(name "Value") "Q_NPN_CBE")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "NPN transistor, collector/base/emitter")
+				(field
+					(name "Sim.Device") "NPN")
+				(field
+					(name "Sim.Pins") "1=C 2=B 3=E")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "C")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "B")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "E")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "power")
+			(part "PWR_FLAG")
+			(description "Special symbol for telling ERC where power comes from")
+			(fields
+				(field
+					(name "Reference") "#FLG")
+				(field
+					(name "Value") "PWR_FLAG")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Special symbol for telling ERC where power comes from")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "power_out")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Isolator")
+			(uri "${KICAD10_SYMBOL_DIR}/Isolator.kicad_sym")
+		)
+		(library
+			(logical "MCU_Module")
+			(uri "${KICAD10_SYMBOL_DIR}/MCU_Module.kicad_sym")
+		)
+		(library
+			(logical "Transistor_BJT")
+			(uri "${KICAD10_SYMBOL_DIR}/Transistor_BJT.kicad_sym")
+		)
+		(library
+			(logical "power")
+			(uri "${KICAD10_SYMBOL_DIR}/power.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "+5V")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "27")
+				(pinfunction "+5V_27")
+				(pintype "power_out")
+			)
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J5")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J6")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "2")
+			(name "/AUDIO_PWM")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "12")
+				(pinfunction "D9_12")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R1")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "3")
+			(name "/DAH")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "6")
+				(pinfunction "D3_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "4")
+			(name "/DIT")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "5")
+				(pinfunction "D2_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "5")
+			(name "/KEY_OUT_CTRL")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "13")
+				(pinfunction "D10_13")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R4")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "6")
+			(name "/LED_KEY")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "16")
+				(pinfunction "D13_16")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R3")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "7")
+			(name "/OLED_SCL")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "24")
+				(pinfunction "A5_24")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J5")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "8")
+			(name "/OLED_SDA")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "23")
+				(pinfunction "A4_23")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J5")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "9")
+			(name "/POT_SPEED")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "19")
+				(pinfunction "A0_19")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "RV1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "10")
+			(name "/POT_TONE")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "20")
+				(pinfunction "A1_20")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "RV2")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "11")
+			(name "/PS2_CLK")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "8")
+				(pinfunction "D5_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J6")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "12")
+			(name "/PS2_DATA")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "7")
+				(pinfunction "D4_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "J6")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "13")
+			(name "/PTT_OUT_CTRL")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "14")
+				(pinfunction "D11_14")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "R5")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "14")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "D1")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FLG_GND")
+				(pin "1")
+				(pintype "power_out")
+			)
+			(node
+				(ref "J1")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "J5")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J6")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "3")
+				(pinfunction "E_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV1")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV2")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV3")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "15")
+			(name "Net-(C3-Pad1)")
+			(class "Default")
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "16")
+			(name "Net-(C4-Pad1)")
+			(class "Default")
+			(node
+				(ref "C4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "17")
+			(name "Net-(D1-A)")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "18")
+			(name "Net-(D2-A)")
+			(class "Default")
+			(node
+				(ref "D2")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "19")
+			(name "Net-(D2-K)")
+			(class "Default")
+			(node
+				(ref "D2")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "20")
+			(name "Net-(J3-Pin_1)")
+			(class "Default")
+			(node
+				(ref "J3")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "21")
+			(name "Net-(J3-Pin_2)")
+			(class "Default")
+			(node
+				(ref "J3")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "Net-(J4-Pin_1)")
+			(class "Default")
+			(node
+				(ref "C5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J4")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "Q1")
+				(pin "1")
+				(pinfunction "C_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "23")
+			(name "Net-(J4-Pin_2)")
+			(class "Default")
+			(node
+				(ref "J4")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R7")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "24")
+			(name "Net-(Q1-B)")
+			(class "Default")
+			(node
+				(ref "Q1")
+				(pin "2")
+				(pinfunction "B_2")
+				(pintype "input")
+			)
+			(node
+				(ref "R6")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "25")
+			(name "Net-(R4-Pad2)")
+			(class "Default")
+			(node
+				(ref "R4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "26")
+			(name "Net-(R5-Pad2)")
+			(class "Default")
+			(node
+				(ref "R5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "27")
+			(name "Net-(R6-Pad1)")
+			(class "Default")
+			(node
+				(ref "R6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "28")
+			(name "unconnected-(A1-3V3-Pad17)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "17")
+				(pinfunction "3V3_17")
+				(pintype "power_out+no_connect")
+			)
+		)
+		(net
+			(code "29")
+			(name "unconnected-(A1-A2-Pad21)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "21")
+				(pinfunction "A2_21")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "30")
+			(name "unconnected-(A1-A3-Pad22)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "22")
+				(pinfunction "A3_22")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "31")
+			(name "unconnected-(A1-A6-Pad25)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "25")
+				(pinfunction "A6_25")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "32")
+			(name "unconnected-(A1-A7-Pad26)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "26")
+				(pinfunction "A7_26")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "33")
+			(name "unconnected-(A1-AREF-Pad18)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "18")
+				(pinfunction "AREF_18")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "34")
+			(name "unconnected-(A1-D0{slash}RX-Pad2)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "2")
+				(pinfunction "D0/RX_2")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "35")
+			(name "unconnected-(A1-D1{slash}TX-Pad1)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "1")
+				(pinfunction "D1/TX_1")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "36")
+			(name "unconnected-(A1-D6-Pad9)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "9")
+				(pinfunction "D6_9")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "37")
+			(name "unconnected-(A1-D7-Pad10)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "10")
+				(pinfunction "D7_10")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "38")
+			(name "unconnected-(A1-D8-Pad11)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "11")
+				(pinfunction "D8_11")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "39")
+			(name "unconnected-(A1-D12-Pad15)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "15")
+				(pinfunction "D12_15")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "40")
+			(name "unconnected-(A1-GND-Pad29)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "29")
+				(pinfunction "GND_29")
+				(pintype "power_in+no_connect")
+			)
+		)
+		(net
+			(code "41")
+			(name "unconnected-(A1-VIN-Pad30)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "30")
+				(pinfunction "VIN_30")
+				(pintype "power_in+no_connect")
+			)
+		)
+		(net
+			(code "42")
+			(name "unconnected-(A1-~{RESET}-Pad3)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "3")
+				(pinfunction "~{RESET}_3")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "43")
+			(name "unconnected-(A1-~{RESET}-Pad28)")
+			(class "Default")
+			(node
+				(ref "A1")
+				(pin "28")
+				(pinfunction "~{RESET}_28")
+				(pintype "input+no_connect")
+			)
+		)
+	)
+)
