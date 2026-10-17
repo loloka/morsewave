@@ -174,15 +174,34 @@ void handleKeyer() {
   bool ditPin = (digitalRead(PIN_DIT) == LOW);
   bool dahPin = (digitalRead(PIN_DAH) == LOW);
 
-  // Память противоположного элемента (Dot/Dash Memory):
-  // Пока передается точка (звук или пауза), ловим нажатие тире
+  static bool prevDitState = HIGH;
+  static bool prevDahState = HIGH;
+
+  bool ditJustPressed = (ditPin && prevDitState == HIGH);
+  bool dahJustPressed = (dahPin && prevDahState == HIGH);
+
+  // Память элементов (Двухуровневая предвыборка):
+  // 1. Пока звучит точка (или ее пауза):
   if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
     if (dahPin) dahMemory = true;
+    // Если тире уже в памяти, и мы отщелкнули точку (буква 'R': . - .)
+    if (dahMemory && ditJustPressed) {
+      ditMemory = true;
+    }
   }
-  // Пока передается тире (звук или пауза), ловим нажатие точки
+
+  // 2. Пока звучит тире (или его пауза):
   if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
     if (ditPin) ditMemory = true;
+    // Если точка уже в памяти, и мы отщелкнули тире (буква 'K': - . -)
+    // Больше не нужно "дожимать" тире после точки!
+    if (ditMemory && dahJustPressed) {
+      dahMemory = true;
+    }
   }
+
+  prevDitState = digitalRead(PIN_DIT);
+  prevDahState = digitalRead(PIN_DAH);
 
   switch (state) {
     case STATE_IDLE:
