@@ -386,6 +386,8 @@ return [
     'cs.add_placeholder' => 'Например: R7AB',
     'cs.add_country_placeholder' => 'Страна (необязательно)',
     'cs.add_btn' => 'Добавить',
+    'cs.paper_log_title' => 'Аппаратный журнал (принятые позывные)',
+    'cs.paper_log_desc' => 'Сверьте записанные на бумаге позывные с принятыми в эфире станциями:',
 
     // --- achievements.php ---
     'ach.title' => 'Достижения',

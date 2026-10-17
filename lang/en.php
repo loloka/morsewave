@@ -382,6 +382,8 @@ return [
     'cs.add_placeholder' => 'e.g. R7AB',
     'cs.add_country_placeholder' => 'Country (optional)',
     'cs.add_btn' => 'Add',
+    'cs.paper_log_title' => 'Station Logbook (received callsigns)',
+    'cs.paper_log_desc' => 'Compare the callsigns written on paper with the stations received from the air:',
 
     // --- achievements.php ---
     'ach.title' => 'Achievements',
