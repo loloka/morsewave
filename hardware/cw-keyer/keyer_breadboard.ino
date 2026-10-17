@@ -1,20 +1,18 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.5 (Live Tuning Edition)
- *  - Регулировка скорости (WPM) и тона (PITCH) НА ЛЕТУ:
- *      * Крутите ручку скорости прямо во время передачи — скорость точек и тире
- *        меняется плавно и непрерывно прямо под пальцами!
- *      * Крутите ручку тона прямо во время звука — высота звука меняется мгновенно!
- *      * Цифровой фильтр АЦП с гистерезисом (deadband) отсекает любые помехи по питанию.
- *  - Скоростной I2C Fast Mode (400 кГц) для мгновенного обновления OLED без задержек.
- *  - Диапазон скорости: от 10 до 60 WPM (длительность точки от 120 до 20 мс).
- *  - Диапазон тона: от 400 до 1200 Гц (шаг 25 Гц).
- *  - Красивый графический прогресс-бар в Serial Monitor при вращении крутилок.
- *  - Профессиональный интерфейс на OLED 0.96" (SSD1306 128x64).
- *  - Классический алгоритм Curtis 8044 / TX-500:
- *      * Полная защита от дребезга контактов весла
- *      * Память элементов (Dot/Dash Memory) для скоростной передачи
- *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец)
+ *  MorseWave Pro Keyer v1.6 (K3NG Pro Signs & Smart Spacing Edition)
+ *  - Честная обработка межсловных пробелов (Smart Word Spacing):
+ *      * Ровно ОДИН пробел между словами при паузе > 7 точек.
+ *      * Никакого спама пробелами, если ключ долго молчит!
+ *  - Полная расширенная таблица Морзе (по стандарту ITU и K3NG Keyer):
+ *      * Все знаки препинания: = (BT), + (AR), <SK>, <KN>, <AS>, @, -, :, ;, ', ", !, _, $, <HH>
+ *      * Русские буквы Морзе (СРТ / ГОСТ): Ч (---.), Ш (----), Э (..-..), Ю (..--), Я (.-.-)
+ *      * Больше никаких случайных [?] в принятом тексте!
+ *  - Двухуровневая предвыборка (Lookahead Memory): знаки K (-.-) и R (.-.)
+ *    передаются мгновенно без необходимости «дожимать» весло.
+ *  - Регулировка WPM (10..60) и PITCH (400..1200 Гц) НА ЛЕТУ.
+ *  - Скоростной Fast I2C (400 кГц) + OLED 0.96" SSD1306.
+ *  - Раскладка СРТ (Точки = D2 указательный, Тире = D3 большой палец).
  * =====================================================================
  */
 
@@ -57,29 +55,70 @@ unsigned long stateStartTime = 0;
 bool ditMemory = false;
 bool dahMemory = false;
 unsigned long lastSymbolEndTime = 0;
+bool wordSpaceNeeded = false;
 
 // Декодер текста Морзе
 String currentMorseChar = "";
 String decodedLine = "";
 
-struct MorseCode { const char* code; char letter; };
-const MorseCode morseTable[] = {
-  {".-", 'A'}, {"-...", 'B'}, {"-.-.", 'C'}, {"-..", 'D'}, {".", 'E'},
-  {"..-.", 'F'}, {"--.", 'G'}, {"....", 'H'}, {"..", 'I'}, {".---", 'J'},
-  {"-.-", 'K'}, {".-..", 'L'}, {"--", 'M'}, {"-.", 'N'}, {"---", 'O'},
-  {".--.", 'P'}, {"--.-", 'Q'}, {".-.", 'R'}, {"...", 'S'}, {"-", 'T'},
-  {"..-", 'U'}, {"...-", 'V'}, {".--", 'W'}, {"-..-", 'X'}, {"-.--", 'Y'},
-  {"--..", 'Z'}, {"-----", '0'}, {".----", '1'}, {"..---", '2'}, {"...--", '3'},
-  {"....-", '4'}, {".....", '5'}, {"-....", '6'}, {"--...", '7'}, {"---..", '8'},
-  {"----.", '9'}, {".-.-.-", '.'}, {"--..--", ','}, {"..--..", '?'}, {"-..-.", '/'}
+// --- ПОЛНАЯ ТАБЛИЦА МОРЗЕ (ITU + K3NG + СРТ ГОСТ) ---
+struct MorseEntry {
+  const char* code;
+  const char* text;
 };
-const int MORSE_TABLE_SIZE = sizeof(morseTable) / sizeof(MorseCode);
 
-char decodeMorse(String code) {
+const MorseEntry morseTable[] = {
+  // Латинские буквы (A-Z)
+  {".-", "A"}, {"-...", "B"}, {"-.-.", "C"}, {"-..", "D"}, {".", "E"},
+  {"..-.", "F"}, {"--.", "G"}, {"....", "H"}, {"..", "I"}, {".---", "J"},
+  {"-.-", "K"}, {".-..", "L"}, {"--", "M"}, {"-.", "N"}, {"---", "O"},
+  {".--.", "P"}, {"--.-", "Q"}, {".-.", "R"}, {"...", "S"}, {"-", "T"},
+  {"..-", "U"}, {"...-", "V"}, {".--", "W"}, {"-..-", "X"}, {"-.--", "Y"},
+  {"--..", "Z"},
+
+  // Цифры (0-9)
+  {"-----", "0"}, {".----", "1"}, {"..---", "2"}, {"...--", "3"},
+  {"....-", "4"}, {".....", "5"}, {"-....", "6"}, {"--...", "7"},
+  {"---..", "8"}, {"----.", "9"},
+
+  // Радиолюбительские знаки и знаки препинания (ITU / K3NG)
+  {".-.-.-", "."},       // Точка
+  {"--..--", ","},       // Запятая
+  {"..--..", "?"},       // Вопросительный знак
+  {"-..-.", "/"},        // Дробь (DN)
+  {"-...-", "="},        // Раздел / Знак равенства (BT) - ключевой знак в эфире!
+  {".-.-.", "+"},        // Конец передачи (AR)
+  {"...-.-", "<SK>"},    // Конец связи (SK)
+  {"-.--.", "("},        // Скобка / KN (только вызываемая станция)
+  {"-.--.-", ")"},       // Закрывающая скобка
+  {".-...", "<AS>"},     // Ждите (AS)
+  {".--.-.", "@"},       // Собака (AC)
+  {"-....-", "-"},       // Дефис / Минус (DU)
+  {"---...", ":"},       // Двоеточие (OS)
+  {"-.-.-.", ";"},       // Точка с запятой (KR)
+  {".----.", "'"},       // Апостроф (WG)
+  {".-..-.", "\""},      // Кавычки (AF)
+  {"-.-.--", "!"},       // Восклицательный знак
+  {"..--.-", "_"},       // Подчеркивание
+  {"...-..-", "$"},      // Доллар
+  {"........", "<HH>"},  // Ошибка / Исправление (8 точек)
+
+  // Русские буквы Морзе (СРТ / ГОСТ), не совпадающие с латиницей
+  {"---.", "CH"},        // Ч
+  {"----", "SH"},        // Ш
+  {"..-..", "E'"},       // Э
+  {"..--", "YU"},        // Ю
+  {".-.-", "YA"}         // Я
+};
+const int MORSE_TABLE_SIZE = sizeof(morseTable) / sizeof(MorseEntry);
+
+const char* decodeMorse(const String& code) {
   for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
-    if (code == morseTable[i].code) return morseTable[i].letter;
+    if (code == morseTable[i].code) {
+      return morseTable[i].text;
+    }
   }
-  return '?';
+  return "?";
 }
 
 // Вывод визуальной шкалы прогресс-бара в Serial
@@ -138,7 +177,7 @@ void setup() {
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("   MorseWave Pro Keyer v1.5 (Live Tuning Edition) "));
+  Serial.println(F("  MorseWave Pro Keyer v1.6 (K3NG & Pro Signs)     "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -157,7 +196,8 @@ void setup() {
   Serial.print(F("OLED  : "));
   Serial.println(hasOled ? F("ONLINE (SSD1306 Fast I2C OK)") : F("OFFLINE (подключи GND, 5V, A4, A5)"));
   Serial.println(F("--------------------------------------------------"));
-  Serial.println(F("Крутилки работают НА ЛЕТУ прямо во время передачи!"));
+  Serial.println(F("Декодер: Полная таблица ITU, спецзнаки BT, AR, SK,"));
+  Serial.println(F("русские буквы Ч, Ш, Э, Ю, Я и честные пробелы!"));
   Serial.println(F("=================================================="));
   Serial.println();
 }
@@ -180,11 +220,11 @@ void handleKeyer() {
   bool ditJustPressed = (ditPin && prevDitState == HIGH);
   bool dahJustPressed = (dahPin && prevDahState == HIGH);
 
-  // Память элементов (Двухуровневая предвыборка):
+  // Память элементов (Двухуровневая предвыборка Lookahead):
   // 1. Пока звучит точка (или ее пауза):
   if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
     if (dahPin) dahMemory = true;
-    // Если тире уже в памяти, и мы отщелкнули точку (буква 'R': . - .)
+    // Если тире уже в памяти, и мы кликнули точку (буква 'R': . - .)
     if (dahMemory && ditJustPressed) {
       ditMemory = true;
     }
@@ -193,8 +233,7 @@ void handleKeyer() {
   // 2. Пока звучит тире (или его пауза):
   if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
     if (ditPin) ditMemory = true;
-    // Если точка уже в памяти, и мы отщелкнули тире (буква 'K': - . -)
-    // Больше не нужно "дожимать" тире после точки!
+    // Если точка уже в памяти, и мы кликнули тире (буква 'K': - . -)
     if (ditMemory && dahJustPressed) {
       dahMemory = true;
     }
@@ -305,10 +344,8 @@ void readPots() {
       filteredWpmAdc = rawWpm;
       lastReportedWpmAdc = rawWpm;
     }
-    // Экспоненциальное сглаживание фильтрует импульсные помехи питания
     filteredWpmAdc = (filteredWpmAdc * 3 + rawWpm) / 4;
 
-    // Зона нечувствительности (deadband) 22 отсчета
     if (abs(filteredWpmAdc - lastReportedWpmAdc) > 22) {
       lastReportedWpmAdc = filteredWpmAdc;
       int newWpm = map(filteredWpmAdc, 0, 1023, MIN_WPM, MAX_WPM);
@@ -348,7 +385,7 @@ void readPots() {
       if (abs(newPitch - currentPitch) >= 25) {
         currentPitch = newPitch;
 
-        // ЕСЛИ ЗВУК СЕЙЧАС ИГРАЕТ — МГНОВЕННО МЕНЯЕМ ТОН В ДИНАМИКЕ НА ЛЕТУ!
+        // Если динамик звучит — мгновенно обновляем тон на лету!
         if (state == STATE_PLAY_DIT || state == STATE_PLAY_DAH) {
           tone(PIN_AUDIO, currentPitch);
         }
@@ -366,36 +403,50 @@ void readPots() {
   }
 }
 
-// --- ДЕКОДЕР ЗНАКОВ И ПАУЗ ---
+// --- УМНЫЙ ДЕКОДЕР ЗНАКОВ И МЕЖСЛОВНЫХ ПРОБЕЛОВ ---
 void handleDecodedPauses() {
-  if (state != STATE_IDLE || currentMorseChar.length() == 0) return;
+  if (state != STATE_IDLE) return;
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // Межзнаковая пауза (3 длительности точки) -> декодируем букву
-  if (pause >= ditMs * 3) {
-    char letter = decodeMorse(currentMorseChar);
-    decodedLine += letter;
-    if (decodedLine.length() > 21) {
-      decodedLine = decodedLine.substring(decodedLine.length() - 21);
+  // 1. Межзнаковая пауза (>= 3 длительностей точки) -> декодируем символ
+  if (currentMorseChar.length() > 0 && pause >= ditMs * 3) {
+    const char* decoded = decodeMorse(currentMorseChar);
+    decodedLine += decoded;
+    if (decodedLine.length() > 32) {
+      decodedLine = decodedLine.substring(decodedLine.length() - 32);
     }
 
     Serial.print(" [");
-    Serial.print(letter);
+    Serial.print(decoded);
     Serial.print("] ");
 
     currentMorseChar = "";
+    wordSpaceNeeded = true; // Символ принят: теперь разрешен межсловный пробел
+
     if (hasOled) {
       updateScreenMorse();
       updateScreenText();
     }
   }
 
-  // Межсловная пауза (7 длительностей точки) -> пробел
-  if (pause >= ditMs * 7 && decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
-    decodedLine += " ";
-    Serial.println();
-    if (hasOled) updateScreenText();
+  // 2. Межсловная пауза (>= 7 длительностей точки) -> ровно ОДИН пробел
+  if (wordSpaceNeeded && pause >= ditMs * 7) {
+    wordSpaceNeeded = false; // Однократное срабатывание: не будет спама пробелами!
+
+    if (decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
+      decodedLine += " ";
+      if (decodedLine.length() > 32) {
+        decodedLine = decodedLine.substring(decodedLine.length() - 32);
+      }
+
+      Serial.print(" ");
+      Serial.println(); // Перевод строки в Serial для красивого чтения слов
+
+      if (hasOled) {
+        updateScreenText();
+      }
+    }
   }
 }
 
@@ -406,11 +457,11 @@ void drawScreenLayout() {
   oled.clear();
   oled.setScale(1);
 
-  // Горизонтальный разделитель под шапкой (строка 1)
+  // Разделитель под шапкой (строка 1)
   oled.setCursor(0, 1);
   oled.print(F("---------------------"));
 
-  // Подпись принятого текста (строка 5)
+  // Подпись блока принятого текста (строка 5)
   oled.setCursor(0, 5);
   oled.print(F("TXT:"));
 }
@@ -435,7 +486,7 @@ void updateScreenMorse() {
   // Строка 3: Крупный шрифт (Scale 2) для текущего знака Морзе
   oled.setScale(2);
   oled.setCursor(0, 3);
-  oled.print(F("          ")); // Очистка старых символов
+  oled.print(F("          ")); // Очистка
   oled.setCursor(10, 3);
   if (currentMorseChar.length() > 0) {
     oled.print(currentMorseChar);
@@ -449,8 +500,12 @@ void updateScreenText() {
 
   oled.setScale(1);
   oled.setCursor(28, 5);
-  // Печатаем строку текста с дополнением пробелами
+  
+  // Выводим бегущую строку (последние 16 символов)
   String displayStr = decodedLine;
+  if (displayStr.length() > 16) {
+    displayStr = displayStr.substring(displayStr.length() - 16);
+  }
   while (displayStr.length() < 16) displayStr += " ";
-  oled.print(displayStr.substring(displayStr.length() - 16));
+  oled.print(displayStr);
 }
