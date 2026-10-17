@@ -278,6 +278,21 @@
     margin-bottom: 32px;
 }
 
+.echo-mode-btn {
+    transition: all 0.2s ease;
+}
+
+.echo-mode-btn:hover {
+    background: var(--surface-3, #222c33) !important;
+    color: #fff !important;
+}
+
+.echo-mode-btn.active {
+    background: #4fd8c4 !important;
+    color: #0b0f12 !important;
+    border-color: #4fd8c4 !important;
+}
+
 .echo-target-line {
     display: flex;
     align-items: baseline;

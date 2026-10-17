@@ -36,7 +36,8 @@ return [
     'footer.source' => 'Source code & changelog',
     'footer.terms' => 'Terms',
     'footer.privacy' => 'Privacy',
-    'footer.key_hardware' => 'Real key',
+    'footer.key_hardware' => 'Real key (DIY)',
+    'footer.keyer' => 'MorseWave Pro Keyer',
     'footer.donate' => 'Support project',
 
     // --- index.php ---

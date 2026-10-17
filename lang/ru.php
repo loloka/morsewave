@@ -39,7 +39,8 @@ return [
     'footer.source' => 'Исходный код и история изменений',
     'footer.terms' => 'Правила',
     'footer.privacy' => 'Конфиденциальность',
-    'footer.key_hardware' => 'Настоящий ключ',
+    'footer.key_hardware' => 'Настоящий ключ (DIY)',
+    'footer.keyer' => 'Ключ MorseWave Pro',
     'footer.donate' => 'Поддержать проект',
 
     // --- index.php ---

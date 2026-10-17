@@ -301,59 +301,154 @@
         });
     }
 
-    // --- Интерактивный эхо-тестер ---
-    const echoPhrases = [
-        'R9OGL',
-        'CQ CQ CQ',
-        '73 DE R9OGL',
-        'RST 599',
-        'QRZ?',
-        'GM OM',
-        'TEST'
-    ];
+    // --- Интерактивный эхо-тренажёр (Morserino & CW Pro) ---
+    const echoCategories = {
+        callsigns: ['R9OGL', 'R8OA', 'RA9O', 'UA9O', 'UA0A', 'RA3A', 'DL1ABC', 'K1ZZ', 'W1AW', 'OH2ZZ', 'RK9O', 'UA9OC'],
+        qcodes: ['CQ CQ', '73 DE R9OGL', 'QRZ?', 'QTH', 'RST 599', 'GM OM', 'TU 73', 'FB OM', 'HW?', 'SK'],
+        contest: ['5NN 001', '5NN 599', 'TEST R9OGL', 'TU 5NN TU', '599 16', 'CQ TEST'],
+        groups: ['VVV =', 'PARIS', 'SOS', 'K M R', 'C W', 'CQ']
+    };
+
+    let activeCategory = 'callsigns';
+    let activeMode = 'echo'; // 'echo' (Morserino style audio) or 'visual'
     let currentEchoIndex = 0;
     let userEchoBuffer = '';
+    let echoStreak = 0;
+    let echoScore = 0;
+    let isPlayingAudio = false;
+    let currentMorsePlayer = null;
+
+    const echoTargetEl = document.getElementById('echo-target-text');
+    const echoResultEl = document.getElementById('echo-result-text');
+    const btnNextEcho = document.getElementById('btn-next-echo');
+    const btnPlayEcho = document.getElementById('btn-play-echo');
+    const btnResetEcho = document.getElementById('btn-reset-echo');
+    const echoCategorySelect = document.getElementById('echo-category-select');
+    const btnModeEcho = document.getElementById('btn-mode-echo');
+    const btnModeVisual = document.getElementById('btn-mode-visual');
+    const echoStreakVal = document.getElementById('echo-streak-val');
+    const echoScoreVal = document.getElementById('echo-score-val');
+    const echoInstructions = document.getElementById('echo-instructions-text');
+
+    function playSuccessChirp() {
+        try {
+            initAudio();
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const oscNode = audioCtx.createOscillator();
+            const gNode = audioCtx.createGain();
+            oscNode.type = 'triangle';
+            oscNode.frequency.setValueAtTime(659.25, now); // E5
+            oscNode.frequency.setValueAtTime(880, now + 0.08); // A5
+            gNode.gain.setValueAtTime(0.18, now);
+            gNode.gain.linearRampToValueAtTime(0, now + 0.28);
+            oscNode.connect(gNode).connect(audioCtx.destination);
+            oscNode.start(now);
+            oscNode.stop(now + 0.28);
+        } catch (e) {}
+    }
+
+    async function playCurrentEchoAudio() {
+        const list = echoCategories[activeCategory] || echoCategories.callsigns;
+        const phrase = list[currentEchoIndex];
+        if (!phrase || isPlayingAudio) return;
+
+        if (typeof MorseAudio === 'undefined') {
+            console.warn('MorseAudio class not loaded');
+            return;
+        }
+
+        try {
+            isPlayingAudio = true;
+            if (btnPlayEcho) {
+                btnPlayEcho.style.opacity = '0.7';
+                btnPlayEcho.innerHTML = '<span>🔊</span> <span>Звучит...</span>';
+            }
+
+            if (currentMorsePlayer && currentMorsePlayer.stop) {
+                currentMorsePlayer.stop();
+            }
+
+            currentMorsePlayer = new MorseAudio({
+                freq: currentToneFreq || 700,
+                wpm: Math.min(30, Math.max(12, currentWpm || 20))
+            });
+
+            await currentMorsePlayer.play(phrase);
+        } catch (e) {
+            console.warn('Echo audio play error:', e);
+        } finally {
+            isPlayingAudio = false;
+            if (btnPlayEcho) {
+                btnPlayEcho.style.opacity = '1';
+                btnPlayEcho.innerHTML = '<span>▶</span> <span>Прослушать</span>';
+            }
+        }
+    }
 
     function setEchoPhrase(index) {
-        currentEchoIndex = index % echoPhrases.length;
+        const list = echoCategories[activeCategory] || echoCategories.callsigns;
+        currentEchoIndex = index % list.length;
         userEchoBuffer = '';
-        if (echoTargetEl) echoTargetEl.textContent = echoPhrases[currentEchoIndex];
-        if (echoResultEl) echoResultEl.textContent = 'Ожидание передачи...';
+
+        const target = list[currentEchoIndex];
+        if (echoTargetEl) {
+            echoTargetEl.textContent = target;
+        }
+        if (echoResultEl) {
+            echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+        }
+
+        if (activeMode === 'echo') {
+            setTimeout(() => {
+                playCurrentEchoAudio();
+            }, 350);
+        }
     }
 
     function checkEchoProgress(char) {
         if (!echoTargetEl || !echoResultEl) return;
-        const target = echoPhrases[currentEchoIndex];
+        const list = echoCategories[activeCategory] || echoCategories.callsigns;
+        const target = list[currentEchoIndex];
 
-        if (char === ' ') {
-            userEchoBuffer += ' ';
-        } else {
-            userEchoBuffer += char.trim();
-        }
+        if (char === ' ' && userEchoBuffer.length === 0) return;
+        if (char === ' ' && userEchoBuffer.endsWith(' ')) return;
 
-        // Рендерим совпадения
+        userEchoBuffer += (char === ' ') ? ' ' : char.trim();
+
         let html = '';
-        let matchedSoFar = true;
+        let hasError = false;
 
         for (let i = 0; i < userEchoBuffer.length; i++) {
             const uChar = userEchoBuffer[i];
             const tChar = target[i];
 
             if (uChar === tChar) {
-                html += `<span style="color:#6fcf7a;">${uChar}</span>`;
+                html += `<span style="color:#4fd8c4; font-weight:700;">${uChar}</span>`;
             } else {
-                html += `<span style="color:#e2584f; text-decoration:line-through;">${uChar}</span>`;
-                matchedSoFar = false;
+                html += `<span style="color:#ff5a52; text-decoration:line-through; font-weight:700;">${uChar}</span>`;
+                hasError = true;
             }
         }
 
-        echoResultEl.innerHTML = html || 'Ожидание передачи...';
+        echoResultEl.innerHTML = html;
 
-        if (userEchoBuffer.trim() === target) {
-            echoResultEl.innerHTML += ' <b style="color:#e8a33d;">✓ ПРИНЯТО НА 100%!</b>';
+        if (userEchoBuffer.trim() === target.trim()) {
+            echoStreak++;
+            echoScore++;
+            if (echoStreakVal) echoStreakVal.textContent = echoStreak;
+            if (echoScoreVal) echoScoreVal.textContent = echoScore;
+
+            echoResultEl.innerHTML += ' <b style="color:#e8a33d; margin-left:8px;">✓ 100% В ЭФИРЕ!</b>';
+            playSuccessChirp();
+
             setTimeout(() => {
                 setEchoPhrase(currentEchoIndex + 1);
-            }, 1800);
+            }, 1400);
+        } else if (hasError && userEchoBuffer.length >= target.length) {
+            echoStreak = 0;
+            if (echoStreakVal) echoStreakVal.textContent = echoStreak;
+            echoResultEl.innerHTML += ' <span style="color:#ff5a52; font-size:12px; margin-left:8px;">[Ошибка передачи, нажмите ⌫ Сброс]</span>';
         }
     }
 
@@ -362,6 +457,78 @@
             setEchoPhrase(currentEchoIndex + 1);
         });
     }
+
+    if (btnResetEcho) {
+        btnResetEcho.addEventListener('click', () => {
+            userEchoBuffer = '';
+            if (echoResultEl) {
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+            }
+        });
+    }
+
+    if (btnPlayEcho) {
+        btnPlayEcho.addEventListener('click', () => {
+            playCurrentEchoAudio();
+        });
+    }
+
+    if (echoCategorySelect) {
+        echoCategorySelect.addEventListener('change', (e) => {
+            activeCategory = e.target.value;
+            setEchoPhrase(0);
+        });
+    }
+
+    function updateModeUI() {
+        if (activeMode === 'echo') {
+            if (btnModeEcho) {
+                btnModeEcho.classList.add('active');
+                btnModeEcho.style.background = 'var(--surface-3, #222c33)';
+                btnModeEcho.style.color = '#fff';
+            }
+            if (btnModeVisual) {
+                btnModeVisual.classList.remove('active');
+                btnModeVisual.style.background = 'transparent';
+                btnModeVisual.style.color = 'var(--text-muted)';
+            }
+            if (echoInstructions) {
+                echoInstructions.textContent = 'Сайт воспроизводит позывной в эфире. Внимательно прослушайте его и повторите веслом на ключе!';
+            }
+        } else {
+            if (btnModeVisual) {
+                btnModeVisual.classList.add('active');
+                btnModeVisual.style.background = 'var(--surface-3, #222c33)';
+                btnModeVisual.style.color = '#fff';
+            }
+            if (btnModeEcho) {
+                btnModeEcho.classList.remove('active');
+                btnModeEcho.style.background = 'transparent';
+                btnModeEcho.style.color = 'var(--text-muted)';
+            }
+            if (echoInstructions) {
+                echoInstructions.textContent = 'Читайте текст с экрана и передавайте его вашим манипулятором, отрабатывая ритм и чистоту.';
+            }
+        }
+    }
+
+    if (btnModeEcho) {
+        btnModeEcho.addEventListener('click', () => {
+            activeMode = 'echo';
+            updateModeUI();
+            setEchoPhrase(currentEchoIndex);
+        });
+    }
+
+    if (btnModeVisual) {
+        btnModeVisual.addEventListener('click', () => {
+            activeMode = 'visual';
+            updateModeUI();
+        });
+    }
+
+    // Инициализация первой фразы
+    setEchoPhrase(0);
 
     // --- Обработка формы предзаказа ключа ---
     const orderForm = document.getElementById('keyer-order-form');
@@ -375,7 +542,7 @@
 
             const callsign = (document.getElementById('order-callsign')?.value || 'RADIO').trim().toUpperCase();
             const contact = document.getElementById('order-contact')?.value || '';
-            const kit = document.getElementById('order-kit')?.value || 'full';
+            const kit = document.getElementById('order-kit')?.value || 'assembled';
             const city = document.getElementById('order-city')?.value || '';
             const notes = document.getElementById('order-notes')?.value || '';
 
