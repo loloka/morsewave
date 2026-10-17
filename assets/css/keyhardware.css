@@ -1,0 +1,410 @@
+/* =========================================================
+   MorseWave Pro Keyer (R9OGL Edition) — Стили страницы
+   Виртуальный OLED 0.96", Serial-терминал, телеметрия и предзаказ
+   ========================================================= */
+
+.hardware-hero {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.hardware-callsign-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(232, 163, 61, 0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    width: fit-content;
+}
+
+/* Сетка главной панели управления */
+.keyer-workspace-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 900px) {
+    .keyer-workspace-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Карточка виртуального OLED-дисплея */
+.oled-card {
+    background: #07090b;
+    border: 2px solid #232930;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    position: relative;
+    overflow: hidden;
+}
+
+.oled-bezel {
+    background: #020406;
+    border: 3px solid #14191f;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.9), 0 0 20px rgba(79, 216, 196, 0.08);
+    font-family: var(--font-mono);
+    color: #4fd8c4;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    text-shadow: 0 0 8px rgba(79, 216, 196, 0.6);
+}
+
+.oled-header-line {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed rgba(79, 216, 196, 0.35);
+}
+
+.oled-middle-char {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 38px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    min-height: 64px;
+    color: #5effeb;
+    text-shadow: 0 0 14px rgba(79, 216, 196, 0.8);
+    transition: transform 0.05s ease;
+}
+
+.oled-middle-char.pulse {
+    transform: scale(1.08);
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+}
+
+.oled-footer-ticker {
+    background: rgba(79, 216, 196, 0.05);
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 2px solid #4fd8c4;
+}
+
+/* Панель индикаторов над OLED */
+.oled-status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.key-led-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.key-led {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #3a1515;
+    border: 1px solid #5a1e1e;
+    transition: all 0.05s ease;
+}
+
+.key-led.active {
+    background: #ff3b30;
+    border-color: #ff857f;
+    box-shadow: 0 0 16px #ff3b30, 0 0 6px #fff;
+}
+
+/* Правая колонка: подключение и телеметрия */
+.connect-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.btn-usb-connect {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #e8a33d, #c27d1d);
+    color: #121518;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px 24px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 18px rgba(232, 163, 61, 0.35);
+}
+
+.btn-usb-connect:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(232, 163, 61, 0.5);
+}
+
+.btn-usb-connect.connected {
+    background: #245952;
+    color: #4fd8c4;
+    box-shadow: none;
+    border: 1px solid #4fd8c4;
+}
+
+/* Датчики WPM и TONE */
+.telemetry-gauges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.gauge-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gauge-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+}
+
+.gauge-value {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+}
+
+.gauge-bar-track {
+    height: 6px;
+    background: var(--surface-2);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 4px;
+}
+
+.gauge-bar-fill {
+    height: 100%;
+    background: var(--signal);
+    border-radius: 3px;
+    transition: width 0.15s ease;
+}
+
+.gauge-bar-fill.pitch {
+    background: var(--accent);
+}
+
+/* Raw Serial Console */
+.serial-terminal-card {
+    background: #090b0d;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+}
+
+.terminal-log-box {
+    height: 110px;
+    overflow-y: auto;
+    color: #8b9198;
+    line-height: 1.5;
+    word-break: break-all;
+    font-size: 12px;
+}
+
+.terminal-log-box .log-ditdah {
+    color: var(--signal);
+    font-weight: 700;
+}
+
+.terminal-log-box .log-char {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.terminal-log-box .log-sys {
+    color: #55606d;
+}
+
+/* Секция тренажёра эхо-проверки */
+.keyer-echo-test {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+}
+
+.echo-target-line {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-top: 8px;
+    font-size: 22px;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--surface-2);
+    padding: 12px 16px;
+    border-radius: 8px;
+}
+
+.echo-user-result {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    color: var(--signal);
+    margin-top: 8px;
+    min-height: 30px;
+}
+
+/* Блок спецификации и начинки */
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.spec-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.spec-item-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.spec-item-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text);
+}
+
+.spec-item-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Форма предзаказа ключа */
+.order-section-card {
+    background: linear-gradient(180deg, var(--surface) 0%, #13171a 100%);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 40px;
+}
+
+.order-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .order-form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.form-field input, .form-field select, .form-field textarea {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus {
+    border-color: var(--accent);
+}
+
+/* Модальное окно подтверждения заявки */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
