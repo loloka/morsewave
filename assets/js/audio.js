@@ -148,9 +148,28 @@ class MorseAudioBus {
         this.setNoiseLevel(level);
     }
 
-    stopNoise() {
+    stopNoise(force = false) {
         if (!this.noiseGain) return;
+        if (this._sessionNoiseActive && !force) return;
         this.setNoiseLevel(0);
+    }
+
+    startSessionNoise() {
+        this._sessionNoiseActive = true;
+        if (this.ctx && this.ctx.state === 'suspended') {
+            try { this.ctx.resume(); } catch (_) {}
+        }
+        this.configure();
+        this.startNoise();
+    }
+
+    stopSessionNoise() {
+        this._sessionNoiseActive = false;
+        this.stopNoise(true);
+    }
+
+    isSessionNoiseActive() {
+        return !!this._sessionNoiseActive;
     }
 
     configure(overrides = {}) {
@@ -166,6 +185,10 @@ class MorseAudioBus {
             this.monoBus.gain.setTargetAtTime(1.0, now, 0.01);
             this.stereoBus.gain.setTargetAtTime(0, now, 0.01);
         }
+
+        if (this._sessionNoiseActive) {
+            this.setNoiseLevel(this.configuredNoiseLevel);
+        }
     }
 }
 
@@ -175,6 +198,29 @@ function getSharedMorseAudioBus(ctx) {
     }
     return window.__morseSharedAudioBus;
 }
+
+function startSessionAudioNoise() {
+    try {
+        const ctx = getSharedAudioContext();
+        if (ctx) {
+            const bus = getSharedMorseAudioBus(ctx);
+            bus.startSessionNoise();
+        }
+    } catch (_) {}
+}
+
+function stopSessionAudioNoise() {
+    try {
+        if (window.__morseSharedAudioCtx) {
+            const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
+            bus.stopSessionNoise();
+        }
+    } catch (_) {}
+}
+
+window.addEventListener('pagehide', () => stopSessionAudioNoise());
+window.addEventListener('beforeunload', () => stopSessionAudioNoise());
+
 
 /**
  * MorseAudio — проигрывает текст азбукой Морзе через Web Audio API.

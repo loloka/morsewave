@@ -630,7 +630,11 @@
                     s.noiseLevel = parseFloat(chip.dataset.noise) || 0;
                     AudioSettings.save(s);
                     if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
-                        getSharedMorseAudioBus(window.__morseSharedAudioCtx).setNoiseLevel(s.noiseLevel);
+                        const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
+                        bus.configure({ noiseLevel: s.noiseLevel });
+                        if (bus.isSessionNoiseActive()) {
+                            bus.setNoiseLevel(s.noiseLevel);
+                        }
                     }
                     updateExtraActiveDot();
                 });
@@ -1112,8 +1116,10 @@
             currentAudio = null;
             isPlaying = false;
         }
-        if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
-            getSharedMorseAudioBus(window.__morseSharedAudioCtx).stopNoise();
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        } else if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
+            getSharedMorseAudioBus(window.__morseSharedAudioCtx).stopSessionNoise();
         }
         cancelPaperSleep();
         if (session) {
@@ -1331,6 +1337,10 @@
         if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
         if (paperControlsRow) paperControlsRow.style.display = 'none';
 
+        if (typeof startSessionAudioNoise === 'function') {
+            startSessionAudioNoise();
+        }
+
         const isReadySignal = readySignalEl ? readySignalEl.checked : ((typeof AudioSettings !== 'undefined') ? !!AudioSettings.load().readySignal : false);
 
         if (isExam) {
@@ -1396,6 +1406,9 @@
 
         qrqStopRequested = false;
         qrqSessionActive = true;
+        if (typeof startSessionAudioNoise === 'function') {
+            startSessionAudioNoise();
+        }
 
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
@@ -1480,6 +1493,9 @@
     }
 
     function finishQrqSession() {
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
         if (qrqAudio) {
             qrqAudio.stop();
             qrqAudio = null;
@@ -1637,6 +1653,9 @@
         }
         signalLine.clear();
         lamp.off();
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
 
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
@@ -1906,6 +1925,15 @@
         if (session.finished) return;
         session.finished = true;
         session.examStopped = true; // на случай досрочной остановки — обрываем цикл проигрывания
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        signalLine.clear();
+        lamp.off();
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
 
         // ВАЖНО: без fallback на session.groups.length — иначе остановка
         // экзамена ДО того, как отыграла хоть одна группа (playedCount === 0),
@@ -3036,7 +3064,6 @@
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
     function stopGroupsSession() {
         if (session) {
-            session.finished = true;
             session.examStopped = true;
             session.paperStopped = true;
         }
@@ -3050,12 +3077,12 @@
             answerInput.removeAttribute('maxlength');
         }
         if (!session) {
+            abortCurrentSession();
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
             return;
         }
         if (session.isPaperMode) {
-            session.paperStopped = true;
             cancelPaperSleep();
             if (session.playedCount > 0) {
                 finishPaperSession();
@@ -3064,6 +3091,10 @@
                 sessionPanel.style.display = 'none';
                 setupPanel.style.display = 'block';
             }
+            return;
+        }
+        if (session.isExam) {
+            finishExamSession();
             return;
         }
         if (session.totalChars > 0) {
@@ -3518,6 +3549,9 @@
         if (wordsAudio) { wordsAudio.stop(); wordsAudio = null; }
         wordsSignalLine.clear();
         wordsLamp.off();
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
     }
 
     async function playCurrentWord() {
@@ -3576,6 +3610,9 @@
         const farnsworth = wordsFwEnabled.checked ? parseInt(wordsFwSlider.value, 10) : null;
 
         haltWords();
+        if (typeof startSessionAudioNoise === 'function') {
+            startSessionAudioNoise();
+        }
         wordsSession = {
             items: Array.from({ length: count }, () => pool[Math.floor(Math.random() * pool.length)]),
             index: 0, wpm, farnsworth,

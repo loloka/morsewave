@@ -434,7 +434,13 @@
                     if (typeof getSharedAudioContext === 'function' && typeof getSharedMorseAudioBus === 'function') {
                         try {
                             const ctx = getSharedAudioContext();
-                            if (ctx) getSharedMorseAudioBus(ctx).setNoiseLevel(s.noiseLevel);
+                            if (ctx) {
+                                const bus = getSharedMorseAudioBus(ctx);
+                                bus.configure({ noiseLevel: s.noiseLevel });
+                                if (bus.isSessionNoiseActive()) {
+                                    bus.setNoiseLevel(s.noiseLevel);
+                                }
+                            }
                         } catch (e) {}
                     }
                     updateKochExtraDot();
@@ -623,10 +629,12 @@
             currentAudio = null;
             isPlaying = false;
         }
-        if (typeof getSharedAudioContext === 'function' && typeof getSharedMorseAudioBus === 'function') {
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        } else if (typeof getSharedAudioContext === 'function' && typeof getSharedMorseAudioBus === 'function') {
             try {
                 const ctx = getSharedAudioContext();
-                if (ctx) getSharedMorseAudioBus(ctx).stopNoise();
+                if (ctx) getSharedMorseAudioBus(ctx).stopSessionNoise();
             } catch (e) {}
         }
         cancelPaperSleep();
@@ -820,6 +828,9 @@
         }
         signalLine.clear();
         lamp.off();
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
 
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
@@ -899,6 +910,9 @@
         };
 
         document.body.classList.add('morse-session-active');
+        if (typeof startSessionAudioNoise === 'function') {
+            startSessionAudioNoise();
+        }
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -1060,6 +1074,9 @@
             currentAudio.stop();
             currentAudio = null;
             isPlaying = false;
+        }
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
         }
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
@@ -1358,11 +1375,9 @@
 
     function stopKochSession() {
         if (session) {
-            session.finished = true;
             session.paperStopped = true;
         }
         if (session && session.isPaperMode) {
-            session.paperStopped = true;
             cancelPaperSleep();
             if (currentAudio) { currentAudio.stop(); currentAudio = null; }
             if (session.playedCount > 0) {
@@ -1384,6 +1399,7 @@
             answerInput.removeAttribute('maxlength');
         }
         if (!session) {
+            abortCurrentSession();
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
             return;

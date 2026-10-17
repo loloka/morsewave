@@ -330,6 +330,9 @@
             currentAudio = null;
             isPlaying = false;
         }
+        if (typeof stopSessionAudioNoise === 'function') {
+            stopSessionAudioNoise();
+        }
         if (session && !session.finished && session.dbXpEarned > 0) {
             const dur = Math.round((Date.now() - session.startTime) / 1000);
             const total = session.index || 1; // estimate
@@ -351,6 +354,9 @@
 
     async function startSession() {
         abortCurrentSession();
+        if (typeof startSessionAudioNoise === 'function') {
+            startSessionAudioNoise();
+        }
         const wpm = parseInt(wpmSlider.value, 10);
         const farnsworth = fwEnabled && fwEnabled.checked ? parseInt(fwSlider.value, 10) : null;
         const isBufferMode = bufferCheckbox ? bufferCheckbox.checked : false;
