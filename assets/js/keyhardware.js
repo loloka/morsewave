@@ -28,11 +28,6 @@
     const gaugePitchVal = document.getElementById('gauge-pitch-value');
     const gaugePitchBar = document.getElementById('gauge-pitch-bar');
 
-    // Эхо-тестер
-    const echoTargetEl = document.getElementById('echo-target-text');
-    const echoResultEl = document.getElementById('echo-result-text');
-    const btnNextEcho = document.getElementById('btn-next-echo');
-
     // Состояние соединения
     let port = null;
     let reader = null;
@@ -219,7 +214,13 @@
     // --- WebSerial API подключение ---
     async function connectSerial() {
         if (!('serial' in navigator)) {
-            alert('Ваш браузер не поддерживает WebSerial API. Пожалуйста, откройте страницу в Google Chrome, Microsoft Edge, Яндекс.Браузере или Opera на компьютере.');
+            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+                alert('⚠️ WebSerial API требует безопасного протокола HTTPS!\n\nПожалуйста, откройте страницу через https:// (с замочком в строке адреса).');
+                appendTerminal('\n[ОШИБКА] WebSerial заблокирован браузером из-за небезопасного соединения HTTP. Откройте сайт по HTTPS!\n', 'sys');
+            } else {
+                alert('⚠️ Ваш браузер не поддерживает WebSerial API.\n\nПожалуйста, используйте Google Chrome, Яндекс.Браузер, Microsoft Edge или Opera на компьютере.');
+                appendTerminal('\n[ОШИБКА] Браузер не поддерживает WebSerial API. Нужен Chrome, Edge или Яндекс.Браузер.\n', 'sys');
+            }
             return;
         }
 
@@ -253,6 +254,15 @@
             }
         } catch (err) {
             console.warn('WebSerial error / cancelled:', err);
+            if (err.name === 'NotFoundError') {
+                appendTerminal('\n[СИСТЕМА] Выбор COM-порта отменён.\n', 'sys');
+            } else {
+                const msg = err.message || String(err);
+                appendTerminal(`\n[ОШИБКА] Не удалось открыть порт: ${msg}\n`, 'sys');
+                if (msg.toLowerCase().includes('failed to open') || msg.toLowerCase().includes('access denied') || err.name === 'NetworkError') {
+                    alert('⚠️ Не удалось открыть COM-порт!\n\nВероятная причина: этот COM-порт сейчас занят другой программой (например, в Arduino IDE открыт «Монитор порта»).\n\nПожалуйста, закройте окно Монитора порта в Arduino IDE и нажмите «Подключить» ещё раз!');
+                }
+            }
             disconnectSerial();
         }
     }
