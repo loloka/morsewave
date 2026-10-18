@@ -881,7 +881,7 @@ HTML
     'js.paris.type_digits_long_coef' => 'коэфф. 2.90',
     'js.paris.type_digits_short' => 'Цифровой текст (короткий ноль «Т»)',
     'js.paris.type_digits_short_coef' => 'коэфф. 3.17',
-    'js.paris.type_nominal' => 'Номинал PARIS (эталонная манипуляция)',
+    'js.paris.type_nominal' => 'Номинал PARIS (эталонная манипуляция ключом)',
     'js.paris.type_nominal_coef' => 'коэфф. 5.00',
     'js.paris.dot_duration' => 'Длительность одной точки (τ)',
     'js.paris.dot_unit' => 'мс',
