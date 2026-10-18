@@ -7,14 +7,39 @@
  * и флаг "занято" (recBusy/isPlaying) навсегда оставался true — тренировка
  * зависала на случайной букве без звука и без реакции на нажатия.
  */
+function unlockAudioContext(ctx) {
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+        try { ctx.resume(); } catch (_) {}
+    }
+    // Разблокировка Web Audio на iOS Safari / Android: проигрываем микробуфер тишины
+    try {
+        const buffer = ctx.createBuffer(1, 1, 22050);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start(0);
+    } catch (_) {}
+}
+
 function getSharedAudioContext() {
     if (!window.__morseSharedAudioCtx) {
         window.__morseSharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
-    if (window.__morseSharedAudioCtx.state === 'suspended') {
-        window.__morseSharedAudioCtx.resume();
-    }
+    unlockAudioContext(window.__morseSharedAudioCtx);
     return window.__morseSharedAudioCtx;
+}
+
+// Автоматическая глобальная разблокировка AudioContext при первом же касании/клике на мобильных
+if (typeof document !== 'undefined') {
+    const unlockOnFirstGesture = () => {
+        if (window.__morseSharedAudioCtx) {
+            unlockAudioContext(window.__morseSharedAudioCtx);
+        }
+    };
+    ['touchstart', 'touchend', 'click', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, unlockOnFirstGesture, { capture: true, passive: true });
+    });
 }
 
 /**
@@ -288,10 +313,19 @@ class MorseAudio {
             // Останавливаем генератор через 5 мс после спада в 0, чтобы исключить обрыв ненулевой фазы
             osc.stop(now + dur + 0.005);
             this._activeNodes = { osc, gain };
-            osc.onended = () => {
+
+            let resolved = false;
+            const finish = () => {
+                if (resolved) return;
+                resolved = true;
+                if (safetyTimer) clearTimeout(safetyTimer);
                 if (this._activeNodes && this._activeNodes.osc === osc) this._activeNodes = null;
                 resolve();
             };
+
+            // Защитный сторожевой таймер на случай зависания/сна AudioContext на мобильных (iOS Safari / Android)
+            const safetyTimer = setTimeout(finish, durationMs + 200);
+            osc.onended = finish;
         });
     }
 
@@ -313,6 +347,9 @@ class MorseAudio {
      */
     async play(text, callbacks = {}) {
         this._ensureCtx();
+        if (this.ctx && this.ctx.state === 'suspended') {
+            try { await this.ctx.resume(); } catch (_) {}
+        }
         const bus = getSharedMorseAudioBus(this.ctx);
         bus.configure();
         bus.startNoise();
@@ -367,6 +404,9 @@ class MorseAudio {
      */
     async playPattern(pattern, callbacks = {}) {
         this._ensureCtx();
+        if (this.ctx && this.ctx.state === 'suspended') {
+            try { await this.ctx.resume(); } catch (_) {}
+        }
         const bus = getSharedMorseAudioBus(this.ctx);
         bus.configure();
         bus.startNoise();

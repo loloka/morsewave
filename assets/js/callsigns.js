@@ -299,10 +299,21 @@
     const vkbEl = document.getElementById('cs-vkb');
     let vkb = null;
     function renderVkb() {
-        if (!vkb && typeof VirtualKeyboard !== 'undefined' && vkbEl) {
+        if (!vkbEl || typeof VirtualKeyboard === 'undefined') return;
+        if (!vkb) {
             vkb = new VirtualKeyboard(vkbEl, answerInput, { showSpace: false, showSlash: true });
+        } else if (window.matchMedia('(pointer: coarse)').matches) {
+            vkbEl.style.display = 'flex';
         }
     }
+
+    // Фоновая подгрузка позывных в кэш при загрузке страницы для мгновенного старта без задержек
+    setTimeout(() => {
+        fetch('api/callsigns.php?count=30')
+            .then(r => r.json())
+            .then(data => { if (Array.isArray(data) && data.length) saveCallsignsToCache(data); })
+            .catch(() => {});
+    }, 600);
 
     const FALLBACK_CALLSIGNS = [
         { callsign: 'R1ABC', country: 'Россия' },
@@ -387,7 +398,7 @@
     async function fetchCallsigns(count) {
         try {
             const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-            const timer = controller ? setTimeout(() => controller.abort(), 4000) : null;
+            const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
             const res = await fetch(`api/callsigns.php?count=${count}`, controller ? { signal: controller.signal } : {});
             if (timer) clearTimeout(timer);
             if (!res.ok) throw new Error('status_' + res.status);
@@ -401,7 +412,8 @@
             console.warn('Network fetch callsigns failed, using offline cache/fallback:', e);
             const cached = getLocalCachedCallsigns(count);
             if (cached && cached.length) return cached;
-            throw e;
+            const fallback = [...FALLBACK_CALLSIGNS].sort(() => Math.random() - 0.5);
+            return fallback.slice(0, count);
         }
     }
 
@@ -771,8 +783,8 @@
         if (currentAudio) {
             currentAudio.stop();
             currentAudio = null;
-            isPlaying = false;
         }
+        isPlaying = false;
         if (typeof stopSessionAudioNoise === 'function') {
             stopSessionAudioNoise();
         }
@@ -796,10 +808,25 @@
     window.addEventListener('pagehide', abortCurrentSession);
 
     async function startSession() {
+        // Синхронно разблокируем Web Audio прямо в стеке пользовательского тапа/клика
+        const ctx = getSharedAudioContext();
+        if (typeof unlockAudioContext === 'function') {
+            unlockAudioContext(ctx);
+        } else if (ctx && ctx.state === 'suspended') {
+            try { ctx.resume(); } catch (_) {}
+        }
+
         abortCurrentSession();
         if (typeof startSessionAudioNoise === 'function') {
             startSessionAudioNoise();
         }
+
+        const startBtn = document.getElementById('start-session');
+        const origBtnText = startBtn ? startBtn.innerHTML : null;
+        if (startBtn) {
+            startBtn.disabled = true;
+        }
+
         const wpm = parseInt(wpmSlider.value, 10);
         const farnsworth = fwEnabled && fwEnabled.checked ? parseInt(fwSlider.value, 10) : null;
         const isPaperMode = paperCheckbox ? paperCheckbox.checked : false;
@@ -813,11 +840,18 @@
         let items;
         try {
             items = await fetchCallsigns(count);
-            if (!items.length) throw new Error('empty');
+            if (!items || !items.length) {
+                const fallback = [...FALLBACK_CALLSIGNS].sort(() => Math.random() - 0.5);
+                items = fallback.slice(0, count);
+            }
         } catch {
-            setupError.textContent = t('js.cs.fetch_error');
-            setupError.className = 'feedback show bad';
-            return;
+            const fallback = [...FALLBACK_CALLSIGNS].sort(() => Math.random() - 0.5);
+            items = fallback.slice(0, count);
+        } finally {
+            if (startBtn) {
+                startBtn.disabled = false;
+                if (origBtnText) startBtn.innerHTML = origBtnText;
+            }
         }
 
         let isDaily = new URLSearchParams(window.location.search).get('daily') === '1';
