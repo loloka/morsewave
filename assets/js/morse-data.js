@@ -213,15 +213,43 @@ function speedXpFactor(wpm) {
 }
 
 /**
- * "≈N зн/мин" рядом с любым ползунком wpm на сайте (по просьбе R8OA, мастера
- * спорта по скоростной телеграфии, 2026-08-09) — новичку проще понять
- * скорость через привычные "знаков в минуту", чем через wpm. Формула из
- * стандарта PARIS: одно "слово" = 5 знаков, значит cpm = wpm × 5. Это
- * ЕДИНАЯ точка форматирования — используется во всех js-файлах со своими
- * wpm-бегунками (groups.js, learn.js, koch.js, callsigns.js), чтобы текст и
- * округление были одинаковыми везде.
+ * Коэффициенты перевода WPM (система PARIS) в реальные знаки в минуту (зн/мин)
+ * по методике ветерана радиоспорта R8OA (Владислав, Новосибирск).
+ * В стандарте PARIS эталонное слово "PARIS " занимает ровно 50 точек.
+ * Номинально: 1 WPM = 5 зн/мин (5 символов по 10 точек).
+ * Но из-за разной длины символов Морзе фактическая скорость зависит от состава текста:
+ * - Буквенный текст: 4.22
+ * - Смешанный (буквы + цифры + знаки, позывные): 3.65
+ * - Цифровой с длинным нулем: 2.90
+ * - Цифровой с коротким нулем: 3.17
+ * - Номинал PARIS: 5.00
  */
-function cpmHintText(wpm) {
-    const w = Math.max(1, Math.round(Number(wpm) || 12));
-    return t('js.common.cpm_hint', { '{cpm}': String(w * 5) });
+const PARIS_SPEED_COEFS = {
+    nominal: 5.0,
+    letters: 4.22,
+    digits: 2.90,
+    digits_short: 3.17,
+    mixed: 3.65,
+    callsigns: 3.65
+};
+
+function getCpmByType(wpm, type = 'nominal') {
+    const w = Math.max(1, Number(wpm) || 12);
+    const coef = PARIS_SPEED_COEFS[type] || PARIS_SPEED_COEFS.nominal;
+    return Math.round(w * coef);
 }
+
+/**
+ * "≈N зн/мин" рядом с любым ползунком wpm на сайте.
+ * Если передан type ('letters', 'digits', 'mixed', 'callsigns'), выводится с уточнением
+ * по реальному коэффициенту типа текста.
+ */
+function cpmHintText(wpm, type = 'nominal') {
+    const cpm = getCpmByType(wpm, type);
+    if (type && type !== 'nominal') {
+        const typeLabel = t('js.common.cpm_type_' + type) || type;
+        return t('js.common.cpm_hint_type', { '{cpm}': String(cpm), '{type}': typeLabel });
+    }
+    return t('js.common.cpm_hint', { '{cpm}': String(cpm) });
+}
+

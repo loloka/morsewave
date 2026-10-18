@@ -3,6 +3,6 @@
  * Единый источник версии проекта MorseWave.
  * Обновляется при каждом релизе синхронно с CHANGELOG.md.
  */
-define('MW_VERSION', 'v2.104.0');
+define('MW_VERSION', 'v2.105.0');
 define('MW_VERSION_DATE', '2026-10-18');
 

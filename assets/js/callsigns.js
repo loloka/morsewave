@@ -14,15 +14,16 @@
     const wpmSlider = document.getElementById('cs-wpm');
     const wpmValue = document.getElementById('cs-wpm-value');
     const wpmCpm = document.getElementById('cs-wpm-cpm');
+    if (wpmCpm) wpmCpm.dataset.cpmType = 'callsigns';
     const savedWpm = localStorage.getItem('morse_cs_wpm');
     if (savedWpm) {
         wpmSlider.value = savedWpm;
         wpmValue.textContent = savedWpm;
-        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(savedWpm);
+        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(savedWpm, 'callsigns');
     }
     wpmSlider.addEventListener('input', () => { 
         wpmValue.textContent = wpmSlider.value; 
-        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(wpmSlider.value); 
+        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(wpmSlider.value, 'callsigns'); 
         localStorage.setItem('morse_cs_wpm', wpmSlider.value);
     });
 
@@ -31,6 +32,7 @@
     const fwSlider = document.getElementById('cs-farnsworth');
     const fwValue = document.getElementById('cs-farnsworth-value');
     const fwCpm = document.getElementById('cs-farnsworth-cpm');
+    if (fwCpm) fwCpm.dataset.cpmType = 'callsigns';
     const fwPanel = document.getElementById('cs-farnsworth-panel');
 
     function updateCsFarnsworthVisibility() {
@@ -48,12 +50,12 @@
     if (savedFwWpm && fwSlider) {
         fwSlider.value = savedFwWpm;
         if (fwValue) fwValue.textContent = savedFwWpm;
-        if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(savedFwWpm);
+        if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(savedFwWpm, 'callsigns');
     }
     if (fwSlider) {
         fwSlider.addEventListener('input', () => {
             if (fwValue) fwValue.textContent = fwSlider.value;
-            if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value);
+            if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value, 'callsigns');
             localStorage.setItem('morse_cs_fw_wpm', fwSlider.value);
         });
     }
@@ -1249,7 +1251,7 @@
         if (pWpm) {
             wpmSlider.value = pWpm;
             wpmValue.textContent = pWpm;
-            wpmCpm.textContent = cpmHintText(pWpm);
+            wpmCpm.textContent = cpmHintText(pWpm, 'callsigns');
         }
         
         // Создадим баннер, что задание активно

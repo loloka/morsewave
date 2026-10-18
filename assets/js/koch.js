@@ -107,11 +107,30 @@
 
     const kochCharsetFeedback = document.getElementById('koch-charset-feedback');
 
+    function getKochCpmType() {
+        const state = (typeof Progress !== 'undefined') ? Progress.load() : {};
+        const level = state.kochLevel || 2;
+        const chars = (typeof KOCH_ORDER !== 'undefined') ? KOCH_ORDER.slice(0, level) : [];
+        return chars.some(c => /[0-9]/.test(c)) ? 'mixed' : 'letters';
+    }
+
+    function updateKochCpmHint() {
+        const type = getKochCpmType();
+        if (wpmCpm && typeof cpmHintText === 'function') {
+            wpmCpm.textContent = cpmHintText(wpmSlider.value, type);
+            wpmCpm.dataset.cpmType = type;
+        }
+        if (fwCpm && fwSlider && typeof cpmHintText === 'function') {
+            fwCpm.textContent = cpmHintText(fwSlider.value, type);
+            fwCpm.dataset.cpmType = type;
+        }
+    }
+
     const savedWpm = localStorage.getItem('morse_koch_wpm');
     if (savedWpm) {
         wpmSlider.value = savedWpm;
         wpmValue.textContent = savedWpm;
-        wpmCpm.textContent = cpmHintText(savedWpm);
+        updateKochCpmHint();
     }
     const savedFwEnabled = localStorage.getItem('morse_koch_fw_enabled');
     if (savedFwEnabled === 'true' && fwEnabled) {
@@ -123,9 +142,7 @@
         fwSlider.value = savedFwWpm;
         fwValue.textContent = savedFwWpm;
     }
-    if (fwCpm && typeof cpmHintText === 'function') {
-        fwCpm.textContent = cpmHintText(fwSlider.value);
-    }
+    updateKochCpmHint();
 
     const kochCountEl = document.getElementById('koch-count');
     const savedKochCount = localStorage.getItem('morse_koch_count');
@@ -140,12 +157,12 @@
 
     wpmSlider.addEventListener('input', () => { 
         wpmValue.textContent = wpmSlider.value; 
-        wpmCpm.textContent = cpmHintText(wpmSlider.value); 
+        updateKochCpmHint(); 
         localStorage.setItem('morse_koch_wpm', wpmSlider.value);
     });
     fwSlider.addEventListener('input', () => { 
         fwValue.textContent = fwSlider.value; 
-        if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value);
+        updateKochCpmHint();
         localStorage.setItem('morse_koch_fw_wpm', fwSlider.value);
     });
     if (fwEnabled) {

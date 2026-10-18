@@ -352,15 +352,16 @@
     });
 
     const savedLearnWpm = localStorage.getItem('morse_learn_wpm');
+    if (wpmCpm) wpmCpm.dataset.cpmType = 'letters';
     if (savedLearnWpm) {
         wpmSlider.value = savedLearnWpm;
         wpmValue.textContent = savedLearnWpm;
-        wpmCpm.textContent = cpmHintText(savedLearnWpm);
+        if (wpmCpm) wpmCpm.textContent = cpmHintText(savedLearnWpm, 'letters');
     }
     
     wpmSlider.addEventListener('input', () => {
         wpmValue.textContent = wpmSlider.value;
-        wpmCpm.textContent = cpmHintText(wpmSlider.value);
+        if (wpmCpm) wpmCpm.textContent = cpmHintText(wpmSlider.value, 'letters');
         key.setWpm(currentWpm());
         localStorage.setItem('morse_learn_wpm', wpmSlider.value);
     });
@@ -724,14 +725,15 @@
     });
 
     const savedRecWpm = localStorage.getItem('morse_rec_wpm');
+    if (recWpmCpm) recWpmCpm.dataset.cpmType = 'letters';
     if (savedRecWpm) {
         recWpmSlider.value = savedRecWpm;
         recWpmValue.textContent = savedRecWpm;
-        recWpmCpm.textContent = cpmHintText(savedRecWpm);
+        if (recWpmCpm) recWpmCpm.textContent = cpmHintText(savedRecWpm, 'letters');
     }
     recWpmSlider.addEventListener('input', () => { 
         recWpmValue.textContent = recWpmSlider.value; 
-        recWpmCpm.textContent = cpmHintText(recWpmSlider.value); 
+        if (recWpmCpm) recWpmCpm.textContent = cpmHintText(recWpmSlider.value, 'letters'); 
         localStorage.setItem('morse_rec_wpm', recWpmSlider.value);
     });
     recStartBtn.addEventListener('click', () => {
@@ -1106,15 +1108,16 @@
     });
 
     const savedRhythmWpm = localStorage.getItem('morse_rhythm_wpm');
+    if (rhythmWpmCpm) rhythmWpmCpm.dataset.cpmType = 'letters';
     if (savedRhythmWpm) {
         rhythmWpmSlider.value = savedRhythmWpm;
         rhythmWpmValue.textContent = savedRhythmWpm;
-        rhythmWpmCpm.textContent = cpmHintText(savedRhythmWpm);
+        if (rhythmWpmCpm) rhythmWpmCpm.textContent = cpmHintText(savedRhythmWpm, 'letters');
     }
 
     rhythmWpmSlider.addEventListener('input', () => {
         rhythmWpmValue.textContent = rhythmWpmSlider.value;
-        rhythmWpmCpm.textContent = cpmHintText(rhythmWpmSlider.value);
+        if (rhythmWpmCpm) rhythmWpmCpm.textContent = cpmHintText(rhythmWpmSlider.value, 'letters');
         rhythmKey.setWpm(currentRhythmWpm());
         localStorage.setItem('morse_rhythm_wpm', rhythmWpmSlider.value);
     });
@@ -2666,14 +2669,15 @@
         });
     }
     const savedInvasionWpm = localStorage.getItem('morse_invasion_wpm');
+    if (invasionWpmCpmEl) invasionWpmCpmEl.dataset.cpmType = 'letters';
     if (savedInvasionWpm) {
         invasionWpmSlider.value = savedInvasionWpm;
         invasionWpmValueEl.textContent = savedInvasionWpm;
-        invasionWpmCpmEl.textContent = cpmHintText(savedInvasionWpm);
+        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(savedInvasionWpm, 'letters');
     }
     invasionWpmSlider.addEventListener('input', () => {
         invasionWpmValueEl.textContent = invasionWpmSlider.value;
-        invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value);
+        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value, 'letters');
         localStorage.setItem('morse_invasion_wpm', invasionWpmSlider.value);
     });
 

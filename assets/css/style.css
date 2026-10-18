@@ -1341,11 +1341,142 @@ input[type="range"] {
     text-align: right;
 }
 /* Подсказка "≈N зн/мин" рядом со скоростью — вспомогательная, мельче и
-   тише основного значения wpm, чтобы не спорить с ним за внимание. */
+   тише основного значения wpm. Кликабельна для вызова шпаргалки PARIS vs зн/мин. */
 .speed-control .cpm-hint {
     font-size: 11px;
     margin-left: -4px;
+    cursor: pointer;
+    text-decoration: underline dotted rgba(255, 255, 255, 0.35);
+    text-underline-offset: 3px;
+    transition: color 0.15s, text-decoration-color 0.15s;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
 }
+.speed-control .cpm-hint:hover {
+    color: var(--accent);
+    text-decoration-color: var(--accent);
+}
+
+/* ---------- Paris Speed Modal (WPM vs CPM) ---------- */
+.paris-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(4px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+.paris-modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+.paris-modal-dialog {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg, 16px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
+    max-width: 580px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    animation: parisModalZoomIn 0.2s ease;
+}
+@keyframes parisModalZoomIn {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+.paris-modal-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.paris-modal-header h3 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+}
+.paris-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 6px;
+    transition: color 0.15s, background 0.15s;
+}
+.paris-modal-close:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.08);
+}
+.paris-modal-body {
+    padding: 18px 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text);
+}
+.paris-modal-body p {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+.paris-calc-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+    padding: 14px 16px;
+    margin: 14px 0;
+}
+.paris-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 13px;
+}
+.paris-table tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    transition: background-color 0.2s ease;
+}
+.paris-table tr:last-child {
+    border-bottom: none;
+}
+.paris-table td {
+    padding: 8px 6px;
+}
+.paris-table .val {
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+}
+.paris-table .coef {
+    text-align: right;
+    color: var(--muted);
+    font-size: 12px;
+    padding-left: 10px;
+    white-space: nowrap;
+}
+.paris-modal-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+}
+
 
 /* ---------- Mode switch (learn page) ---------- */
 /* flex-wrap обязателен: на "Группах" тут три чипа ("Группы символов" /

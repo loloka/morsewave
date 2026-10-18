@@ -162,3 +162,163 @@ document.addEventListener('click', (e) => {
         });
     }
 });
+
+// =========================================================================
+// Шпаргалка и калькулятор соответствия скоростей WPM vs Знаки/мин (система PARIS)
+// по рекомендациям мастера скоростной радиотелеграфии R8OA
+// =========================================================================
+let parisModalEl = null;
+
+function openParisSpeedModal(initialWpm = 12, initialType = 'nominal') {
+    const wpmVal = Math.max(5, Math.min(60, parseInt(initialWpm, 10) || 12));
+    if (!parisModalEl) {
+        parisModalEl = document.createElement('div');
+        parisModalEl.className = 'paris-modal-overlay';
+        parisModalEl.id = 'paris-speed-modal';
+        parisModalEl.innerHTML = `
+            <div class="paris-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="paris-modal-title">
+                <div class="paris-modal-header">
+                    <h3 id="paris-modal-title">${t('js.paris.modal_title')}</h3>
+                    <button type="button" class="paris-modal-close" id="paris-modal-close-btn" aria-label="Закрыть">&times;</button>
+                </div>
+                <div class="paris-modal-body">
+                    <p style="font-weight:700; font-size:15px; color:var(--accent); margin-bottom:8px;">${t('js.paris.modal_intro')}</p>
+                    <p class="muted" style="font-size:13px; line-height:1.5;">${t('js.paris.modal_desc')}</p>
+                    <p class="muted" style="font-size:13px; line-height:1.5;">${t('js.paris.modal_diff_desc')}</p>
+
+                    <div class="paris-calc-card">
+                        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                            <div style="font-weight:700; font-size:13px;">${t('js.paris.calc_title')}</div>
+                            <div class="speed-control" style="margin:0;">
+                                <span class="speed-label">${t('js.paris.speed_label')}</span>
+                                <input type="range" id="paris-modal-wpm-slider" min="5" max="60" step="1" value="${wpmVal}">
+                                <span class="speed-value" id="paris-modal-wpm-val" style="font-size:16px;">${wpmVal}</span> <span class="speed-unit">wpm</span>
+                            </div>
+                        </div>
+
+                        <table class="paris-table">
+                            <tbody>
+                                <tr id="paris-row-letters">
+                                    <td>${t('js.paris.type_letters')}</td>
+                                    <td class="coef">${t('js.paris.type_letters_coef')}</td>
+                                    <td class="val" id="paris-val-letters">0 зн/мин</td>
+                                </tr>
+                                <tr id="paris-row-mixed">
+                                    <td>${t('js.paris.type_mixed')}</td>
+                                    <td class="coef">${t('js.paris.type_mixed_coef')}</td>
+                                    <td class="val" id="paris-val-mixed">0 зн/мин</td>
+                                </tr>
+                                <tr id="paris-row-digits-long">
+                                    <td>${t('js.paris.type_digits_long')}</td>
+                                    <td class="coef">${t('js.paris.type_digits_long_coef')}</td>
+                                    <td class="val" id="paris-val-digits-long">0 зн/мин</td>
+                                </tr>
+                                <tr id="paris-row-digits-short">
+                                    <td>${t('js.paris.type_digits_short')}</td>
+                                    <td class="coef">${t('js.paris.type_digits_short_coef')}</td>
+                                    <td class="val" id="paris-val-digits-short">0 зн/мин</td>
+                                </tr>
+                                <tr id="paris-row-nominal" style="background:rgba(255,255,255,0.02);">
+                                    <td>${t('js.paris.type_nominal')}</td>
+                                    <td class="coef">${t('js.paris.type_nominal_coef')}</td>
+                                    <td class="val" id="paris-val-nominal">0 зн/мин</td>
+                                </tr>
+                                <tr>
+                                    <td>${t('js.paris.dot_duration')}</td>
+                                    <td class="coef">1200 / WPM</td>
+                                    <td class="val" id="paris-val-dot">0 ${t('js.paris.dot_unit')}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="muted mt-2" style="font-size:12px; line-height:1.5; border-left:3px solid var(--accent); padding-left:12px;">
+                        ${t('js.paris.sport_note')}
+                    </div>
+                </div>
+                <div class="paris-modal-footer">
+                    <button type="button" class="btn btn-primary btn-sm" id="paris-modal-ok-btn">${t('js.paris.close')}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(parisModalEl);
+
+        const closeBtn = document.getElementById('paris-modal-close-btn');
+        const okBtn = document.getElementById('paris-modal-ok-btn');
+        const close = () => {
+            parisModalEl.classList.remove('active');
+            setTimeout(() => { if (!parisModalEl.classList.contains('active')) parisModalEl.style.display = 'none'; }, 200);
+        };
+        closeBtn?.addEventListener('click', close);
+        okBtn?.addEventListener('click', close);
+        parisModalEl.addEventListener('click', (e) => {
+            if (e.target === parisModalEl) close();
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && parisModalEl.classList.contains('active')) {
+                close();
+            }
+        });
+
+        const slider = document.getElementById('paris-modal-wpm-slider');
+        const valEl = document.getElementById('paris-modal-wpm-val');
+        const unit = t('js.common.cpm_unit') || 'зн/мин';
+        const updateCalc = () => {
+            const w = parseInt(slider.value, 10) || 12;
+            valEl.textContent = w;
+            document.getElementById('paris-val-letters').textContent = `${Math.round(w * 4.22)} ${unit}`;
+            document.getElementById('paris-val-mixed').textContent = `${Math.round(w * 3.65)} ${unit}`;
+            document.getElementById('paris-val-digits-long').textContent = `${Math.round(w * 2.90)} ${unit}`;
+            document.getElementById('paris-val-digits-short').textContent = `${Math.round(w * 3.17)} ${unit}`;
+            document.getElementById('paris-val-nominal').textContent = `${Math.round(w * 5.00)} ${unit}`;
+            document.getElementById('paris-val-dot').textContent = `${Math.round(1200 / w)} ${t('js.paris.dot_unit')}`;
+        };
+        slider?.addEventListener('input', updateCalc);
+        parisModalEl._updateCalc = updateCalc;
+    }
+
+    const slider = document.getElementById('paris-modal-wpm-slider');
+    if (slider) {
+        slider.value = wpmVal;
+        if (parisModalEl._updateCalc) parisModalEl._updateCalc();
+    }
+
+    ['letters', 'mixed', 'digits-long', 'digits-short', 'nominal'].forEach(k => {
+        const row = document.getElementById('paris-row-' + k);
+        if (row) row.style.backgroundColor = '';
+    });
+    let activeRowId = 'paris-row-nominal';
+    if (initialType === 'letters') activeRowId = 'paris-row-letters';
+    else if (initialType === 'mixed' || initialType === 'callsigns') activeRowId = 'paris-row-mixed';
+    else if (initialType === 'digits') activeRowId = 'paris-row-digits-long';
+    else if (initialType === 'digits_short') activeRowId = 'paris-row-digits-short';
+    const activeRow = document.getElementById(activeRowId);
+    if (activeRow) activeRow.style.backgroundColor = 'rgba(74, 222, 128, 0.12)';
+
+    parisModalEl.style.display = 'flex';
+    requestAnimationFrame(() => parisModalEl.classList.add('active'));
+}
+window.openParisSpeedModal = openParisSpeedModal;
+
+// Глобальное делегирование клика по плашке скорости cpm-hint
+document.addEventListener('click', (e) => {
+    const hint = e.target.closest('.cpm-hint, [data-open-paris-modal]');
+    if (hint) {
+        e.preventDefault();
+        const wrap = hint.closest('.speed-control') || hint.parentElement;
+        const slider = wrap ? wrap.querySelector('input[type="range"]') : null;
+        const wpm = slider ? parseInt(slider.value, 10) : 12;
+        const type = hint.dataset.cpmType || 'nominal';
+        openParisSpeedModal(wpm, type);
+    }
+});
+
+function initCpmHintTitles() {
+    document.querySelectorAll('.cpm-hint').forEach(el => {
+        if (!el.getAttribute('title')) {
+            el.setAttribute('title', t('js.common.cpm_title'));
+        }
+    });
+}
+window.addEventListener('DOMContentLoaded', initCpmHintTitles);
+
