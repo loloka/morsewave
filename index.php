@@ -29,6 +29,7 @@ include __DIR__ . '/includes/header.php';
 
             <div class="btn-row" style="align-items:center;">
                 <a href="learn.php" class="btn btn-primary"><?= t('index.start_letters') ?></a>
+                <a href="dosaaf.php" class="btn"><?= t('index.dosaaf_method') ?></a>
                 <a href="koch.php" class="btn-quiet"><?= t('index.koch_method') ?></a>
             </div>
 
@@ -135,10 +136,13 @@ include __DIR__ . '/includes/header.php';
         <div class="onboarding-step">
             <div class="step-num">2</div>
             <div class="step-content">
-                <div class="step-icon"><?= mw_icon('headphones', 22) ?></div>
+                <div class="step-icon"><?= mw_icon('graduate', 22) ?></div>
                 <h3><?= t('index.step2_title') ?></h3>
                 <p><?= t('index.step2_text') ?></p>
-                <a href="koch.php" class="btn btn-sm"><?= t('index.step2_btn') ?></a>
+                <div class="btn-row">
+                    <a href="dosaaf.php" class="btn btn-primary btn-sm"><?= t('index.step2_btn_dosaaf') ?></a>
+                    <a href="koch.php" class="btn btn-sm"><?= t('index.step2_btn_koch') ?></a>
+                </div>
             </div>
         </div>
 
@@ -148,7 +152,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="step-icon"><?= mw_icon('levels', 22) ?></div>
                 <h3><?= t('index.step3_title') ?></h3>
                 <p><?= t('index.step3_text') ?></p>
-                <a href="groups.php" class="btn btn-sm"><?= t('index.step3_btn') ?></a>
+                <a href="groups.php" class="btn btn-primary btn-sm"><?= t('index.step3_btn') ?></a>
             </div>
         </div>
 
@@ -159,8 +163,8 @@ include __DIR__ . '/includes/header.php';
                 <h3><?= t('index.step4_title') ?></h3>
                 <p><?= t('index.step4_text') ?></p>
                 <div class="btn-row">
-                    <a href="callsigns.php" class="btn btn-sm"><?= t('index.step4_btn_callsigns') ?></a>
-                    <a href="groups.php" class="btn btn-sm"><?= t('index.step4_btn_abbrev') ?></a>
+                    <a href="callsigns.php" class="btn btn-primary btn-sm"><?= t('index.step4_btn_callsigns') ?></a>
+                    <a href="groups.php?mode=abbrev" class="btn btn-sm"><?= t('index.step4_btn_abbrev') ?></a>
                 </div>
             </div>
         </div>
