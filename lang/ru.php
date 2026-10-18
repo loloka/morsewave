@@ -577,7 +577,8 @@ return [
 <p class="mt-3">Как мы обращаемся с твоими данными — в
     <a href="privacy.php" class="link">Политике конфиденциальности</a>. По любым вопросам —
     <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
-HTML,
+HTML
+,
 
     'privacy.title' => 'Политика конфиденциальности',
     'privacy.h1' => 'Политика конфиденциальности',
@@ -647,7 +648,8 @@ HTML,
 <p>Регистрируя аккаунт, ты подтверждаешь, что ознакомился с этой политикой и
     <a href="terms.php" class="link">пользовательским соглашением</a> и согласен на
     обработку указанных данных описанным здесь образом.</p>
-HTML,
+HTML
+,
 
     // --- keyhardware.php ---
     'keyhardware.eyebrow' => 'Своими руками',
@@ -768,7 +770,8 @@ void loop() {
     исследовании, не готов. Если попробуешь один из способов выше и
     что-то пойдёт не так (или наоборот, всё получится) — дай знать на
     <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
-HTML,
+HTML
+,
 
     // --- includes/mailer.php (письма) ---
     'email.verify_page_title' => 'Подтверди e-mail — MorseWave',

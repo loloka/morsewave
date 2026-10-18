@@ -573,7 +573,8 @@ return [
 <p class="mt-3">How we handle your data is described in the
     <a href="privacy.php" class="link">Privacy Policy</a>. For any questions —
     <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
-HTML,
+HTML
+,
 
     'privacy.title' => 'Privacy Policy',
     'privacy.h1' => 'Privacy Policy',
@@ -646,7 +647,8 @@ HTML,
 <p>By registering an account, you confirm that you've read this policy and
     the <a href="terms.php" class="link">Terms of Service</a> and consent to
     the described data being processed as described here.</p>
-HTML,
+HTML
+,
 
     // --- keyhardware.php ---
     'keyhardware.eyebrow' => 'DIY',
@@ -767,7 +769,8 @@ void loop() {
     path is still just research, not ready yet. If you try one of the methods
     above and something doesn't work (or does!) — let us know at
     <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
-HTML,
+HTML
+,
 
     // --- includes/mailer.php (emails) ---
     'email.verify_page_title' => 'Confirm your email — MorseWave',
