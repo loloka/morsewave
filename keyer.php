@@ -326,13 +326,56 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
+            <!-- Переключатель ракурса платы -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 8px; flex-wrap:wrap; gap:6px;">
+                <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Ракурс платы:</span>
+                <div style="display:inline-flex; gap:6px;">
+                    <button type="button" id="btn-pcb-top" onclick="setPcbView('top')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; cursor:pointer; background:#162330; border:1px solid #4fd8c4; color:#4fd8c4; transition:all 0.2s ease;">
+                        📐 Вид сверху (Чёткий)
+                    </button>
+                    <button type="button" id="btn-pcb-iso" onclick="setPcbView('iso')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #233140; color:var(--text-muted); transition:all 0.2s ease;">
+                        🔍 3D Изометрия
+                    </button>
+                </div>
+            </div>
+
             <!-- Изображение 3D платы с эффектом интерактивности -->
-            <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid rgba(79,216,196,0.25); background:#06080a; margin:6px 0 10px;">
-                <img src="<?= asset_v('assets/img/morsewave_pro_3d_iso.png') ?>" alt="3D модель платы MorseWave Pro v2.0" style="width:100%; height:auto; display:block; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid rgba(79,216,196,0.25); background:#06080a; margin:0 0 10px;">
+                <img id="pcb-preview-img" src="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-top="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-iso="<?= asset_v('assets/img/morsewave_pro_3d_iso.png') ?>" alt="Плата MorseWave Pro v2.0 (100% THT)" style="width:100%; height:auto; display:block; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 <div style="position:absolute; top:8px; right:8px; background:rgba(220,38,38,0.92); color:#fff; font-size:10px; font-weight:800; padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase; box-shadow:0 2px 6px rgba(0,0,0,0.6);">
                     В РАЗРАБОТКЕ
                 </div>
             </div>
+
+            <script>
+            function setPcbView(view) {
+                var img = document.getElementById('pcb-preview-img');
+                var btnTop = document.getElementById('btn-pcb-top');
+                var btnIso = document.getElementById('btn-pcb-iso');
+                if (!img) return;
+                if (view === 'iso') {
+                    img.src = img.getAttribute('data-iso');
+                    btnIso.style.background = '#162330';
+                    btnIso.style.borderColor = '#4fd8c4';
+                    btnIso.style.color = '#4fd8c4';
+                    btnIso.style.fontWeight = '700';
+                    btnTop.style.background = 'transparent';
+                    btnTop.style.borderColor = '#233140';
+                    btnTop.style.color = 'var(--text-muted)';
+                    btnTop.style.fontWeight = '600';
+                } else {
+                    img.src = img.getAttribute('data-top');
+                    btnTop.style.background = '#162330';
+                    btnTop.style.borderColor = '#4fd8c4';
+                    btnTop.style.color = '#4fd8c4';
+                    btnTop.style.fontWeight = '700';
+                    btnIso.style.background = 'transparent';
+                    btnIso.style.borderColor = '#233140';
+                    btnIso.style.color = 'var(--text-muted)';
+                    btnIso.style.fontWeight = '600';
+                }
+            }
+            </script>
 
             <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
                 <span class="badge" style="background:rgba(79,216,196,0.1); color:#4fd8c4; border:1px solid rgba(79,216,196,0.3);">100% THT Classic (0 SMD)</span>
