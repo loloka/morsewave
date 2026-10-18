@@ -4,6 +4,7 @@ require_once __DIR__ . '/icons.php';
 $navItems = [
     'index'       => ['label' => t('nav.home'),         'icon' => 'home',    'href' => 'index.php'],
     'learn'       => ['label' => t('nav.learn'),        'icon' => 'book',    'href' => 'learn.php'],
+    'dosaaf'      => ['label' => t('nav.dosaaf'),       'icon' => 'book-open', 'href' => 'dosaaf.php'],
     'koch'        => ['label' => t('nav.koch'),         'icon' => 'headphones', 'href' => 'koch.php'],
     'groups'      => ['label' => t('nav.groups'),       'icon' => 'levels',     'href' => 'groups.php'],
     'callsigns'   => ['label' => t('nav.callsigns'),    'icon' => 'tower',      'href' => 'callsigns.php'],

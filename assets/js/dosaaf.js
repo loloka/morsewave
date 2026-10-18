@@ -147,16 +147,20 @@
             quoteAuthorEl.textContent = `— ${stageData.quote.author}, ${stageData.quote.book}`;
         }
 
-        // Обновляем рекомендуемую скорость в зачёте
+        // Обновляем рекомендуемую скорость в зачёте с учётом типа знаков ступени
         const examSpeedHintEl = document.getElementById('dosaaf-exam-min-speed');
         if (examSpeedHintEl) {
             const minWpm = stageData.minExamWpm || 10;
-            const minCpm = Math.round(minWpm * 4.22);
+            const cpmType = getStageCpmType(currentStageNum);
+            const minCpm = (typeof getCpmByType === 'function')
+                ? getCpmByType(minWpm, cpmType)
+                : Math.round(minWpm * (cpmType === 'digits' ? 2.90 : (cpmType === 'mixed' ? 3.65 : 4.22)));
             examSpeedHintEl.textContent = (t('dosaaf.exam_min_speed_hint') || 'Норматив скорости зачёта ступени: не менее {wpm} WPM ({cpm} зн/мин).')
                 .replace('{wpm}', minWpm)
                 .replace('{cpm}', minCpm);
         }
 
+        updateSpeedCpmHint();
         renderActiveSubTab();
     }
 
@@ -359,7 +363,7 @@
         if (goalTextEl) {
             goalTextEl.textContent = (t('dosaaf.words_practice_goal') || 'Готовность к зачёту ступени: {streak} / {target} слов')
                 .replace('{streak}', Math.min(currentCount, target))
-                .replace('{target}', target);
+                .replaceAll('{target}', target);
         }
         if (goalBarEl) {
             goalBarEl.style.width = `${pct}%`;
@@ -500,7 +504,7 @@
             if (lockedText) {
                 lockedText.textContent = (t('dosaaf.exam_locked_alert') || '🔒 Зачёт заблокирован. Для допуска необходимо принять минимум {target} слов в тренировке «Приём слов» (прогресс: {done}/{target}).')
                     .replace('{done}', doneWords)
-                    .replace('{target}', requiredWords);
+                    .replaceAll('{target}', requiredWords);
             }
             return;
         }
@@ -862,33 +866,41 @@
         });
     }
 
-    // Регулятор скорости
-    function setupSpeedControl() {
+    function getStageCpmType(stageNum) {
+        if (stageNum === 6) return 'digits';
+        if (stageNum === 7) return 'mixed';
+        return 'letters';
+    }
+
+    function updateSpeedCpmHint() {
         const slider = document.getElementById('dosaaf-wpm');
         const valEl = document.getElementById('dosaaf-wpm-val');
         const cpmEl = document.getElementById('dosaaf-wpm-cpm');
-
         if (!slider) return;
+        const w = parseInt(slider.value, 10) || 12;
+        if (valEl) valEl.textContent = w;
+        if (cpmEl) {
+            const cpmType = getStageCpmType(currentStageNum);
+            cpmEl.dataset.cpmType = cpmType;
+            cpmEl.textContent = (typeof cpmHintText === 'function')
+                ? cpmHintText(w, cpmType)
+                : `≈${Math.round(w * (cpmType === 'digits' ? 2.90 : (cpmType === 'mixed' ? 3.65 : 4.22)))} зн/мин`;
+        }
+    }
 
-        const updateCpm = () => {
-            const w = parseInt(slider.value, 10) || 12;
-            if (valEl) valEl.textContent = w;
-            if (cpmEl) {
-                cpmEl.dataset.cpmType = 'letters';
-                cpmEl.textContent = (typeof cpmHintText === 'function')
-                    ? cpmHintText(w, 'letters')
-                    : `≈${Math.round(w * 4.22)} зн/мин`;
-            }
-        };
+    // Регулятор скорости
+    function setupSpeedControl() {
+        const slider = document.getElementById('dosaaf-wpm');
+        if (!slider) return;
 
         const saved = localStorage.getItem('morse_dosaaf_wpm');
         if (saved) {
             slider.value = saved;
         }
-        updateCpm();
+        updateSpeedCpmHint();
 
         slider.addEventListener('input', () => {
-            updateCpm();
+            updateSpeedCpmHint();
             localStorage.setItem('morse_dosaaf_wpm', slider.value);
         });
     }

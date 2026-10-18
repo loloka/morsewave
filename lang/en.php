@@ -20,6 +20,7 @@ return [
     // --- includes/nav.php ---
     'nav.home' => 'Home',
     'nav.learn' => 'Letters',
+    'nav.dosaaf' => 'DOSAAF',
     'nav.koch' => 'Koch',
     'nav.groups' => 'Groups',
     'nav.callsigns' => 'Callsigns',
@@ -159,7 +160,12 @@ return [
     'learn.stat_accuracy' => 'Session accuracy',
     'learn.stat_total' => 'Total correct',
 
-    // --- learn.php (DOSAAF) ---
+    // --- dosaaf.php & learn.php (DOSAAF) ---
+    'dosaaf.title' => 'DOSAAF Method — Radiotelegraphy School',
+    'dosaaf.eyebrow' => 'Classic Soviet Radiotelegraphy School',
+    'dosaaf.h1' => 'DOSAAF Method',
+    'dosaaf.intro' => 'Classic sound-and-word curriculum from USSR DOSAAF military and sports radio classrooms. Centered on rhythmic letter melodies without counting dots and dashes, receiving semantic Russian words from the very first lesson, and an authentic qualification ranking system (Cadet → 3rd, 2nd, and 1st Class).',
+    'dosaaf.speed_advice' => '💡 We recommend starting at a comfortable, lower speed (10–12 WPM / 40–50 cpm) and gradually increasing tempo as character melodies become reflexive.',
     'learn.mode_dosaaf' => 'DOSAAF Method',
     'dosaaf.nav_label' => 'Curriculum (7 Stages):',
     'dosaaf.stage_short' => 'Stage',

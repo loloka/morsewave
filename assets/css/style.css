@@ -234,9 +234,15 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
         backdrop-filter: blur(10px);
         border-top: 1px solid var(--border);
         z-index: 100;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
     }
+    .tabbar::-webkit-scrollbar { display: none; }
     .tabbar a {
-        flex: 1;
+        flex: 1 0 auto;
+        min-width: 48px;
+        padding: 0 4px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1529,11 +1535,34 @@ input[type="range"] {
    неудобно скроллить, чтобы дотянуться до "Сокращения" (было багом). */
 .mode-switch {
     display: flex;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 16px;
     padding-bottom: 12px;
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
+}
+.mode-switch-left {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.mode-switch-right {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-left: auto;
+}
+@media (max-width: 640px) {
+    .mode-switch-right {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 6px;
+        border-top: 1px dashed var(--border);
+    }
 }
 
 /* ---------- Recognize mode keyboard tiles ---------- */

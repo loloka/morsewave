@@ -60,25 +60,20 @@
 
     document.querySelectorAll('.mode-switch .chip').forEach(chip => {
         chip.addEventListener('click', () => {
+            const mode = chip.dataset.mode;
+            if (!mode) return; // Ссылка-чип (например, переход на dosaaf.php) — не перехватываем
             document.querySelectorAll('.mode-switch .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
-            const mode = chip.dataset.mode;
             sendModeEl.style.display = mode === 'send' ? 'block' : 'none';
             recognizeModeEl.style.display = mode === 'recognize' ? 'block' : 'none';
-            if (dosaafModeEl) dosaafModeEl.style.display = mode === 'dosaaf' ? 'block' : 'none';
             rhythmModeEl.style.display = mode === 'rhythm' ? 'block' : 'none';
             invasionModeEl.style.display = mode === 'invasion' ? 'block' : 'none';
             sendModeActive = mode === 'send';
             recognizeModeActive = mode === 'recognize';
-            dosaafModeActive = mode === 'dosaaf';
             rhythmModeActive = mode === 'rhythm';
             if (recognizeModeActive) {
                 initRecognizeGrid();
                 startRecognizeSession();
-            } else if (dosaafModeActive) {
-                if (typeof window.initDosaafMode === 'function') {
-                    window.initDosaafMode();
-                }
             } else {
                 // уход со вкладки не должен оставлять звук играть в фоне
                 haltRecognize();
