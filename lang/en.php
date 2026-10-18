@@ -67,7 +67,7 @@ return [
     'index.step1_text' => 'The "Letters" page is meant purely for initial acquaintance: click any character, listen to its distinct melody, and try out key rhythms. Don\'t try to memorize everything at once — simply get comfortable with how the sounds feel.',
     'index.step1_btn' => 'Letters section →',
     'index.step2_title' => 'Choose your learning method: DOSAAF or Koch',
-    'index.step2_text' => 'Once you\'ve heard the initial sounds, choose your preferred learning methodology:<br><br>• <b>DOSAAF Method</b> — classic curriculum with melodic mnemonics, 7 progressive stages, and radio telegraphist qualification ranks.<br>• <b>Koch Method</b> — recognized global standard for self-study: symbols sound at full combat speed right away, unlocking new characters once you reach 90%+ accuracy.',
+    'index.step2_text' => 'Once you\'ve heard the initial sounds, choose your preferred learning methodology:<br><br>• <b>DOSAAF Method</b> — classic curriculum with melodic mnemonics, 7 progressive stages, and radio telegraphist qualification ranks.<br>• <b>Koch Method</b> — recognized global standard for self-study: characters sound at full combat speed right away without counting dots, with optional Farnsworth pauses between symbols for thinking time, unlocking new characters once you reach 90%+ accuracy.',
     'index.step2_btn_dosaaf' => 'DOSAAF Method →',
     'index.step2_btn_koch' => 'Koch Method →',
     'index.step3_title' => 'Build speed on groups (target: 90%+ and higher)',
