@@ -113,7 +113,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     display: flex;
     align-items: center;
     gap: 10px;
-    flex-shrink: 0;
+    flex: 1 1 0;
     min-width: 0;
 }
 .brand-code {
@@ -143,7 +143,9 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
 .nav-links {
     display: flex;
-    gap: 2px;
+    align-items: center;
+    gap: 3px;
+    flex: 0 0 auto;
 }
 .nav-links a {
     padding: 6px 11px;
@@ -156,6 +158,15 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .nav-links a:hover { color: var(--text); background: var(--surface-2); }
 .nav-links a.active { color: var(--bg); background: var(--accent); font-weight: 600; }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
 .nav-lang {
     font-family: var(--font-ui);
     font-size: 12px;
@@ -164,21 +175,13 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     border: 1px solid var(--surface-2);
     border-radius: var(--radius-sm);
     padding: 4px 8px;
-    margin-right: 10px;
     letter-spacing: .02em;
+    flex-shrink: 0;
 }
 .nav-lang:hover { color: var(--text); background: var(--surface-2); }
 
-.nav-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-left: auto;
-    flex-shrink: 0;
-}
-
 .nav-account-btn {
-    display: none; /* скрыта на десктопе, т.к. "Профиль" уже есть в меню ссылок nav-links */
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     font-family: var(--font-ui);
@@ -192,6 +195,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     text-decoration: none;
     transition: color .15s, background .15s, border-color .15s;
     white-space: nowrap;
+    flex-shrink: 0;
 }
 .nav-account-btn:hover {
     color: var(--text);
@@ -243,8 +247,15 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     flex-shrink: 0;
 }
 
+@media (max-width: 1160px) and (min-width: 901px) {
+    .brand-code { display: none; }
+    .nav-links a { padding: 5px 8px; font-size: 13px; }
+}
+
 @media (max-width: 900px) {
     .nav-links { display: none; }
+    .brand { flex: 0 0 auto; }
+    .nav-actions { flex: 0 0 auto; margin-left: auto; }
     .nav-account-btn { display: inline-flex; }
 }
 
