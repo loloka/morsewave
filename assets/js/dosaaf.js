@@ -1,12 +1,18 @@
 /**
- * Логика обучающего режима «Метод ДОСААФ» для MorseWave.
- * Управляет ступенями (1..7), напевами, приёмом смысловых слов и сдачей зачётов.
+ * Учебно-методический контроллер режима «Метод ДОСААФ» для MorseWave.
+ * 
+ * Логика и педагогический маршрут ступени:
+ * 1. Напевы букв (прослушать все карточки новой ступени для допуска к словам).
+ * 2. Приём слов (кнопка «Начать приём», автозамена EN->RU раскладки, экранная клавиатура, цель 5 слов).
+ * 3. Зачёт ступени (допуск после 5 принятых слов, 10 контрольных слов, порог 80% / 8 из 10, скорость).
+ * 4. Классность ДОСААФ (интерактивный расчёт звания: Курсант -> 3-й -> 2-й -> 1-й класс по ЕВСК).
  */
 
 (function () {
     let currentStageNum = 1;
     let maxUnlockedStage = 1;
-    let currentSubTab = 'words'; // 'napevs', 'words', 'exam', 'ranks'
+    let currentSubTab = 'napevs'; // 'napevs', 'words', 'exam', 'ranks'
+
     let currentWord = null;
     let isWordPlaying = false;
     let currentAudio = null;
@@ -14,21 +20,54 @@
     let wordStreak = 0;
     let wordSessionCorrect = 0;
     let wordSessionTotal = 0;
+    let wordsSessionStarted = false;
 
+    // Состояние зачёта (10 слов)
     let examActive = false;
     let examWords = [];
     let examIndex = 0;
     let examCorrect = 0;
 
-    // Загрузка сохранённого прогресса
+    // Накопленный прогресс пользователя
+    let listenedLetters = new Set();
+    let stageWordsDone = {}; // { 1: 5, 2: 3, ... }
+    let examPassed = {};     // { 1: { score: 9, total: 10, wpm: 12, date: ... }, ... }
+
+    // Карта для прозрачной трансляции английской раскладки в русскую
+    const LAYOUT_EN_TO_RU = {
+        'Q': 'Й', 'W': 'Ц', 'E': 'У', 'R': 'К', 'T': 'Е', 'Y': 'Н', 'U': 'Г', 'I': 'Ш', 'O': 'Щ', 'P': 'З', '[': 'Х', ']': 'Ъ',
+        'A': 'Ф', 'S': 'Ы', 'D': 'В', 'F': 'А', 'G': 'П', 'H': 'Р', 'J': 'О', 'K': 'Л', 'L': 'Д', ';': 'Ж', "'": 'Э',
+        'Z': 'Я', 'X': 'Ч', 'C': 'С', 'V': 'М', 'B': 'И', 'N': 'Т', 'M': 'Ь', ',': 'Б', '.': 'Ю', '`': 'Ё',
+        'q': 'Й', 'w': 'Ц', 'e': 'У', 'r': 'К', 't': 'Е', 'y': 'Н', 'u': 'Г', 'i': 'Ш', 'o': 'Щ', 'p': 'З', '{': 'Х', '}': 'Ъ',
+        'a': 'Ф', 's': 'Ы', 'd': 'В', 'f': 'А', 'g': 'П', 'h': 'Р', 'j': 'О', 'k': 'Л', 'l': 'Д', ':': 'Ж', '"': 'Э',
+        'z': 'Я', 'x': 'Ч', 'c': 'С', 'v': 'М', 'b': 'И', 'n': 'Т', 'm': 'Ь', '<': 'Б', '>': 'Ю', '~': 'Ё'
+    };
+
+    // Загрузка и сохранение состояния
     function loadDosaafProgress() {
         try {
             maxUnlockedStage = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
             const savedStage = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
-            currentStageNum = Math.min(savedStage, maxUnlockedStage);
+            currentStageNum = Math.min(Math.max(savedStage, 1), maxUnlockedStage);
+
+            const rawListened = localStorage.getItem('morse_dosaaf_listened_letters');
+            if (rawListened) {
+                listenedLetters = new Set(JSON.parse(rawListened));
+            } else {
+                listenedLetters = new Set();
+            }
+
+            const rawWords = localStorage.getItem('morse_dosaaf_stage_words_done');
+            stageWordsDone = rawWords ? JSON.parse(rawWords) : {};
+
+            const rawExams = localStorage.getItem('morse_dosaaf_exam_passed');
+            examPassed = rawExams ? JSON.parse(rawExams) : {};
         } catch (_) {
             maxUnlockedStage = 1;
             currentStageNum = 1;
+            listenedLetters = new Set();
+            stageWordsDone = {};
+            examPassed = {};
         }
     }
 
@@ -36,6 +75,9 @@
         try {
             localStorage.setItem('morse_dosaaf_max_stage', String(maxUnlockedStage));
             localStorage.setItem('morse_dosaaf_current_stage', String(currentStageNum));
+            localStorage.setItem('morse_dosaaf_listened_letters', JSON.stringify([...listenedLetters]));
+            localStorage.setItem('morse_dosaaf_stage_words_done', JSON.stringify(stageWordsDone));
+            localStorage.setItem('morse_dosaaf_exam_passed', JSON.stringify(examPassed));
         } catch (_) {}
     }
 
@@ -44,16 +86,17 @@
         return slider ? (parseInt(slider.value, 10) || 12) : 12;
     }
 
-    // Инициализация интерфейса при открытии режима
+    // Инициализация режима
     function initDosaafMode() {
         loadDosaafProgress();
         renderStageNav();
         renderCurrentStage();
         setupSpeedControl();
         setupSubTabs();
+        setupInputTransliteration();
     }
 
-    // Отрисовка навигатора по 7 ступеням
+    // Отрисовка навигатора ступеней (1..7)
     function renderStageNav() {
         const container = document.getElementById('dosaaf-stage-chips');
         if (!container) return;
@@ -66,13 +109,16 @@
 
             chip.className = 'chip' + (isCurrent ? ' active' : '') + (!isUnlocked ? ' disabled' : '');
             chip.dataset.stage = String(st.stage);
-            
+
             let statusIcon = '';
-            if (st.stage < maxUnlockedStage) statusIcon = ' ✓';
-            else if (!isUnlocked) statusIcon = ' 🔒';
+            if (examPassed[st.stage]) {
+                statusIcon = ' ✓';
+            } else if (!isUnlocked) {
+                statusIcon = ' 🔒';
+            }
 
             chip.textContent = `${t('dosaaf.stage_short') || 'Ступень'} ${st.stage}${statusIcon}`;
-            
+
             if (isUnlocked) {
                 chip.addEventListener('click', () => {
                     currentStageNum = st.stage;
@@ -85,17 +131,15 @@
         });
     }
 
-    // Отрисовка данных текущей ступени
+    // Отрисовка текущей выбранной ступени
     function renderCurrentStage() {
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
 
-        // Заголовок и подзаголовок
         const titleEl = document.getElementById('dosaaf-stage-title');
         const subtitleEl = document.getElementById('dosaaf-stage-subtitle');
         if (titleEl) titleEl.textContent = stageData.title;
         if (subtitleEl) subtitleEl.textContent = stageData.subtitle;
 
-        // Историческая цитата
         const quoteTextEl = document.getElementById('dosaaf-quote-text');
         const quoteAuthorEl = document.getElementById('dosaaf-quote-author');
         if (quoteTextEl && quoteAuthorEl) {
@@ -103,7 +147,16 @@
             quoteAuthorEl.textContent = `— ${stageData.quote.author}, ${stageData.quote.book}`;
         }
 
-        // Обновление активной вкладки
+        // Обновляем рекомендуемую скорость в зачёте
+        const examSpeedHintEl = document.getElementById('dosaaf-exam-min-speed');
+        if (examSpeedHintEl) {
+            const minWpm = stageData.minExamWpm || 10;
+            const minCpm = Math.round(minWpm * 4.22);
+            examSpeedHintEl.textContent = (t('dosaaf.exam_min_speed_hint') || 'Норматив скорости зачёта ступени: не менее {wpm} WPM ({cpm} зн/мин).')
+                .replace('{wpm}', minWpm)
+                .replace('{cpm}', minCpm);
+        }
+
         renderActiveSubTab();
     }
 
@@ -117,6 +170,32 @@
                 renderActiveSubTab();
             });
         });
+
+        // Ссылки быстрого перехода при блокировках
+        document.getElementById('dosaaf-goto-napevs-btn')?.addEventListener('click', () => {
+            switchToSubTab('napevs');
+        });
+        document.getElementById('dosaaf-goto-words-btn')?.addEventListener('click', () => {
+            switchToSubTab('words');
+        });
+    }
+
+    function switchToSubTab(tabName) {
+        currentSubTab = tabName;
+        document.querySelectorAll('#dosaaf-subtabs .chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.tab === tabName);
+        });
+        renderActiveSubTab();
+    }
+
+    // Проверка условий открытия разделов
+    function isNapevsCompleted(stageNum) {
+        const stageData = DOSAAF_STAGES.find(s => s.stage === stageNum) || DOSAAF_STAGES[0];
+        return stageData.newLetters.every(ch => listenedLetters.has(ch));
+    }
+
+    function getStageWordsDoneCount(stageNum) {
+        return stageWordsDone[stageNum] || 0;
     }
 
     function renderActiveSubTab() {
@@ -130,50 +209,169 @@
         if (examView) examView.style.display = currentSubTab === 'exam' ? 'block' : 'none';
         if (ranksView) ranksView.style.display = currentSubTab === 'ranks' ? 'block' : 'none';
 
-        if (currentSubTab === 'napevs') renderNapevsGrid();
-        else if (currentSubTab === 'words') nextWord(false);
-        else if (currentSubTab === 'ranks') renderRanksView();
+        if (currentSubTab === 'napevs') {
+            renderNapevsGrid();
+        } else if (currentSubTab === 'words') {
+            renderWordsView();
+        } else if (currentSubTab === 'exam') {
+            renderExamView();
+        } else if (currentSubTab === 'ranks') {
+            renderRanksView();
+        }
     }
 
-    // 1. Отрисовка карточек напевов
+    // =========================================================================
+    // 1. НАПЕВЫ БУКВ
+    // =========================================================================
     function renderNapevsGrid() {
         const container = document.getElementById('dosaaf-napevs-grid');
         if (!container) return;
         container.innerHTML = '';
 
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
+        const newLetters = stageData.newLetters;
 
-        stageData.newLetters.forEach(ch => {
+        // Расчёт прогресса прослушивания напевов ступени
+        let listenedCount = 0;
+        newLetters.forEach(ch => {
+            if (listenedLetters.has(ch)) listenedCount++;
+        });
+
+        const progressTextEl = document.getElementById('dosaaf-napevs-progress-text');
+        const progressBarEl = document.getElementById('dosaaf-napevs-progress-bar');
+        const doneMsgEl = document.getElementById('dosaaf-napevs-done-msg');
+
+        const totalLetters = newLetters.length;
+        const pct = Math.round((listenedCount / totalLetters) * 100);
+
+        if (progressTextEl) {
+            progressTextEl.textContent = (t('dosaaf.napevs_progress') || 'Изучено напевов ступени: {done} из {total}')
+                .replace('{done}', listenedCount)
+                .replace('{total}', totalLetters);
+        }
+        if (progressBarEl) progressBarEl.style.width = `${pct}%`;
+
+        if (doneMsgEl) {
+            if (listenedCount >= totalLetters) {
+                doneMsgEl.style.display = 'block';
+                doneMsgEl.textContent = t('dosaaf.napevs_done_msg') || '🎉 Все напевы этой ступени изучены! Раздел «Приём слов» разблокирован.';
+            } else {
+                doneMsgEl.style.display = 'none';
+            }
+        }
+
+        newLetters.forEach(ch => {
             const info = stageData.napevs[ch];
             if (!info) return;
 
+            const isListened = listenedLetters.has(ch);
             const card = document.createElement('div');
-            card.className = 'card dosaaf-napev-card';
+            card.className = 'card dosaaf-napev-card' + (isListened ? ' listened' : '');
             card.style.cursor = 'pointer';
+
+            const statusBadge = isListened
+                ? `<span class="dosaaf-badge-done">✓ Изучено</span>`
+                : `<button type="button" class="btn btn-sm btn-outline dosaaf-play-letter-btn" aria-label="Прослушать">▶</button>`;
+
             card.innerHTML = `
                 <div class="flex-between" style="align-items:center;">
-                    <span class="dosaaf-letter-char mono" style="font-size:28px; font-weight:800; color:var(--accent);">${ch}</span>
-                    <button type="button" class="btn btn-sm btn-outline dosaaf-play-letter-btn" aria-label="Прослушать">▶</button>
+                    <span class="dosaaf-letter-char mono" style="font-size:28px; font-weight:800; color:${isListened ? 'var(--success)' : 'var(--accent)'};">${ch}</span>
+                    ${statusBadge}
                 </div>
                 <div class="dosaaf-napev-text bold mt-1" style="font-size:15px; color:var(--text); letter-spacing:0.5px;">${info.napev}</div>
                 <div class="dosaaf-pattern-text mono muted" style="font-size:13px; margin-top:3px;">${info.pattern.replace(/\./g, '•').replace(/-/g, '—')} (${info.tita})</div>
             `;
 
             card.addEventListener('click', () => {
+                listenedLetters.add(ch);
+                saveDosaafProgress();
                 playDosaafSound(ch);
+                renderNapevsGrid();
             });
 
             container.appendChild(card);
         });
     }
 
-    // 2. Тренажёр приёма смысловых слов
+    // =========================================================================
+    // 2. ПРИЁМ СЛОВ
+    // =========================================================================
+    function renderWordsView() {
+        const lockedBox = document.getElementById('dosaaf-words-locked');
+        const activeBox = document.getElementById('dosaaf-words-active');
+        const lockedText = document.getElementById('dosaaf-words-locked-text');
+
+        const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
+        const newLetters = stageData.newLetters;
+        let listenedCount = 0;
+        newLetters.forEach(ch => {
+            if (listenedLetters.has(ch)) listenedCount++;
+        });
+
+        if (listenedCount < newLetters.length) {
+            // Раздел заблокирован до изучения напевов
+            if (lockedBox) lockedBox.style.display = 'block';
+            if (activeBox) activeBox.style.display = 'none';
+            if (lockedText) {
+                lockedText.textContent = (t('dosaaf.napevs_not_done_alert') || '🔒 Сначала прослушайте все напевы букв этой ступени в разделе «Напевы букв» (прослушано {done} из {total}).')
+                    .replace('{done}', listenedCount)
+                    .replace('{total}', newLetters.length);
+            }
+            return;
+        }
+
+        if (lockedBox) lockedBox.style.display = 'none';
+        if (activeBox) activeBox.style.display = 'block';
+
+        updateWordsGoalProgress();
+        buildMobileKeypad('dosaaf-words-kbd', 'dosaaf-word-input', checkWordAnswer);
+
+        // Если тренировка ещё не запущена — показываем стартовый CTA
+        const startBox = document.getElementById('dosaaf-words-start-box');
+        const playBox = document.getElementById('dosaaf-words-play-box');
+
+        if (!wordsSessionStarted) {
+            if (startBox) startBox.style.display = 'block';
+            if (playBox) playBox.style.display = 'none';
+        } else {
+            if (startBox) startBox.style.display = 'none';
+            if (playBox) playBox.style.display = 'block';
+        }
+    }
+
+    function startWordsTraining() {
+        wordsSessionStarted = true;
+        const startBox = document.getElementById('dosaaf-words-start-box');
+        const playBox = document.getElementById('dosaaf-words-play-box');
+        if (startBox) startBox.style.display = 'none';
+        if (playBox) playBox.style.display = 'block';
+
+        nextWord(true);
+    }
+
+    function updateWordsGoalProgress() {
+        const goalTextEl = document.getElementById('dosaaf-words-goal-text');
+        const goalBarEl = document.getElementById('dosaaf-words-goal-bar');
+        const currentCount = getStageWordsDoneCount(currentStageNum);
+        const target = 5;
+        const pct = Math.min(100, Math.round((currentCount / target) * 100));
+
+        if (goalTextEl) {
+            goalTextEl.textContent = (t('dosaaf.words_practice_goal') || 'Готовность к зачёту ступени: {streak} / {target} слов')
+                .replace('{streak}', Math.min(currentCount, target))
+                .replace('{target}', target);
+        }
+        if (goalBarEl) {
+            goalBarEl.style.width = `${pct}%`;
+            goalBarEl.style.background = pct >= 100 ? 'var(--success)' : 'var(--accent)';
+        }
+    }
+
     function nextWord(autoPlay = true) {
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
         const words = stageData.words;
         if (!words || words.length === 0) return;
 
-        // Выбираем случайное слово, стараясь не повторять то же самое
         let candidate = words[Math.floor(Math.random() * words.length)];
         if (words.length > 1 && candidate === currentWord) {
             candidate = words[Math.floor(Math.random() * words.length)];
@@ -184,7 +382,10 @@
         if (input) {
             input.value = '';
             input.disabled = false;
-            input.focus();
+            // Фокусируем только на не-сенсорных устройствах во избежание прыжков экрана
+            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+                input.focus();
+            }
         }
 
         const feedback = document.getElementById('dosaaf-word-feedback');
@@ -197,6 +398,9 @@
         if (lenHint) {
             lenHint.textContent = `${t('dosaaf.word_length') || 'Длина'}: ${currentWord.length} ${t('dosaaf.chars') || 'букв'}`;
         }
+
+        const warnEl = document.getElementById('dosaaf-words-layout-warn');
+        if (warnEl) warnEl.style.display = 'none';
 
         if (autoPlay) {
             playCurrentWord();
@@ -217,9 +421,15 @@
 
         const isCorrect = answer === currentWord.toUpperCase();
         wordSessionTotal++;
+
         if (isCorrect) {
             wordStreak++;
             wordSessionCorrect++;
+            const curDone = getStageWordsDoneCount(currentStageNum);
+            stageWordsDone[currentStageNum] = curDone + 1;
+            saveDosaafProgress();
+            updateWordsGoalProgress();
+
             if (typeof awardXp === 'function') awardXp(2, t('dosaaf.word_xp') || 'Слово ДОСААФ');
         } else {
             wordStreak = 0;
@@ -238,7 +448,7 @@
                 const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum);
                 let breakdown = currentWord.split('').map(c => {
                     const nap = stageData?.napevs[c]?.napev || '';
-                    return `<b>${c}</b> (${nap})`;
+                    return nap ? `<b>${c}</b> (${nap})` : `<b>${c}</b>`;
                 }).join(' · ');
                 feedback.innerHTML = `✗ ${t('dosaaf.wrong_was') || 'Ошибка! Передавалось:'} <b>${currentWord}</b><br><small class="muted">${breakdown}</small>`;
             }
@@ -273,18 +483,55 @@
         }
     }
 
-    // 3. Зачёт ступени
+    // =========================================================================
+    // 3. ЗАЧЁТ СТУПЕНИ (10 контрольных слов, 80% порог)
+    // =========================================================================
+    function renderExamView() {
+        const lockedBox = document.getElementById('dosaaf-exam-locked');
+        const unlockedBox = document.getElementById('dosaaf-exam-unlocked');
+        const lockedText = document.getElementById('dosaaf-exam-locked-text');
+
+        const doneWords = getStageWordsDoneCount(currentStageNum);
+        const requiredWords = 5;
+
+        if (doneWords < requiredWords) {
+            if (lockedBox) lockedBox.style.display = 'block';
+            if (unlockedBox) unlockedBox.style.display = 'none';
+            if (lockedText) {
+                lockedText.textContent = (t('dosaaf.exam_locked_alert') || '🔒 Зачёт заблокирован. Для допуска необходимо принять минимум {target} слов в тренировке «Приём слов» (прогресс: {done}/{target}).')
+                    .replace('{done}', doneWords)
+                    .replace('{target}', requiredWords);
+            }
+            return;
+        }
+
+        if (lockedBox) lockedBox.style.display = 'none';
+        if (unlockedBox) unlockedBox.style.display = 'block';
+
+        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
+    }
+
     function startStageExam() {
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
-        examWords = [...stageData.words].sort(() => Math.random() - 0.5).slice(0, 5);
+        
+        // 10 контрольных слов
+        examWords = [...stageData.words].sort(() => Math.random() - 0.5).slice(0, 10);
+        // Если в ступени меньше 10 слов, дополняем повторами в случайном порядке
+        while (examWords.length < 10 && stageData.words.length > 0) {
+            examWords.push(stageData.words[Math.floor(Math.random() * stageData.words.length)]);
+        }
+
         examIndex = 0;
         examCorrect = 0;
         examActive = true;
 
         const panel = document.getElementById('dosaaf-exam-panel');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
+        const resultBox = document.getElementById('dosaaf-exam-result');
+
         if (panel) panel.style.display = 'block';
         if (startBtn) startBtn.style.display = 'none';
+        if (resultBox) resultBox.style.display = 'none';
 
         nextExamWord();
     }
@@ -302,8 +549,13 @@
         const input = document.getElementById('dosaaf-exam-input');
         if (input) {
             input.value = '';
-            input.focus();
+            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+                input.focus();
+            }
         }
+
+        const warnEl = document.getElementById('dosaaf-exam-layout-warn');
+        if (warnEl) warnEl.style.display = 'none';
 
         playDosaafSound(word);
     }
@@ -332,9 +584,22 @@
         if (panel) panel.style.display = 'none';
         if (startBtn) startBtn.style.display = 'inline-flex';
 
-        const isPassed = examCorrect >= 4; // 80% порог сдачи
-        if (isPassed && currentStageNum === maxUnlockedStage && maxUnlockedStage < 7) {
-            maxUnlockedStage++;
+        const totalWords = examWords.length || 10;
+        const passThreshold = Math.ceil(totalWords * 0.8); // 80% (8 из 10)
+        const isPassed = examCorrect >= passThreshold;
+        const currentWpm = getDosaafWpm();
+
+        if (isPassed) {
+            examPassed[currentStageNum] = {
+                score: examCorrect,
+                total: totalWords,
+                wpm: currentWpm,
+                date: new Date().toISOString()
+            };
+
+            if (currentStageNum === maxUnlockedStage && maxUnlockedStage < 7) {
+                maxUnlockedStage++;
+            }
             saveDosaafProgress();
             renderStageNav();
         }
@@ -342,40 +607,240 @@
         if (resultBox) {
             resultBox.style.display = 'block';
             resultBox.className = 'card mt-2 ' + (isPassed ? 'subcard-success' : 'subcard-warn');
+            const pct = Math.round((examCorrect / totalWords) * 100);
+
             resultBox.innerHTML = `
-                <div class="bold" style="font-size:16px;">${isPassed ? '✓ Зачёт сдан!' : '✗ Зачёт не сдан'}</div>
-                <p class="muted mt-1" style="font-size:13px;">
-                    Результат: <b>${examCorrect} из 5 слов</b> (${Math.round((examCorrect / 5) * 100)}%).
-                    ${isPassed ? (maxUnlockedStage > currentStageNum ? 'Следующая ступень открыта!' : 'Ступень успешно освоена!') : 'Для зачёта необходимо принять верно минимум 4 слова. Повторите напевы и попробуйте снова.'}
+                <div class="bold" style="font-size:16px;">${isPassed ? (t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
+                <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
+                    Результат: <b>${examCorrect} из ${totalWords} слов</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
+                    ${isPassed 
+                        ? (maxUnlockedStage > currentStageNum 
+                            ? '<b>Поздравляем!</b> Следующая ступень учебной программы открыта. Проверьте обновлённую классность ДОСААФ!' 
+                            : '<b>Отлично!</b> Ступень успешно подтверждена на текущей скорости.')
+                        : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' слов (80%). Потренируйтесь на словах и повторите зачёт.'}
                 </p>
             `;
         }
     }
 
-    // 4. Классность ДОСААФ
+    // =========================================================================
+    // 4. КЛАССНОСТЬ ДОСААФ (Интерактивная оценка квалификации)
+    // =========================================================================
+    function computeCurrentRank() {
+        let maxPassedStage = 0;
+        let maxExamWpm = 0;
+
+        Object.keys(examPassed).forEach(stStr => {
+            const st = parseInt(stStr, 10);
+            if (st > maxPassedStage) maxPassedStage = st;
+            if (examPassed[st].wpm > maxExamWpm) maxExamWpm = examPassed[st].wpm;
+        });
+
+        // 1-й класс: 7-я ступень сдана на скорости >= 20 WPM
+        if (maxPassedStage >= 7 && maxExamWpm >= 20) return 'class1';
+        // 2-й класс: 5-я ступень сдана на скорости >= 16 WPM
+        if (maxPassedStage >= 5 && maxExamWpm >= 16) return 'class2';
+        // 3-й класс: 3-я ступень сдана на скорости >= 12 WPM
+        if (maxPassedStage >= 3 && maxExamWpm >= 12) return 'class3';
+        // Курсант: начальный ранг
+        return 'cadet';
+    }
+
     function renderRanksView() {
+        const currentRankCard = document.getElementById('dosaaf-current-rank-card');
         const container = document.getElementById('dosaaf-ranks-list');
         if (!container) return;
         container.innerHTML = '';
+
+        const activeRankId = computeCurrentRank();
+        const activeRank = DOSAAF_RANKS.find(r => r.id === activeRankId) || DOSAAF_RANKS[0];
+
+        if (currentRankCard) {
+            currentRankCard.innerHTML = `
+                <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                    <div>
+                        <span class="muted small text-uppercase" style="letter-spacing:1px; font-weight:700;">${t('dosaaf.rank_current') || 'Текущее звание'}</span>
+                        <h3 class="mt-0 mb-0" style="font-size:18px; color:var(--accent);">${activeRank.title}</h3>
+                        <div class="muted mt-1" style="font-size:13px;">${activeRank.description}</div>
+                    </div>
+                    <span class="badge" style="font-size:14px; font-weight:800; padding:6px 14px; background:var(--accent); color:#1a1200;">${activeRank.badge}</span>
+                </div>
+            `;
+        }
 
         DOSAAF_RANKS.forEach(rk => {
             const card = document.createElement('div');
             card.className = 'card mt-2';
             card.style.background = 'var(--surface-2)';
+
+            // Проверяем, выполнено ли условие для этого ранга
+            let isAchieved = false;
+            let statusText = '';
+            let statusBadge = '';
+
+            if (rk.id === 'cadet') {
+                isAchieved = true;
+                statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
+            } else {
+                const reqStageExam = examPassed[rk.requiredStage];
+                if (reqStageExam && reqStageExam.wpm >= rk.minSpeedWpm) {
+                    isAchieved = true;
+                    statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
+                } else {
+                    const reqInfo = (t('dosaaf.rank_req_info') || 'Требуется: сдать зачёт {stage} ступени со скоростью ≥ {wpm} WPM ({cpm} зн/мин).')
+                        .replace('{stage}', rk.requiredStage)
+                        .replace('{wpm}', rk.minSpeedWpm)
+                        .replace('{cpm}', rk.minSpeedCpm);
+                    statusBadge = `<span class="badge" style="background:var(--surface); border:1px solid var(--border); color:var(--text-muted);">${t('dosaaf.rank_locked') || '🔒 Не выполнено'}</span>`;
+                    statusText = `<div class="muted small mt-1" style="color:var(--accent);">${reqInfo}</div>`;
+                }
+            }
+
             card.innerHTML = `
                 <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                     <div>
-                        <div class="bold" style="font-size:15px; color:var(--text);">${rk.title}</div>
+                        <div class="bold" style="font-size:15px; color:${isAchieved ? 'var(--text)' : 'var(--text-muted)'};">${rk.title}</div>
                         <div class="muted mt-1" style="font-size:13px;">${rk.description}</div>
+                        ${statusText}
                     </div>
-                    <span class="badge" style="font-weight:700;">${rk.badge}</span>
+                    ${statusBadge}
                 </div>
             `;
             container.appendChild(card);
         });
     }
 
-    // Звуковой движок
+    // =========================================================================
+    // 5. ЭКРАННАЯ КЛАВИАТУРА ДЛЯ ТЕЛЕФОНА (Mobile-Friendly Keypad)
+    // =========================================================================
+    function buildMobileKeypad(containerId, inputId, checkCallback) {
+        const container = document.getElementById(containerId);
+        const input = document.getElementById(inputId);
+        if (!container || !input) return;
+
+        container.innerHTML = '';
+        const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
+        const chars = stageData.allLetters;
+
+        // Формируем аккуратные ряды кнопок (по 6-8 кнопок в ряду)
+        const row1 = document.createElement('div');
+        row1.className = 'dosaaf-kbd-row';
+
+        const row2 = document.createElement('div');
+        row2.className = 'dosaaf-kbd-row';
+
+        const row3 = document.createElement('div');
+        row3.className = 'dosaaf-kbd-row';
+
+        const mid = Math.ceil(chars.length / 2);
+        const firstHalf = chars.slice(0, mid);
+        const secondHalf = chars.slice(mid);
+
+        firstHalf.forEach(ch => {
+            const btn = createKeyBtn(ch, () => appendCharToInput(input, ch));
+            row1.appendChild(btn);
+        });
+
+        secondHalf.forEach(ch => {
+            const btn = createKeyBtn(ch, () => appendCharToInput(input, ch));
+            row2.appendChild(btn);
+        });
+
+        // Служебные кнопки в третьем ряду: Стереть (Backspace) и Проверить (Check)
+        const backspaceBtn = document.createElement('div');
+        backspaceBtn.className = 'dosaaf-key dosaaf-key-action';
+        backspaceBtn.innerHTML = '⌫';
+        backspaceBtn.title = 'Стереть символ';
+        backspaceBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            input.value = input.value.slice(0, -1);
+        });
+
+        const checkBtn = document.createElement('div');
+        checkBtn.className = 'dosaaf-key dosaaf-key-action btn-accent';
+        checkBtn.innerHTML = '↵ ' + (t('dosaaf.check_btn') || 'Проверить');
+        checkBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (typeof checkCallback === 'function') checkCallback();
+        });
+
+        row3.appendChild(backspaceBtn);
+        row3.appendChild(checkBtn);
+
+        if (row1.children.length > 0) container.appendChild(row1);
+        if (row2.children.length > 0) container.appendChild(row2);
+        container.appendChild(row3);
+    }
+
+    function createKeyBtn(ch, clickHandler) {
+        const btn = document.createElement('div');
+        btn.className = 'dosaaf-key';
+        btn.textContent = ch;
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            clickHandler();
+        });
+        return btn;
+    }
+
+    function appendCharToInput(input, ch) {
+        input.value += ch;
+    }
+
+    // =========================================================================
+    // 6. АВТОПЕРЕВОД РАСКЛАДКИ EN -> RU С ПРЕДУПРЕЖДЕНИЕМ
+    // =========================================================================
+    function setupInputTransliteration() {
+        const wordInput = document.getElementById('dosaaf-word-input');
+        const wordWarn = document.getElementById('dosaaf-words-layout-warn');
+
+        const examInput = document.getElementById('dosaaf-exam-input');
+        const examWarn = document.getElementById('dosaaf-exam-layout-warn');
+
+        if (wordInput) {
+            wordInput.addEventListener('input', () => {
+                handleTranslit(wordInput, wordWarn);
+            });
+        }
+        if (examInput) {
+            examInput.addEventListener('input', () => {
+                handleTranslit(examInput, examWarn);
+            });
+        }
+    }
+
+    function handleTranslit(inputEl, warnEl) {
+        const val = inputEl.value;
+        let converted = '';
+        let hadEnglish = false;
+
+        for (let i = 0; i < val.length; i++) {
+            const ch = val[i];
+            if (LAYOUT_EN_TO_RU[ch]) {
+                converted += LAYOUT_EN_TO_RU[ch];
+                hadEnglish = true;
+            } else {
+                converted += ch.toUpperCase();
+            }
+        }
+
+        if (converted !== val) {
+            inputEl.value = converted;
+        }
+
+        if (warnEl) {
+            if (hadEnglish) {
+                warnEl.style.display = 'block';
+                warnEl.textContent = t('dosaaf.layout_warn') || '⚠️ Включена английская раскладка — текст автоматически переводится на русский';
+            } else {
+                warnEl.style.display = 'none';
+            }
+        }
+    }
+
+    // =========================================================================
+    // 7. ЗВУКОВОЙ ДВИЖОК
+    // =========================================================================
     function playDosaafSound(text) {
         if (!text) return;
         if (currentAudio) {
@@ -428,15 +893,17 @@
         });
     }
 
-    // Обработчики кнопок
+    // Инициализация при загрузке документа
     window.addEventListener('DOMContentLoaded', () => {
         initDosaafMode();
 
+        const startWordsBtn = document.getElementById('dosaaf-start-words-btn');
         const playBtn = document.getElementById('dosaaf-play-word-btn');
         const checkBtn = document.getElementById('dosaaf-check-word-btn');
         const nextBtn = document.getElementById('dosaaf-next-word-btn');
         const wordInput = document.getElementById('dosaaf-word-input');
 
+        startWordsBtn?.addEventListener('click', startWordsTraining);
         playBtn?.addEventListener('click', playCurrentWord);
         checkBtn?.addEventListener('click', checkWordAnswer);
         nextBtn?.addEventListener('click', () => nextWord(true));
