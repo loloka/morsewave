@@ -28,7 +28,7 @@ include __DIR__ . '/includes/header.php';
         <div class="chip-row mt-1 dosaaf-stage-scroll" id="dosaaf-stage-chips"></div>
 
         <div class="mt-2" style="border-top:1px solid var(--border); padding-top:14px;">
-            <div class="flex-between flex-wrap gap-2" style="align-items:baseline;">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                 <div>
                     <h2 class="mt-0" id="dosaaf-stage-title" style="margin-bottom:2px; font-size:18px;"></h2>
                     <p class="muted mt-0" id="dosaaf-stage-subtitle" style="font-size:13px;"></p>

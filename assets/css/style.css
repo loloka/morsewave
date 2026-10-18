@@ -3220,6 +3220,10 @@ select.select-styled option {
         font-size: 13px;
         margin-bottom: 6px;
     }
+    #dosaaf-lamp {
+        width: 44px;
+        height: 44px;
+    }
     .dosaaf-header-advice {
         padding: 8px 10px !important;
         font-size: 12px !important;

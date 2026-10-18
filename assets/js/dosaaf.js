@@ -16,6 +16,7 @@
     let currentWord = null;
     let isWordPlaying = false;
     let currentAudio = null;
+    let dosaafLamp = null;
 
     let wordStreak = 0;
     let wordSessionCorrect = 0;
@@ -86,8 +87,21 @@
         return slider ? (parseInt(slider.value, 10) || 12) : 12;
     }
 
+    function getDosaafLamp() {
+        if (!dosaafLamp) {
+            const lampEl = document.getElementById('dosaaf-lamp');
+            if (lampEl && typeof MorseLamp !== 'undefined') {
+                dosaafLamp = new MorseLamp(lampEl);
+            }
+        } else if (dosaafLamp.updateVisibility) {
+            dosaafLamp.updateVisibility();
+        }
+        return dosaafLamp;
+    }
+
     // Инициализация режима
     function initDosaafMode() {
+        getDosaafLamp();
         loadDosaafProgress();
         renderStageNav();
         renderCurrentStage();
@@ -137,6 +151,13 @@
     // Переход к указанной ступени с сохранением и центрированием
     function goToStage(stageNum) {
         if (stageNum > 7 || stageNum > maxUnlockedStage) return;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        if (dosaafLamp) {
+            dosaafLamp.off();
+        }
         currentStageNum = stageNum;
         saveDosaafProgress();
         renderStageNav();
@@ -209,6 +230,13 @@
     }
 
     function switchToSubTab(tabName, shouldScroll = true) {
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        if (dosaafLamp) {
+            dosaafLamp.off();
+        }
         currentSubTab = tabName;
         document.querySelectorAll('#dosaaf-subtabs .chip').forEach(c => {
             c.classList.toggle('active', c.dataset.tab === tabName);
@@ -628,6 +656,13 @@
 
     function finishStageExam() {
         examActive = false;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        if (dosaafLamp) {
+            dosaafLamp.off();
+        }
         const panel = document.getElementById('dosaaf-exam-panel');
         const resultBox = document.getElementById('dosaaf-exam-result');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
@@ -924,21 +959,30 @@
     // =========================================================================
     function playDosaafSound(text) {
         if (!text) return;
+        const lamp = getDosaafLamp();
         if (currentAudio) {
             currentAudio.stop();
+            currentAudio = null;
+        }
+        if (lamp) {
+            lamp.off();
         }
         const wpm = getDosaafWpm();
         currentAudio = new MorseAudio({ wpm });
         isWordPlaying = true;
-        const lamp = document.getElementById('dosaaf-lamp');
 
         currentAudio.play(text, {
-            onSymbol: () => {
-                if (lamp) lamp.classList.add('active');
+            onSymbol: ({ symbol, durationMs }) => {
+                if (lamp) {
+                    lamp.flash(durationMs);
+                }
             },
             onDone: () => {
                 isWordPlaying = false;
-                if (lamp) lamp.classList.remove('active');
+                if (lamp) {
+                    lamp.off();
+                }
+                currentAudio = null;
             }
         });
     }
