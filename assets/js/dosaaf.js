@@ -277,13 +277,18 @@
                 ? `<span class="dosaaf-badge-done">✓ Изучено</span>`
                 : `<button type="button" class="btn btn-sm btn-outline dosaaf-play-letter-btn" aria-label="Прослушать">▶</button>`;
 
+            const formattedPattern = info.pattern
+                .split('')
+                .map(s => s === '.' ? '•' : '—')
+                .join(' ');
+
             card.innerHTML = `
                 <div class="flex-between" style="align-items:center;">
                     <span class="dosaaf-letter-char mono" style="font-size:28px; font-weight:800; color:${isListened ? 'var(--success)' : 'var(--accent)'};">${ch}</span>
                     ${statusBadge}
                 </div>
                 <div class="dosaaf-napev-text bold mt-1" style="font-size:15px; color:var(--text); letter-spacing:0.5px;">${info.napev}</div>
-                <div class="dosaaf-pattern-text mono muted" style="font-size:13px; margin-top:3px;">${info.pattern.replace(/\./g, '•').replace(/-/g, '—')} (${info.tita})</div>
+                <div class="dosaaf-pattern-text mono muted" style="font-size:13px; margin-top:3px;"><span class="dosaaf-pattern-symbols" style="letter-spacing:3px; font-weight:700; color:var(--text);">${formattedPattern}</span> <span style="letter-spacing:normal;">(${info.tita})</span></div>
             `;
 
             card.addEventListener('click', () => {

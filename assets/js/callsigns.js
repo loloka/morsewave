@@ -1,4 +1,22 @@
 (function () {
+    const safeStorage = {
+        getItem(key, fallback = null) {
+            try {
+                const val = localStorage.getItem(key);
+                return val !== null ? val : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        },
+        setItem(key, val) {
+            try {
+                localStorage.setItem(key, val);
+            } catch (e) {
+                /* ignore storage errors */
+            }
+        }
+    };
+
     const setupPanel = document.getElementById('setup-panel');
     const sessionPanel = document.getElementById('session-panel');
     const resultPanel = document.getElementById('result-panel');
@@ -15,17 +33,6 @@
     const wpmValue = document.getElementById('cs-wpm-value');
     const wpmCpm = document.getElementById('cs-wpm-cpm');
     if (wpmCpm) wpmCpm.dataset.cpmType = 'callsigns';
-    const savedWpm = localStorage.getItem('morse_cs_wpm');
-    if (savedWpm) {
-        wpmSlider.value = savedWpm;
-        wpmValue.textContent = savedWpm;
-        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(savedWpm, 'callsigns');
-    }
-    wpmSlider.addEventListener('input', () => { 
-        wpmValue.textContent = wpmSlider.value; 
-        if (typeof cpmHintText === 'function') wpmCpm.textContent = cpmHintText(wpmSlider.value, 'callsigns'); 
-        localStorage.setItem('morse_cs_wpm', wpmSlider.value);
-    });
 
     // Farnsworth controls
     const fwEnabled = document.getElementById('cs-farnsworth-enabled');
@@ -35,18 +42,54 @@
     if (fwCpm) fwCpm.dataset.cpmType = 'callsigns';
     const fwPanel = document.getElementById('cs-farnsworth-panel');
 
+    // Buffer input controls
+    const bufferCheckbox = document.getElementById('cs-buffer-enabled');
+    const bufferPanel = document.getElementById('cs-buffer-panel');
+    const bufferLabel = document.getElementById('cs-buffer-label');
+
+    // Paper copy mode controls
+    const paperCheckbox = document.getElementById('cs-paper-enabled');
+    const paperPanel = document.getElementById('cs-paper-panel');
+    const paperGapSlider = document.getElementById('cs-paper-gap');
+    const paperGapValue = document.getElementById('cs-paper-gap-value');
+    const paperSessionDisplay = document.getElementById('cs-paper-session-display');
+    const paperStatusMsg = document.getElementById('cs-paper-status-msg');
+    const paperSubMsg = document.getElementById('cs-paper-sub-msg');
+    const paperProgressWrap = document.getElementById('cs-paper-progress-wrap');
+    const paperProgressBar = document.getElementById('cs-paper-progress-bar');
+    const paperControlsRow = document.getElementById('cs-paper-controls-row');
+    const paperStopBtn = document.getElementById('cs-paper-stop-btn');
+    const paperResultBlock = document.getElementById('cs-paper-result-block');
+    const paperRadiogramText = document.getElementById('cs-paper-radiogram-text');
+    const paperCopyBtn = document.getElementById('cs-paper-copy-btn');
+    const csSubmitRow = document.getElementById('cs-submit-row');
+
+    const savedWpm = safeStorage.getItem('morse_cs_wpm');
+    if (savedWpm && wpmSlider) {
+        wpmSlider.value = savedWpm;
+        if (wpmValue) wpmValue.textContent = savedWpm;
+        if (typeof cpmHintText === 'function' && wpmCpm) wpmCpm.textContent = cpmHintText(savedWpm, 'callsigns');
+    }
+    if (wpmSlider) {
+        wpmSlider.addEventListener('input', () => { 
+            if (wpmValue) wpmValue.textContent = wpmSlider.value; 
+            if (typeof cpmHintText === 'function' && wpmCpm) wpmCpm.textContent = cpmHintText(wpmSlider.value, 'callsigns'); 
+            safeStorage.setItem('morse_cs_wpm', wpmSlider.value);
+        });
+    }
+
     function updateCsFarnsworthVisibility() {
         const on = fwEnabled && fwEnabled.checked;
         if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
     }
 
-    const savedFwEnabled = localStorage.getItem('morse_cs_fw_enabled');
+    const savedFwEnabled = safeStorage.getItem('morse_cs_fw_enabled');
     if (savedFwEnabled === 'true' && fwEnabled) {
         fwEnabled.checked = true;
     }
     updateCsFarnsworthVisibility();
 
-    const savedFwWpm = localStorage.getItem('morse_cs_fw_wpm');
+    const savedFwWpm = safeStorage.getItem('morse_cs_fw_wpm');
     if (savedFwWpm && fwSlider) {
         fwSlider.value = savedFwWpm;
         if (fwValue) fwValue.textContent = savedFwWpm;
@@ -56,21 +99,17 @@
         fwSlider.addEventListener('input', () => {
             if (fwValue) fwValue.textContent = fwSlider.value;
             if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value, 'callsigns');
-            localStorage.setItem('morse_cs_fw_wpm', fwSlider.value);
+            safeStorage.setItem('morse_cs_fw_wpm', fwSlider.value);
         });
     }
     if (fwEnabled) {
         fwEnabled.addEventListener('change', () => {
             updateCsFarnsworthVisibility();
-            localStorage.setItem('morse_cs_fw_enabled', fwEnabled.checked);
+            safeStorage.setItem('morse_cs_fw_enabled', fwEnabled.checked);
         });
     }
 
-    // Buffer input controls
-    const bufferCheckbox = document.getElementById('cs-buffer-enabled');
-    const bufferPanel = document.getElementById('cs-buffer-panel');
-    const bufferLabel = document.getElementById('cs-buffer-label');
-    let selectedBufferDepth = localStorage.getItem('morse_cs_buffer_depth') || 'all';
+    let selectedBufferDepth = safeStorage.getItem('morse_cs_buffer_depth', 'all');
 
     function updateCsBufferTip(depth) {
         const tipEl = document.getElementById('cs-buffer-tip-text');
@@ -89,13 +128,13 @@
     }
 
     if (bufferCheckbox) {
-        const savedBufferEnabled = localStorage.getItem('morse_cs_buffer_enabled');
+        const savedBufferEnabled = safeStorage.getItem('morse_cs_buffer_enabled');
         if (savedBufferEnabled !== null) {
             bufferCheckbox.checked = (savedBufferEnabled === 'true');
         }
         updateCsBufferPanelVisibility();
         bufferCheckbox.addEventListener('change', () => {
-            localStorage.setItem('morse_cs_buffer_enabled', bufferCheckbox.checked);
+            safeStorage.setItem('morse_cs_buffer_enabled', bufferCheckbox.checked);
             updateCsBufferPanelVisibility();
         });
     }
@@ -109,28 +148,11 @@
             document.querySelectorAll('#cs-buffer-depth-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             selectedBufferDepth = chip.dataset.depth;
-            localStorage.setItem('morse_cs_buffer_depth', selectedBufferDepth);
+            safeStorage.setItem('morse_cs_buffer_depth', selectedBufferDepth);
             updateCsBufferTip(selectedBufferDepth);
         });
     });
     updateCsBufferTip(selectedBufferDepth);
-
-    // Paper copy mode controls
-    const paperCheckbox = document.getElementById('cs-paper-enabled');
-    const paperPanel = document.getElementById('cs-paper-panel');
-    const paperGapSlider = document.getElementById('cs-paper-gap');
-    const paperGapValue = document.getElementById('cs-paper-gap-value');
-    const paperSessionDisplay = document.getElementById('cs-paper-session-display');
-    const paperStatusMsg = document.getElementById('cs-paper-status-msg');
-    const paperSubMsg = document.getElementById('cs-paper-sub-msg');
-    const paperProgressWrap = document.getElementById('cs-paper-progress-wrap');
-    const paperProgressBar = document.getElementById('cs-paper-progress-bar');
-    const paperControlsRow = document.getElementById('cs-paper-controls-row');
-    const paperStopBtn = document.getElementById('cs-paper-stop-btn');
-    const paperResultBlock = document.getElementById('cs-paper-result-block');
-    const paperRadiogramText = document.getElementById('cs-paper-radiogram-text');
-    const paperCopyBtn = document.getElementById('cs-paper-copy-btn');
-    const csSubmitRow = document.getElementById('cs-submit-row');
 
     let csPaperSleepResolve = null;
     let csPaperSleepTimer = null;
@@ -167,20 +189,20 @@
     }
 
     if (paperCheckbox) {
-        const savedPaperEnabled = localStorage.getItem('morse_cs_paper_enabled');
+        const savedPaperEnabled = safeStorage.getItem('morse_cs_paper_enabled');
         if (savedPaperEnabled !== null) {
             paperCheckbox.checked = (savedPaperEnabled === 'true');
         }
         updateCsPaperPanelVisibility();
         paperCheckbox.addEventListener('change', () => {
-            localStorage.setItem('morse_cs_paper_enabled', paperCheckbox.checked);
+            safeStorage.setItem('morse_cs_paper_enabled', paperCheckbox.checked);
             updateCsPaperPanelVisibility();
             updateCsExtraActiveDot();
         });
     }
 
     if (paperGapSlider) {
-        const savedPaperGap = localStorage.getItem('morse_cs_paper_gap');
+        const savedPaperGap = safeStorage.getItem('morse_cs_paper_gap');
         if (savedPaperGap) {
             paperGapSlider.value = savedPaperGap;
             if (paperGapValue) paperGapValue.textContent = parseFloat(savedPaperGap).toFixed(1);
@@ -189,7 +211,7 @@
             if (paperGapValue) paperGapValue.textContent = parseFloat(paperGapSlider.value).toFixed(1);
         });
         paperGapSlider.addEventListener('change', () => {
-            localStorage.setItem('morse_cs_paper_gap', paperGapSlider.value);
+            safeStorage.setItem('morse_cs_paper_gap', paperGapSlider.value);
         });
     }
 
@@ -235,7 +257,7 @@
                 const s = AudioSettings.load();
                 s.readySignal = readySignalEl.checked;
                 AudioSettings.save(s);
-                localStorage.setItem('morsewave_ready_signal_user_set', '1');
+                safeStorage.setItem('morsewave_ready_signal_user_set', '1');
                 updateCsExtraActiveDot();
             });
         }
@@ -281,13 +303,13 @@
     });
 
     const csCountEl = document.getElementById('cs-count');
-    const savedCount = localStorage.getItem('morse_cs_count');
+    const savedCount = safeStorage.getItem('morse_cs_count');
     if (savedCount && csCountEl) {
         csCountEl.value = savedCount;
     }
     if (csCountEl) {
         csCountEl.addEventListener('change', () => {
-            localStorage.setItem('morse_cs_count', csCountEl.value);
+            safeStorage.setItem('morse_cs_count', csCountEl.value);
         });
     }
 
@@ -367,7 +389,7 @@
 
     function getLocalCachedCallsigns(count) {
         try {
-            const raw = localStorage.getItem('morse_cached_callsigns');
+            const raw = safeStorage.getItem('morse_cached_callsigns');
             const list = raw ? JSON.parse(raw) : [];
             if (Array.isArray(list) && list.length >= 5) {
                 const shuffled = [...list].sort(() => Math.random() - 0.5);
@@ -381,7 +403,7 @@
     function saveCallsignsToCache(items) {
         if (!Array.isArray(items) || !items.length) return;
         try {
-            const raw = localStorage.getItem('morse_cached_callsigns');
+            const raw = safeStorage.getItem('morse_cached_callsigns');
             const existing = (raw ? JSON.parse(raw) : []) || [];
             const map = new Map();
             for (const item of existing) {
@@ -391,7 +413,7 @@
                 if (item && item.callsign) map.set(item.callsign, item);
             }
             const merged = Array.from(map.values()).slice(-200);
-            localStorage.setItem('morse_cached_callsigns', JSON.stringify(merged));
+            safeStorage.setItem('morse_cached_callsigns', JSON.stringify(merged));
         } catch {}
     }
 
