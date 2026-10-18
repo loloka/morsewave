@@ -862,26 +862,29 @@
             row2.appendChild(btn);
         });
 
-        // Служебные кнопки в третьем ряду: Стереть (Backspace) и Проверить (Check)
+        // Служебные кнопки в третьем ряду: Стереть символ (Backspace) и Очистить всё (Clear all)
         const backspaceBtn = document.createElement('div');
         backspaceBtn.className = 'dosaaf-key dosaaf-key-action';
-        backspaceBtn.innerHTML = '⌫';
-        backspaceBtn.title = 'Стереть символ';
+        backspaceBtn.innerHTML = t('dosaaf.btn_backspace') || '⌫ Стереть';
+        backspaceBtn.title = t('dosaaf.btn_backspace_title') || 'Стереть последний символ';
         backspaceBtn.addEventListener('click', (e) => {
             e.preventDefault();
             input.value = input.value.slice(0, -1);
+            input.dispatchEvent(new Event('input'));
         });
 
-        const checkBtn = document.createElement('div');
-        checkBtn.className = 'dosaaf-key dosaaf-key-action btn-accent';
-        checkBtn.innerHTML = '↵ ' + (t('dosaaf.check_btn') || 'Проверить');
-        checkBtn.addEventListener('click', (e) => {
+        const clearBtn = document.createElement('div');
+        clearBtn.className = 'dosaaf-key dosaaf-key-action dosaaf-key-clear';
+        clearBtn.innerHTML = t('dosaaf.btn_clear') || '✕ Очистить всё';
+        clearBtn.title = t('dosaaf.btn_clear_title') || 'Очистить всё введённое поле';
+        clearBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (typeof checkCallback === 'function') checkCallback();
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
         });
 
         row3.appendChild(backspaceBtn);
-        row3.appendChild(checkBtn);
+        row3.appendChild(clearBtn);
 
         if (row1.children.length > 0) container.appendChild(row1);
         if (row2.children.length > 0) container.appendChild(row2);

@@ -3101,15 +3101,29 @@ select.select-styled option {
     transform: scale(0.92);
 }
 .dosaaf-key-action {
-    background: var(--surface);
-    font-size: 14px;
-    padding: 0 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-size: 13px;
+    padding: 0 14px;
     font-weight: 600;
+    min-width: auto;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
-.dosaaf-key-action.btn-accent {
-    background: var(--accent);
-    color: #1a1200;
+.dosaaf-key-action:hover {
     border-color: var(--accent);
+    background: var(--surface);
+    color: var(--text);
+}
+.dosaaf-key-clear {
+    color: var(--muted);
+}
+.dosaaf-key-clear:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
 }
 @media (max-width: 480px) {
     .dosaaf-key {
@@ -3117,6 +3131,11 @@ select.select-styled option {
         height: 38px;
         font-size: 14px;
         padding: 0 5px;
+    }
+    .dosaaf-key-action {
+        font-size: 12px;
+        padding: 0 10px;
+        height: 36px;
     }
 }
 
@@ -3273,8 +3292,5 @@ select.select-styled option {
     }
     .dosaaf-compact-stats .label {
         font-size: 10px !important;
-    }
-    .dosaaf-desktop-check-btn {
-        display: none !important;
     }
 }

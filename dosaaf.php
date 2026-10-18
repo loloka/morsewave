@@ -98,7 +98,7 @@ include __DIR__ . '/includes/header.php';
                         <input type="text" id="dosaaf-word-input" class="answer-input"
                                placeholder="<?= htmlspecialchars(t('dosaaf.word_ph')) ?>"
                                style="text-transform:uppercase; font-size:18px; letter-spacing:1px; flex:1;" autocomplete="off">
-                        <button type="button" class="btn btn-primary dosaaf-desktop-check-btn" id="dosaaf-check-word-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
+                        <button type="button" class="btn btn-primary" id="dosaaf-check-word-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
                     </div>
                     <div class="dosaaf-layout-warning muted" id="dosaaf-words-layout-warn" style="display:none; font-size:12px; margin-top:6px; color:var(--accent);"></div>
 
