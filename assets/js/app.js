@@ -165,11 +165,39 @@ document.addEventListener('click', (e) => {
 
 // =========================================================================
 // Шпаргалка и калькулятор соответствия скоростей WPM vs Знаки/мин (система PARIS)
-// по рекомендациям мастера скоростной радиотелеграфии R8OA
+// со стандартами радиоспорта и СРТ
 // =========================================================================
 let parisModalEl = null;
+let parisModalTargetSlider = null;
 
-function openParisSpeedModal(initialWpm = 12, initialType = 'nominal') {
+function syncModalSpeedToPage(w) {
+    const updateSlider = (s) => {
+        if (!s || s.id === 'paris-modal-wpm-slider') return;
+        const min = parseInt(s.min, 10) || 5;
+        const max = parseInt(s.max, 10) || 60;
+        const clamped = Math.max(min, Math.min(max, w));
+        if (parseInt(s.value, 10) !== clamped) {
+            s.value = clamped;
+            s.dispatchEvent(new Event('input', { bubbles: true }));
+            s.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    };
+
+    if (parisModalTargetSlider && document.body.contains(parisModalTargetSlider)) {
+        updateSlider(parisModalTargetSlider);
+    }
+    // Синхронизируем также остальные основные слайдеры скорости WPM на странице
+    document.querySelectorAll('.speed-control input[type="range"]').forEach(s => {
+        const id = (s.id || '').toLowerCase();
+        if (id.includes('farnsworth') || id.includes('vol') || id.includes('freq') || id.includes('pitch') || id.includes('gap') || id.includes('jump')) {
+            return;
+        }
+        updateSlider(s);
+    });
+}
+
+function openParisSpeedModal(initialWpm = 12, initialType = 'nominal', triggerSlider = null) {
+    parisModalTargetSlider = triggerSlider || null;
     const wpmVal = Math.max(5, Math.min(60, parseInt(initialWpm, 10) || 12));
     if (!parisModalEl) {
         parisModalEl = document.createElement('div');
@@ -263,7 +291,7 @@ function openParisSpeedModal(initialWpm = 12, initialType = 'nominal') {
         const slider = document.getElementById('paris-modal-wpm-slider');
         const valEl = document.getElementById('paris-modal-wpm-val');
         const unit = t('js.common.cpm_unit') || 'зн/мин';
-        const updateCalc = () => {
+        const updateCalc = (syncToPage = true) => {
             const w = parseInt(slider.value, 10) || 12;
             valEl.textContent = w;
             document.getElementById('paris-val-letters').textContent = `${Math.round(w * 4.22)} ${unit}`;
@@ -272,15 +300,19 @@ function openParisSpeedModal(initialWpm = 12, initialType = 'nominal') {
             document.getElementById('paris-val-digits-short').textContent = `${Math.round(w * 3.17)} ${unit}`;
             document.getElementById('paris-val-nominal').textContent = `${Math.round(w * 5.00)} ${unit}`;
             document.getElementById('paris-val-dot').textContent = `${Math.round(1200 / w)} ${t('js.paris.dot_unit')}`;
+
+            if (syncToPage) {
+                syncModalSpeedToPage(w);
+            }
         };
-        slider?.addEventListener('input', updateCalc);
+        slider?.addEventListener('input', () => updateCalc(true));
         parisModalEl._updateCalc = updateCalc;
     }
 
     const slider = document.getElementById('paris-modal-wpm-slider');
     if (slider) {
         slider.value = wpmVal;
-        if (parisModalEl._updateCalc) parisModalEl._updateCalc();
+        if (parisModalEl._updateCalc) parisModalEl._updateCalc(false);
     }
 
     ['letters', 'mixed', 'digits-long', 'digits-short', 'nominal'].forEach(k => {
@@ -309,7 +341,7 @@ document.addEventListener('click', (e) => {
         const slider = wrap ? wrap.querySelector('input[type="range"]') : null;
         const wpm = slider ? parseInt(slider.value, 10) : 12;
         const type = hint.dataset.cpmType || 'nominal';
-        openParisSpeedModal(wpm, type);
+        openParisSpeedModal(wpm, type, slider);
     }
 });
 

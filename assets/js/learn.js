@@ -433,15 +433,120 @@
         return ALL_LEARNABLE;
     }
 
+    const recCharsetCard = document.getElementById('rec-charset-card');
+    const recCharsetHeader = document.getElementById('rec-charset-header');
+    const recCharsetBody = document.getElementById('rec-charset-body');
+    const recCharsetChevron = document.getElementById('rec-charset-chevron');
+    const recCharsetToggleText = document.getElementById('rec-charset-toggle-text');
+    const recCharsetCurrentName = document.getElementById('rec-charset-current-name');
+    const recCharsetCurrentBadge = document.getElementById('rec-charset-current-badge');
+
+    function toggleRecCharsetDropdown(forceState) {
+        if (!recCharsetBody) return;
+        const willOpen = (typeof forceState === 'boolean') ? forceState : (recCharsetBody.style.display === 'none');
+        recCharsetBody.style.display = willOpen ? 'block' : 'none';
+        if (recCharsetCard) recCharsetCard.classList.toggle('is-open', willOpen);
+        if (recCharsetChevron) recCharsetChevron.textContent = willOpen ? '▴' : '▾';
+        if (recCharsetToggleText) recCharsetToggleText.textContent = willOpen ? t('groups.collapse_charset') : t('groups.change_charset');
+    }
+
+    if (recCharsetHeader) {
+        recCharsetHeader.addEventListener('click', (e) => {
+            if (e.target.closest('#rec-custom-input')) return;
+            toggleRecCharsetDropdown();
+        });
+        recCharsetHeader.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleRecCharsetDropdown();
+            }
+        });
+    }
+
+    function getRecCpmType() {
+        if (recCharsetKey === 'letters' || recCharsetKey === 'cyrillic') return 'letters';
+        if (recCharsetKey === 'digits') return 'digits';
+        if (recCharsetKey === 'all') return 'mixed';
+        if (recCharsetKey === 'learned') {
+            const state = Progress.load();
+            const learned = (state.learnedLetters || []).filter(ch => ALL_LEARNABLE.includes(ch));
+            const hasDigits = learned.some(ch => /[0-9]/.test(ch));
+            const hasLetters = learned.some(ch => /[A-Z]/.test(ch));
+            if (hasDigits && hasLetters) return 'mixed';
+            if (hasDigits) return 'digits';
+            return 'letters';
+        }
+        if (recCharsetKey === 'custom') {
+            const chars = parseRecCustomCharset();
+            const hasDigits = chars.some(ch => /[0-9]/.test(ch));
+            const hasLetters = chars.some(ch => /[A-Za-zА-Яа-яЁё]/.test(ch));
+            if (hasDigits && hasLetters) return 'mixed';
+            if (hasDigits) return 'digits';
+            return 'letters';
+        }
+        return 'mixed';
+    }
+
+    function updateRecCpm() {
+        if (!recWpmCpm) return;
+        const type = getRecCpmType();
+        recWpmCpm.dataset.cpmType = type;
+        recWpmCpm.textContent = cpmHintText(recWpmSlider.value, type);
+    }
+
+    function updateRecCharsetSummary() {
+        if (!recCharsetCurrentName || !recCharsetCurrentBadge) return;
+        const isEn = (document.documentElement.lang === 'en');
+        let name = t('learn.rec_set_all');
+        let badge = isEn ? '36 chars' : '36 знаков';
+
+        switch (recCharsetKey) {
+            case 'all':
+                name = t('learn.rec_set_all');
+                badge = isEn ? '36 chars' : '36 знаков';
+                break;
+            case 'letters':
+                name = t('learn.rec_set_letters');
+                badge = isEn ? '26 letters' : '26 букв';
+                break;
+            case 'digits':
+                name = t('learn.rec_set_digits');
+                badge = isEn ? '10 digits' : '10 цифр';
+                break;
+            case 'cyrillic':
+                name = t('learn.rec_set_cyrillic');
+                badge = isEn ? '32 letters' : '32 буквы';
+                break;
+            case 'learned': {
+                name = t('learn.rec_set_learned');
+                const state = Progress.load();
+                const total = (state.learnedLetters || []).filter(ch => ALL_LEARNABLE.includes(ch)).length;
+                badge = `${total} ` + (isEn ? 'chars' : 'знаков');
+                break;
+            }
+            case 'custom': {
+                name = t('learn.rec_set_custom');
+                const count = parseRecCustomCharset().length;
+                badge = count > 0 ? (`${count} ` + (isEn ? 'chars' : 'знаков')) : (isEn ? 'configure' : 'настройте');
+                break;
+            }
+        }
+        recCharsetCurrentName.textContent = name;
+        recCharsetCurrentBadge.textContent = badge;
+    }
+
     document.querySelectorAll('#rec-charset-chips .chip').forEach(chip => {
         chip.addEventListener('click', () => {
             document.querySelectorAll('#rec-charset-chips .chip').forEach(c => c.classList.remove('active'));
             chip.classList.add('active');
             recCharsetKey = chip.dataset.set;
+            localStorage.setItem('morse_rec_charset', recCharsetKey);
             const recIsCustom = recCharsetKey === 'custom';
             recCustomInput.style.display = recIsCustom ? 'block' : 'none';
             document.getElementById('rec-custom-hint').style.display = recIsCustom ? 'block' : 'none';
             buildRecGrid(recGridLettersFor(recCharsetKey));
+            updateRecCharsetSummary();
+            updateRecCpm();
         });
     });
 
@@ -451,7 +556,11 @@
     recCustomInput.addEventListener('input', () => {
         const cleaned = recCustomInput.value.replace(/[^A-Za-zА-Яа-яЁё0-9 ]/g, '');
         if (cleaned !== recCustomInput.value) recCustomInput.value = cleaned;
-        if (recCharsetKey === 'custom') buildRecGrid(recGridLettersFor('custom'));
+        if (recCharsetKey === 'custom') {
+            buildRecGrid(recGridLettersFor('custom'));
+            updateRecCharsetSummary();
+            updateRecCpm();
+        }
     });
 
     const REC_KBD_QWERTY = [
@@ -725,15 +834,30 @@
     });
 
     const savedRecWpm = localStorage.getItem('morse_rec_wpm');
-    if (recWpmCpm) recWpmCpm.dataset.cpmType = 'letters';
     if (savedRecWpm) {
         recWpmSlider.value = savedRecWpm;
         recWpmValue.textContent = savedRecWpm;
-        if (recWpmCpm) recWpmCpm.textContent = cpmHintText(savedRecWpm, 'letters');
     }
+    const savedRecCharset = localStorage.getItem('morse_rec_charset');
+    if (savedRecCharset) {
+        const chip = document.querySelector(`#rec-charset-chips .chip[data-set="${savedRecCharset}"]`);
+        if (chip) {
+            document.querySelectorAll('#rec-charset-chips .chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            recCharsetKey = savedRecCharset;
+            const recIsCustom = recCharsetKey === 'custom';
+            if (recCustomInput) recCustomInput.style.display = recIsCustom ? 'block' : 'none';
+            const hintEl = document.getElementById('rec-custom-hint');
+            if (hintEl) hintEl.style.display = recIsCustom ? 'block' : 'none';
+            buildRecGrid(recGridLettersFor(recCharsetKey));
+        }
+    }
+    updateRecCharsetSummary();
+    updateRecCpm();
+
     recWpmSlider.addEventListener('input', () => { 
         recWpmValue.textContent = recWpmSlider.value; 
-        if (recWpmCpm) recWpmCpm.textContent = cpmHintText(recWpmSlider.value, 'letters'); 
+        updateRecCpm();
         localStorage.setItem('morse_rec_wpm', recWpmSlider.value);
     });
     recStartBtn.addEventListener('click', () => {
@@ -2669,15 +2793,15 @@
         });
     }
     const savedInvasionWpm = localStorage.getItem('morse_invasion_wpm');
-    if (invasionWpmCpmEl) invasionWpmCpmEl.dataset.cpmType = 'letters';
+    if (invasionWpmCpmEl) invasionWpmCpmEl.dataset.cpmType = 'mixed';
     if (savedInvasionWpm) {
         invasionWpmSlider.value = savedInvasionWpm;
         invasionWpmValueEl.textContent = savedInvasionWpm;
-        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(savedInvasionWpm, 'letters');
+        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(savedInvasionWpm, 'mixed');
     }
     invasionWpmSlider.addEventListener('input', () => {
         invasionWpmValueEl.textContent = invasionWpmSlider.value;
-        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value, 'letters');
+        if (invasionWpmCpmEl) invasionWpmCpmEl.textContent = cpmHintText(invasionWpmSlider.value, 'mixed');
         localStorage.setItem('morse_invasion_wpm', invasionWpmSlider.value);
     });
 

@@ -72,18 +72,42 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-2">
         <p class="mt-0"><?= t('learn.rec_intro') ?></p>
 
-        <div class="chip-row mt-1" id="rec-charset-chips">
-            <div class="chip active" data-set="all"><?= t('learn.rec_set_all') ?></div>
-            <div class="chip" data-set="letters"><?= t('learn.rec_set_letters') ?></div>
-            <div class="chip" data-set="digits"><?= t('learn.rec_set_digits') ?></div>
-            <div class="chip" data-set="learned"><?= t('learn.rec_set_learned') ?></div>
-            <div class="chip" data-set="cyrillic"><?= t('learn.rec_set_cyrillic') ?></div>
-            <div class="chip" data-set="custom"><?= t('learn.rec_set_custom') ?></div>
+        <!-- Набор символов: отдельный аккуратный блок со сворачиванием как в группах -->
+        <div class="groups-charset-card mt-2" id="rec-charset-card">
+            <div class="groups-charset-header" id="rec-charset-header" role="button" tabindex="0" title="<?= t('groups.change_charset') ?>">
+                <div class="groups-charset-summary">
+                    <span class="groups-charset-icon"><?= mw_icon('layers', 20) ?></span>
+                    <div class="groups-charset-info">
+                        <span class="groups-charset-caption"><?= t('groups.charset_label') ?></span>
+                        <div class="groups-charset-current">
+                            <span class="bold" id="rec-charset-current-name"><?= t('learn.rec_set_all') ?></span>
+                            <span class="badge-mini" id="rec-charset-current-badge">36 знаков</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="groups-charset-toggle-btn" id="rec-charset-toggle-btn">
+                    <span id="rec-charset-toggle-text"><?= t('groups.change_charset') ?></span>
+                    <span class="groups-chevron" id="rec-charset-chevron">▾</span>
+                </div>
+            </div>
+
+            <!-- Раскрывающееся тело с чипами и кастомным вводом -->
+            <div class="groups-charset-body" id="rec-charset-body" style="display:none;">
+                <div class="muted small mb-1" style="font-size:12px; margin-top:8px;"><?= t('groups.choose_charset_desc') ?></div>
+                <div class="chip-row mt-1" id="rec-charset-chips">
+                    <div class="chip active" data-set="all"><?= t('learn.rec_set_all') ?></div>
+                    <div class="chip" data-set="letters"><?= t('learn.rec_set_letters') ?></div>
+                    <div class="chip" data-set="digits"><?= t('learn.rec_set_digits') ?></div>
+                    <div class="chip" data-set="learned"><?= t('learn.rec_set_learned') ?></div>
+                    <div class="chip" data-set="cyrillic"><?= t('learn.rec_set_cyrillic') ?></div>
+                    <div class="chip" data-set="custom"><?= t('learn.rec_set_custom') ?></div>
+                </div>
+                <input type="text" id="rec-custom-input" class="answer-input mt-2"
+                       placeholder="<?= htmlspecialchars(t('learn.rec_custom_placeholder')) ?>"
+                       style="display:none; text-transform:uppercase;" autocomplete="off">
+                <div class="muted" id="rec-custom-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('learn.rec_custom_hint') ?></div>
+            </div>
         </div>
-        <input type="text" id="rec-custom-input" class="answer-input mt-1"
-               placeholder="<?= htmlspecialchars(t('learn.rec_custom_placeholder')) ?>"
-               style="display:none; text-transform:uppercase;" autocomplete="off">
-        <div class="muted" id="rec-custom-hint" style="display:none; font-size:11px; margin-top:4px;"><?= t('learn.rec_custom_hint') ?></div>
 
         <div class="flex-between flex-wrap gap-2 mt-2">
             <div class="speed-control">
