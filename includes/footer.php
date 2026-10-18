@@ -34,6 +34,9 @@
 <script src="<?= asset_v('assets/js/progress.js') ?>"></script>
 <script src="<?= asset_v('assets/js/daily.js') ?>"></script>
 <script src="<?= asset_v('assets/js/app.js') ?>"></script>
+<?php if (!empty($extraScripts)): foreach ($extraScripts as $es): ?>
+<script src="<?= asset_v('assets/js/' . $es) ?>"></script>
+<?php endforeach; endif; ?>
 <?php if (!empty($pageScript)): ?>
 <script src="<?= asset_v('assets/js/' . $pageScript) ?>"></script>
 <?php endif; ?>

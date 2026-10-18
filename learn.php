@@ -2,6 +2,7 @@
 require_once __DIR__ . '/includes/i18n.php';
 $pageTitle = t('learn.title');
 $activePage = 'learn';
+$extraScripts = ['dosaaf-data.js', 'dosaaf.js'];
 $pageScript = 'learn.js';
 include __DIR__ . '/includes/header.php';
 ?>
@@ -13,6 +14,7 @@ include __DIR__ . '/includes/header.php';
 <div class="mode-switch">
     <div class="chip active" data-mode="send"><?= t('learn.mode_send') ?></div>
     <div class="chip" data-mode="recognize"><?= t('learn.mode_recognize') ?></div>
+    <div class="chip" data-mode="dosaaf"><?= mw_icon('book-open', 14) ?> <?= t('learn.mode_dosaaf') ?></div>
     <div class="chip" data-mode="rhythm"><?= t('learn.mode_rhythm') ?></div>
     <div class="chip" data-mode="invasion"><?= t('learn.mode_invasion') ?> <span class="badge-beta">BETA</span></div>
 </div>
@@ -146,6 +148,114 @@ include __DIR__ . '/includes/header.php';
              списком (последний сверху) и остаются на экране, пока их не
              вытеснят более новые. -->
         <div class="mt-2" id="rec-history"></div>
+    </div>
+</div>
+
+<!-- ======================= РЕЖИМ: МЕТОД ДОСААФ ======================= -->
+<div id="dosaaf-mode" style="display:none;">
+    <div class="card mt-2">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <div>
+                <div class="muted small" style="font-size:12px;"><?= t('dosaaf.nav_label') ?></div>
+                <div class="chip-row mt-1" id="dosaaf-stage-chips"></div>
+            </div>
+            <div class="speed-control" style="margin:0;">
+                <?= t('learn.speed') ?>
+                <input type="range" id="dosaaf-wpm" min="5" max="35" step="1" value="12">
+                <span class="speed-value" id="dosaaf-wpm-val">12</span> wpm
+                <span class="muted cpm-hint" id="dosaaf-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 51]) ?></span>
+            </div>
+        </div>
+
+        <div class="mt-2" style="border-top:1px solid var(--border); padding-top:14px;">
+            <div class="flex-between flex-wrap gap-2" style="align-items:baseline;">
+                <div>
+                    <h2 class="mt-0" id="dosaaf-stage-title" style="margin-bottom:2px; font-size:18px;"></h2>
+                    <p class="muted mt-0" id="dosaaf-stage-subtitle" style="font-size:13px;"></p>
+                </div>
+                <div class="morse-lamp" id="dosaaf-lamp"></div>
+            </div>
+
+            <div class="dosaaf-quote-box">
+                <p class="dosaaf-quote-text" id="dosaaf-quote-text"></p>
+                <div class="dosaaf-quote-author" id="dosaaf-quote-author"></div>
+            </div>
+        </div>
+
+        <div class="chip-row mt-2" id="dosaaf-subtabs">
+            <div class="chip active" data-tab="words"><?= mw_icon('radio', 13) ?> <?= t('dosaaf.tab_words') ?></div>
+            <div class="chip" data-tab="napevs"><?= mw_icon('music', 13) ?> <?= t('dosaaf.tab_napevs') ?></div>
+            <div class="chip" data-tab="exam"><?= mw_icon('check-circle', 13) ?> <?= t('dosaaf.tab_exam') ?></div>
+            <div class="chip" data-tab="ranks"><?= mw_icon('award', 13) ?> <?= t('dosaaf.tab_ranks') ?></div>
+        </div>
+
+        <!-- 1. Тренажёр приёма смысловых слов -->
+        <div id="dosaaf-view-words" class="mt-2">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <span class="muted" id="dosaaf-word-length-hint" style="font-size:13px;"></span>
+                <div class="flex-between gap-1">
+                    <button type="button" class="btn btn-sm btn-outline" id="dosaaf-play-word-btn" title="Прослушать слово снова"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?></button>
+                    <button type="button" class="btn btn-sm btn-outline" id="dosaaf-next-word-btn" title="Пропустить и перейти к следующему"><?= mw_icon('skip-forward', 13) ?> <?= t('dosaaf.next_word') ?></button>
+                </div>
+            </div>
+
+            <div class="mt-2 flex-between gap-2 flex-wrap" style="align-items:center;">
+                <input type="text" id="dosaaf-word-input" class="answer-input"
+                       placeholder="<?= htmlspecialchars(t('dosaaf.word_ph')) ?>"
+                       style="text-transform:uppercase; font-size:18px; letter-spacing:1px; flex:1;" autocomplete="off">
+                <button type="button" class="btn btn-primary" id="dosaaf-check-word-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
+            </div>
+
+            <div class="feedback mt-2" id="dosaaf-word-feedback"></div>
+
+            <div class="grid grid-3 mt-2">
+                <div class="stat"><span class="value" id="dosaaf-word-streak">0</span><span class="label"><?= mw_icon('flame', 12) ?> <?= t('dosaaf.stat_streak') ?></span></div>
+                <div class="stat"><span class="value" id="dosaaf-word-accuracy">—</span><span class="label"><?= mw_icon('target', 12) ?> <?= t('dosaaf.stat_accuracy') ?></span></div>
+                <div class="stat"><span class="value" id="dosaaf-word-total">0</span><span class="label"><?= mw_icon('check', 12) ?> <?= t('dosaaf.stat_total') ?></span></div>
+            </div>
+
+            <div class="mt-2" id="dosaaf-word-history"></div>
+        </div>
+
+        <!-- 2. Карточки напевов текущей ступени -->
+        <div id="dosaaf-view-napevs" class="mt-2" style="display:none;">
+            <p class="muted mt-0 mb-2" style="font-size:13px;"><?= t('dosaaf.napevs_desc') ?></p>
+            <div class="dosaaf-napevs-grid" id="dosaaf-napevs-grid"></div>
+        </div>
+
+        <!-- 3. Зачёт ступени -->
+        <div id="dosaaf-view-exam" class="mt-2" style="display:none;">
+            <div class="card subcard p-3">
+                <h3 class="mt-0" style="font-size:16px;"><?= t('dosaaf.exam_title') ?></h3>
+                <p class="muted" style="font-size:13px; line-height:1.5;"><?= t('dosaaf.exam_desc') ?></p>
+
+                <div class="mt-2">
+                    <button type="button" class="btn btn-primary btn-sm" id="dosaaf-start-exam-btn"><?= mw_icon('play', 13) ?> <?= t('dosaaf.start_exam') ?></button>
+                </div>
+
+                <div id="dosaaf-exam-panel" class="mt-2" style="display:none;">
+                    <div class="flex-between" style="align-items:center;">
+                        <span class="muted small"><?= t('dosaaf.exam_word_counter') ?>: <b id="dosaaf-exam-progress">1 / 5</b></span>
+                        <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-play-btn"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?></button>
+                    </div>
+
+                    <div class="mt-2 flex-between gap-2 flex-wrap">
+                        <input type="text" id="dosaaf-exam-input" class="answer-input"
+                               placeholder="<?= htmlspecialchars(t('dosaaf.exam_word_ph')) ?>"
+                               style="text-transform:uppercase; font-size:16px; flex:1;" autocomplete="off">
+                        <button type="button" class="btn btn-primary btn-sm" id="dosaaf-exam-check-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
+                    </div>
+                </div>
+
+                <div id="dosaaf-exam-result" style="display:none;"></div>
+            </div>
+        </div>
+
+        <!-- 4. Классность ДОСААФ -->
+        <div id="dosaaf-view-ranks" class="mt-2" style="display:none;">
+            <p class="muted mt-0 mb-2" style="font-size:13px;"><?= t('dosaaf.ranks_desc') ?></p>
+            <div id="dosaaf-ranks-list"></div>
+        </div>
     </div>
 </div>
 
