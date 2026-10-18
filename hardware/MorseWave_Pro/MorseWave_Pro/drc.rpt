@@ -1,0 +1,668 @@
+** Drc report for MorseWave_Pro.kicad_pcb **
+** Created on 2026-10-18T02:48:12 **
+** Report includes: Errors, Warnings **
+
+** Found 114 DRC violations **
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-A) и GND)
+    Local override; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-A) и GND)
+    Local override; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J3-Pin_2) и Net-(J3-Pin_1))
+    Local override; error
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J3-Pin_2) и Net-(J3-Pin_1))
+    Local override; error
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J3-Pin_2) и Net-(J3-Pin_1))
+    Local override; error
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J3-Pin_2) и Net-(J3-Pin_1))
+    Local override; error
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1601 mm)
+    Local override; error
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+    @(42.3800 mm, 69.5200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1601 mm)
+    Local override; error
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+    @(42.3800 mm, 69.5200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1601 mm)
+    Local override; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(42.3800 mm, 66.9800 mm): PTH pad 13 [/KEY_OUT_CTRL] of A1
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1601 mm)
+    Local override; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(42.3800 mm, 66.9800 mm): PTH pad 13 [/KEY_OUT_CTRL] of A1
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(26.0000 mm, 60.5000 mm): Footprint D2
+    @(22.0000 mm, 54.0000 mm): Footprint C7
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+    @(26.0000 mm, 60.5000 mm): Footprint D2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(22.0000 mm, 54.0000 mm): Footprint C7
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(42.3800 mm, 36.5000 mm): Footprint A1
+    @(33.0000 mm, 67.0000 mm): Footprint U2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+    @(42.3800 mm, 36.5000 mm): Footprint A1
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(42.3800 mm, 36.5000 mm): Footprint A1
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(94.0000 mm, 67.0000 mm): Footprint J6
+    @(96.0000 mm, 71.0000 mm): Footprint H4
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(95.0000 mm, 56.0000 mm): Footprint J4
+    @(89.0000 mm, 56.0000 mm): Footprint R7
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(95.0000 mm, 56.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of J4
+    @(89.0000 mm, 56.0000 mm): Footprint R7
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(95.0000 mm, 53.5000 mm): PTH pad 2 [Net-(J4-Pin_2)] of J4
+    @(89.0000 mm, 56.0000 mm): Footprint R7
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(94.0000 mm, 18.0000 mm): Footprint D1
+    @(94.0000 mm, 28.0000 mm): Footprint R3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(94.0000 mm, 20.3800 mm): PTH pad 2 [Net-(D1-A)] of R3
+    @(94.0000 mm, 18.0000 mm): Footprint D1
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(86.0000 mm, 67.0000 mm): Footprint J3
+    @(78.0000 mm, 67.0000 mm): Footprint U3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+    @(86.0000 mm, 67.0000 mm): Footprint J3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 67.0000 mm): Footprint J3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+    @(78.0000 mm, 67.0000 mm): Footprint U3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+    @(78.0000 mm, 67.0000 mm): Footprint U3
+[copper_edge_clearance]: Нарушение отступа от контура платы (ограничение настроек контура зазор 0,5000 mm; текущий 0,0700 mm)
+    Rule: ограничение настроек контура; error
+    @(100.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(99.0800 mm, 67.0000 mm): PTH pad 3 [/PS2_DATA] of J6
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+    @(42.3800 mm, 69.5200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+    @(42.3800 mm, 69.5200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(42.3800 mm, 66.9800 mm): PTH pad 13 [/KEY_OUT_CTRL] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(42.3800 mm, 66.9800 mm): PTH pad 13 [/KEY_OUT_CTRL] of A1
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(0.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(4.0000 mm, -0.1500 mm): Reference field of H1
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 75.0000 mm): Segment on Edge.Cuts
+    @(40.9800 mm, 37.7700 mm): Segment of A1 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 75.0000 mm): Segment on Edge.Cuts
+    @(46.0600 mm, 78.5400 mm): Segment of A1 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 75.0000 mm): Segment on Edge.Cuts
+    @(53.9400 mm, 68.1200 mm): Segment of A1 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 75.0000 mm): Segment on Edge.Cuts
+    @(59.0200 mm, 76.0000 mm): Segment of A1 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(95.2700 mm, 65.6200 mm): Segment of J6 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(95.2700 mm, 68.3800 mm): Segment of J6 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(90.2800 mm, 54.0800 mm): Segment of R7 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(100.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(90.2800 mm, 57.9200 mm): Segment of R7 on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: ограничения настроек платы; warning
+    @(0.0000 mm, 0.0000 mm): Segment on Edge.Cuts
+    @(96.0000 mm, -0.1500 mm): Reference field of H2
+[hole_to_hole]: Сверленое отверстие слишком близко к другому отверстию (заданные ограничения платы мин. 0,2500 mm; текущий 0,0000 mm)
+    Rule: заданные ограничения платы; warning
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[hole_to_hole]: Сверленое отверстие слишком близко к другому отверстию (заданные ограничения платы мин. 0,2500 mm; текущий 0,0000 mm)
+    Rule: заданные ограничения платы; warning
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 36.5000 mm): PCB text 'TX' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 39.0400 mm): PCB text 'RX' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 41.5800 mm): PCB text 'RST' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 44.1200 mm): PCB text 'GND' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 46.6600 mm): PCB text 'D2' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 49.2000 mm): PCB text 'D3' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 51.7400 mm): PCB text 'D4' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 54.2800 mm): PCB text 'D5' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 56.8200 mm): PCB text 'D6' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 59.3600 mm): PCB text 'D7' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 61.9000 mm): PCB text 'D8' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 64.4400 mm): PCB text 'D9' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 66.9800 mm): PCB text 'D10' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 69.5200 mm): PCB text 'D11' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(39.1800 mm, 72.0600 mm): PCB text 'D12' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 36.5000 mm): PCB text 'VIN' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 39.0400 mm): PCB text 'GND' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 41.5800 mm): PCB text 'RST' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 44.1200 mm): PCB text '5V' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 46.6600 mm): PCB text 'A7' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 49.2000 mm): PCB text 'A6' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 51.7400 mm): PCB text 'A5' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 54.2800 mm): PCB text 'A4' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 56.8200 mm): PCB text 'A3' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 59.3600 mm): PCB text 'A2' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 61.9000 mm): PCB text 'A1' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 64.4400 mm): PCB text 'A0' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 66.9800 mm): PCB text 'REF' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 69.5200 mm): PCB text '3V3' on F.Silkscreen
+[text_height]: Высота текста вне допустимого диапазона (высота текста шелкографии из настроек ограничений платы мин. высота 0,8000 mm; текущая 0,7500 mm)
+    Rule: высота текста шелкографии из настроек ограничений платы; warning
+    @(60.8200 mm, 72.0600 mm): PCB text 'D13' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(39.1800 mm, 66.9800 mm): PCB text 'D10' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(39.1800 mm, 69.5200 mm): PCB text 'D11' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(26.0000 mm, 54.5000 mm): PCB text 'D2' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(10.0000 mm, 73.0000 mm): PCB text 'PADDLE' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(94.0000 mm, 73.0000 mm): PCB text 'PS/2' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(24.8800 mm, 58.8100 mm): Rectangle of D2 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(24.2000 mm, 60.5000 mm): Footprint text of D2 (K)
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(40.9800 mm, 37.7700 mm): Segment of A1 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(21.8800 mm, 52.6300 mm): Segment of C7 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(95.2700 mm, 18.0000 mm): Arc of D1 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(90.2800 mm, 54.0800 mm): Segment of R7 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(96.0000 mm, 66.8500 mm): Reference field of H4
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(96.0000 mm, 66.8500 mm): Reference field of H4
+    @(95.2700 mm, 68.3800 mm): Segment of J6 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(90.2800 mm, 57.9200 mm): Segment of R7 on F.Silkscreen
+    @(92.2500 mm, 57.6000 mm): Segment of J4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(92.5400 mm, 58.5600 mm): Rectangle of J4 on F.Silkscreen
+    @(95.0000 mm, 51.5000 mm): PCB text 'C5' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(94.8000 mm, 50.9500 mm): Segment of J4 on F.Silkscreen
+    @(95.0000 mm, 51.5000 mm): PCB text 'C5' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(95.0000 mm, 51.5000 mm): PCB text 'C5' on F.Silkscreen
+    @(94.8000 mm, 51.7000 mm): Segment of J4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(94.8000 mm, 58.5500 mm): Segment of J4 on F.Silkscreen
+    @(90.2800 mm, 57.9200 mm): Segment of R7 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(90.2800 mm, 54.0800 mm): Segment of R7 on F.Silkscreen
+    @(97.7500 mm, 51.7000 mm): Segment of J4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(92.5400 mm, 58.5600 mm): Rectangle of J4 on F.Silkscreen
+    @(90.2800 mm, 54.0800 mm): Segment of R7 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(92.5400 mm, 58.5600 mm): Rectangle of J4 on F.Silkscreen
+    @(90.2800 mm, 57.9200 mm): Segment of R7 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(92.5500 mm, 58.5500 mm): Rectangle of J4 on F.Silkscreen
+    @(90.2800 mm, 57.9200 mm): Segment of R7 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(39.4600 mm, 70.8700 mm): Segment of U2 on F.Silkscreen
+    @(39.1800 mm, 66.9800 mm): PCB text 'D10' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(39.1800 mm, 69.5200 mm): PCB text 'D11' on F.Silkscreen
+    @(39.4600 mm, 70.8700 mm): Segment of U2 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(50.0000 mm, 73.0000 mm): PCB text 'USB / SERIAL' on F.Silkscreen
+    @(46.0600 mm, 78.5400 mm): Segment of A1 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(50.0000 mm, 73.0000 mm): PCB text 'USB / SERIAL' on F.Silkscreen
+    @(50.0000 mm, 72.0600 mm): Footprint text of A1 (USB)
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(50.0000 mm, 73.0000 mm): PCB text 'USB / SERIAL' on F.Silkscreen
+    @(53.9400 mm, 68.1200 mm): Segment of A1 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(11.2500 mm, 54.0000 mm): Circle of C6 on F.Silkscreen
+    @(10.0000 mm, 56.5000 mm): PCB text 'C1' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(8.6200 mm, 68.2700 mm): Segment of J1 on F.Silkscreen
+    @(10.0000 mm, 73.0000 mm): PCB text 'PADDLE' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(8.6200 mm, 73.4600 mm): Segment of J1 on F.Silkscreen
+    @(10.0000 mm, 73.0000 mm): PCB text 'PADDLE' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(11.3800 mm, 68.2700 mm): Segment of J1 on F.Silkscreen
+    @(10.0000 mm, 73.0000 mm): PCB text 'PADDLE' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(26.0000 mm, 54.5000 mm): PCB text 'D2' on F.Silkscreen
+    @(24.8800 mm, 58.8100 mm): Rectangle of D2 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(24.8800 mm, 58.8100 mm): Rectangle of D2 on F.Silkscreen
+    @(27.1200 mm, 55.3700 mm): Segment of C7 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(24.8800 mm, 58.8100 mm): Rectangle of D2 on F.Silkscreen
+    @(27.1200 mm, 55.0330 mm): Segment of C7 on F.Silkscreen
+
+** Found 59 unconnected pads **
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(26.0000 mm, 60.5000 mm): PTH pad 1 [Net-(D2-K)] of D2
+    @(22.0000 mm, 69.5400 mm): PTH pad 2 [Net-(D2-K)] of J2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(40.6200 mm, 67.0000 mm): PTH pad 4 [Net-(D2-K)] of U2
+    @(26.0000 mm, 60.5000 mm): PTH pad 1 [Net-(D2-K)] of D2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(22.0000 mm, 67.0000 mm): PTH pad 1 [Net-(D2-A)] of J2
+    @(40.6200 mm, 69.5400 mm): PTH pad 3 [Net-(D2-A)] of U2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(26.0000 mm, 52.8800 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(22.0000 mm, 67.0000 mm): PTH pad 1 [Net-(D2-A)] of J2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(15.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C1
+    @(12.5000 mm, 54.0000 mm): PTH pad 2 [GND] of C6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(15.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C1
+    @(23.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(15.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C1
+    @(10.0000 mm, 72.0800 mm): PTH pad 3 [GND] of J1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(23.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C2
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(27.0000 mm, 54.0000 mm): PTH pad 2 [GND] of C7
+    @(42.3800 mm, 44.1200 mm): PTH pad 4 [GND] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(33.0000 mm, 69.5400 mm): PTH pad 2 [GND] of U2
+    @(23.0000 mm, 60.5000 mm): PTH pad 2 [GND] of C2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.1900 mm, 30.5000 mm): PTH pad 1 [GND] of J5
+    @(42.3800 mm, 44.1200 mm): PTH pad 4 [GND] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.1900 mm, 30.5000 mm): PTH pad 1 [GND] of J5
+    @(67.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.2500 mm, 23.0000 mm): PTH pad 3 [GND] of RV2
+    @(46.1900 mm, 30.5000 mm): PTH pad 1 [GND] of J5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.2500 mm, 23.0000 mm): PTH pad 3 [GND] of RV2
+    @(17.5000 mm, 23.0000 mm): PTH pad 3 [GND] of RV1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(75.0000 mm, 23.0000 mm): PTH pad 3 [GND] of RV3
+    @(78.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C4
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C4
+    @(67.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C4
+    @(91.5400 mm, 46.0000 mm): PTH pad 3 [GND] of Q1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 69.5400 mm): PTH pad 2 [GND] of U3
+    @(67.0000 mm, 69.5400 mm): PTH pad 2 [GND] of J7
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 69.5400 mm): PTH pad 2 [GND] of U3
+    @(96.5400 mm, 67.0000 mm): PTH pad 2 [GND] of J6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(91.5400 mm, 46.0000 mm): PTH pad 3 [GND] of Q1
+    @(95.0000 mm, 41.0000 mm): PTH pad 2 [GND] of C5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(91.5400 mm, 46.0000 mm): PTH pad 3 [GND] of Q1
+    @(96.5400 mm, 67.0000 mm): PTH pad 2 [GND] of J6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(94.0000 mm, 18.0000 mm): PTH pad 1 [GND] of D1
+    @(75.0000 mm, 23.0000 mm): PTH pad 3 [GND] of RV3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(10.0000 mm, 60.5000 mm): PTH pad 1 [/DIT] of C1
+    @(10.0000 mm, 67.0000 mm): PTH pad 1 [/DIT] of J1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 46.6600 mm): PTH pad 5 [/DIT] of A1
+    @(10.0000 mm, 60.5000 mm): PTH pad 1 [/DIT] of C1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(18.0000 mm, 60.5000 mm): PTH pad 1 [/DAH] of C2
+    @(10.0000 mm, 69.5400 mm): PTH pad 2 [/DAH] of J1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 49.2000 mm): PTH pad 6 [/DAH] of A1
+    @(18.0000 mm, 60.5000 mm): PTH pad 1 [/DAH] of C2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 51.7400 mm): PTH pad 7 [/PS2_DATA] of A1
+    @(99.0800 mm, 67.0000 mm): PTH pad 3 [/PS2_DATA] of J6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 54.2800 mm): PTH pad 8 [/PS2_CLK] of A1
+    @(101.6200 mm, 67.0000 mm): PTH pad 4 [/PS2_CLK] of J6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 64.4400 mm): PTH pad 12 [/AUDIO_PWM] of A1
+    @(67.0000 mm, 36.0000 mm): PTH pad 1 [/AUDIO_PWM] of R1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(33.0000 mm, 56.0000 mm): PTH pad 1 [/KEY_OUT_CTRL] of R4
+    @(42.3800 mm, 66.9800 mm): PTH pad 13 [/KEY_OUT_CTRL] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(42.3800 mm, 69.5200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+    @(78.0000 mm, 56.0000 mm): PTH pad 1 [/PTT_OUT_CTRL] of R5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(57.6200 mm, 72.0600 mm): PTH pad 16 [/LED_KEY] of A1
+    @(94.0000 mm, 28.0000 mm): PTH pad 1 [/LED_KEY] of R3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(17.5000 mm, 20.5000 mm): PTH pad 2 [/POT_SPEED] of RV1
+    @(57.6200 mm, 64.4400 mm): PTH pad 19 [/POT_SPEED] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.2500 mm, 20.5000 mm): PTH pad 2 [/POT_TONE] of RV2
+    @(57.6200 mm, 61.9000 mm): PTH pad 20 [/POT_TONE] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(53.8100 mm, 30.5000 mm): PTH pad 4 [/OLED_SDA] of J5
+    @(57.6200 mm, 54.2800 mm): PTH pad 23 [/OLED_SDA] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(51.2700 mm, 30.5000 mm): PTH pad 3 [/OLED_SCL] of J5
+    @(57.6200 mm, 51.7400 mm): PTH pad 24 [/OLED_SCL] of A1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(10.0000 mm, 54.0000 mm): PTH pad 1 [+5V] of C6
+    @(22.0000 mm, 54.0000 mm): PTH pad 1 [+5V] of C7
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.2500 mm, 18.0000 mm): PTH pad 1 [+5V] of RV2
+    @(48.7300 mm, 30.5000 mm): PTH pad 2 [+5V] of J5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(46.2500 mm, 18.0000 mm): PTH pad 1 [+5V] of RV2
+    @(17.5000 mm, 18.0000 mm): PTH pad 1 [+5V] of RV1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(48.7300 mm, 30.5000 mm): PTH pad 2 [+5V] of J5
+    @(22.0000 mm, 54.0000 mm): PTH pad 1 [+5V] of C7
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(57.6200 mm, 44.1200 mm): PTH pad 27 [+5V] of A1
+    @(48.7300 mm, 30.5000 mm): PTH pad 2 [+5V] of J5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(57.6200 mm, 44.1200 mm): PTH pad 27 [+5V] of A1
+    @(94.0000 mm, 67.0000 mm): PTH pad 1 [+5V] of J6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(94.0000 mm, 67.0000 mm): PTH pad 1 [+5V] of J6
+    @(101.7000 mm, 56.0000 mm): PTH pad 2 [+5V] of R7
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 46.0000 mm): PTH pad 1 [Net-(C4-Pad1)] of C4
+    @(85.6200 mm, 36.0000 mm): PTH pad 2 [Net-(C4-Pad1)] of R2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(85.6200 mm, 36.0000 mm): PTH pad 2 [Net-(C4-Pad1)] of R2
+    @(75.0000 mm, 18.0000 mm): PTH pad 1 [Net-(C4-Pad1)] of RV3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(74.6200 mm, 36.0000 mm): PTH pad 2 [Net-(C3-Pad1)] of R1
+    @(67.0000 mm, 46.0000 mm): PTH pad 1 [Net-(C3-Pad1)] of C3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 36.0000 mm): PTH pad 1 [Net-(C3-Pad1)] of R2
+    @(74.6200 mm, 36.0000 mm): PTH pad 2 [Net-(C3-Pad1)] of R1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(89.0000 mm, 46.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of Q1
+    @(67.0000 mm, 56.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of R8
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(95.0000 mm, 46.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of C5
+    @(89.0000 mm, 46.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of Q1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(95.0000 mm, 56.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of J4
+    @(95.0000 mm, 46.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of C5
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(89.0000 mm, 56.0000 mm): PTH pad 1 [Net-(J4-Pin_2)] of R7
+    @(95.0000 mm, 53.5000 mm): PTH pad 2 [Net-(J4-Pin_2)] of J4
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(33.0000 mm, 48.3800 mm): PTH pad 2 [Net-(R4-Pad2)] of R4
+    @(33.0000 mm, 67.0000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(67.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J7-Pin_1)] of J7
+    @(74.6200 mm, 56.0000 mm): PTH pad 2 [Net-(J7-Pin_1)] of R8
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(94.0000 mm, 20.3800 mm): PTH pad 2 [Net-(D1-A)] of R3
+    @(96.5400 mm, 18.0000 mm): PTH pad 2 [Net-(D1-A)] of D1
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(78.0000 mm, 48.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+    @(78.0000 mm, 67.0000 mm): PTH pad 1 [Net-(R5-Pad2)] of U3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(85.6200 mm, 69.5400 mm): PTH pad 3 [Net-(J3-Pin_1)] of U3
+    @(86.0000 mm, 67.0000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(85.6200 mm, 67.0000 mm): PTH pad 4 [Net-(J3-Pin_2)] of U3
+    @(86.0000 mm, 69.5400 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(90.2700 mm, 46.0000 mm): PTH pad 2 [Net-(Q1-B)] of Q1
+    @(96.6200 mm, 36.0000 mm): PTH pad 2 [Net-(Q1-B)] of R6
+[unconnected_items]: Missing connection between items
+    Local override; error
+    @(75.0000 mm, 20.5000 mm): PTH pad 2 [Net-(R6-Pad1)] of RV3
+    @(89.0000 mm, 36.0000 mm): PTH pad 1 [Net-(R6-Pad1)] of R6
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

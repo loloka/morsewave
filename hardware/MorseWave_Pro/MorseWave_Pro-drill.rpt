@@ -1,5 +1,5 @@
 Drill report for MorseWave_Pro.kicad_pcb
-Created on 2026-10-18T01:41:52
+Created on 2026-10-18T18:16:58
 
 Copper Layer Stackup:
     =============================================================
@@ -7,21 +7,23 @@ Copper Layer Stackup:
     L2 :  B.Cu                      back
 
 
-Drill file 'MorseWave_Pro.drl' contains
+Drill file 'MorseWave_Pro-PTH.drl' contains
     plated through holes:
     =============================================================
-    T1  0.750mm  0.0295"  (3 holes))
-    T2  0.800mm  0.0315"  (8 holes))
-    T3  0.900mm  0.0354"  (2 holes))
-    T4  1.000mm  0.0394"  (56 holes))
-    T5  1.100mm  0.0433"  (6 holes)  (with 6 slots)
+    T1  0.350mm  0.0138"  (10 holes))
+    T2  0.750mm  0.0295"  (3 holes))
+    T3  0.800mm  0.0315"  (38 holes))
+    T4  0.900mm  0.0354"  (2 holes))
+    T5  1.000mm  0.0394"  (69 holes))
+    T6  1.100mm  0.0433"  (6 holes)  (with 6 slots)
+    T7  1.200mm  0.0472"  (2 holes))
 
-    Total plated holes count 75
+    Total plated holes count 130
 
 
-Not plated through holes are merged with plated holes
+Drill file 'MorseWave_Pro-NPTH.drl' contains
     unplated through holes:
     =============================================================
-    T6  3.200mm  0.1260"  (4 holes))
+    T1  3.200mm  0.1260"  (4 holes))
 
     Total unplated holes count 4

@@ -1,0 +1,851 @@
+** Drc report for MorseWave_Pro.kicad_pcb **
+** Created on 2026-10-18T16:49:23 **
+** Report includes: Errors, Warnings **
+
+** Found 212 DRC violations **
+[items_not_allowed]: Items not allowed
+    Local override; error
+    @(76.0000 mm, 21.0000 mm): Track [Net-(J_RV3-Pin_1)] on F.Cu, length 10.6066 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 21.2000 mm
+    @(63.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 32.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(57.6200 mm, 47.2400 mm): Track [/OLED_SCL] on B.Cu, length 3.8800 mm
+    @(60.5000 mm, 54.8600 mm): Track [/POT_TONE] on B.Cu, length 35.8600 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(61.5000 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 38.4200 mm
+    @(24.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(39.0000 mm, 52.3200 mm): Track [/AUDIO_PWM] on B.Cu, length 13.6800 mm
+    @(42.3800 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 6.3800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и Net-(J7-Pin_1))
+    Local override; error
+    @(58.5000 mm, 68.5000 mm): Track [+5V] on B.Cu, length 31.5000 mm
+    @(64.0000 mm, 68.5000 mm): PTH pad 1 [Net-(J7-Pin_1)] of J7
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(57.6200 mm, 54.8600 mm): Track [/POT_TONE] on B.Cu, length 2.8800 mm
+    @(59.5000 mm, 59.9400 mm): Track [/POT_SPEED] on B.Cu, length 41.9400 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(57.6200 mm, 59.9400 mm): Track [/POT_SPEED] on B.Cu, length 1.8800 mm
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1000 mm)
+    Local override; error
+    @(38.0000 mm, 72.0000 mm): Track [/LED_KEY] on B.Cu, length 60.0000 mm
+    @(36.0000 mm, 72.5000 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 41.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(77.0000 mm, 43.3800 mm): Track [Net-(R5-Pad2)] on F.Cu, length 16.6200 mm
+    @(96.5000 mm, 54.0000 mm): Track [Net-(J4-Pin_2)] on F.Cu, length 29.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(26.0000 mm, 67.5000 mm): Track [Net-(R4-Pad2)] on F.Cu, length 3.0000 mm
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 9.5000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи GND и /POT_SPEED)
+    Local override; error
+    @(42.5000 mm, 18.5000 mm): PTH pad 3 [GND] of RV2
+    @(59.5000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 35.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(26.0000 mm, 43.3800 mm): Track [Net-(R4-Pad2)] on F.Cu, length 24.1200 mm
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 6.4600 mm
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и <без цепи>)
+    Local override; error
+    @(58.5000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 51.5000 mm
+    @(24.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV1
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(60.5000 mm, 19.0000 mm): Track [/POT_TONE] on B.Cu, length 10.5000 mm
+    @(50.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(24.0000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 5.5400 mm
+    @(24.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и GND)
+    Local override; error
+    @(10.0000 mm, 60.0000 mm): Track [+5V] on B.Cu, length 10.0000 mm
+    @(12.5000 mm, 60.0000 mm): PTH pad 2 [GND] of C6
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-A) и Net-(D2-K))
+    Local override; error
+    @(36.6200 mm, 70.0400 mm): Track [Net-(D2-A)] on F.Cu, length 12.0400 mm
+    @(36.6200 mm, 67.5000 mm): PTH pad 4 [Net-(D2-K)] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи <без цепи> и Net-(J_RV3-Pin_1))
+    Local override; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): Track [Net-(J_RV3-Pin_1)] on F.Cu, length 10.6066 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(59.5000 mm, 59.9400 mm): Track [/POT_SPEED] on B.Cu, length 41.9400 mm
+    @(57.6200 mm, 47.2400 mm): Track [/OLED_SCL] on B.Cu, length 3.8800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи <без цепи> и Net-(J_RV3-Pin_1))
+    Local override; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(85.6200 mm, 21.0000 mm): Track [Net-(J_RV3-Pin_1)] on F.Cu, length 9.6200 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J4-Pin_1) и Net-(Q1-B))
+    Local override; error
+    @(81.0000 mm, 48.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of Q1
+    @(74.6200 mm, 48.0000 mm): Track [Net-(Q1-B)] on F.Cu, length 7.6500 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J_RV3-Pin_2) и GND)
+    Local override; error
+    @(72.0000 mm, 23.5400 mm): Track [Net-(J_RV3-Pin_2)] on F.Cu, length 22.4600 mm
+    @(72.0000 mm, 42.0000 mm): PTH pad 2 [GND] of C3
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и Net-(J4-Pin_2))
+    Local override; error
+    @(79.7000 mm, 54.0000 mm): PTH pad 2 [+5V] of R7
+    @(96.5000 mm, 54.0000 mm): Track [Net-(J4-Pin_2)] on F.Cu, length 29.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(81.0000 mm, 48.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 7.0000 mm
+    @(74.6200 mm, 48.0000 mm): Track [Net-(Q1-B)] on F.Cu, length 7.6500 mm
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и Net-(J4-Pin_1))
+    Local override; error
+    @(79.7000 mm, 54.0000 mm): PTH pad 2 [+5V] of R7
+    @(81.0000 mm, 48.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 10.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(81.0000 mm, 58.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 17.0000 mm
+    @(77.0000 mm, 43.3800 mm): Track [Net-(R5-Pad2)] on F.Cu, length 16.6200 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-K) и Net-(R4-Pad2))
+    Local override; error
+    @(36.6200 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 7.6200 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-K) и Net-(R4-Pad2))
+    Local override; error
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 6.4600 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-A) и GND)
+    Local override; error
+    @(36.6200 mm, 70.0400 mm): Track [Net-(D2-A)] on F.Cu, length 16.6200 mm
+    @(29.0000 mm, 70.0400 mm): PTH pad 2 [GND] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи /LED_KEY и Net-(D1-A))
+    Local override; error
+    @(90.0000 mm, 26.5000 mm): PTH pad 1 [/LED_KEY] of R3
+    @(97.6200 mm, 26.5000 mm): Track [Net-(D1-A)] on F.Cu, length 7.6200 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-K) и Net-(R4-Pad2))
+    Local override; error
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 9.5000 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи /LED_KEY и Net-(D1-A))
+    Local override; error
+    @(90.0000 mm, 26.5000 mm): PTH pad 1 [/LED_KEY] of R3
+    @(90.0000 mm, 26.5000 mm): Track [Net-(D1-A)] on F.Cu, length 6.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(77.0000 mm, 72.5000 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 21.5000 mm
+    @(38.0000 mm, 72.0000 mm): Track [/LED_KEY] on B.Cu, length 60.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(42.3800 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 6.3800 mm
+    @(37.0000 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 23.2200 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(37.5000 mm, 47.2400 mm): Track [/PS2_DATA] on B.Cu, length 26.2600 mm
+    @(42.3800 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 5.3800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи /PTT_OUT_CTRL и Net-(D2-A))
+    Local override; error
+    @(36.0000 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 7.4800 mm
+    @(36.6200 mm, 70.0400 mm): PTH pad 3 [Net-(D2-A)] of U2
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D2-A) и /PS2_CLK)
+    Local override; error
+    @(36.6200 mm, 58.0000 mm): PTH pad 2 [Net-(D2-A)] of D2
+    @(37.0000 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 23.2200 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(37.0000 mm, 73.0000 mm): Track [/PS2_CLK] on B.Cu, length 60.6200 mm
+    @(95.0800 mm, 73.5000 mm): Track [/PS2_DATA] on B.Cu, length 5.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(50.0000 mm, 23.5400 mm): Track [/POT_TONE] on B.Cu, length 10.6349 mm
+    @(59.5000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 35.5000 mm
+[hole_clearance]: Нарушение зазора между отв. (ограничения настроек отверстия зазор 0,2500 mm; текущий 0,0000 mm)
+    Rule: ограничения настроек отверстия; error
+    @(95.0800 mm, 73.5000 mm): Track [/PS2_DATA] on B.Cu, length 5.0000 mm
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+[hole_clearance]: Нарушение зазора между отв. (ограничения настроек отверстия зазор 0,2500 mm; текущий 0,0000 mm)
+    Rule: ограничения настроек отверстия; error
+    @(97.6200 mm, 73.0000 mm): Track [/PS2_CLK] on B.Cu, length 4.5000 mm
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(24.0000 mm, 23.5400 mm): Track [/POT_SPEED] on B.Cu, length 10.6349 mm
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи /POT_TONE и <без цепи>)
+    Local override; error
+    @(50.0000 mm, 19.0000 mm): Track [/POT_TONE] on B.Cu, length 4.5400 mm
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(57.6200 mm, 49.7800 mm): Track [/OLED_SDA] on B.Cu, length 4.8800 mm
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи /POT_SPEED и /OLED_SCL)
+    Local override; error
+    @(24.0000 mm, 23.5400 mm): PTH pad 2 [/POT_SPEED] of J_RV1
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(38.0000 mm, 57.4000 mm): Track [/LED_KEY] on B.Cu, length 14.6000 mm
+    @(42.3800 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 6.3800 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(62.5000 mm, 21.0000 mm): Track [/OLED_SDA] on B.Cu, length 36.8800 mm
+    @(50.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1000 mm)
+    Local override; error
+    @(62.5000 mm, 49.7800 mm): Track [/OLED_SDA] on B.Cu, length 28.7800 mm
+    @(63.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 32.0000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(D1-A) и /LED_KEY)
+    Local override; error
+    @(97.6200 mm, 26.5000 mm): PTH pad 2 [Net-(D1-A)] of R3
+    @(98.0000 mm, 26.5000 mm): Track [/LED_KEY] on B.Cu, length 8.0000 mm
+[hole_clearance]: Нарушение зазора между отв. (ограничения настроек отверстия зазор 0,2500 mm; текущий 0,2000 mm)
+    Rule: ограничения настроек отверстия; error
+    @(98.0000 mm, 72.0000 mm): Track [/LED_KEY] on B.Cu, length 45.5000 mm
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и /DIT)
+    Local override; error
+    @(10.0000 mm, 60.0000 mm): PTH pad 1 [+5V] of C6
+    @(10.0000 mm, 52.0000 mm): Track [/DIT] on F.Cu, length 16.5000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи Net-(J4-Pin_1) и /AUDIO_PWM)
+    Local override; error
+    @(64.0000 mm, 60.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of R8
+    @(63.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 32.0000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи /PTT_OUT_CTRL и /AUDIO_PWM)
+    Local override; error
+    @(42.3800 mm, 65.0200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+    @(39.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 24.0000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи GND и +5V)
+    Local override; error
+    @(18.0000 mm, 30.0000 mm): PTH pad 1 [GND] of J5
+    @(7.0000 mm, 30.0000 mm): Track [+5V] on B.Cu, length 13.5400 mm
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1000 mm)
+    Local override; error
+    @(63.0000 mm, 34.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 4.0000 mm
+    @(62.5000 mm, 49.7800 mm): Track [/OLED_SDA] on B.Cu, length 28.7800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи unconnected-(A1-AREF-Pad18) и +5V)
+    Local override; error
+    @(57.6200 mm, 62.4800 mm): PTH pad 18 [unconnected-(A1-AREF-Pad18)] of A1
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+[tracks_crossing]: Tracks crossing
+    Local override; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 30.1200 mm
+    @(62.5000 mm, 21.0000 mm): Track [/OLED_SDA] on B.Cu, length 36.8800 mm
+[shorting_items]: Элементы замыкают две цепи (цепи <без цепи> и +5V)
+    Local override; error
+    @(24.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и <без цепи>)
+    Local override; error
+    @(42.5000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 7.5000 mm
+    @(50.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV2
+[shorting_items]: Элементы замыкают две цепи (цепи +5V и <без цепи>)
+    Local override; error
+    @(50.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+    @(50.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV2
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0304 mm)
+    Local override; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 54.8600 mm): PTH pad 21 [/POT_TONE] of A1
+[hole_clearance]: Нарушение зазора между отв. (ограничения настроек отверстия зазор 0,2500 mm; текущий 0,2139 mm)
+    Rule: ограничения настроек отверстия; error
+    @(95.0800 mm, 68.5000 mm): PTH pad 3 [/PS2_DATA] of J6
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+[hole_clearance]: Нарушение зазора между отв. (ограничения настроек отверстия зазор 0,2500 mm; текущий 0,2139 mm)
+    Rule: ограничения настроек отверстия; error
+    @(95.0800 mm, 68.5000 mm): PTH pad 3 [/PS2_DATA] of J6
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1042 mm)
+    Local override; error
+    @(77.0000 mm, 43.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+    @(78.0000 mm, 42.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of C4
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,1042 mm)
+    Local override; error
+    @(77.0000 mm, 43.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+    @(78.0000 mm, 42.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of C4
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of J_RV3
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of J_RV3
+[clearance]: Нарушение зазора ( зазор 0,2000 mm; текущий 0,0000 mm)
+    Local override; error
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(67.0000 mm, 54.0000 mm): Footprint R7
+    @(77.0000 mm, 51.0000 mm): Footprint R5
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(76.0000 mm, 21.0000 mm): Footprint J_RV3
+    @(68.5000 mm, 13.5000 mm): Footprint RV3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): Footprint J_RV3
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(76.0000 mm, 21.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of J_RV3
+    @(68.5000 mm, 13.5000 mm): Footprint RV3
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(16.5000 mm, 13.5000 mm): Footprint RV1
+    @(24.0000 mm, 21.0000 mm): Footprint J_RV1
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+    @(16.5000 mm, 13.5000 mm): Footprint RV1
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 21.0000 mm): Footprint J_RV1
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(42.5000 mm, 13.5000 mm): Footprint RV2
+    @(50.0000 mm, 21.0000 mm): Footprint J_RV2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+    @(42.5000 mm, 13.5000 mm): Footprint RV2
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+    @(50.0000 mm, 21.0000 mm): Footprint J_RV2
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(67.0000 mm, 48.0000 mm): Footprint R6
+    @(77.0000 mm, 51.0000 mm): Footprint R5
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(77.0000 mm, 51.0000 mm): Footprint R5
+    @(78.0000 mm, 42.0000 mm): Footprint C4
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(78.0000 mm, 42.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of C4
+    @(77.0000 mm, 51.0000 mm): Footprint R5
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(77.0000 mm, 43.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+    @(78.0000 mm, 42.0000 mm): Footprint C4
+[courtyards_overlap]: Courtyards overlap
+    Rule: ограничение настроек области установки; error
+    @(96.0000 mm, 71.0000 mm): Footprint H4
+    @(90.0000 mm, 68.5000 mm): Footprint J6
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(95.0800 mm, 68.5000 mm): PTH pad 3 [/PS2_DATA] of J6
+    @(96.0000 mm, 71.0000 mm): Footprint H4
+[pth_inside_courtyard]: PTH inside courtyard
+    Local override; error
+    @(97.6200 mm, 68.5000 mm): PTH pad 4 [/PS2_CLK] of J6
+    @(96.0000 mm, 71.0000 mm): Footprint H4
+[npth_inside_courtyard]: NPTH inside courtyard
+    Local override; error
+    @(96.0000 mm, 71.0000 mm): NPTH pad of H4
+    @(90.0000 mm, 68.5000 mm): Footprint J6
+[starved_thermal]: Неполное подключение терморазгрузки к зоне (слой F.Cu; 1 мостиков подключены к изолированному островку)
+    Local override; error
+    @(0.5000 mm, 0.5000 mm): Zone [GND] on F.Cu, priority 0
+    @(83.5400 mm, 48.0000 mm): PTH pad 3 [GND] of Q1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 51.5000 mm
+    @(24.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(76.0000 mm, 21.0000 mm): Track [Net-(J_RV3-Pin_1)] on F.Cu, length 10.6066 mm
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 51.5000 mm
+    @(50.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(36.6200 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 7.6200 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(63.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 32.0000 mm
+    @(64.0000 mm, 60.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of R8
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(42.5000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 7.5000 mm
+    @(50.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+    @(24.0000 mm, 23.5400 mm): PTH pad 2 [/POT_SPEED] of J_RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(72.0000 mm, 23.5400 mm): Track [Net-(J_RV3-Pin_2)] on F.Cu, length 22.4600 mm
+    @(72.0000 mm, 42.0000 mm): PTH pad 2 [GND] of C3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.5000 mm, 47.2400 mm): Track [/PS2_DATA] on B.Cu, length 26.2600 mm
+    @(36.6200 mm, 70.0400 mm): PTH pad 3 [Net-(D2-A)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(23.0800 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 10.0000 mm
+    @(24.0000 mm, 26.0800 mm): PTH pad 3 [GND] of J_RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.5000 mm, 47.2400 mm): Track [/PS2_DATA] on B.Cu, length 26.2600 mm
+    @(36.6200 mm, 67.5000 mm): PTH pad 4 [Net-(D2-K)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 21.2000 mm
+    @(57.6200 mm, 54.8600 mm): PTH pad 21 [/POT_TONE] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(10.0000 mm, 52.0000 mm): Track [/DIT] on F.Cu, length 16.5000 mm
+    @(10.0000 mm, 60.0000 mm): PTH pad 1 [+5V] of C6
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.5000 mm, 47.2400 mm): Track [/PS2_DATA] on B.Cu, length 26.2600 mm
+    @(36.6200 mm, 58.0000 mm): PTH pad 2 [Net-(D2-A)] of D2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(81.0000 mm, 48.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 7.0000 mm
+    @(82.2700 mm, 48.0000 mm): PTH pad 2 [Net-(Q1-B)] of Q1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(62.5000 mm, 21.0000 mm): Track [/OLED_SDA] on B.Cu, length 36.8800 mm
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(81.0000 mm, 48.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 7.0000 mm
+    @(83.5400 mm, 48.0000 mm): PTH pad 3 [GND] of Q1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(74.6200 mm, 48.0000 mm): Track [Net-(Q1-B)] on F.Cu, length 7.6500 mm
+    @(81.0000 mm, 48.0000 mm): PTH pad 1 [Net-(J4-Pin_1)] of Q1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 21.2000 mm
+    @(67.0000 mm, 54.0000 mm): PTH pad 1 [Net-(J4-Pin_2)] of R7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(62.5000 mm, 21.0000 mm): Track [/OLED_SDA] on B.Cu, length 36.8800 mm
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(81.0000 mm, 48.0000 mm): Track [Net-(J4-Pin_1)] on F.Cu, length 10.0000 mm
+    @(79.7000 mm, 54.0000 mm): PTH pad 2 [+5V] of R7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(36.0000 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 7.4800 mm
+    @(36.6200 mm, 70.0400 mm): PTH pad 3 [Net-(D2-A)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(98.0000 mm, 26.5000 mm): Track [/LED_KEY] on B.Cu, length 8.0000 mm
+    @(97.6200 mm, 26.5000 mm): PTH pad 2 [Net-(D1-A)] of R3
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(26.0000 mm, 43.3800 mm): Track [Net-(R4-Pad2)] on F.Cu, length 24.1200 mm
+    @(25.0000 mm, 60.0000 mm): PTH pad 2 [GND] of C7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 54.8600 mm): PTH pad 21 [/POT_TONE] of A1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(96.5000 mm, 54.0000 mm): Track [Net-(J4-Pin_2)] on F.Cu, length 29.5000 mm
+    @(79.7000 mm, 54.0000 mm): PTH pad 2 [+5V] of R7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(36.0000 mm, 65.0200 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 7.4800 mm
+    @(36.6200 mm, 67.5000 mm): PTH pad 4 [Net-(D2-K)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 52.3200 mm): PTH pad 22 [unconnected-(A1-A3-Pad22)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(98.0000 mm, 72.0000 mm): Track [/LED_KEY] on B.Cu, length 45.5000 mm
+    @(97.6200 mm, 26.5000 mm): PTH pad 2 [Net-(D1-A)] of R3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 5.5400 mm
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(77.0000 mm, 43.3800 mm): Track [Net-(R5-Pad2)] on F.Cu, length 16.6200 mm
+    @(77.0000 mm, 51.0000 mm): PTH pad 1 [/PTT_OUT_CTRL] of R5
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 49.7800 mm): PTH pad 23 [/OLED_SDA] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(77.0000 mm, 72.5000 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 21.5000 mm
+    @(77.0000 mm, 68.5000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(98.0000 mm, 72.0000 mm): Track [/LED_KEY] on B.Cu, length 45.5000 mm
+    @(97.6200 mm, 68.5000 mm): PTH pad 4 [/PS2_CLK] of J6
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 5.5400 mm
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(85.6200 mm, 21.0000 mm): Track [Net-(J_RV3-Pin_1)] on F.Cu, length 9.6200 mm
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 47.2400 mm): PTH pad 24 [/OLED_SCL] of A1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of J_RV3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(77.0000 mm, 72.5000 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 21.5000 mm
+    @(77.0000 mm, 60.0000 mm): PTH pad 1 [Net-(R5-Pad2)] of U3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(61.5000 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 38.4200 mm
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 44.7000 mm): PTH pad 25 [unconnected-(A1-A6-Pad25)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(59.5000 mm, 18.0000 mm): Track [/POT_SPEED] on B.Cu, length 35.5000 mm
+    @(42.5000 mm, 18.5000 mm): PTH pad 3 [GND] of RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(77.0000 mm, 72.5000 mm): Track [/PTT_OUT_CTRL] on B.Cu, length 21.5000 mm
+    @(77.0000 mm, 62.5400 mm): PTH pad 2 [GND] of U3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 14.3800 mm
+    @(57.6200 mm, 42.1600 mm): PTH pad 26 [unconnected-(A1-A7-Pad26)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(61.5000 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 38.4200 mm
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 19.0000 mm): Track [/POT_TONE] on B.Cu, length 4.5400 mm
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(61.5000 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 38.4200 mm
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 30.1200 mm
+    @(57.6200 mm, 37.0800 mm): PTH pad 28 [unconnected-(A1-~{RESET}-Pad28)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(76.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV3
+    @(76.0000 mm, 21.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of J_RV3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 19.0000 mm): Track [/POT_TONE] on B.Cu, length 4.5400 mm
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 30.1200 mm
+    @(57.6200 mm, 34.5400 mm): PTH pad 29 [unconnected-(A1-GND-Pad29)] of A1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(90.0000 mm, 26.5000 mm): Track [Net-(D1-A)] on F.Cu, length 6.5000 mm
+    @(90.0000 mm, 26.5000 mm): PTH pad 1 [/LED_KEY] of R3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(61.5000 mm, 20.0000 mm): Track [/OLED_SCL] on B.Cu, length 38.4200 mm
+    @(50.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 39.6200 mm): Track [+5V] on B.Cu, length 30.1200 mm
+    @(57.6200 mm, 32.0000 mm): PTH pad 30 [unconnected-(A1-VIN-Pad30)] of A1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(97.6200 mm, 26.5000 mm): Track [Net-(D1-A)] on F.Cu, length 7.6200 mm
+    @(90.0000 mm, 26.5000 mm): PTH pad 1 [/LED_KEY] of R3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(10.0000 mm, 60.0000 mm): Track [+5V] on B.Cu, length 10.0000 mm
+    @(12.5000 mm, 60.0000 mm): PTH pad 2 [GND] of C6
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.0000 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 23.2200 mm
+    @(36.6200 mm, 70.0400 mm): PTH pad 3 [Net-(D2-A)] of U2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(36.6200 mm, 70.0400 mm): Track [Net-(D2-A)] on F.Cu, length 12.0400 mm
+    @(36.6200 mm, 67.5000 mm): PTH pad 4 [Net-(D2-K)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+    @(24.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(36.6200 mm, 70.0400 mm): Track [Net-(D2-A)] on F.Cu, length 16.6200 mm
+    @(29.0000 mm, 70.0400 mm): PTH pad 2 [GND] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 6.4600 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.0000 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 23.2200 mm
+    @(36.6200 mm, 67.5000 mm): PTH pad 4 [Net-(D2-K)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+    @(50.0000 mm, 11.2500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(37.0000 mm, 49.7800 mm): Track [/PS2_CLK] on B.Cu, length 23.2200 mm
+    @(36.6200 mm, 58.0000 mm): PTH pad 2 [Net-(D2-A)] of D2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(29.0000 mm, 67.5000 mm): Track [Net-(D2-K)] on F.Cu, length 9.5000 mm
+    @(29.0000 mm, 67.5000 mm): PTH pad 1 [Net-(R4-Pad2)] of U2
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(50.0000 mm, 9.5000 mm): Track [+5V] on B.Cu, length 11.5000 mm
+    @(50.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV2
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(78.0000 mm, 42.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of C4
+    @(77.0000 mm, 43.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+[solder_mask_bridge]: Апертура передней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(77.0000 mm, 43.3800 mm): PTH pad 2 [Net-(R5-Pad2)] of R5
+    @(78.0000 mm, 42.0000 mm): PTH pad 1 [Net-(J_RV3-Pin_1)] of C4
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 68.5000 mm): Track [+5V] on B.Cu, length 31.5000 mm
+    @(64.0000 mm, 68.5000 mm): PTH pad 1 [Net-(J7-Pin_1)] of J7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 68.5000 mm): Track [+5V] on B.Cu, length 31.5000 mm
+    @(66.5400 mm, 68.5000 mm): PTH pad 2 [GND] of J7
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(24.0000 mm, 20.7500 mm): PTH pad MP [<no net>] of RV1
+    @(24.0000 mm, 21.0000 mm): PTH pad 1 [+5V] of J_RV1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 68.5000 mm): Track [+5V] on B.Cu, length 31.5000 mm
+    @(77.0000 mm, 68.5000 mm): PTH pad 1 [Net-(J3-Pin_1)] of J3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 68.5000 mm): Track [+5V] on B.Cu, length 31.5000 mm
+    @(79.5400 mm, 68.5000 mm): PTH pad 2 [Net-(J3-Pin_2)] of J3
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 67.5600 mm): PTH pad 16 [unconnected-(A1-D13-Pad16)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 65.0200 mm): PTH pad 17 [unconnected-(A1-3V3-Pad17)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 62.4800 mm): PTH pad 18 [unconnected-(A1-AREF-Pad18)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 59.9400 mm): PTH pad 19 [/POT_SPEED] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 57.4000 mm): PTH pad 20 [unconnected-(A1-A1-Pad20)] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(58.5000 mm, 54.0000 mm): Track [+5V] on B.Cu, length 14.5000 mm
+    @(57.6200 mm, 54.8600 mm): PTH pad 21 [/POT_TONE] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(7.0000 mm, 30.0000 mm): Track [+5V] on B.Cu, length 13.5400 mm
+    @(18.0000 mm, 30.0000 mm): PTH pad 1 [GND] of J5
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(39.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 24.0000 mm
+    @(42.3800 mm, 65.0200 mm): PTH pad 14 [/PTT_OUT_CTRL] of A1
+[solder_mask_bridge]: Апертура задней паяльной маски объединяет элементы с различ. цепями
+    Rule: мин. ширина маски из параметров платы; error
+    @(39.0000 mm, 66.0000 mm): Track [/AUDIO_PWM] on B.Cu, length 24.0000 mm
+    @(57.6200 mm, 65.0200 mm): PTH pad 17 [unconnected-(A1-3V3-Pad17)] of A1
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(4.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(78.0000 mm, 44.5000 mm): PCB text 'C4' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(24.0000 mm, 10.5000 mm): PCB text 'SPEED' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(50.0000 mm, 10.5000 mm): PCB text 'TONE' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(76.0000 mm, 10.5000 mm): PCB text 'VOLUME' on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(74.6200 mm, 19.6200 mm): Segment of J_RV3 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(74.6200 mm, 22.2700 mm): Segment of J_RV3 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(22.6200 mm, 19.6200 mm): Segment of J_RV1 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(22.6200 mm, 22.2700 mm): Segment of J_RV1 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(48.6200 mm, 19.6200 mm): Segment of J_RV2 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(48.6200 mm, 22.2700 mm): Segment of J_RV2 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(77.8800 mm, 43.3700 mm): Segment of C4 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(83.1200 mm, 43.3700 mm): Segment of C4 on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; warning
+    @(91.2700 mm, 69.8800 mm): Segment of J6 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(19.0000 mm, 28.2000 mm): PCB text 'OLED 0.96" I2C' on F.Silkscreen
+    @(19.2700 mm, 28.6200 mm): Segment of J5 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(33.5000 mm, 56.5000 mm): Segment on F.Silkscreen
+    @(29.0000 mm, 56.2000 mm): Footprint text of D2 (K)
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(19.2700 mm, 31.3800 mm): Segment of J5 on F.Silkscreen
+    @(19.0000 mm, 28.2000 mm): PCB text 'OLED 0.96" I2C' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(33.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+    @(33.0400 mm, 50.4600 mm): Segment of R4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(33.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+    @(33.3700 mm, 43.9200 mm): Segment of R4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(33.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+    @(33.3700 mm, 50.4600 mm): Segment of R4 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(4.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+    @(22.6200 mm, 22.2700 mm): Segment of J_RV1 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(25.3800 mm, 22.2700 mm): Segment of J_RV1 on F.Silkscreen
+    @(4.5000 mm, 26.5000 mm): Segment on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(19.0000 mm, 14.0000 mm): Rectangle of RV1 on F.Silkscreen
+    @(24.0000 mm, 17.5000 mm): PCB text 'GND WIP 5V' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(27.5000 mm, 14.0000 mm): Rectangle of RV1 on F.Silkscreen
+    @(24.0000 mm, 17.5000 mm): PCB text 'GND WIP 5V' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(24.0000 mm, 10.5000 mm): PCB text 'SPEED' on F.Silkscreen
+    @(17.3800 mm, 9.8300 mm): Segment of RV1 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(25.9550 mm, 9.8300 mm): Segment of RV1 on F.Silkscreen
+    @(24.0000 mm, 10.5000 mm): PCB text 'SPEED' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(78.3700 mm, 50.4600 mm): Segment of R5 on F.Silkscreen
+    @(78.0000 mm, 44.5000 mm): PCB text 'C4' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(45.0000 mm, 14.0000 mm): Rectangle of RV2 on F.Silkscreen
+    @(50.0000 mm, 17.5000 mm): PCB text 'GND WIP 5V' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(43.3800 mm, 9.8300 mm): Segment of RV2 on F.Silkscreen
+    @(50.0000 mm, 10.5000 mm): PCB text 'TONE' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(51.9550 mm, 9.8300 mm): Segment of RV2 on F.Silkscreen
+    @(50.0000 mm, 10.5000 mm): PCB text 'TONE' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(53.5000 mm, 14.0000 mm): Rectangle of RV2 on F.Silkscreen
+    @(50.0000 mm, 17.5000 mm): PCB text 'GND WIP 5V' on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(76.0000 mm, 10.5000 mm): PCB text 'VOLUME' on F.Silkscreen
+    @(77.9550 mm, 9.8300 mm): Segment of RV3 on F.Silkscreen
+[silk_overlap]: Silkscreen clearance
+    Rule: ограничения настроек платы; warning
+    @(76.0000 mm, 10.5000 mm): PCB text 'VOLUME' on F.Silkscreen
+    @(69.3800 mm, 9.8300 mm): Segment of RV3 on F.Silkscreen
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** Ignored checks **
+    - Footprint has no courtyard defined
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+    - Footprint doesn't match symbol's footprint filters
+    - Footprint component type doesn't match footprint pads
+
+** End of Report **

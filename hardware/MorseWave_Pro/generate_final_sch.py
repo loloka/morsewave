@@ -255,71 +255,77 @@ s.sym("A1", "Arduino_Nano_v3.x", "Module:Arduino_Nano", "MCU_Module", "Arduino_N
 s.no_connect(*s.pin_pos("A1", 2))
 s.no_connect(*s.pin_pos("A1", 1))
 
-# D2 (DIT)
+# D2 (DIT) - Nano pin 5
 p_d2 = s.pin_pos("A1", 5)
 s.wr(p_d2[0], p_d2[1], p_d2[0] - 12.70, p_d2[1])
 s.lbl("DIT", p_d2[0] - 12.70, p_d2[1], 0, "right bottom")
 
-# D3 (DAH)
+# D3 (DAH) - Nano pin 6
 p_d3 = s.pin_pos("A1", 6)
 s.wr(p_d3[0], p_d3[1], p_d3[0] - 12.70, p_d3[1])
 s.lbl("DAH", p_d3[0] - 12.70, p_d3[1], 0, "right bottom")
 
-# D4 (PS2_DATA)
+# D4 (PS2_DATA) - Nano pin 7
 p_d4 = s.pin_pos("A1", 7)
 s.wr(p_d4[0], p_d4[1], p_d4[0] - 12.70, p_d4[1])
 s.lbl("PS2_DATA", p_d4[0] - 12.70, p_d4[1], 0, "right bottom")
 
-# D5 (PS2_CLK)
+# D5 (PS2_CLK) - Nano pin 8
 p_d5 = s.pin_pos("A1", 8)
 s.wr(p_d5[0], p_d5[1], p_d5[0] - 12.70, p_d5[1])
 s.lbl("PS2_CLK", p_d5[0] - 12.70, p_d5[1], 0, "right bottom")
 
-# D6, D7, D8 (no connect)
-s.no_connect(*s.pin_pos("A1", 9))
+# D6 (AUDIO_PWM) - Nano pin 9 (matches firmware PIN_AUDIO = 6)
+p_d6 = s.pin_pos("A1", 9)
+s.wr(p_d6[0], p_d6[1], p_d6[0] - 12.70, p_d6[1])
+s.lbl("AUDIO_PWM", p_d6[0] - 12.70, p_d6[1], 0, "right bottom")
+
+# D7 (no connect) - Nano pin 10
 s.no_connect(*s.pin_pos("A1", 10))
-s.no_connect(*s.pin_pos("A1", 11))
 
-# D9 (AUDIO_PWM)
-p_d9 = s.pin_pos("A1", 12)
-s.wr(p_d9[0], p_d9[1], p_d9[0] - 12.70, p_d9[1])
-s.lbl("AUDIO_PWM", p_d9[0] - 12.70, p_d9[1], 0, "right bottom")
+# D8 (LED_KEY) - Nano pin 11 (matches firmware PIN_LED_KEY = 8, Green LED)
+p_d8 = s.pin_pos("A1", 11)
+s.wr(p_d8[0], p_d8[1], p_d8[0] - 12.70, p_d8[1])
+s.lbl("LED_KEY", p_d8[0] - 12.70, p_d8[1], 0, "right bottom")
 
-# D10 (KEY_OUT_CTRL)
+# D9 (no connect) - Nano pin 12
+s.no_connect(*s.pin_pos("A1", 12))
+
+# D10 (KEY_OUT_CTRL) - Nano pin 13
 p_d10 = s.pin_pos("A1", 13)
 s.wr(p_d10[0], p_d10[1], p_d10[0] - 12.70, p_d10[1])
 s.lbl("KEY_OUT_CTRL", p_d10[0] - 12.70, p_d10[1], 0, "right bottom")
 
-# D11 (PTT_OUT_CTRL)
+# D11 (PTT_OUT_CTRL) - Nano pin 14
 p_d11 = s.pin_pos("A1", 14)
 s.wr(p_d11[0], p_d11[1], p_d11[0] - 12.70, p_d11[1])
 s.lbl("PTT_OUT_CTRL", p_d11[0] - 12.70, p_d11[1], 0, "right bottom")
 
-# D12 (no connect)
+# D12 (no connect) - Nano pin 15
 s.no_connect(*s.pin_pos("A1", 15))
 
-# D13 (LED_KEY)
-p_d13 = s.pin_pos("A1", 16)
-s.wr(p_d13[0], p_d13[1], p_d13[0] - 12.70, p_d13[1])
-s.lbl("LED_KEY", p_d13[0] - 12.70, p_d13[1], 0, "right bottom")
+# D13 (no connect, onboard LED) - Nano pin 16
+s.no_connect(*s.pin_pos("A1", 16))
 
 # Right pins of Nano:
 s.no_connect(*s.pin_pos("A1", 28))
 s.no_connect(*s.pin_pos("A1", 3))
 s.no_connect(*s.pin_pos("A1", 18))
 
-# A0 (POT_SPEED)
+# A0 (POT_SPEED) - Nano pin 19 (matches firmware PIN_POT_WPM = A0)
 p_a0 = s.pin_pos("A1", 19)
 s.wr(p_a0[0], p_a0[1], p_a0[0] + 12.70, p_a0[1])
 s.lbl("POT_SPEED", p_a0[0] + 12.70, p_a0[1], 0, "left bottom")
 
-# A1 (POT_TONE)
-p_a1 = s.pin_pos("A1", 20)
-s.wr(p_a1[0], p_a1[1], p_a1[0] + 12.70, p_a1[1])
-s.lbl("POT_TONE", p_a1[0] + 12.70, p_a1[1], 0, "left bottom")
+# A1 (no connect) - Nano pin 20
+s.no_connect(*s.pin_pos("A1", 20))
 
-# A2, A3 (no connect)
-s.no_connect(*s.pin_pos("A1", 21))
+# A2 (POT_TONE) - Nano pin 21 (matches firmware PIN_POT_PITCH = A2)
+p_a2 = s.pin_pos("A1", 21)
+s.wr(p_a2[0], p_a2[1], p_a2[0] + 12.70, p_a2[1])
+s.lbl("POT_TONE", p_a2[0] + 12.70, p_a2[1], 0, "left bottom")
+
+# A3 (no connect) - Nano pin 22
 s.no_connect(*s.pin_pos("A1", 22))
 
 # A4 (OLED_SDA)
@@ -523,7 +529,7 @@ s.junc(p_c4_1[0], p_c4_1[1])
 s.wr(p_c4_2[0], p_c4_2[1], p_c4_2[0], p_c4_2[1] + 5.08)
 s.pwr("GND", p_c4_2[0], p_c4_2[1] + 5.08, 0)
 
-# Volume Potentiometer RV3 (10k)
+# Volume Potentiometer RV3 (10k) + Soviet Wire Header J_RV3
 s.sym("RV3", "10k (Volume)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 99.06, AUDIO_Y + 3.81, 0)
 p_rv3_1 = s.pin_pos("RV3", 1)
 p_rv3_2 = s.pin_pos("RV3", 2)
@@ -532,6 +538,18 @@ p_rv3_3 = s.pin_pos("RV3", 3)
 s.wr(p_c4_1[0], p_c4_1[1], p_rv3_1[0], p_rv3_1[1])
 s.wr(p_rv3_3[0], p_rv3_3[1], p_rv3_3[0], p_rv3_3[1] + 5.08)
 s.pwr("GND", p_rv3_3[0], p_rv3_3[1] + 5.08, 0)
+
+# Wire terminal header J_RV3 for Soviet chassis potentiometer СП3-4 / wires
+s.sym("J_RV3", "VOL_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 99.06, AUDIO_Y + 22.86, 0)
+p_jrv3_1 = s.pin_pos("J_RV3", 1)
+p_jrv3_2 = s.pin_pos("J_RV3", 2)
+p_jrv3_3 = s.pin_pos("J_RV3", 3)
+s.wr(p_jrv3_1[0], p_jrv3_1[1], p_rv3_1[0], p_rv3_1[1])
+s.junc(p_rv3_1[0], p_rv3_1[1])
+s.wr(p_jrv3_2[0], p_jrv3_2[1], p_rv3_2[0], p_rv3_2[1])
+s.junc(p_rv3_2[0], p_rv3_2[1])
+s.wr(p_jrv3_3[0], p_jrv3_3[1], p_rv3_3[0], p_rv3_3[1])
+s.junc(p_rv3_3[0], p_rv3_3[1])
 
 # R6 (470R) horizontal rot=90: Base resistor for Q1
 s.sym("R6", "470R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 110.49, p_rv3_2[1], 90)
@@ -580,13 +598,26 @@ s.wr(p_j4_2[0], R7_Y, p_r7_1[0], p_r7_1[1])
 s.wr(p_r7_2[0], p_r7_2[1], p_r7_2[0] + 5.08, p_r7_2[1])
 s.pwr("+5V", p_r7_2[0] + 5.08, p_r7_2[1], 270)
 
+# Headphones Output J7 (PHONES_3.5mm) with attenuation resistor R8 (150R):
+s.sym("R8", "150R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 137.16, p_q1_c[1] + 12.70, 90)
+p_r8_1 = s.pin_pos("R8", 1)
+p_r8_2 = s.pin_pos("R8", 2)
+s.wr(p_c5_1[0], p_c5_1[1], p_r8_1[0], p_r8_1[1])
+
+s.sym("J7", "PHONES_3.5mm", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 154.94, p_q1_c[1] + 12.70, 180)
+p_j7_1 = s.pin_pos("J7", 1)
+p_j7_2 = s.pin_pos("J7", 2)
+s.wr(p_r8_2[0], p_r8_2[1], p_j7_1[0], p_j7_1[1])
+s.wr(p_j7_2[0], p_j7_2[1], p_j7_2[0], p_j7_2[1] + 5.08)
+s.pwr("GND", p_j7_2[0], p_j7_2[1] + 5.08, 0)
+
 
 # ==============================================================================
-# SECTION 5: FRONT PANEL CONTROLS (SPEED, TONE, LED KEY)
+# SECTION 5: FRONT PANEL CONTROLS (SPEED, TONE, GREEN TX LED)
 # ==============================================================================
-s.txt("5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ", 215.90, 172.72)
+s.txt("5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ (ПОТЕНЦИОМЕТРЫ + СВЕТОДИОД TX)", 215.90, 172.72)
 
-# RV1 Speed (10k)
+# RV1 Speed (10k) + Soviet Wire Header J_RV1
 s.sym("RV1", "10k (Speed)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 228.60, 190.50, 0)
 p_rv1_1 = s.pin_pos("RV1", 1)
 p_rv1_2 = s.pin_pos("RV1", 2)
@@ -601,7 +632,19 @@ s.pwr("GND", p_rv1_3[0], p_rv1_3[1] + 5.08, 0)
 s.wr(p_rv1_2[0], p_rv1_2[1], p_rv1_2[0] + 6.35, p_rv1_2[1])
 s.lbl("POT_SPEED", p_rv1_2[0] + 6.35, p_rv1_2[1], 0, "left bottom")
 
-# RV2 Tone (10k)
+# Parallel 1x03 header J_RV1 for Soviet chassis pot wires (1: GND, 2: WIPER, 3: +5V)
+s.sym("J_RV1", "SPEED_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 228.60, 208.28, 0)
+p_jrv1_1 = s.pin_pos("J_RV1", 1)
+p_jrv1_2 = s.pin_pos("J_RV1", 2)
+p_jrv1_3 = s.pin_pos("J_RV1", 3)
+s.wr(p_jrv1_1[0], p_jrv1_1[1], p_rv1_1[0], p_rv1_1[1])
+s.junc(p_rv1_1[0], p_rv1_1[1])
+s.wr(p_jrv1_2[0], p_jrv1_2[1], p_rv1_2[0], p_rv1_2[1])
+s.junc(p_rv1_2[0], p_rv1_2[1])
+s.wr(p_jrv1_3[0], p_jrv1_3[1], p_rv1_3[0], p_rv1_3[1])
+s.junc(p_rv1_3[0], p_rv1_3[1])
+
+# RV2 Tone (10k) + Soviet Wire Header J_RV2
 s.sym("RV2", "10k (Tone)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 254.00, 190.50, 0)
 p_rv2_1 = s.pin_pos("RV2", 1)
 p_rv2_2 = s.pin_pos("RV2", 2)
@@ -616,7 +659,19 @@ s.pwr("GND", p_rv2_3[0], p_rv2_3[1] + 5.08, 0)
 s.wr(p_rv2_2[0], p_rv2_2[1], p_rv2_2[0] + 6.35, p_rv2_2[1])
 s.lbl("POT_TONE", p_rv2_2[0] + 6.35, p_rv2_2[1], 0, "left bottom")
 
-# LED Key: D1 + R3
+# Parallel 1x03 header J_RV2 for Soviet chassis pot wires (1: GND, 2: WIPER, 3: +5V)
+s.sym("J_RV2", "TONE_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 254.00, 208.28, 0)
+p_jrv2_1 = s.pin_pos("J_RV2", 1)
+p_jrv2_2 = s.pin_pos("J_RV2", 2)
+p_jrv2_3 = s.pin_pos("J_RV2", 3)
+s.wr(p_jrv2_1[0], p_jrv2_1[1], p_rv2_1[0], p_rv2_1[1])
+s.junc(p_rv2_1[0], p_rv2_1[1])
+s.wr(p_jrv2_2[0], p_jrv2_2[1], p_rv2_2[0], p_rv2_2[1])
+s.junc(p_rv2_2[0], p_rv2_2[1])
+s.wr(p_jrv2_3[0], p_jrv2_3[1], p_rv2_3[0], p_rv2_3[1])
+s.junc(p_rv2_3[0], p_rv2_3[1])
+
+# LED Key: D1 (Green 3mm) + R3 (330R) + Parallel Wire Header J_LED
 s.sym("R3", "330R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 283.21, 190.50, 90)
 p_r3_1 = s.pin_pos("R3", 1)
 p_r3_2 = s.pin_pos("R3", 2)
@@ -624,14 +679,23 @@ p_r3_2 = s.pin_pos("R3", 2)
 s.lbl("LED_KEY", p_r3_1[0] - 6.35, p_r3_1[1], 0, "right bottom")
 s.wr(p_r3_1[0] - 6.35, p_r3_1[1], p_r3_1[0], p_r3_1[1])
 
-# D1 rot=180: Anode (pin 2) on left at x - 3.81, Cathode (pin 1) on right at x + 3.81
-s.sym("D1", "LED_KEY", "LED_THT:LED_D3.0mm", "Device", "LED", 294.64, 190.50, 180)
+# D1 (Green TX LED) rot=180: Anode (pin 2) on left, Cathode (pin 1) on right
+s.sym("D1", "TX_GREEN_3mm", "LED_THT:LED_D3.0mm", "Device", "LED", 294.64, 190.50, 180)
 p_d1_k = s.pin_pos("D1", 1)
 p_d1_a = s.pin_pos("D1", 2)
 
 s.wr(p_r3_2[0], p_r3_2[1], p_d1_a[0], p_d1_a[1])
 s.wr(p_d1_k[0], p_d1_k[1], p_d1_k[0] + 5.08, p_d1_k[1])
 s.pwr("GND", p_d1_k[0] + 5.08, p_d1_k[1], 270)
+
+# Parallel 1x02 header J_LED for front panel LED wires (Pin 1: Anode +, Pin 2: Cathode -)
+s.sym("J_LED", "TX_LED_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 294.64, 205.74, 180)
+p_jled_1 = s.pin_pos("J_LED", 1)
+p_jled_2 = s.pin_pos("J_LED", 2)
+s.wr(p_jled_1[0], p_jled_1[1], p_d1_a[0], p_d1_a[1])
+s.junc(p_d1_a[0], p_d1_a[1])
+s.wr(p_jled_2[0], p_jled_2[1], p_d1_k[0], p_d1_k[1])
+s.junc(p_d1_k[0], p_d1_k[1])
 
 
 # ==============================================================================
@@ -740,7 +804,7 @@ final_sch = f"""(kicad_sch
 \t\t(rev "v2.0 (THT Classic)")
 \t\t(company "By R9OGL")
 \t\t(comment 1 "CW Keyer with Curtis Lookahead, 2-Stage Audio Filter & Transceiver Isolation")
-\t\t(comment 2 "Website: morse.r9old.ru | Call: R9OGL")
+\t\t(comment 2 "Website: morse.r9old.ru | Callsign: DE R9OGL (-.. .   .-. ----. --- --. .-..)")
 \t)
 \t(lib_symbols
 {lib_str}
