@@ -751,81 +751,64 @@ HTML
     — its other keys are irrelevant, and it still takes up some desk space.
     For a one-off DIY project that's usually fine.</p>
 
-<h2>2. The Arduino way — if you'd rather have a small board than a whole keyboard</h2>
-<p>If a full-size donor keyboard is awkward to fit somewhere, a small board
-    built on the <b>ATmega32u4</b> with "real" native USB (not a separate
-    USB-serial chip) gets you the same result — for example an <b>Arduino Pro
-    Micro</b>, <b>Arduino Leonardo</b>, or <b>Arduino Micro</b>. Only these
-    boards have the <code>Keyboard.h</code> library in the Arduino IDE, which
-    can act as a keyboard out of the box. Pricier than the option above and
-    needs flashing a sketch, but neater and more compact.</p>
+<h2>2. MorseWave Pro Electronic Keyer on Arduino (The New Standard)</h2>
+<p>If you want more than just a keyboard emulator workaround — an <b>authentic electronic CW keyer</b> with soft analog sound, Curtis 8044 Iambic Mode B, hardware debouncing, and direct USB-serial decoding into your browser — we have engineered the dedicated <b>MorseWave Pro (R9OGL Edition)</b> keyer.</p>
+
+<p><b>Project Status:</b> The prototype is fully functional, debugged, and battle-tested. The factory PCB <b>MorseWave Pro v2.0</b> (100% classic through-hole THT design — easily assembled with any basic soldering iron) is designed and in active development, with board production files in preparation.</p>
+
+<div class="alert alert-info" style="background: rgba(79, 216, 196, 0.08); border: 1px solid rgba(79, 216, 196, 0.3); border-radius: 10px; padding: 14px 18px; margin: 16px 0;">
+    <div style="font-weight: 700; color: #4fd8c4; margin-bottom: 4px;">🚀 Want to build the starter version right now?</div>
+    <div style="font-size: 14px; color: var(--text-muted); line-height: 1.6;">
+        You don't have to wait for the factory PCB! You can build the core starter version on a standard solderless breadboard in just 15–20 minutes without any soldering.
+    </div>
+</div>
+
+<h3>Quick starter build guide:</h3>
+<ol>
+    <li><b>What you'll need:</b>
+        <ul>
+            <li>An <b>Arduino Nano</b> (or Uno) with a standard USB cable;</li>
+            <li>A solderless breadboard and jumper wires (male-to-male);</li>
+            <li>A <b>3.5mm stereo jack</b> for connecting your dual-lever paddle or straight key;</li>
+            <li>A small speaker (8 Ohm) or passive piezo buzzer;</li>
+            <li>A 3mm LED and a 220–330 Ohm resistor (key-down / TX indicator).</li>
+        </ul>
+    </li>
+    <li><b>Quick wiring to Arduino Nano:</b>
+        <ul>
+            <li><b>Pin D2</b> → Paddle "DIT" contact.</li>
+            <li><b>Pin D3</b> → Paddle "DAH" contact.</li>
+            <li><b>Paddle Ground</b> → Arduino <b>GND</b>. Internal pull-up (<code>INPUT_PULLUP</code>) is enabled in the firmware.</li>
+            <li><b>Pin D9</b> → Speaker positive lead (other lead to GND).</li>
+            <li><b>Pin D8</b> → LED anode via 330 Ohm resistor (cathode to GND).</li>
+        </ul>
+    </li>
+    <li><b>Flashing the firmware:</b>
+        <ul>
+            <li>Download the sketch <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">keyer_breadboard.ino ↗</a>.</li>
+            <li>Open it in the free official <b>Arduino IDE</b>.</li>
+            <li>Select <i>«Arduino Nano»</i> (processor <i>ATmega328P</i>) under <b>Tools → Board</b>, select your COM port under <b>Tools → Port</b>, and click <b>Upload</b>.</li>
+        </ul>
+    </li>
+    <li><b>Testing in the web app:</b>
+        <ul>
+            <li>Open the <a href="keyer.php" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">Interactive Keyer Hub (keyer.php)</a>.</li>
+            <li>Click <b>«Connect Keyer via USB»</b> and select your Arduino's serial port.</li>
+            <li>You're all set! Press the paddle — characters decode in real time, indicators flash, and live on-air practice mode activates.</li>
+        </ul>
+    </li>
+</ol>
+
+<p><b>Useful build guides on GitHub:</b></p>
 <ul>
-    <li>One key contact — to any digital pin on the board, e.g. <b>D2</b>.</li>
-    <li>The other key contact — to the board's <b>GND</b>.</li>
+    <li>📘 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-guide-full.md" target="_blank" style="color:#4fd8c4;">Complete step-by-step guide with photos and parts list (cw-keyer-guide-full.md) ↗</a></li>
+    <li>🔌 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/breadboard-wiring.md" target="_blank" style="color:#4fd8c4;">Solderless breadboard wiring map (breadboard-wiring.md) ↗</a></li>
+    <li>📐 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-schematic.md" target="_blank" style="color:#4fd8c4;">Schematic with analog filter (cw-keyer-schematic.md) ↗</a></li>
+    <li>💻 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4;">Direct firmware download link (keyer_breadboard.ino) ↗</a></li>
 </ul>
-<p>No external resistor needed — the firmware below enables the pin's
-    internal pull-up resistor (<code>INPUT_PULLUP</code>): while the key is
-    open, the pin reads HIGH; the moment it closes, it reads LOW.</p>
-<pre class="code-block"><code>#include &lt;Keyboard.h&gt;
 
-const int KEY_PIN = 2;               // key: one contact here, the other to GND
-const unsigned long DEBOUNCE_MS = 5; // contact debounce
-
-bool pressed = false;      // has a HID "space down" already been sent
-bool lastReading = HIGH;   // last raw pin reading
-unsigned long lastChangeAt = 0;
-
-void setup() {
-  pinMode(KEY_PIN, INPUT_PULLUP); // open = HIGH, closed = LOW
-  Keyboard.begin();
-}
-
-void loop() {
-  bool reading = digitalRead(KEY_PIN);
-
-  if (reading != lastReading) {
-    lastChangeAt = millis();
-    lastReading = reading;
-  }
-
-  if (millis() - lastChangeAt > DEBOUNCE_MS) {
-    bool keyDown = (reading == LOW);
-    if (keyDown && !pressed) {
-      Keyboard.press(' ');
-      pressed = true;
-    } else if (!keyDown && pressed) {
-      Keyboard.release(' ');
-      pressed = false;
-    }
-  }
-}
-</code></pre>
-<p>Flash it like any Arduino sketch: Arduino IDE → <b>Tools → Board</b> →
-    "Arduino Leonardo" (for a genuine Leonardo/Micro) or "SparkFun Pro Micro"
-    via the boards manager for a Pro Micro clone → pick the port under
-    <b>Tools → Port</b> → "Upload". Arduino Uno and Nano (based on the
-    ATmega328P) won't work for this — they don't have built-in
-    <code>Keyboard.h</code> support.</p>
-
-<h2>3. Testing it (either method)</h2>
-<p>Open "Letters" → "Send" or "Key rhythm", click anywhere on the page (so
-    focus definitely isn't in a text field), and press the key — it should
-    trigger the exact same reaction as pressing spacebar.</p>
-<p class="muted" style="font-size:13px;"><b>Good to know:</b> while the
-    adapter is connected, it sends the spacebar to <em>whatever window
-    currently has focus</em> — not just the browser. If you press the key
-    while some other window is active, a plain spacebar goes there instead
-    (which might, say, scroll a page or pause a video). Nothing breaks, but
-    it's a reason to keep the trainer's tab focused during practice.</p>
-
-<h2>4. What's next</h2>
-<p>Both methods above are keyboard emulation. For a real key wired to its own
-    practice oscillator or a transmitter, receiving the signal straight from
-    a microphone via tone detection is a lot more interesting — no adapter
-    needed at all, just listening to the tone the key already produces. That
-    path is still just research, not ready yet. If you try one of the methods
-    above and something doesn't work (or does!) — let us know at
-    <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a>.</p>
+<h2>3. Feedback & Community</h2>
+<p>The project is actively evolving with enclosures and PCB batches in progress. If you've assembled a starter build or have ideas for timing algorithms — reach out to us at <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a> or follow repository updates!</p>
 HTML
 ,
 

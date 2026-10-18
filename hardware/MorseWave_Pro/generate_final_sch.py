@@ -529,8 +529,8 @@ s.junc(p_c4_1[0], p_c4_1[1])
 s.wr(p_c4_2[0], p_c4_2[1], p_c4_2[0], p_c4_2[1] + 5.08)
 s.pwr("GND", p_c4_2[0], p_c4_2[1] + 5.08, 0)
 
-# Volume Potentiometer RV3 (10k) + Soviet Wire Header J_RV3
-s.sym("RV3", "10k (Volume)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 99.06, AUDIO_Y + 3.81, 0)
+# Volume Potentiometer RV3 (10k) - 3-Pin Header for Front Panel Chassis Potentiometer СП3-4 / Wires
+s.sym("RV3", "VOLUME (10k)", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Device", "R_Potentiometer", 99.06, AUDIO_Y + 3.81, 0)
 p_rv3_1 = s.pin_pos("RV3", 1)
 p_rv3_2 = s.pin_pos("RV3", 2)
 p_rv3_3 = s.pin_pos("RV3", 3)
@@ -538,18 +538,6 @@ p_rv3_3 = s.pin_pos("RV3", 3)
 s.wr(p_c4_1[0], p_c4_1[1], p_rv3_1[0], p_rv3_1[1])
 s.wr(p_rv3_3[0], p_rv3_3[1], p_rv3_3[0], p_rv3_3[1] + 5.08)
 s.pwr("GND", p_rv3_3[0], p_rv3_3[1] + 5.08, 0)
-
-# Wire terminal header J_RV3 for Soviet chassis potentiometer СП3-4 / wires
-s.sym("J_RV3", "VOL_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 99.06, AUDIO_Y + 22.86, 0)
-p_jrv3_1 = s.pin_pos("J_RV3", 1)
-p_jrv3_2 = s.pin_pos("J_RV3", 2)
-p_jrv3_3 = s.pin_pos("J_RV3", 3)
-s.wr(p_jrv3_1[0], p_jrv3_1[1], p_rv3_1[0], p_rv3_1[1])
-s.junc(p_rv3_1[0], p_rv3_1[1])
-s.wr(p_jrv3_2[0], p_jrv3_2[1], p_rv3_2[0], p_rv3_2[1])
-s.junc(p_rv3_2[0], p_rv3_2[1])
-s.wr(p_jrv3_3[0], p_jrv3_3[1], p_rv3_3[0], p_rv3_3[1])
-s.junc(p_rv3_3[0], p_rv3_3[1])
 
 # R6 (470R) horizontal rot=90: Base resistor for Q1
 s.sym("R6", "470R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 110.49, p_rv3_2[1], 90)
@@ -580,7 +568,7 @@ s.wr(p_c5_2[0], p_c5_2[1], p_c5_2[0], p_c5_2[1] + 5.08)
 s.pwr("GND", p_c5_2[0], p_c5_2[1] + 5.08, 0)
 
 # Speaker connector J4 (Conn_01x02_Pin) rot=180:
-s.sym("J4", "SPEAKER_8R", "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical", "Connector", "Conn_01x02_Pin", 154.94, p_q1_c[1], 180)
+s.sym("J4", "SPEAKER_8R", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 154.94, p_q1_c[1], 180)
 p_j4_1 = s.pin_pos("J4", 1)  # Bottom pin (at p_q1_c[1] = 189.23)
 p_j4_2 = s.pin_pos("J4", 2)  # Top pin (at 186.69)
 
@@ -617,8 +605,8 @@ s.pwr("GND", p_j7_2[0], p_j7_2[1] + 5.08, 0)
 # ==============================================================================
 s.txt("5. ОРГАНЫ УПРАВЛЕНИЯ ЛИЦЕВОЙ ПАНЕЛИ (ПОТЕНЦИОМЕТРЫ + СВЕТОДИОД TX)", 215.90, 172.72)
 
-# RV1 Speed (10k) + Soviet Wire Header J_RV1
-s.sym("RV1", "10k (Speed)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 228.60, 190.50, 0)
+# RV1 Speed (10k) - 3-Pin Header for Front Panel Chassis Potentiometer СП3-4 / Wires
+s.sym("RV1", "SPEED (10k)", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Device", "R_Potentiometer", 228.60, 190.50, 0)
 p_rv1_1 = s.pin_pos("RV1", 1)
 p_rv1_2 = s.pin_pos("RV1", 2)
 p_rv1_3 = s.pin_pos("RV1", 3)
@@ -632,20 +620,8 @@ s.pwr("GND", p_rv1_3[0], p_rv1_3[1] + 5.08, 0)
 s.wr(p_rv1_2[0], p_rv1_2[1], p_rv1_2[0] + 6.35, p_rv1_2[1])
 s.lbl("POT_SPEED", p_rv1_2[0] + 6.35, p_rv1_2[1], 0, "left bottom")
 
-# Parallel 1x03 header J_RV1 for Soviet chassis pot wires (1: GND, 2: WIPER, 3: +5V)
-s.sym("J_RV1", "SPEED_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 228.60, 208.28, 0)
-p_jrv1_1 = s.pin_pos("J_RV1", 1)
-p_jrv1_2 = s.pin_pos("J_RV1", 2)
-p_jrv1_3 = s.pin_pos("J_RV1", 3)
-s.wr(p_jrv1_1[0], p_jrv1_1[1], p_rv1_1[0], p_rv1_1[1])
-s.junc(p_rv1_1[0], p_rv1_1[1])
-s.wr(p_jrv1_2[0], p_jrv1_2[1], p_rv1_2[0], p_rv1_2[1])
-s.junc(p_rv1_2[0], p_rv1_2[1])
-s.wr(p_jrv1_3[0], p_jrv1_3[1], p_rv1_3[0], p_rv1_3[1])
-s.junc(p_rv1_3[0], p_rv1_3[1])
-
-# RV2 Tone (10k) + Soviet Wire Header J_RV2
-s.sym("RV2", "10k (Tone)", "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical", "Device", "R_Potentiometer", 254.00, 190.50, 0)
+# RV2 Tone (10k) - 3-Pin Header for Front Panel Chassis Potentiometer СП3-4 / Wires
+s.sym("RV2", "TONE (10k)", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Device", "R_Potentiometer", 254.00, 190.50, 0)
 p_rv2_1 = s.pin_pos("RV2", 1)
 p_rv2_2 = s.pin_pos("RV2", 2)
 p_rv2_3 = s.pin_pos("RV2", 3)
@@ -659,19 +635,7 @@ s.pwr("GND", p_rv2_3[0], p_rv2_3[1] + 5.08, 0)
 s.wr(p_rv2_2[0], p_rv2_2[1], p_rv2_2[0] + 6.35, p_rv2_2[1])
 s.lbl("POT_TONE", p_rv2_2[0] + 6.35, p_rv2_2[1], 0, "left bottom")
 
-# Parallel 1x03 header J_RV2 for Soviet chassis pot wires (1: GND, 2: WIPER, 3: +5V)
-s.sym("J_RV2", "TONE_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical", "Connector", "Conn_01x03_Pin", 254.00, 208.28, 0)
-p_jrv2_1 = s.pin_pos("J_RV2", 1)
-p_jrv2_2 = s.pin_pos("J_RV2", 2)
-p_jrv2_3 = s.pin_pos("J_RV2", 3)
-s.wr(p_jrv2_1[0], p_jrv2_1[1], p_rv2_1[0], p_rv2_1[1])
-s.junc(p_rv2_1[0], p_rv2_1[1])
-s.wr(p_jrv2_2[0], p_jrv2_2[1], p_rv2_2[0], p_rv2_2[1])
-s.junc(p_rv2_2[0], p_rv2_2[1])
-s.wr(p_jrv2_3[0], p_jrv2_3[1], p_rv2_3[0], p_rv2_3[1])
-s.junc(p_rv2_3[0], p_rv2_3[1])
-
-# LED Key: D1 (Green 3mm) + R3 (330R) + Parallel Wire Header J_LED
+# LED Key: D1 (Red 3mm) + R3 (330R) + Parallel Wire Header J_LED
 s.sym("R3", "330R", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 283.21, 190.50, 90)
 p_r3_1 = s.pin_pos("R3", 1)
 p_r3_2 = s.pin_pos("R3", 2)
@@ -679,8 +643,8 @@ p_r3_2 = s.pin_pos("R3", 2)
 s.lbl("LED_KEY", p_r3_1[0] - 6.35, p_r3_1[1], 0, "right bottom")
 s.wr(p_r3_1[0] - 6.35, p_r3_1[1], p_r3_1[0], p_r3_1[1])
 
-# D1 (Green TX LED) rot=180: Anode (pin 2) on left, Cathode (pin 1) on right
-s.sym("D1", "TX_GREEN_3mm", "LED_THT:LED_D3.0mm", "Device", "LED", 294.64, 190.50, 180)
+# D1 (Red TX/KEY LED) rot=180: Anode (pin 2) on left, Cathode (pin 1) on right
+s.sym("D1", "KEY_RED_3mm", "LED_THT:LED_D3.0mm", "Device", "LED", 294.64, 190.50, 180)
 p_d1_k = s.pin_pos("D1", 1)
 p_d1_a = s.pin_pos("D1", 2)
 
@@ -689,7 +653,7 @@ s.wr(p_d1_k[0], p_d1_k[1], p_d1_k[0] + 5.08, p_d1_k[1])
 s.pwr("GND", p_d1_k[0] + 5.08, p_d1_k[1], 270)
 
 # Parallel 1x02 header J_LED for front panel LED wires (Pin 1: Anode +, Pin 2: Cathode -)
-s.sym("J_LED", "TX_LED_WIRES", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 294.64, 205.74, 180)
+s.sym("J_LED", "EXT_KEY_LED", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 294.64, 205.74, 180)
 p_jled_1 = s.pin_pos("J_LED", 1)
 p_jled_2 = s.pin_pos("J_LED", 2)
 s.wr(p_jled_1[0], p_jled_1[1], p_d1_a[0], p_d1_a[1])
@@ -697,6 +661,29 @@ s.junc(p_d1_a[0], p_d1_a[1])
 s.wr(p_jled_2[0], p_jled_2[1], p_d1_k[0], p_d1_k[1])
 s.junc(p_d1_k[0], p_d1_k[1])
 
+# LED Power: D3 (Green 3mm) + R9 (1k) + Parallel Wire Header J_PWR
+s.sym("R9", "1k", "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal", "Device", "R", 320.00, 190.50, 90)
+p_r9_1 = s.pin_pos("R9", 1)
+p_r9_2 = s.pin_pos("R9", 2)
+s.pwr("+5V", p_r9_1[0] - 5.08, p_r9_1[1], 90)
+s.wr(p_r9_1[0] - 5.08, p_r9_1[1], p_r9_1[0], p_r9_1[1])
+
+# D3 (Green PWR LED) rot=180: Anode (pin 2) on left, Cathode (pin 1) on right
+s.sym("D3", "PWR_GREEN_3mm", "LED_THT:LED_D3.0mm", "Device", "LED", 331.43, 190.50, 180)
+p_d3_k = s.pin_pos("D3", 1)
+p_d3_a = s.pin_pos("D3", 2)
+s.wr(p_r9_2[0], p_r9_2[1], p_d3_a[0], p_d3_a[1])
+s.wr(p_d3_k[0], p_d3_k[1], p_d3_k[0] + 5.08, p_d3_k[1])
+s.pwr("GND", p_d3_k[0] + 5.08, p_d3_k[1], 270)
+
+# Parallel 1x02 header J_PWR for front panel power LED wires (Pin 1: Anode +, Pin 2: Cathode -)
+s.sym("J_PWR", "EXT_PWR_LED", "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "Connector", "Conn_01x02_Pin", 331.43, 205.74, 180)
+p_jpwr_1 = s.pin_pos("J_PWR", 1)
+p_jpwr_2 = s.pin_pos("J_PWR", 2)
+s.wr(p_jpwr_1[0], p_jpwr_1[1], p_d3_a[0], p_d3_a[1])
+s.junc(p_d3_a[0], p_d3_a[1])
+s.wr(p_jpwr_2[0], p_jpwr_2[1], p_d3_k[0], p_d3_k[1])
+s.junc(p_d3_k[0], p_d3_k[1])
 
 # ==============================================================================
 # SECTION 6: OLED 0.96" I2C CONNECTOR HEADER
@@ -705,7 +692,7 @@ s.txt("6. ЭКРАН OLED 0.96 ДЮЙМА I2C FAST", 30.48, 106.68)
 
 # J5 (Conn_01x04_Pin) rot=180:
 # Pins calculated dynamically via pin_pos!
-s.sym("J5", "OLED_0.96_I2C", "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical", "Connector", "Conn_01x04_Pin", 55.88, 121.92, 180)
+s.sym("J5", "OLED_0.96_I2C", "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical", "Connector", "Conn_01x04_Pin", 55.88, 121.92, 180)
 p_j5_1 = s.pin_pos("J5", 1)  # GND
 p_j5_2 = s.pin_pos("J5", 2)  # +5V
 p_j5_3 = s.pin_pos("J5", 3)  # OLED_SCL
@@ -826,3 +813,11 @@ print(f"Schematic generated: {out_file} ({len(final_sch)} bytes)")
 
 res = subprocess.run([r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe", "sch", "erc", out_file], capture_output=True, text=True)
 print("ERC Output:", res.stdout + res.stderr)
+
+net_file = r"e:\dev\morse-trainer\hardware\MorseWave_Pro\MorseWave_Pro\MorseWave_Pro.net"
+res_net = subprocess.run([r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe", "sch", "export", "netlist", "-o", net_file, out_file], capture_output=True, text=True)
+print("Netlist export:", res_net.returncode)
+
+pdf_file = r"e:\dev\morse-trainer\hardware\MorseWave_Pro\MorseWave_Pro_Schematic.pdf"
+res_pdf = subprocess.run([r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe", "sch", "export", "pdf", "-o", pdf_file, out_file], capture_output=True, text=True)
+print("Schematic PDF export:", res_pdf.returncode)

@@ -1,10 +1,10 @@
 #VRML V2.0 utf8
-# OLED 0.96 inch I2C Display Module 3D Model
+# 4-Pin 2.54mm Socket Header for OLED Display (Origin at Pin 1)
 Group {
   children [
-    # 1. 4-Pin Female Header Socket on PCB
+    # 1. Black PBT Insulator Body
     Transform {
-      translation 0.0 -3.81 4.25
+      translation 0.0 3.81 4.25
       children [
         Shape {
           appearance Appearance {
@@ -20,62 +20,64 @@ Group {
         }
       ]
     }
-
-    # 2. OLED Module Substrate PCB (27.0 x 27.0 x 1.6 mm, Dark Blue)
-    # Centered at local X = +10.5 mm (extends DOWN squarely inside dedicated OLED Zone on left: X = 4..34, Y = 26..56)
+    # 2. Gold Internal Spring Contact Insets (4x 2.54mm pitch)
     Transform {
-      translation 10.5 -3.81 14.5
+      translation 0.0 0.0 8.45
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.05 0.25 0.65
-              specularColor 0.2 0.3 0.5
-              shininess 0.4
+              diffuseColor 0.85 0.72 0.22
+              specularColor 0.95 0.85 0.35
+              shininess 0.85
             }
           }
-          geometry Box {
-            size 27.0 27.0 1.6
-          }
+          geometry Box { size 1.1 1.1 0.12 }
         }
       ]
     }
-
-    # 3. Shiny Glass OLED Display Panel (24.0 x 14.5 x 1.2 mm)
     Transform {
-      translation 9.5 -3.81 15.9
+      translation 0.0 2.54 8.45
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.04 0.05 0.06
-              specularColor 0.85 0.85 0.9
-              shininess 0.95
+              diffuseColor 0.85 0.72 0.22
+              specularColor 0.95 0.85 0.35
+              shininess 0.85
             }
           }
-          geometry Box {
-            size 15.0 24.5 1.2
-          }
+          geometry Box { size 1.1 1.1 0.12 }
         }
       ]
     }
-
-    # 4. Active Lit OLED Matrix (Cyan glowing CW status display)
     Transform {
-      translation 9.5 -3.81 16.55
+      translation 0.0 5.08 8.45
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.02 0.25 0.45
-              emissiveColor 0.08 0.55 0.75
-              specularColor 0.9 0.95 1.0
-              shininess 0.95
+              diffuseColor 0.85 0.72 0.22
+              specularColor 0.95 0.85 0.35
+              shininess 0.85
             }
           }
-          geometry Box {
-            size 12.5 22.0 0.1
+          geometry Box { size 1.1 1.1 0.12 }
+        }
+      ]
+    }
+    Transform {
+      translation 0.0 7.62 8.45
+      children [
+        Shape {
+          appearance Appearance {
+            material Material {
+              diffuseColor 0.85 0.72 0.22
+              specularColor 0.95 0.85 0.35
+              shininess 0.85
+            }
           }
+          geometry Box { size 1.1 1.1 0.12 }
         }
       ]
     }

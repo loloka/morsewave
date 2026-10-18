@@ -1,11 +1,8 @@
 #VRML V2.0 utf8
-# Arduino Nano Module 3D Model in VRML 2.0
-# Properly oriented for KiCad PCB: Pin 1 at (0, 0), USB at bottom (Y = -37.75 mm)
-
+# Arduino Nano Module (Origin at Pin 1)
 Group {
   children [
-    # 1. Dual 1x15 Female Socket Headers (Black plastic on PCB)
-    # Left Socket Strip (Pins 1 - 15)
+    # 1. Dual Socket Headers
     Transform {
       translation 0.0 -17.78 4.25
       children [
@@ -23,8 +20,6 @@ Group {
         }
       ]
     }
-
-    # Right Socket Strip (Pins 30 - 16)
     Transform {
       translation 15.24 -17.78 4.25
       children [
@@ -43,7 +38,7 @@ Group {
       ]
     }
 
-    # 2. Arduino Nano PCB (Classic Dark Blue Substrate 43.5 x 17.8 x 1.6 mm)
+    # 2. Arduino Nano PCB (Classic Dark Blue Substrate 17.8 x 43.5 x 1.6 mm)
     Transform {
       translation 7.62 -17.78 9.3
       children [
@@ -62,54 +57,17 @@ Group {
       ]
     }
 
-    # 3. USB Type-C / Mini-B Metal Connector (Flush with bottom edge at Y = -38 mm)
+    # 3. ATmega328P TQFP-32 Microcontroller
     Transform {
-      translation 7.62 -37.8 11.2
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.78 0.80 0.82
-              specularColor 0.95 0.95 0.95
-              shininess 0.85
-            }
-          }
-          geometry Box {
-            size 7.5 8.0 3.2
-          }
-        }
-      ]
-    }
-
-    # Internal USB Port Cavity (Black slot inside metal shield)
-    Transform {
-      translation 7.62 -41.8 11.2
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.05 0.05 0.05
-              shininess 0.2
-            }
-          }
-          geometry Box {
-            size 5.5 0.3 2.0
-          }
-        }
-      ]
-    }
-
-    # 4. ATmega328P Microcontroller (Black QFP-32 Package rotated 45 deg)
-    Transform {
-      translation 7.62 -18.0 10.6
+      translation 7.62 -14.0 10.6
       rotation 0 0 1 0.785398
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.10 0.10 0.10
+              diffuseColor 0.15 0.15 0.16
               specularColor 0.3 0.3 0.3
-              shininess 0.4
+              shininess 0.3
             }
           }
           geometry Box {
@@ -119,110 +77,38 @@ Group {
       ]
     }
 
-    # 5. 16 MHz Crystal Oscillator (Silver HC-49SM Can)
+    # 4. Mini-USB Type B Metal Shell (at rear edge flush with PCB)
     Transform {
-      translation 7.62 -27.5 11.0
+      translation 7.62 -38.0 11.6
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.82 0.84 0.86
-              specularColor 0.9 0.9 0.9
-              shininess 0.8
+              diffuseColor 0.85 0.87 0.90
+              specularColor 0.95 0.95 0.95
+              shininess 0.9
             }
           }
           geometry Box {
-            size 4.5 10.5 2.0
+            size 7.5 9.0 4.0
           }
         }
       ]
     }
 
-    # 6. Reset Pushbutton (White button on square metal base)
+    # 5. LEDs (PWR Green, TX/RX Orange)
     Transform {
-      translation 7.62 -8.0 10.5
+      translation 5.0 -22.0 10.3
       children [
         Shape {
           appearance Appearance {
             material Material {
-              diffuseColor 0.75 0.75 0.75
-              shininess 0.5
+              diffuseColor 0.1 0.8 0.2
+              emissiveColor 0.05 0.5 0.1
             }
           }
           geometry Box {
-            size 3.5 3.5 1.0
-          }
-        }
-      ]
-    }
-    Transform {
-      translation 7.62 -8.0 11.3
-      rotation 1 0 0 1.570796
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.92 0.92 0.92
-              shininess 0.4
-            }
-          }
-          geometry Cylinder {
-            radius 1.1
-            height 0.8
-          }
-        }
-      ]
-    }
-
-    # 7. ICSP 2x3 Male Pin Header (Gold pins at top edge)
-    Transform {
-      translation 7.62 -2.54 11.0
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.12 0.12 0.12
-              shininess 0.3
-            }
-          }
-          geometry Box {
-            size 5.08 7.62 1.5
-          }
-        }
-      ]
-    }
-
-    # 8. Power & Status LEDs (0805 SMD Indicators)
-    # Green Power LED
-    Transform {
-      translation 4.2 -11.0 10.3
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.1 0.85 0.2
-              emissiveColor 0.05 0.4 0.1
-            }
-          }
-          geometry Box {
-            size 1.2 2.0 0.4
-          }
-        }
-      ]
-    }
-    # Red Pin 13 / L LED
-    Transform {
-      translation 4.2 -14.0 10.3
-      children [
-        Shape {
-          appearance Appearance {
-            material Material {
-              diffuseColor 0.85 0.15 0.15
-              emissiveColor 0.4 0.05 0.05
-            }
-          }
-          geometry Box {
-            size 1.2 2.0 0.4
+            size 1.2 1.8 0.5
           }
         }
       ]

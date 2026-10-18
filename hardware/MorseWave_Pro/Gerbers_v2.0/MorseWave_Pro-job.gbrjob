@@ -5,7 +5,7 @@
       "Application": "Pcbnew",
       "Version": "10.0.7"
     },
-    "CreationDate": "2026-10-18T03:08:51+07:00"
+    "CreationDate": "2026-10-18T23:17:02+07:00"
   },
   "GeneralSpecs": {
     "ProjectId": {
@@ -27,6 +27,7 @@
       "PadToPad": 0.2,
       "PadToTrack": 0.2,
       "TrackToTrack": 0.2,
+      "MinLineWidth": 0.254,
       "TrackToRegion": 0.5,
       "RegionToRegion": 0.5
     }
@@ -40,26 +41,6 @@
     {
       "Path": "MorseWave_Pro-B_Cu.gbl",
       "FileFunction": "Copper,L2,Bot",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-F_Adhesive.gta",
-      "FileFunction": "Glue,Top",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-B_Adhesive.gba",
-      "FileFunction": "Glue,Bot",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-F_Paste.gtp",
-      "FileFunction": "SolderPaste,Top",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-B_Paste.gbp",
-      "FileFunction": "SolderPaste,Bot",
       "FilePolarity": "Positive"
     },
     {
@@ -83,58 +64,8 @@
       "FilePolarity": "Negative"
     },
     {
-      "Path": "MorseWave_Pro-User_Drawings.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_Comments.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_Eco1.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_Eco2.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
       "Path": "MorseWave_Pro-Edge_Cuts.gm1",
       "FileFunction": "Profile",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-F_Fab.gbr",
-      "FileFunction": "AssemblyDrawing,Top",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-B_Fab.gbr",
-      "FileFunction": "AssemblyDrawing,Bot",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_1.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_2.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_3.gbr",
-      "FileFunction": "Other,User",
-      "FilePolarity": "Positive"
-    },
-    {
-      "Path": "MorseWave_Pro-User_4.gbr",
-      "FileFunction": "Other,User",
       "FilePolarity": "Positive"
     }
   ],

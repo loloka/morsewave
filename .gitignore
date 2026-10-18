@@ -18,3 +18,11 @@ config/maintenance_secret.php
 
 # Локальные секреты для docker-compose (если заведёшь .env)
 .env
+
+# Временные файлы KiCad и локальная история
+*.lck
+*.kicad_prl
+*-save.kicad_pcb
+*-save.kicad_sch
+_autosave-*
+.history/

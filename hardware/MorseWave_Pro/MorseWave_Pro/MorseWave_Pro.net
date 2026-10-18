@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "e:\\dev\\morse-trainer\\hardware\\MorseWave_Pro\\MorseWave_Pro\\MorseWave_Pro.kicad_sch")
-		(date "2026-10-18T16:42:32")
+		(date "2026-10-18T22:58:09")
 		(tool "Eeschema 10.0.7")
 		(sheet
 			(number "1")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b05ee347-1ebf-456c-869d-54824268c001")
+			(tstamps "818926f1-28e9-4124-950e-8d666d1bd6da")
 			(units
 				(unit
 					(name "A")
@@ -231,7 +231,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0619ff02-e240-4aea-ad09-db08fe97d67d")
+			(tstamps "da7cf013-d18e-4d2f-a7e4-e5b3ff20027f")
 			(units
 				(unit
 					(name "A")
@@ -285,7 +285,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0232e026-0166-4e9a-a567-a20506659921")
+			(tstamps "90d8856c-437c-4292-9735-00c4c111c402")
 			(units
 				(unit
 					(name "A")
@@ -339,7 +339,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "afacec89-80c8-48bc-aab9-347d40885c19")
+			(tstamps "aca77f74-8c2b-4e48-9864-2fe6b580326b")
 			(units
 				(unit
 					(name "A")
@@ -393,7 +393,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "216e518d-68a0-4276-851a-253ee1c2fa60")
+			(tstamps "fe70b473-2109-4579-8b71-ede6432f9bdc")
 			(units
 				(unit
 					(name "A")
@@ -447,7 +447,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d5e276e6-b97b-43e9-ac9d-a8b50bc83f5b")
+			(tstamps "023c495b-3115-4166-9eb7-ee2d828548c9")
 			(units
 				(unit
 					(name "A")
@@ -501,7 +501,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1473c0d8-7b88-4e0f-81e4-843727784c67")
+			(tstamps "d26c2c03-ed79-4f28-8b87-50b49adc661a")
 			(units
 				(unit
 					(name "A")
@@ -555,7 +555,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e832c783-3829-4468-a73e-3be18553fdca")
+			(tstamps "89098a11-6bb7-41ec-8b48-d4dc25cf7364")
 			(units
 				(unit
 					(name "A")
@@ -572,7 +572,7 @@
 		)
 		(comp
 			(ref "D1")
-			(value "TX_GREEN_3mm")
+			(value "KEY_RED_3mm")
 			(footprint "LED_THT:LED_D3.0mm")
 			(fields
 				(field
@@ -609,7 +609,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0ea238ae-1342-4b32-b342-b21bb8ccb99f")
+			(tstamps "41727a17-67c1-45f6-9b78-bea0e0507746")
 			(units
 				(unit
 					(name "A")
@@ -663,7 +663,61 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "15638e44-3d13-49d8-9007-aa1718c2295c")
+			(tstamps "a228cb86-c77a-40fb-b55f-9f7cb84a8da2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D3")
+			(value "PWR_GREEN_3mm")
+			(footprint "LED_THT:LED_D3.0mm")
+			(fields
+				(field
+					(name "Footprint") "LED_THT:LED_D3.0mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ff12fb1a-c8df-4cce-b1ba-31fad4e23d88")
 			(units
 				(unit
 					(name "A")
@@ -713,7 +767,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "64e94ef7-f5f8-4bde-8397-3bd74815c191")
+			(tstamps "becaca03-c6d1-4041-bc4a-8e8e3fee8c0b")
 			(units
 				(unit
 					(name "A")
@@ -764,7 +818,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c0ab1048-ad10-4e22-874d-9cd537fbce80")
+			(tstamps "0039bd65-d1e8-47d1-941e-5ce7e2973df8")
 			(units
 				(unit
 					(name "A")
@@ -821,7 +875,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "79bb1f1f-a948-4bb7-af4e-e57fce24c81c")
+			(tstamps "1115553f-5033-4870-b500-af3edbd4bccf")
 			(units
 				(unit
 					(name "A")
@@ -875,7 +929,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7fe157e6-a5ca-4a99-bdd8-1ed210530283")
+			(tstamps "0dd35ab1-84b4-4068-bd51-30c7b9779f50")
 			(units
 				(unit
 					(name "A")
@@ -893,10 +947,10 @@
 		(comp
 			(ref "J4")
 			(value "SPEAKER_8R")
-			(footprint "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical")
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -929,7 +983,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f5f64976-240c-42ca-bccc-f826b405af95")
+			(tstamps "fef42a7c-93b8-4f72-aa73-b33fac5e35f7")
 			(units
 				(unit
 					(name "A")
@@ -947,10 +1001,10 @@
 		(comp
 			(ref "J5")
 			(value "OLED_0.96_I2C")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+			(footprint "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+					(name "Footprint") "Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -983,7 +1037,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5110fd12-1a8b-4827-9ab8-8cc81ca15e8a")
+			(tstamps "b46d2371-e4fd-463e-ade8-fd47387efae2")
 			(units
 				(unit
 					(name "A")
@@ -1043,7 +1097,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2ed633c5-15cd-4c2e-a064-324ff806b802")
+			(tstamps "8bd7908b-9dbd-4644-8be5-67be4cdce178")
 			(units
 				(unit
 					(name "A")
@@ -1103,7 +1157,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e728faa3-d6e9-455f-8f61-431fd81de1e0")
+			(tstamps "92fb5e52-456c-4e09-bef1-87f60d7a6c43")
 			(units
 				(unit
 					(name "A")
@@ -1120,7 +1174,7 @@
 		)
 		(comp
 			(ref "J_LED")
-			(value "TX_LED_WIRES")
+			(value "EXT_KEY_LED")
 			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 			(fields
 				(field
@@ -1157,7 +1211,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3b63371b-9b3b-4c32-9211-5a7aa675aa40")
+			(tstamps "0de4097b-ba24-41a4-9b80-97635e0e9210")
 			(units
 				(unit
 					(name "A")
@@ -1173,12 +1227,12 @@
 			)
 		)
 		(comp
-			(ref "J_RV1")
-			(value "SPEED_WIRES")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
+			(ref "J_PWR")
+			(value "EXT_PWR_LED")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -1188,8 +1242,8 @@
 			)
 			(libsource
 				(lib "Connector")
-				(part "Conn_01x03_Pin")
-				(description "Generic connector, single row, 01x03, script generated")
+				(part "Conn_01x02_Pin")
+				(description "Generic connector, single row, 01x02, script generated")
 			)
 			(property
 				(name "Sheetname")
@@ -1211,7 +1265,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2e13640b-1206-4580-8ce1-e9a6b500ffa0")
+			(tstamps "909f690e-0d31-4bdc-bf53-6be4a990e433")
 			(units
 				(unit
 					(name "A")
@@ -1221,123 +1275,6 @@
 						)
 						(pin
 							(num "2")
-						)
-						(pin
-							(num "3")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "J_RV2")
-			(value "TONE_WIRES")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
-			(fields
-				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Connector")
-				(part "Conn_01x03_Pin")
-				(description "Generic connector, single row, 01x03, script generated")
-			)
-			(property
-				(name "Sheetname")
-				(value "MorseWave_Pro")
-			)
-			(property
-				(name "Sheetfile")
-				(value "MorseWave_Pro.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "connector")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Connector*:*_1x??_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "e468edc6-8289-4e15-911a-474858175219")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "3")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "J_RV3")
-			(value "VOL_WIRES")
-			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
-			(fields
-				(field
-					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Connector")
-				(part "Conn_01x03_Pin")
-				(description "Generic connector, single row, 01x03, script generated")
-			)
-			(property
-				(name "Sheetname")
-				(value "MorseWave_Pro")
-			)
-			(property
-				(name "Sheetfile")
-				(value "MorseWave_Pro.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "connector")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "Connector*:*_1x??_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "bb48256e-8cd0-4f51-ac08-fc2d713b91c4")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-						(pin
-							(num "3")
 						)
 					)
 				)
@@ -1378,7 +1315,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "88034c7c-2a2f-43e8-bbc5-d9471337da96")
+			(tstamps "1de68376-f5ab-4eb4-9f1e-10e1533ed064")
 			(units
 				(unit
 					(name "A")
@@ -1435,7 +1372,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dd1c8385-2004-4230-8c0c-f5e51025dbbd")
+			(tstamps "1b0765bc-1d99-4ac5-88c4-9b606df1cf78")
 			(units
 				(unit
 					(name "A")
@@ -1489,7 +1426,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5a62789c-26b4-43c8-9de5-285ad4ad603f")
+			(tstamps "66191186-92f9-4fda-838d-1e878f2f67ba")
 			(units
 				(unit
 					(name "A")
@@ -1543,7 +1480,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "225e1a84-f643-4587-a277-c5e65608e4eb")
+			(tstamps "8114a5e5-626f-4027-98b0-b82afd1aa9ba")
 			(units
 				(unit
 					(name "A")
@@ -1597,7 +1534,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8acbd740-a23e-438c-b63f-f5318d038d5c")
+			(tstamps "7a2af22b-0896-46d5-bdd4-a48ef2b57949")
 			(units
 				(unit
 					(name "A")
@@ -1651,7 +1588,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "64fb201f-8baf-4a3f-9edd-62c32623ea64")
+			(tstamps "65b8a439-168a-4dc4-b11c-55a9178be2f1")
 			(units
 				(unit
 					(name "A")
@@ -1705,7 +1642,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "36ee1a50-60a9-40f0-9ca2-365a186ca452")
+			(tstamps "f14eba8a-096b-42bf-a2e4-bd8e074573e8")
 			(units
 				(unit
 					(name "A")
@@ -1759,7 +1696,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ed06496d-5cf0-4473-bd09-e4b32be073e8")
+			(tstamps "2c957245-5995-4d9e-a1a2-3f2862e5f1ae")
 			(units
 				(unit
 					(name "A")
@@ -1813,7 +1750,61 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6394527b-81ef-48ae-8a7a-3322ec7043ac")
+			(tstamps "d8268faf-d4e8-4a5c-8632-b17f07dd0e58")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R9")
+			(value "1k")
+			(footprint "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
+			(fields
+				(field
+					(name "Footprint") "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "MorseWave_Pro")
+			)
+			(property
+				(name "Sheetfile")
+				(value "MorseWave_Pro.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "178883c0-f441-4e70-901b-44c2d6277fde")
 			(units
 				(unit
 					(name "A")
@@ -1830,11 +1821,11 @@
 		)
 		(comp
 			(ref "RV1")
-			(value "10k (Speed)")
-			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(value "SPEED (10k)")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -1867,7 +1858,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a423396b-13ec-4366-bbe4-c884102299e4")
+			(tstamps "7cdd1908-3b5c-42d7-a5d2-633ab1e683a0")
 			(units
 				(unit
 					(name "A")
@@ -1887,11 +1878,11 @@
 		)
 		(comp
 			(ref "RV2")
-			(value "10k (Tone)")
-			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(value "TONE (10k)")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -1924,7 +1915,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3319b35e-f106-4f6f-880d-62848ec5aea0")
+			(tstamps "96a508f4-726b-4488-a85b-4926bc0c7982")
 			(units
 				(unit
 					(name "A")
@@ -1944,11 +1935,11 @@
 		)
 		(comp
 			(ref "RV3")
-			(value "10k (Volume)")
-			(footprint "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+			(value "VOLUME (10k)")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 			(fields
 				(field
-					(name "Footprint") "Potentiometer_THT:Potentiometer_Alps_RK09L_Single_Vertical")
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -1981,7 +1972,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fe3a161c-835f-43cb-9c7b-2c04dc44aadf")
+			(tstamps "35c62dcd-a805-4c10-9336-ffca5653e014")
 			(units
 				(unit
 					(name "A")
@@ -2038,7 +2029,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fe7c6182-c523-480e-9cbe-64b0c257ee76")
+			(tstamps "c99903ae-9a7b-4cee-ab6d-811c6ba97c96")
 			(units
 				(unit
 					(name "A")
@@ -2098,7 +2089,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "782277e6-9a11-4567-b297-0e4fcc3bc093")
+			(tstamps "2b5ea1fa-d1b2-4c98-b68a-9e99f97b6132")
 			(units
 				(unit
 					(name "A")
@@ -2809,20 +2800,13 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J_RV1")
-				(pin "1")
-				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "J_RV2")
-				(pin "1")
-				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
 				(ref "R7")
 				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
+				(pin "1")
 				(pintype "passive")
 			)
 			(node
@@ -2975,12 +2959,6 @@
 				(pintype "bidirectional")
 			)
 			(node
-				(ref "J_RV1")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
 				(ref "RV1")
 				(pin "2")
 				(pinfunction "2_2")
@@ -2996,12 +2974,6 @@
 				(pin "21")
 				(pinfunction "A2_21")
 				(pintype "bidirectional")
-			)
-			(node
-				(ref "J_RV2")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
 			)
 			(node
 				(ref "RV2")
@@ -3112,6 +3084,12 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "D3")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
 				(ref "FLG_GND")
 				(pin "1")
 				(pintype "power_out")
@@ -3147,21 +3125,9 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J_RV1")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "J_RV2")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
-			(node
-				(ref "J_RV3")
-				(pin "3")
-				(pinfunction "Pin_3_3")
+				(ref "J_PWR")
+				(pin "2")
+				(pinfunction "Pin_2_2")
 				(pintype "passive")
 			)
 			(node
@@ -3221,6 +3187,27 @@
 		)
 		(net
 			(code "16")
+			(name "Net-(C4-Pad1)")
+			(class "Default")
+			(node
+				(ref "C4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV3")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "17")
 			(name "Net-(D1-A)")
 			(class "Default")
 			(node
@@ -3242,7 +3229,7 @@
 			)
 		)
 		(net
-			(code "17")
+			(code "18")
 			(name "Net-(D2-A)")
 			(class "Default")
 			(node
@@ -3264,7 +3251,7 @@
 			)
 		)
 		(net
-			(code "18")
+			(code "19")
 			(name "Net-(D2-K)")
 			(class "Default")
 			(node
@@ -3286,7 +3273,29 @@
 			)
 		)
 		(net
-			(code "19")
+			(code "20")
+			(name "Net-(D3-A)")
+			(class "Default")
+			(node
+				(ref "D3")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J_PWR")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "21")
 			(name "Net-(J3-Pin_1)")
 			(class "Default")
 			(node
@@ -3302,7 +3311,7 @@
 			)
 		)
 		(net
-			(code "20")
+			(code "22")
 			(name "Net-(J3-Pin_2)")
 			(class "Default")
 			(node
@@ -3318,7 +3327,7 @@
 			)
 		)
 		(net
-			(code "21")
+			(code "23")
 			(name "Net-(J4-Pin_1)")
 			(class "Default")
 			(node
@@ -3345,7 +3354,7 @@
 			)
 		)
 		(net
-			(code "22")
+			(code "24")
 			(name "Net-(J4-Pin_2)")
 			(class "Default")
 			(node
@@ -3361,7 +3370,7 @@
 			)
 		)
 		(net
-			(code "23")
+			(code "25")
 			(name "Net-(J7-Pin_1)")
 			(class "Default")
 			(node
@@ -3373,55 +3382,6 @@
 			(node
 				(ref "R8")
 				(pin "2")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "24")
-			(name "Net-(J_RV3-Pin_1)")
-			(class "Default")
-			(node
-				(ref "C4")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "J_RV3")
-				(pin "1")
-				(pinfunction "Pin_1_1")
-				(pintype "passive")
-			)
-			(node
-				(ref "R2")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "RV3")
-				(pin "1")
-				(pinfunction "1_1")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "25")
-			(name "Net-(J_RV3-Pin_2)")
-			(class "Default")
-			(node
-				(ref "J_RV3")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R6")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "RV3")
-				(pin "2")
-				(pinfunction "2_2")
 				(pintype "passive")
 			)
 		)
@@ -3473,6 +3433,22 @@
 		)
 		(net
 			(code "29")
+			(name "Net-(R6-Pad1)")
+			(class "Default")
+			(node
+				(ref "R6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "RV3")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "30")
 			(name "unconnected-(A1-3V3-Pad17)")
 			(class "Default")
 			(node
@@ -3483,7 +3459,7 @@
 			)
 		)
 		(net
-			(code "30")
+			(code "31")
 			(name "unconnected-(A1-A1-Pad20)")
 			(class "Default")
 			(node
@@ -3494,7 +3470,7 @@
 			)
 		)
 		(net
-			(code "31")
+			(code "32")
 			(name "unconnected-(A1-A3-Pad22)")
 			(class "Default")
 			(node
@@ -3505,7 +3481,7 @@
 			)
 		)
 		(net
-			(code "32")
+			(code "33")
 			(name "unconnected-(A1-A6-Pad25)")
 			(class "Default")
 			(node
@@ -3516,7 +3492,7 @@
 			)
 		)
 		(net
-			(code "33")
+			(code "34")
 			(name "unconnected-(A1-A7-Pad26)")
 			(class "Default")
 			(node
@@ -3527,7 +3503,7 @@
 			)
 		)
 		(net
-			(code "34")
+			(code "35")
 			(name "unconnected-(A1-AREF-Pad18)")
 			(class "Default")
 			(node
@@ -3538,7 +3514,7 @@
 			)
 		)
 		(net
-			(code "35")
+			(code "36")
 			(name "unconnected-(A1-D0{slash}RX-Pad2)")
 			(class "Default")
 			(node
@@ -3549,7 +3525,7 @@
 			)
 		)
 		(net
-			(code "36")
+			(code "37")
 			(name "unconnected-(A1-D1{slash}TX-Pad1)")
 			(class "Default")
 			(node
@@ -3560,7 +3536,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "38")
 			(name "unconnected-(A1-D7-Pad10)")
 			(class "Default")
 			(node
@@ -3571,7 +3547,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "39")
 			(name "unconnected-(A1-D9-Pad12)")
 			(class "Default")
 			(node
@@ -3582,7 +3558,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "40")
 			(name "unconnected-(A1-D12-Pad15)")
 			(class "Default")
 			(node
@@ -3593,7 +3569,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "41")
 			(name "unconnected-(A1-D13-Pad16)")
 			(class "Default")
 			(node
@@ -3604,7 +3580,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "42")
 			(name "unconnected-(A1-GND-Pad29)")
 			(class "Default")
 			(node
@@ -3615,7 +3591,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "43")
 			(name "unconnected-(A1-VIN-Pad30)")
 			(class "Default")
 			(node
@@ -3626,7 +3602,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "44")
 			(name "unconnected-(A1-~{RESET}-Pad3)")
 			(class "Default")
 			(node
@@ -3637,7 +3613,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "45")
 			(name "unconnected-(A1-~{RESET}-Pad28)")
 			(class "Default")
 			(node

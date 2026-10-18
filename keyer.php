@@ -21,12 +21,22 @@ include __DIR__ . '/includes/header.php';
     </p>
 
     <!-- Информационная плашка подключения -->
-    <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #4fd8c4; font-size: 15px;">
-            <span>🔌</span> Как устроен и подключается ключ:
+    <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #4fd8c4; font-size: 15px;">
+                <span>🔌</span> Как устроен и подключается ключ:
+            </div>
+            <span style="font-size: 11px; font-weight: 800; color: #f87171; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.04em;">
+                ⚡ ПРОЕКТ В РАЗРАБОТКЕ · СЛЕДИТЕ ЗА ОБНОВЛЕНИЯМИ
+            </span>
         </div>
         <div style="font-size: 14px; color: var(--text); line-height: 1.6;">
-            Манипулятор подключается к компьютеру через плату <b>Arduino (Nano / Uno)</b> с открытой <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">прошивкой MorseWave Pro v1.7 (GitHub) ↗</a>.
+            Манипулятор подключается к компьютеру через плату <b>Arduino (Nano / Uno)</b> со скетчем открытой прошивки.
+            <div style="margin-top: 6px;">
+                <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(79, 216, 196, 0.15); border: 1px solid #4fd8c4; color: #4fd8c4; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none;">
+                    <span>📥</span> Скачать файл прошивки: keyer_breadboard.ino ↗
+                </a>
+            </div>
         </div>
         <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
             Поддерживается <b>любой манипулятор</b> — двухрычажный ямбический (с упором на режим Iambic B) или однорычажное весло — через стандартный разъём <b>Jack 3.5 мм</b> (поддержка классического прямого ключа-клоподава будет добавлена в следующих версиях).
@@ -298,6 +308,38 @@ include __DIR__ . '/includes/header.php';
                 Автоматический алгоритм сегментации расшифровывает символы, даже если буквы переданы без идеальной паузы (например, R9 или CQ не превращаются в ошибку). Контроль межсловных пауз 7T выдаёт честные пробелы без спама.
             </div>
         </div>
+
+        <!-- 3D модель печатной платы (заполняет пустые 2 колонки) -->
+        <div class="spec-item spec-item-pcb" style="display:flex; flex-direction:column; justify-content:space-between; background:linear-gradient(135deg, rgba(14,20,26,0.95), rgba(9,12,16,0.98)); border:1px solid rgba(239,68,68,0.45); border-radius:12px; padding:18px; position:relative; overflow:hidden;">
+            <div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#4fd8c4; font-size:14px; text-transform:uppercase; letter-spacing:0.04em;">
+                        <span>🎛️</span>
+                        <span>Печатная плата MorseWave Pro v2.0 (100% THT)</span>
+                    </div>
+                    <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:3px 10px; border-radius:4px; letter-spacing:0.08em; text-transform:uppercase; box-shadow:0 0 12px rgba(220,38,38,0.5);">
+                        ● В РАЗРАБОТКЕ
+                    </span>
+                </div>
+                <div class="spec-item-desc" style="margin-bottom:10px;">
+                    Заводская плата 100×75 мм под стандартный корпус. Полностью на классических выводных компонентах (0 SMD — собирается обычным паяльником). Опторазвязка манипулятора и PTT на PC817, 2-звенный Butterworth ФНЧ звука, разъёмы под СП3-4 и непрерывный экран земли B.Cu (&gt;95%).
+                </div>
+            </div>
+
+            <!-- Изображение 3D платы с эффектом интерактивности -->
+            <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid rgba(79,216,196,0.25); background:#06080a; margin:6px 0 10px;">
+                <img src="<?= asset_v('assets/img/morsewave_pro_3d_iso.png') ?>" alt="3D модель платы MorseWave Pro v2.0" style="width:100%; height:auto; display:block; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="position:absolute; top:8px; right:8px; background:rgba(220,38,38,0.92); color:#fff; font-size:10px; font-weight:800; padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase; box-shadow:0 2px 6px rgba(0,0,0,0.6);">
+                    В РАЗРАБОТКЕ
+                </div>
+            </div>
+
+            <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
+                <span class="badge" style="background:rgba(79,216,196,0.1); color:#4fd8c4; border:1px solid rgba(79,216,196,0.3);">100% THT Classic (0 SMD)</span>
+                <span class="badge" style="background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">Класс Резонит 3/4 (DRC 0 ошибок)</span>
+                <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);">Экран массы B.Cu &gt;95%</span>
+            </div>
+        </div>
     </div>
 
     <!-- Сравнение с китайским MX-K2 -->
@@ -371,16 +413,69 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <div class="card mt-4" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-        <div>
-            <h4 style="margin:0 0 4px;">Хотите собрать такой же ключ своими руками?</h4>
-            <p class="muted" style="margin:0; font-size:14px;">
-                Полный мануал, список покупок с артикулами (BOM), карта проводки макетки и код прошивки v1.7 лежат в репозитории проекта.
-            </p>
+    <!-- Блок "Где взять ключ / Сборка своими руками" -->
+    <div class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
+            <div>
+                <div class="card-eyebrow" style="color:#4fd8c4;">СДЕЛАЙ САМ (DIY) · СТАРТОВАЯ ВЕРСИЯ</div>
+                <h3 style="margin:0 0 6px;">Где взять ключ? Соберите своими руками прямо сейчас!</h3>
+                <p class="muted" style="margin:0; font-size:14px; max-width:820px; line-height:1.6;">
+                    Заводская печатная плата <b>MorseWave Pro v2.0</b> сейчас находится в активной разработке и подготовке к производству. Но вам не обязательно ждать! Вы можете прямо сегодня собрать базовую стартовую версию на обычной беспаечной макетке (Breadboard) всего за 15–20 минут. Все детали стандартные и доступны в любом радиомагазине или на Ozon/AliExpress.
+                </p>
+            </div>
+            <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:4px 10px; border-radius:6px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;">
+                ⚡ ПРОЕКТ В РАЗРАБОТКЕ
+            </span>
         </div>
-        <div style="display:flex; gap:10px;">
-            <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px;">
-                <span>Исходники на GitHub ↗</span>
+
+        <!-- Сетка полезных ссылок и гайдов -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:16px;">
+            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-guide-full.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+                <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span>📘</span> Полное руководство по сборке ↗
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                    Пошаговый мануал, список всех деталей с номиналами (BOM) и схема запуска с нуля.
+                </div>
+            </a>
+
+            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/breadboard-wiring.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+                <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span>🔌</span> Карта соединений на макетке ↗
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                    Наглядная монтажная схема сборки проводками на беспаечной плате за 15 минут.
+                </div>
+            </a>
+
+            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-schematic.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+                <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span>📐</span> Принципиальная схема (PDF/MD) ↗
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                    Электрическая схема, фильтры радиопомех, опторазвязка манипулятора и распиновка.
+                </div>
+            </a>
+
+            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+                <div style="font-weight:700; color:#e8a33d; font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span>💻</span> Файл прошивки: keyer_breadboard.ino ↗
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                    Готовый исходный код скетча для заливки в Arduino Nano / Uno через Arduino IDE.
+                </div>
+            </a>
+        </div>
+
+        <!-- Нижняя плашка репозитория GitHub и уведомления о разработке -->
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:14px; border-top:1px dashed #1c2633;">
+            <div style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px;">
+                <span>🛠️</span>
+                <span>Проект в активной разработке, следите за обновлениями схем, прошивок и выпуском заводских плат!</span>
+            </div>
+            <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px; font-size:13px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                <span>Репозиторий проекта на GitHub ↗</span>
             </a>
         </div>
     </div>
