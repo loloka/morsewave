@@ -205,7 +205,7 @@ return [
     'dosaaf.words_practice_goal' => 'Stage exam readiness: {streak} / {target} words',
     'dosaaf.exam_locked_alert' => '🔒 Exam is locked. Decode at least {target} words in Word Reception practice ({done}/{target}).',
     'dosaaf.go_to_words' => 'Go to Word Practice →',
-    'dosaaf.layout_warn' => '⚠️ English keyboard layout detected — text is auto-transliterated to Cyrillic',
+    'dosaaf.layout_warn' => '⚠️ English layout active — characters are automatically entered using Russian layout',
     'dosaaf.exam_title' => 'Stage Qualification Exam',
     'dosaaf.exam_desc' => 'Receive 10 control words in a row. To pass and unlock the next stage, correctly decode at least 8 words (80%).',
     'dosaaf.exam_min_speed_hint' => 'Stage exam speed requirement: at least {wpm} WPM ({cpm} cpm).',

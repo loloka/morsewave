@@ -28,6 +28,7 @@
     let examWords = [];
     let examIndex = 0;
     let examCorrect = 0;
+    let examXpEarned = 0;
 
     // Накопленный прогресс пользователя
     let listenedLetters = new Set();
@@ -509,7 +510,11 @@
             saveDosaafProgress();
             updateWordsGoalProgress();
 
-            if (typeof awardXp === 'function') awardXp(2, t('dosaaf.word_xp') || 'Слово ДОСААФ');
+            if (typeof Progress !== 'undefined') {
+                Progress.addXp(1);
+                Progress.logXp(1, 'dosaaf_words');
+                Progress.markDailyActivity();
+            }
         } else {
             wordStreak = 0;
         }
@@ -521,7 +526,7 @@
         if (feedback) {
             feedback.className = 'feedback show ' + (isCorrect ? 'ok' : 'bad');
             if (isCorrect) {
-                feedback.innerHTML = `✓ <b>${currentWord}</b> — ${t('dosaaf.correct') || 'Верно!'}`;
+                feedback.innerHTML = `✓ <b>${currentWord}</b> — ${t('dosaaf.correct') || 'Верно!'} <span class="badge-xp" style="margin-left:6px; font-size:12px; font-weight:700; color:var(--accent);">+1 XP</span>`;
                 setTimeout(() => nextWord(true), 900);
             } else {
                 const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum);
@@ -602,6 +607,7 @@
 
         examIndex = 0;
         examCorrect = 0;
+        examXpEarned = 0;
         examActive = true;
 
         const panel = document.getElementById('dosaaf-exam-panel');
@@ -649,6 +655,14 @@
 
         if (ans === target) {
             examCorrect++;
+            // В зачёте контрольное слово рассчитывается как группа символов (коэффициент 1.2 за знак)
+            const wordXp = Math.max(2, Math.round(target.length * 1.2));
+            examXpEarned += wordXp;
+            if (typeof Progress !== 'undefined') {
+                Progress.addXp(wordXp);
+                Progress.logXp(wordXp, 'dosaaf_exam_word');
+                Progress.markDailyActivity();
+            }
         }
         examIndex++;
         nextExamWord();
@@ -674,6 +688,7 @@
         const passThreshold = Math.ceil(totalWords * 0.8); // 80% (8 из 10)
         const isPassed = examCorrect >= passThreshold;
         const currentWpm = getDosaafWpm();
+        const passBonus = 25;
 
         if (isPassed) {
             const prev = examPassed[currentStageNum];
@@ -690,8 +705,15 @@
             saveDosaafProgress();
             renderStageNav();
 
-            if (typeof Progress !== 'undefined' && typeof Progress.checkAchievements === 'function') {
-                Progress.checkAchievements();
+            // Бонус опыта за успешную сдачу зачёта ступени (+25 XP)
+            examXpEarned += passBonus;
+            if (typeof Progress !== 'undefined') {
+                Progress.addXp(passBonus);
+                Progress.logXp(passBonus, 'dosaaf_exam_pass');
+                Progress.markDailyActivity();
+                if (typeof Progress.checkAchievements === 'function') {
+                    Progress.checkAchievements();
+                }
             }
         }
 
@@ -710,6 +732,11 @@
                             : '<b>Поздравляем!</b> Полный курс ДОСААФ успешно завершён!')
                         : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' слов (80%). Потренируйтесь на словах и повторите зачёт.'}
                 </p>
+                ${examXpEarned > 0 ? `
+                    <div class="mt-2 p-2" style="background:var(--surface-2); border-radius:var(--radius-sm); border-left:3px solid var(--accent); font-size:13px; font-weight:600;">
+                        ✨ <b>+${examXpEarned} XP</b> получено за зачёт ${isPassed ? '(включая бонус +25 XP за сдачу ступени)' : ''}
+                    </div>
+                ` : ''}
                 ${isPassed ? `
                     <div class="mt-3">
                         ${currentStageNum < 7 ? `
@@ -950,7 +977,7 @@
         if (warnEl) {
             if (hadEnglish) {
                 warnEl.style.display = 'block';
-                warnEl.textContent = t('dosaaf.layout_warn') || '⚠️ Включена английская раскладка — текст автоматически переводится на русский';
+                warnEl.textContent = t('dosaaf.layout_warn') || '⚠️ Включена английская раскладка — символы автоматически вводятся в русской раскладке';
             } else {
                 warnEl.style.display = 'none';
             }
