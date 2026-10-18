@@ -865,7 +865,7 @@ HTML
     'js.common.cpm_title' => 'Нажмите, чтобы узнать соответствие WPM и реальных знаков в минуту (стандарт PARIS и радиоспорт)',
     'js.common.cpm_type_letters' => 'буквы',
     'js.common.cpm_type_digits' => 'цифры',
-    'js.common.cpm_type_mixed' => 'смесь',
+    'js.common.cpm_type_mixed' => 'смешанный текст',
     'js.common.cpm_type_callsigns' => 'позывные',
     'js.common.cpm_type_nominal' => 'PARIS',
 

@@ -863,7 +863,7 @@ HTML
     'js.common.cpm_title' => 'Click to learn how WPM converts to real characters per minute (PARIS standard & radio sports ratios)',
     'js.common.cpm_type_letters' => 'letters',
     'js.common.cpm_type_digits' => 'digits',
-    'js.common.cpm_type_mixed' => 'mixed',
+    'js.common.cpm_type_mixed' => 'mixed text',
     'js.common.cpm_type_callsigns' => 'callsigns',
     'js.common.cpm_type_nominal' => 'PARIS',
 
