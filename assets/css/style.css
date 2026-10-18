@@ -1329,6 +1329,7 @@ input[type="range"] {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 .speed-control .speed-value {
     font-family: var(--font-ui);
@@ -1475,6 +1476,49 @@ input[type="range"] {
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
+}
+
+@media (max-width: 520px) {
+    .paris-modal-overlay {
+        padding: 8px;
+    }
+    .paris-modal-dialog {
+        max-height: 94vh;
+        border-radius: var(--radius-md, 12px);
+    }
+    .paris-modal-header {
+        padding: 12px 14px;
+    }
+    .paris-modal-header h3 {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+    .paris-modal-body {
+        padding: 12px 14px;
+        font-size: 13px;
+        line-height: 1.45;
+    }
+    .paris-calc-card {
+        padding: 10px 12px;
+        margin: 10px 0;
+    }
+    .paris-table {
+        font-size: 12px;
+    }
+    .paris-table td {
+        padding: 6px 3px;
+    }
+    .paris-table .coef {
+        font-size: 11px;
+        padding-left: 4px;
+    }
+    .paris-table .val {
+        font-size: 12px;
+        padding-left: 6px;
+    }
+    .paris-modal-footer {
+        padding: 10px 14px;
+    }
 }
 
 
