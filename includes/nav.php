@@ -22,12 +22,18 @@ $navItems = [
             <a href="<?= $item['href'] ?>" class="<?= $activePage === $key ? 'active' : '' ?>"><?= $item['label'] ?></a>
         <?php endforeach; ?>
     </div>
-    <a href="<?= htmlspecialchars(mw_lang_switch_url()) ?>" class="nav-lang" title="<?= htmlspecialchars(t('lang.switch_title')) ?>"><?= htmlspecialchars(t('lang.switch_to')) ?></a>
-    <a href="account.php" class="nav-stats" title="<?= htmlspecialchars(t('nav.open_profile')) ?>">
-        <span><?= t('nav.xp') ?> <b data-nav-xp>0</b></span>
-        <span><?= t('nav.level') ?> <b data-nav-level>1</b></span>
-        <span class="nav-stat-streak" title="<?= htmlspecialchars(t('acc.streak_days')) ?>"><?= mw_icon('flame', 15) ?> <b data-nav-streak>0</b></span>
-    </a>
+    <div class="nav-actions">
+        <a href="<?= htmlspecialchars(mw_lang_switch_url()) ?>" class="nav-lang" title="<?= htmlspecialchars(t('lang.switch_title')) ?>"><?= htmlspecialchars(t('lang.switch_to')) ?></a>
+        <a href="account.php" class="nav-account-btn <?= $activePage === 'account' ? 'active' : '' ?>" title="<?= htmlspecialchars(t('nav.open_profile')) ?>">
+            <?= mw_icon('user', 14) ?>
+            <span class="nav-account-label" data-nav-account-label><?= t('nav.account') ?></span>
+        </a>
+        <a href="account.php" class="nav-stats" title="<?= htmlspecialchars(t('nav.open_profile')) ?>">
+            <span><?= t('nav.xp') ?> <b data-nav-xp>0</b></span>
+            <span><?= t('nav.level') ?> <b data-nav-level>1</b></span>
+            <span class="nav-stat-streak" title="<?= htmlspecialchars(t('acc.streak_days')) ?>"><?= mw_icon('flame', 15) ?> <b data-nav-streak>0</b></span>
+        </a>
+    </div>
 </nav>
 
 <div class="tabbar">

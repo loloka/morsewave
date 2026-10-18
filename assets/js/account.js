@@ -83,6 +83,12 @@
         });
     });
 
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('mode') === 'register' || window.location.hash === '#register') {
+        const regChip = document.querySelector('.mode-switch .chip[data-mode="register"]');
+        if (regChip) regChip.click();
+    }
+
     function renderVerifyStatus(user) {
         const box = document.getElementById('verify-status');
         if (user.email_verified_at) {

@@ -49,6 +49,7 @@ return [
     'index.hero_lead' => 'MorseWave — тренажёр азбуки Морзе с методом Коха, тренировкой групп символов и позывных. Занимайся с телефона или компьютера, набирай опыт и выполняй тренировки несколько дней подряд.',
     'index.start_letters' => 'Начать с букв',
     'index.koch_method' => 'Метод Коха →',
+    'index.hero_create_account' => 'Создать аккаунт для сохранения прогресса и рейтинга →',
     'index.stat_xp' => 'Опыт (XP)',
     'index.stat_level' => 'Уровень',
     'index.stat_streak' => 'Серия дней',
@@ -210,7 +211,7 @@ return [
     'dosaaf.rank_current' => 'Текущее звание',
     'dosaaf.rank_achieved' => '✓ Присвоено',
     'dosaaf.rank_locked' => '🔒 Не выполнено',
-    'dosaaf.rank_req_info' => 'Требуется: сдать зачёт {stage} ступени со скоростью ≥ {wpm} WPM ({cpm} зн/мин).',
+    'dosaaf.rank_req_info' => 'Требуется: сдать зачёт полного курса (все 7 ступеней) со скоростью ≥ {wpm} WPM ({cpm} зн/мин).',
 
     // --- koch.php ---
     'koch.title' => 'Метод Коха',

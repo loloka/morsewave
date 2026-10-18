@@ -31,6 +31,13 @@ include __DIR__ . '/includes/header.php';
                 <a href="learn.php" class="btn btn-primary"><?= t('index.start_letters') ?></a>
                 <a href="koch.php" class="btn-quiet"><?= t('index.koch_method') ?></a>
             </div>
+
+            <div class="hero-auth-note mt-2">
+                <a href="account.php?mode=register" class="hero-account-link" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--text-muted); text-decoration:none;">
+                    <?= mw_icon('user', 14) ?>
+                    <span><?= t('index.hero_create_account') ?></span>
+                </a>
+            </div>
         </div>
 
         <div class="hero-promo">
@@ -92,7 +99,7 @@ include __DIR__ . '/includes/header.php';
 <section class="section" id="leaderboard-section">
     <div class="flex-between flex-wrap gap-2">
         <h2 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('trophy', 20) ?> <?= t('index.leaderboard_title') ?></h2>
-        <a href="account.php" class="btn btn-sm"><?= t('index.leaderboard_join') ?></a>
+        <a href="account.php?mode=register" class="btn btn-sm"><?= t('index.leaderboard_join') ?></a>
     </div>
     <p class="muted mt-0" style="font-size:13px;"><?= t('index.leaderboard_intro') ?></p>
 

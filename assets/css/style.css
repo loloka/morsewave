@@ -168,6 +168,44 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 }
 .nav-lang:hover { color: var(--text); background: var(--surface-2); }
 
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.nav-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    text-decoration: none;
+    transition: color .15s, background .15s, border-color .15s;
+    white-space: nowrap;
+}
+.nav-account-btn:hover {
+    color: var(--text);
+    background: var(--surface-2);
+    border-color: var(--text-faint);
+}
+.nav-account-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--surface-2);
+}
+.nav-account-btn svg {
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
 .nav-stats {
     display: flex;
     gap: 14px;
@@ -213,11 +251,21 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     .real-key-hint { display: none; }
 }
 
+@media (max-width: 480px) {
+    .nav-actions { gap: 6px; }
+    .nav-account-btn { padding: 4px 7px; font-size: 12px; }
+}
+
 @media (max-width: 420px) {
-    .topnav { padding: 0 12px; }
+    .topnav { padding: 0 10px; }
     .brand-code { display: none; }
     .nav-stats { gap: 8px; font-size: 12px; }
     .nav-stats b { max-width: 46px; }
+}
+
+@media (max-width: 360px) {
+    .nav-account-label { display: none; }
+    .nav-account-btn { padding: 4px 6px; }
 }
 
 /* ---------- Mobile bottom tab bar ---------- */
@@ -3077,6 +3125,12 @@ select.select-styled option {
     padding: 6px 12px;
     font-size: 13px;
     cursor: pointer;
+}
+@media (min-width: 860px) {
+    .dosaaf-stage-scroll {
+        flex-wrap: wrap !important;
+        overflow-x: visible !important;
+    }
 }
 
 /* Горизонтальный скролл вкладок ДОСААФ */

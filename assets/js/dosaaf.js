@@ -641,10 +641,11 @@
         const currentWpm = getDosaafWpm();
 
         if (isPassed) {
+            const prev = examPassed[currentStageNum];
             examPassed[currentStageNum] = {
-                score: examCorrect,
+                score: Math.max(prev?.score || 0, examCorrect),
                 total: totalWords,
-                wpm: currentWpm,
+                wpm: Math.max(prev?.wpm || 0, currentWpm),
                 date: new Date().toISOString()
             };
 
@@ -707,22 +708,18 @@
     // 4. КЛАССНОСТЬ ДОСААФ (Интерактивная оценка квалификации)
     // =========================================================================
     function computeCurrentRank() {
-        let maxPassedStage = 0;
-        let maxExamWpm = 0;
-
-        Object.keys(examPassed).forEach(stStr => {
-            const st = parseInt(stStr, 10);
-            if (st > maxPassedStage) maxPassedStage = st;
-            if (examPassed[st].wpm > maxExamWpm) maxExamWpm = examPassed[st].wpm;
-        });
-
-        // 1-й класс: 7-я ступень сдана на скорости >= 20 WPM
-        if (maxPassedStage >= 7 && maxExamWpm >= 20) return 'class1';
-        // 2-й класс: 5-я ступень сдана на скорости >= 16 WPM
-        if (maxPassedStage >= 5 && maxExamWpm >= 16) return 'class2';
-        // 3-й класс: 3-я ступень сдана на скорости >= 12 WPM
-        if (maxPassedStage >= 3 && maxExamWpm >= 12) return 'class3';
-        // Курсант: начальный ранг
+        // Присвоение классности радиоспециалиста ДОСААФ (по ЕВСК):
+        // Обязательное условие: освоение полного курса (все 7 ступеней: буквы и цифры).
+        // Класс определяется нормативной скоростью сдачи зачёта 7-й ступени.
+        const stage7Exam = examPassed[7];
+        if (stage7Exam) {
+            const wpm7 = stage7Exam.wpm || 0;
+            if (wpm7 >= 28) return 'master'; // 120+ зн/мин
+            if (wpm7 >= 24) return 'class1'; // 100+ зн/мин
+            if (wpm7 >= 19) return 'class2'; // 80+ зн/мин
+            if (wpm7 >= 14) return 'class3'; // 60+ зн/мин
+        }
+        // Курсант: в процессе обучения (ступени 1-7)
         return 'cadet';
     }
 
@@ -762,12 +759,12 @@
                 isAchieved = true;
                 statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
             } else {
-                const reqStageExam = examPassed[rk.requiredStage];
-                if (reqStageExam && reqStageExam.wpm >= rk.minSpeedWpm) {
+                const stage7Exam = examPassed[7];
+                if (stage7Exam && stage7Exam.wpm >= rk.minSpeedWpm) {
                     isAchieved = true;
                     statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
                 } else {
-                    const reqInfo = (t('dosaaf.rank_req_info') || 'Требуется: сдать зачёт {stage} ступени со скоростью ≥ {wpm} WPM ({cpm} зн/мин).')
+                    const reqInfo = (t('dosaaf.rank_req_info') || 'Требуется: сдать зачёт полного курса (все 7 ступеней) со скоростью ≥ {wpm} WPM ({cpm} зн/мин).')
                         .replace('{stage}', rk.requiredStage)
                         .replace('{wpm}', rk.minSpeedWpm)
                         .replace('{cpm}', rk.minSpeedCpm);

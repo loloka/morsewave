@@ -16,11 +16,8 @@ include __DIR__ . '/includes/header.php';
 
 <div id="dosaaf-mode">
     <div class="card mt-2">
-        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-            <div style="min-width:0; flex:1;">
-                <div class="muted small" style="font-size:12px;"><?= t('dosaaf.nav_label') ?></div>
-                <div class="chip-row mt-1 dosaaf-stage-scroll" id="dosaaf-stage-chips"></div>
-            </div>
+        <div class="flex-between flex-wrap gap-2 mb-2" style="align-items:center;">
+            <div class="muted small" style="font-size:13px; font-weight:600;"><?= t('dosaaf.nav_label') ?></div>
             <div class="speed-control dosaaf-speed-box" style="margin:0;">
                 <?= t('learn.speed') ?>
                 <input type="range" id="dosaaf-wpm" min="5" max="35" step="1" value="12">
@@ -28,6 +25,7 @@ include __DIR__ . '/includes/header.php';
                 <span class="muted cpm-hint" id="dosaaf-wpm-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 51]) ?></span>
             </div>
         </div>
+        <div class="chip-row mt-1 dosaaf-stage-scroll" id="dosaaf-stage-chips"></div>
 
         <div class="mt-2" style="border-top:1px solid var(--border); padding-top:14px;">
             <div class="flex-between flex-wrap gap-2" style="align-items:baseline;">

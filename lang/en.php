@@ -46,6 +46,7 @@ return [
     'index.hero_lead' => 'MorseWave is a Morse code trainer with the Koch method, character group drills, and callsign practice. Train from your phone or computer, earn XP, and keep a daily streak going.',
     'index.start_letters' => 'Start with letters',
     'index.koch_method' => 'Koch method →',
+    'index.hero_create_account' => 'Create an account to save progress & join leaderboard →',
     'index.stat_xp' => 'Experience (XP)',
     'index.stat_level' => 'Level',
     'index.stat_streak' => 'Daily streak',
@@ -207,7 +208,7 @@ return [
     'dosaaf.rank_current' => 'Current Rank',
     'dosaaf.rank_achieved' => '✓ Achieved',
     'dosaaf.rank_locked' => '🔒 Locked',
-    'dosaaf.rank_req_info' => 'Requirement: pass stage {stage} exam at speed ≥ {wpm} WPM ({cpm} cpm).',
+    'dosaaf.rank_req_info' => 'Requirement: pass full course exam (all 7 stages) at speed ≥ {wpm} WPM ({cpm} cpm).',
 
     // --- koch.php ---
     'koch.title' => 'Koch method',
