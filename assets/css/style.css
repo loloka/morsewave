@@ -3055,4 +3055,109 @@ select.select-styled option {
         font-size: 14px;
         padding: 0 5px;
     }
+}
+
+/* Горизонтальный скролл полосы ступеней ДОСААФ */
+.dosaaf-stage-scroll {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0 6px 0;
+    max-width: 100%;
+}
+.dosaaf-stage-scroll::-webkit-scrollbar {
+    display: none;
+}
+.dosaaf-stage-scroll .chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Горизонтальный скролл вкладок ДОСААФ */
+.dosaaf-subtabs-scroll {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    gap: 6px !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 2px 0 6px 0;
+    max-width: 100%;
+}
+.dosaaf-subtabs-scroll::-webkit-scrollbar {
+    display: none;
+}
+.dosaaf-subtabs-scroll .chip {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 6px 14px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Компактный режим ДОСААФ для мобильных телефонов */
+@media (max-width: 640px) {
+    .dosaaf-header-intro {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    .dosaaf-header-advice {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        margin-bottom: 8px !important;
+    }
+    .dosaaf-speed-box {
+        width: 100%;
+        margin-top: 6px !important;
+    }
+    .dosaaf-napevs-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .dosaaf-napev-card {
+        padding: 8px 10px !important;
+    }
+    .dosaaf-napev-card .dosaaf-letter-char {
+        font-size: 22px !important;
+    }
+    .dosaaf-napev-card .dosaaf-napev-text {
+        font-size: 13px !important;
+    }
+    .dosaaf-napev-card .dosaaf-pattern-text {
+        font-size: 11px !important;
+    }
+    .dosaaf-quote-box {
+        padding: 6px 10px !important;
+        margin-top: 6px !important;
+    }
+    .dosaaf-quote-text {
+        font-size: 12px !important;
+        line-height: 1.35 !important;
+    }
+    .dosaaf-quote-author {
+        font-size: 10px !important;
+    }
+    .dosaaf-compact-stats {
+        margin-top: 8px !important;
+        gap: 6px !important;
+    }
+    .dosaaf-compact-stats .stat {
+        padding: 6px 8px !important;
+    }
+    .dosaaf-compact-stats .value {
+        font-size: 16px !important;
+    }
+    .dosaaf-compact-stats .label {
+        font-size: 10px !important;
+    }
+    .dosaaf-desktop-check-btn {
+        display: none !important;
+    }
 }

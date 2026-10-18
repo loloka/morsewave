@@ -121,14 +121,31 @@
 
             if (isUnlocked) {
                 chip.addEventListener('click', () => {
-                    currentStageNum = st.stage;
-                    saveDosaafProgress();
-                    renderStageNav();
-                    renderCurrentStage();
+                    goToStage(st.stage);
                 });
             }
             container.appendChild(chip);
         });
+
+        // Плавный скролл активного чипа ступени в горизонтальной полосе
+        const activeChip = container.querySelector('.chip.active');
+        if (activeChip) {
+            activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    }
+
+    // Переход к указанной ступени с сохранением и центрированием
+    function goToStage(stageNum) {
+        if (stageNum > 7 || stageNum > maxUnlockedStage) return;
+        currentStageNum = stageNum;
+        saveDosaafProgress();
+        renderStageNav();
+        renderCurrentStage();
+        switchToSubTab('napevs', true);
+        const stageMode = document.getElementById('dosaaf-mode');
+        if (stageMode) {
+            stageMode.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
 
     // Отрисовка текущей выбранной ступени
@@ -168,28 +185,41 @@
     function setupSubTabs() {
         document.querySelectorAll('#dosaaf-subtabs .chip').forEach(chip => {
             chip.addEventListener('click', () => {
-                document.querySelectorAll('#dosaaf-subtabs .chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                currentSubTab = chip.dataset.tab;
-                renderActiveSubTab();
+                switchToSubTab(chip.dataset.tab, false);
             });
         });
 
         // Ссылки быстрого перехода при блокировках
         document.getElementById('dosaaf-goto-napevs-btn')?.addEventListener('click', () => {
-            switchToSubTab('napevs');
+            switchToSubTab('napevs', true);
         });
         document.getElementById('dosaaf-goto-words-btn')?.addEventListener('click', () => {
-            switchToSubTab('words');
+            switchToSubTab('words', true);
+        });
+        document.getElementById('dosaaf-goto-words-next-btn')?.addEventListener('click', () => {
+            switchToSubTab('words', true);
+            const startBtn = document.getElementById('dosaaf-start-words-btn');
+            if (startBtn && startBtn.offsetParent !== null) {
+                startWordsPractice();
+            }
+        });
+        document.getElementById('dosaaf-goto-exam-next-btn')?.addEventListener('click', () => {
+            switchToSubTab('exam', true);
         });
     }
 
-    function switchToSubTab(tabName) {
+    function switchToSubTab(tabName, shouldScroll = true) {
         currentSubTab = tabName;
         document.querySelectorAll('#dosaaf-subtabs .chip').forEach(c => {
             c.classList.toggle('active', c.dataset.tab === tabName);
         });
         renderActiveSubTab();
+        if (shouldScroll) {
+            const targetView = document.getElementById(`dosaaf-view-${tabName}`);
+            if (targetView) {
+                targetView.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
     }
 
     // Проверка условий открытия разделов
@@ -256,11 +286,14 @@
         if (progressBarEl) progressBarEl.style.width = `${pct}%`;
 
         if (doneMsgEl) {
+            const nextActionEl = document.getElementById('dosaaf-napevs-next-action');
             if (listenedCount >= totalLetters) {
                 doneMsgEl.style.display = 'block';
                 doneMsgEl.textContent = t('dosaaf.napevs_done_msg') || '🎉 Все напевы этой ступени изучены! Раздел «Приём слов» разблокирован.';
+                if (nextActionEl) nextActionEl.style.display = 'block';
             } else {
                 doneMsgEl.style.display = 'none';
+                if (nextActionEl) nextActionEl.style.display = 'none';
             }
         }
 
@@ -373,6 +406,15 @@
         if (goalBarEl) {
             goalBarEl.style.width = `${pct}%`;
             goalBarEl.style.background = pct >= 100 ? 'var(--success)' : 'var(--accent)';
+        }
+
+        const nextActionEl = document.getElementById('dosaaf-words-next-action');
+        if (nextActionEl) {
+            if (currentCount >= target) {
+                nextActionEl.style.display = 'block';
+            } else {
+                nextActionEl.style.display = 'none';
+            }
         }
     }
 
@@ -623,12 +665,41 @@
                 <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
                     Результат: <b>${examCorrect} из ${totalWords} слов</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
                     ${isPassed 
-                        ? (maxUnlockedStage > currentStageNum 
-                            ? '<b>Поздравляем!</b> Следующая ступень учебной программы открыта. Проверьте обновлённую классность ДОСААФ!' 
-                            : '<b>Отлично!</b> Ступень успешно подтверждена на текущей скорости.')
+                        ? (currentStageNum < 7 
+                            ? '<b>Поздравляем!</b> Зачёт успешно сдан, следующая ступень программы ДОСААФ открыта!' 
+                            : '<b>Поздравляем!</b> Полный курс ДОСААФ успешно завершён!')
                         : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' слов (80%). Потренируйтесь на словах и повторите зачёт.'}
                 </p>
+                ${isPassed ? `
+                    <div class="mt-3">
+                        ${currentStageNum < 7 ? `
+                            <button type="button" class="btn btn-primary" id="dosaaf-next-stage-btn" style="width:100%; font-size:15px; padding:12px 18px; font-weight:700;">
+                                Перейти к Ступени ${currentStageNum + 1} ➔
+                            </button>
+                        ` : `
+                            <button type="button" class="btn btn-primary" id="dosaaf-view-rank-btn" style="width:100%; font-size:15px; padding:12px 18px; font-weight:700;">
+                                🏆 Посмотреть мою классность ДОСААФ ➔
+                            </button>
+                        `}
+                    </div>
+                ` : `
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-outline" id="dosaaf-retry-exam-btn" style="width:100%; padding:10px 16px;">
+                            Повторить зачёт
+                        </button>
+                    </div>
+                `}
             `;
+
+            document.getElementById('dosaaf-next-stage-btn')?.addEventListener('click', () => {
+                goToStage(currentStageNum + 1);
+            });
+            document.getElementById('dosaaf-view-rank-btn')?.addEventListener('click', () => {
+                switchToSubTab('ranks', true);
+            });
+            document.getElementById('dosaaf-retry-exam-btn')?.addEventListener('click', () => {
+                startStageExam();
+            });
         }
     }
 

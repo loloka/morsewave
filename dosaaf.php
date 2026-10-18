@@ -8,20 +8,20 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card-eyebrow"><?= t('dosaaf.eyebrow') ?></div>
 <h1><?= t('dosaaf.h1') ?></h1>
-<p><?= t('dosaaf.intro') ?></p>
+<p class="dosaaf-header-intro"><?= t('dosaaf.intro') ?></p>
 
-<div class="card p-3 mb-2" style="background:var(--surface-2); border-left:3px solid var(--accent); font-size:13px; line-height:1.5;">
+<div class="card p-3 mb-2 dosaaf-header-advice" style="background:var(--surface-2); border-left:3px solid var(--accent); font-size:13px; line-height:1.5;">
     <?= t('dosaaf.speed_advice') ?>
 </div>
 
 <div id="dosaaf-mode">
     <div class="card mt-2">
         <div class="flex-between flex-wrap gap-2" style="align-items:center;">
-            <div>
+            <div style="min-width:0; flex:1;">
                 <div class="muted small" style="font-size:12px;"><?= t('dosaaf.nav_label') ?></div>
-                <div class="chip-row mt-1" id="dosaaf-stage-chips"></div>
+                <div class="chip-row mt-1 dosaaf-stage-scroll" id="dosaaf-stage-chips"></div>
             </div>
-            <div class="speed-control" style="margin:0;">
+            <div class="speed-control dosaaf-speed-box" style="margin:0;">
                 <?= t('learn.speed') ?>
                 <input type="range" id="dosaaf-wpm" min="5" max="35" step="1" value="12">
                 <span class="speed-value" id="dosaaf-wpm-val">12</span> wpm
@@ -44,7 +44,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="chip-row mt-2" id="dosaaf-subtabs">
+        <div class="chip-row mt-2 dosaaf-subtabs-scroll" id="dosaaf-subtabs">
             <div class="chip active" data-tab="napevs"><?= mw_icon('music', 13) ?> <?= t('dosaaf.tab_napevs') ?></div>
             <div class="chip" data-tab="words"><?= mw_icon('radio', 13) ?> <?= t('dosaaf.tab_words') ?></div>
             <div class="chip" data-tab="exam"><?= mw_icon('check-circle', 13) ?> <?= t('dosaaf.tab_exam') ?></div>
@@ -60,6 +60,15 @@ include __DIR__ . '/includes/header.php';
             <div id="dosaaf-napevs-done-msg" class="card subcard-success p-2 mb-2" style="display:none; font-size:13px;"></div>
             <p class="muted mt-0 mb-2" style="font-size:13px;"><?= t('dosaaf.napevs_desc') ?></p>
             <div class="dosaaf-napevs-grid" id="dosaaf-napevs-grid"></div>
+
+            <!-- Кнопка прямого перехода к приёму слов после изучения напевов -->
+            <div id="dosaaf-napevs-next-action" class="card subcard-success p-3 text-center mt-3" style="display:none;">
+                <div class="bold" style="font-size:16px;">🎉 Все напевы ступени изучены!</div>
+                <div class="muted mt-1 mb-2" style="font-size:13px;">Отлично! Теперь закрепите эти буквы приёмом реальных смысловых слов.</div>
+                <button type="button" class="btn btn-primary" id="dosaaf-goto-words-next-btn" style="font-size:14px; padding:10px 18px;">
+                    <?= mw_icon('radio', 14) ?> Перейти к приёму слов ➔
+                </button>
+            </div>
         </div>
 
         <!-- 2. Тренажёр приёма смысловых слов -->
@@ -91,7 +100,7 @@ include __DIR__ . '/includes/header.php';
                         <input type="text" id="dosaaf-word-input" class="answer-input"
                                placeholder="<?= htmlspecialchars(t('dosaaf.word_ph')) ?>"
                                style="text-transform:uppercase; font-size:18px; letter-spacing:1px; flex:1;" autocomplete="off">
-                        <button type="button" class="btn btn-primary" id="dosaaf-check-word-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
+                        <button type="button" class="btn btn-primary dosaaf-desktop-check-btn" id="dosaaf-check-word-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
                     </div>
                     <div class="dosaaf-layout-warning muted" id="dosaaf-words-layout-warn" style="display:none; font-size:12px; margin-top:6px; color:var(--accent);"></div>
 
@@ -100,7 +109,7 @@ include __DIR__ . '/includes/header.php';
 
                     <div class="feedback mt-2" id="dosaaf-word-feedback"></div>
 
-                    <div class="grid grid-3 mt-2">
+                    <div class="grid grid-3 mt-2 dosaaf-compact-stats">
                         <div class="stat"><span class="value" id="dosaaf-word-streak">0</span><span class="label"><?= mw_icon('flame', 12) ?> <?= t('dosaaf.stat_streak') ?></span></div>
                         <div class="stat"><span class="value" id="dosaaf-word-accuracy">—</span><span class="label"><?= mw_icon('target', 12) ?> <?= t('dosaaf.stat_accuracy') ?></span></div>
                         <div class="stat"><span class="value" id="dosaaf-word-total">0</span><span class="label"><?= mw_icon('check', 12) ?> <?= t('dosaaf.stat_total') ?></span></div>
@@ -109,6 +118,15 @@ include __DIR__ . '/includes/header.php';
                     <div class="card subcard p-2 mt-2 flex-between flex-wrap gap-2" style="align-items:center; background:var(--surface-2);">
                         <span class="muted small" id="dosaaf-words-goal-text"></span>
                         <div class="progress-bar" style="width:130px;"><span id="dosaaf-words-goal-bar" style="width:0%"></span></div>
+                    </div>
+
+                    <!-- Кнопка прямого перехода к зачёту ступени после набора нормы слов -->
+                    <div id="dosaaf-words-next-action" class="card subcard-success p-3 text-center mt-3" style="display:none;">
+                        <div class="bold" style="font-size:16px;">🎯 Норма выполнена: принято 5 слов!</div>
+                        <div class="muted mt-1 mb-2" style="font-size:13px;">Зачёт ступени разблокирован. Сдайте зачёт, чтобы подтвердить ступень и открыть следующую.</div>
+                        <button type="button" class="btn btn-primary" id="dosaaf-goto-exam-next-btn" style="font-size:14px; padding:10px 18px;">
+                            <?= mw_icon('check-circle', 14) ?> Сдать зачёт ступени ➔
+                        </button>
                     </div>
 
                     <div class="mt-2" id="dosaaf-word-history"></div>
