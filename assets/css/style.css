@@ -143,14 +143,15 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
 .nav-links {
     display: flex;
-    gap: 4px;
+    gap: 2px;
 }
 .nav-links a {
-    padding: 8px 14px;
+    padding: 6px 11px;
     border-radius: var(--radius-sm);
-    font-size: 14px;
+    font-size: 13.5px;
     color: var(--text-muted);
     transition: color .15s, background .15s;
+    white-space: nowrap;
 }
 .nav-links a:hover { color: var(--text); background: var(--surface-2); }
 .nav-links a.active { color: var(--bg); background: var(--accent); font-weight: 600; }
@@ -173,10 +174,11 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     align-items: center;
     gap: 10px;
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 .nav-account-btn {
-    display: inline-flex;
+    display: none; /* скрыта на десктопе, т.к. "Профиль" уже есть в меню ссылок nav-links */
     align-items: center;
     gap: 6px;
     font-family: var(--font-ui);
@@ -217,8 +219,9 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
     color: var(--text-muted);
     border-radius: var(--radius-sm);
     padding: 4px 8px;
-    margin: -4px -8px;
+    margin: -4px 0;
     transition: background .15s;
+    flex-shrink: 0;
 }
 .nav-stats:hover { background: var(--surface-2); }
 .nav-stats b {
@@ -242,6 +245,7 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 
 @media (max-width: 900px) {
     .nav-links { display: none; }
+    .nav-account-btn { display: inline-flex; }
 }
 
 /* Подсказка про реальный телеграфный ключ (learn.php, режимы "Отправка" и
@@ -3155,8 +3159,52 @@ select.select-styled option {
     cursor: pointer;
 }
 
+.dosaaf-subtab-short { display: none; }
+
 /* Компактный режим ДОСААФ для мобильных телефонов */
 @media (max-width: 640px) {
+    .dosaaf-subtab-full { display: none; }
+    .dosaaf-subtab-short { display: inline; }
+
+    /* Ступени ДОСААФ на телефоне: компактный 2-рядный блок без скролла (все 7 ступеней на виду) */
+    .dosaaf-stage-scroll {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 4px !important;
+        overflow-x: visible !important;
+        padding: 2px 0 !important;
+    }
+    .dosaaf-stage-scroll .chip {
+        flex: 1 1 calc(25% - 4px) !important;
+        min-width: 68px !important;
+        padding: 5px 3px !important;
+        font-size: 11px !important;
+        text-align: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+    }
+
+    /* Подвкладки ДОСААФ на телефоне: 4 компактные кнопки в одну строку без скролла */
+    .dosaaf-subtabs-scroll {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 4px !important;
+        overflow-x: visible !important;
+        padding: 2px 0 !important;
+    }
+    .dosaaf-subtabs-scroll .chip {
+        padding: 7px 2px !important;
+        font-size: 11px !important;
+        text-align: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        gap: 3px !important;
+    }
+    .dosaaf-subtabs-scroll .chip svg {
+        width: 12px !important;
+        height: 12px !important;
+    }
+
     .dosaaf-header-intro {
         font-size: 13px;
         margin-bottom: 6px;

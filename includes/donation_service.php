@@ -70,7 +70,7 @@ function ensure_donation_tables(PDO $pdo): void {
         ");
     } catch (Throwable $e) {}
 
-    // 4. Добавляем ачивку project_supporter в справочник
+    // 4. Добавляем ачивку project_supporter и ачивки ДОСААФ в справочник
     try {
         $pdo->exec("
             ALTER TABLE achievements MODIFY COLUMN condition_type ENUM(
@@ -89,7 +89,12 @@ function ensure_donation_tables(PDO $pdo): void {
                 'invasion_waves_count',
                 'rhythm_mastered_count',
                 'rhythm_mastered_count_any',
-                'project_supporter'
+                'project_supporter',
+                'dosaaf_cadet',
+                'dosaaf_class3',
+                'dosaaf_class2',
+                'dosaaf_class1',
+                'dosaaf_master'
             ) NOT NULL
         ");
     } catch (Throwable $e) {}
@@ -105,6 +110,29 @@ function ensure_donation_tables(PDO $pdo): void {
             $ins->execute();
         }
     } catch (Throwable $e) {}
+
+    // 5. Авто-добавление ачивок программы ДОСААФ
+    $dosaafAchs = [
+        ['dosaaf_cadet', 'Курсант радиошколы ДОСААФ', 'Сдайте зачёт 1-й ступени «МЕТОНА» по программе ДОСААФ', '🎖️', 'dosaaf_cadet', 1, 28],
+        ['dosaaf_class3', 'Радиотелеграфист 3-го класса', 'Освойте полный курс ДОСААФ (все 7 ступеней) и сдайте зачёт со скоростью ≥ 60 зн/мин (14 WPM)', '🥉', 'dosaaf_class3', 1, 29],
+        ['dosaaf_class2', 'Радиотелеграфист 2-го класса', 'Освойте полный курс ДОСААФ и подтвердите норматив скорости ≥ 80 зн/мин (19 WPM)', '🥈', 'dosaaf_class2', 1, 30],
+        ['dosaaf_class1', 'Радиотелеграфист 1-го класса', 'Освойте полный курс ДОСААФ и сдайте зачёт со скоростью ≥ 100 зн/мин (24 WPM)', '🥇', 'dosaaf_class1', 1, 31],
+        ['dosaaf_master', 'Мастер радиосвязи ДОСААФ', 'Высшая квалификация: приём радиограмм полного курса со скоростью ≥ 120 зн/мин (28 WPM)', '🏆', 'dosaaf_master', 1, 32],
+    ];
+
+    foreach ($dosaafAchs as $ach) {
+        try {
+            $stmt = $pdo->prepare("SELECT id FROM achievements WHERE code = ?");
+            $stmt->execute([$ach[0]]);
+            if (!$stmt->fetch()) {
+                $ins = $pdo->prepare("
+                    INSERT INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ");
+                $ins->execute($ach);
+            }
+        } catch (Throwable $e) {}
+    }
 
     $checked = true;
 }

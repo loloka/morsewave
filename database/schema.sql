@@ -53,7 +53,12 @@ CREATE TABLE IF NOT EXISTS achievements (
         -- смешивать с латиницей безопасно (v2.60, реальный баг: "Ровная
         -- рука" не засчитывала кириллицу).
         'rhythm_mastered_count_any',
-        'project_supporter'
+        'project_supporter',
+        'dosaaf_cadet',
+        'dosaaf_class3',
+        'dosaaf_class2',
+        'dosaaf_class1',
+        'dosaaf_master'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -111,7 +116,12 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('invasion_10',     'Защитник эфира',    'Отбейте 10 волн вторжения в мини-игре',       '🛸', 'invasion_waves_count', 10, 24),
 ('rhythm_10',       'Ровная рука',       'Отточите ритм ключа для 10 символов',         '🎵', 'rhythm_mastered_count_any', 10, 25),
 ('rhythm_full',     'Метроном',          'Отточите ритм ключа для всех букв и цифр',    '🎼', 'rhythm_mastered_count', 36, 26),
-('project_supporter','Друг MorseWave',    'Поддержал развитие проекта словом или делом! 73!', '💖', 'project_supporter', 1, 27);
+('project_supporter','Друг MorseWave',    'Поддержал развитие проекта словом или делом! 73!', '💖', 'project_supporter', 1, 27),
+('dosaaf_cadet',    'Курсант радиошколы ДОСААФ', 'Сдайте зачёт 1-й ступени «МЕТОНА» по программе ДОСААФ', '🎖️', 'dosaaf_cadet', 1, 28),
+('dosaaf_class3',   'Радиотелеграфист 3-го класса', 'Освойте полный курс ДОСААФ (все 7 ступеней) и сдайте зачёт со скоростью ≥ 60 зн/мин (14 WPM)', '🥉', 'dosaaf_class3', 1, 29),
+('dosaaf_class2',   'Радиотелеграфист 2-го класса', 'Освойте полный курс ДОСААФ и подтвердите норматив скорости ≥ 80 зн/мин (19 WPM)', '🥈', 'dosaaf_class2', 1, 30),
+('dosaaf_class1',   'Радиотелеграфист 1-го класса', 'Освойте полный курс ДОСААФ и сдайте зачёт со скоростью ≥ 100 зн/мин (24 WPM)', '🥇', 'dosaaf_class1', 1, 31),
+('dosaaf_master',   'Мастер радиосвязи ДОСААФ', 'Высшая квалификация: приём радиограмм полного курса со скоростью ≥ 120 зн/мин (28 WPM)', '🏆', 'dosaaf_master', 1, 32);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)

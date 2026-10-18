@@ -654,6 +654,10 @@
             }
             saveDosaafProgress();
             renderStageNav();
+
+            if (typeof Progress !== 'undefined' && typeof Progress.checkAchievements === 'function') {
+                Progress.checkAchievements();
+            }
         }
 
         if (resultBox) {

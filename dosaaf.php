@@ -43,10 +43,10 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="chip-row mt-2 dosaaf-subtabs-scroll" id="dosaaf-subtabs">
-            <div class="chip active" data-tab="napevs"><?= mw_icon('music', 13) ?> <?= t('dosaaf.tab_napevs') ?></div>
-            <div class="chip" data-tab="words"><?= mw_icon('radio', 13) ?> <?= t('dosaaf.tab_words') ?></div>
-            <div class="chip" data-tab="exam"><?= mw_icon('check-circle', 13) ?> <?= t('dosaaf.tab_exam') ?></div>
-            <div class="chip" data-tab="ranks"><?= mw_icon('award', 13) ?> <?= t('dosaaf.tab_ranks') ?></div>
+            <div class="chip active" data-tab="napevs"><?= mw_icon('music', 13) ?> <span class="dosaaf-subtab-full"><?= t('dosaaf.tab_napevs') ?></span><span class="dosaaf-subtab-short"><?= t('dosaaf.tab_napevs_short') ?></span></div>
+            <div class="chip" data-tab="words"><?= mw_icon('radio', 13) ?> <span class="dosaaf-subtab-full"><?= t('dosaaf.tab_words') ?></span><span class="dosaaf-subtab-short"><?= t('dosaaf.tab_words_short') ?></span></div>
+            <div class="chip" data-tab="exam"><?= mw_icon('check-circle', 13) ?> <span class="dosaaf-subtab-full"><?= t('dosaaf.tab_exam') ?></span><span class="dosaaf-subtab-short"><?= t('dosaaf.tab_exam_short') ?></span></div>
+            <div class="chip" data-tab="ranks"><?= mw_icon('award', 13) ?> <span class="dosaaf-subtab-full"><?= t('dosaaf.tab_ranks') ?></span><span class="dosaaf-subtab-short"><?= t('dosaaf.tab_ranks_short') ?></span></div>
         </div>
 
         <!-- 1. Карточки напевов текущей ступени -->

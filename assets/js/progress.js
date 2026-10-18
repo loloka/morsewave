@@ -23,7 +23,7 @@ const Progress = (() => {
     // чтобы переходы по сайту не дёргали БД заново. progress — ВСЕГДА
     // свежий (нужен для merge при каждой загрузке) и в кэш не попадает.
     const DASH_CACHE_TTL_MS = 60 * 1000;
-    const DASH_CACHE_KEY = 'morsewave_dash_cache_v3';
+    const DASH_CACHE_KEY = 'morsewave_dash_cache_v4';
     let dashInFlight = null; // {key, promise} — дедуп одновременных вызовов с одинаковым набором частей
 
     function clearDashCache() {
@@ -31,6 +31,7 @@ const Progress = (() => {
             sessionStorage.removeItem(DASH_CACHE_KEY);
             sessionStorage.removeItem('morsewave_dash_cache_v1');
             sessionStorage.removeItem('morsewave_dash_cache_v2');
+            sessionStorage.removeItem('morsewave_dash_cache_v3');
         } catch {}
     }
 
@@ -1098,6 +1099,36 @@ const Progress = (() => {
                         (state.stats && state.stats.projectSupporter) ||
                         (state.unlockedAchievements && state.unlockedAchievements.includes('project_supporter'))
                     ) ? 1 : 0;
+                case 'dosaaf_cadet': {
+                    try {
+                        const dEx = JSON.parse(localStorage.getItem('morse_dosaaf_exam_passed') || '{}');
+                        return Object.keys(dEx).length >= 1 ? 1 : 0;
+                    } catch { return 0; }
+                }
+                case 'dosaaf_class3': {
+                    try {
+                        const dEx = JSON.parse(localStorage.getItem('morse_dosaaf_exam_passed') || '{}');
+                        return (dEx[7] && (dEx[7].wpm || 0) >= 14) ? 1 : 0;
+                    } catch { return 0; }
+                }
+                case 'dosaaf_class2': {
+                    try {
+                        const dEx = JSON.parse(localStorage.getItem('morse_dosaaf_exam_passed') || '{}');
+                        return (dEx[7] && (dEx[7].wpm || 0) >= 19) ? 1 : 0;
+                    } catch { return 0; }
+                }
+                case 'dosaaf_class1': {
+                    try {
+                        const dEx = JSON.parse(localStorage.getItem('morse_dosaaf_exam_passed') || '{}');
+                        return (dEx[7] && (dEx[7].wpm || 0) >= 24) ? 1 : 0;
+                    } catch { return 0; }
+                }
+                case 'dosaaf_master': {
+                    try {
+                        const dEx = JSON.parse(localStorage.getItem('morse_dosaaf_exam_passed') || '{}');
+                        return (dEx[7] && (dEx[7].wpm || 0) >= 28) ? 1 : 0;
+                    } catch { return 0; }
+                }
                 default: return 0;
             }
         };
