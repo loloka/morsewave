@@ -702,7 +702,134 @@
         });
         updateExamDescription(currentLen);
 
-        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
+        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer, { showSpace: true });
+    }
+
+    let examAudioPlaying = false;
+    let examDelayTimer = null;
+
+    function stopExamAudio() {
+        examAudioPlaying = false;
+        if (examDelayTimer) {
+            clearTimeout(examDelayTimer);
+            examDelayTimer = null;
+        }
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        if (dosaafLamp) {
+            dosaafLamp.off();
+        }
+    }
+
+    function delayExam(ms) {
+        return new Promise((resolve) => {
+            if (!examAudioPlaying) return resolve();
+            examDelayTimer = setTimeout(() => {
+                examDelayTimer = null;
+                resolve();
+            }, ms);
+        });
+    }
+
+    function playExamMorseChunk(text) {
+        return new Promise((resolve) => {
+            if (!examAudioPlaying) return resolve();
+            const lamp = getDosaafLamp();
+            const wpm = getDosaafWpm();
+            currentAudio = new MorseAudio({ wpm });
+            currentAudio.play(text, {
+                onSymbol: ({ durationMs }) => {
+                    if (lamp) lamp.flash(durationMs);
+                },
+                onDone: () => {
+                    if (lamp) lamp.off();
+                    currentAudio = null;
+                    resolve();
+                }
+            });
+        });
+    }
+
+    async function runDosaafExamPlayback() {
+        stopExamAudio();
+        examAudioPlaying = true;
+
+        const progressEl = document.getElementById('dosaaf-exam-progress');
+        const statusEl = document.getElementById('dosaaf-exam-audio-status');
+        const playBtn = document.getElementById('dosaaf-exam-play-btn');
+        const checkBtn = document.getElementById('dosaaf-exam-check-btn');
+
+        if (playBtn) playBtn.disabled = true;
+
+        // 1. Позывной готовности VVV = (военный настроечный сигнал ДОСААФ «ЖЖЖ=»)
+        if (progressEl) progressEl.textContent = `VVV =`;
+        if (statusEl) {
+            statusEl.innerHTML = `📻 Настроечный сигнал: <b>ЖЖЖ = (VVV =)</b>. Приготовьтесь к приёму радиограммы!`;
+        }
+
+        await playExamMorseChunk('VVV=');
+        if (!examAudioPlaying) {
+            if (playBtn) playBtn.disabled = false;
+            return;
+        }
+
+        // Пауза перед началом передачи радиограммы (~1.4 секунды)
+        await delayExam(1400);
+        if (!examAudioPlaying) {
+            if (playBtn) playBtn.disabled = false;
+            return;
+        }
+
+        // 2. Непрерывная передача радиограммы
+        const total = examWords.length;
+        const wpm = getDosaafWpm();
+        const unitMs = 1200 / wpm;
+        const wordGapMs = Math.round(unitMs * 7);
+
+        for (let i = 0; i < total; i++) {
+            if (!examAudioPlaying) break;
+            const word = examWords[i];
+
+            if (progressEl) progressEl.textContent = `${i + 1} / ${total}`;
+            if (statusEl) {
+                statusEl.innerHTML = `🎧 Передача радиограммы: группа <b>${i + 1}</b> из <b>${total}</b>`;
+            }
+
+            await playExamMorseChunk(word);
+            if (!examAudioPlaying) break;
+
+            if (i < total - 1) {
+                await delayExam(wordGapMs);
+            }
+        }
+
+        if (examAudioPlaying) {
+            if (statusEl) {
+                statusEl.innerHTML = `✓ Передача радиограммы завершена! Проверьте текст и нажмите <b>«Проверить радиограмму»</b>`;
+            }
+            if (checkBtn) {
+                checkBtn.classList.add('pulse-attention');
+            }
+        }
+
+        examAudioPlaying = false;
+        if (playBtn) playBtn.disabled = false;
+    }
+
+    function abortStageExam() {
+        stopExamAudio();
+        examActive = false;
+        const panel = document.getElementById('dosaaf-exam-panel');
+        const startBtn = document.getElementById('dosaaf-start-exam-btn');
+        const lengthWrapper = document.getElementById('dosaaf-exam-length-wrapper');
+        const statusEl = document.getElementById('dosaaf-exam-audio-status');
+
+        if (panel) panel.style.display = 'none';
+        if (startBtn) startBtn.style.display = 'inline-flex';
+        if (lengthWrapper) lengthWrapper.style.display = 'block';
+        if (statusEl) statusEl.textContent = '';
     }
 
     function startStageExam() {
@@ -710,37 +837,27 @@
         const targetLength = getExamLength();
         
         examWords = generateStageExamWords(stageData, targetLength);
-        examIndex = 0;
-        examCorrect = 0;
-        examXpEarned = 0;
         examActive = true;
 
         const panel = document.getElementById('dosaaf-exam-panel');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
         const lengthWrapper = document.getElementById('dosaaf-exam-length-wrapper');
         const resultBox = document.getElementById('dosaaf-exam-result');
+        const checkBtn = document.getElementById('dosaaf-exam-check-btn');
 
         if (panel) panel.style.display = 'block';
         if (startBtn) startBtn.style.display = 'none';
         if (lengthWrapper) lengthWrapper.style.display = 'none';
         if (resultBox) resultBox.style.display = 'none';
-
-        nextExamWord();
-    }
-
-    function nextExamWord() {
-        if (examIndex >= examWords.length) {
-            finishStageExam();
-            return;
+        if (checkBtn) {
+            checkBtn.classList.remove('pulse-attention');
+            checkBtn.disabled = false;
         }
-
-        const word = examWords[examIndex];
-        const progressEl = document.getElementById('dosaaf-exam-progress');
-        if (progressEl) progressEl.textContent = `${examIndex + 1} / ${examWords.length}`;
 
         const input = document.getElementById('dosaaf-exam-input');
         if (input) {
             input.value = '';
+            input.disabled = false;
             if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
                 input.focus();
             }
@@ -749,40 +866,74 @@
         const warnEl = document.getElementById('dosaaf-exam-layout-warn');
         if (warnEl) warnEl.style.display = 'none';
 
-        playDosaafSound(word);
+        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer, { showSpace: true });
+
+        runDosaafExamPlayback();
+    }
+
+    function alignWordSequences(expected, typed) {
+        const n = expected.length;
+        const m = typed.length;
+        const dp = Array.from({ length: n + 1 }, () => new Int32Array(m + 1));
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < m; j++) {
+                if (expected[i] === typed[j]) {
+                    dp[i + 1][j + 1] = dp[i][j] + 1;
+                } else {
+                    dp[i + 1][j + 1] = Math.max(dp[i][j + 1], dp[i + 1][j]);
+                }
+            }
+        }
+
+        let i = n, j = m;
+        const alignment = [];
+
+        while (i > 0 || j > 0) {
+            if (i > 0 && j > 0 && expected[i - 1] === typed[j - 1]) {
+                alignment.unshift({ expected: expected[i - 1], typed: typed[j - 1], status: 'ok' });
+                i--;
+                j--;
+            } else if (i > 0 && j > 0 && dp[i - 1][j] === dp[i][j - 1]) {
+                alignment.unshift({ expected: expected[i - 1], typed: typed[j - 1], status: 'wrong' });
+                i--;
+                j--;
+            } else if (i > 0 && (j === 0 || dp[i - 1][j] >= dp[i][j - 1])) {
+                alignment.unshift({ expected: expected[i - 1], typed: '', status: 'missing' });
+                i--;
+            } else {
+                alignment.unshift({ expected: '', typed: typed[j - 1], status: 'extra' });
+                j--;
+            }
+        }
+
+        let correctCount = 0;
+        alignment.forEach(item => {
+            if (item.status === 'ok') correctCount++;
+        });
+
+        return { alignment, correctCount };
     }
 
     function checkExamAnswer() {
-        if (!examActive || examIndex >= examWords.length) return;
+        if (!examActive) return;
+        stopExamAudio();
+
         const input = document.getElementById('dosaaf-exam-input');
         if (!input) return;
 
-        const ans = input.value.trim().toUpperCase();
-        const target = examWords[examIndex].toUpperCase();
+        const typedText = input.value.trim().toUpperCase();
+        const typedWords = typedText.split(/\s+/).filter(Boolean);
 
-        if (ans === target) {
-            examCorrect++;
-            // В зачёте контрольное слово рассчитывается как группа символов (коэффициент 1.2 за знак)
-            const wordXp = Math.max(2, Math.round(target.length * 1.2));
-            examXpEarned += wordXp;
-            if (typeof Progress !== 'undefined') {
-                Progress.addXp(wordXp);
-                Progress.logXp(wordXp, 'dosaaf_exam_word');
-            }
-        }
-        examIndex++;
-        nextExamWord();
+        const { alignment, correctCount } = alignWordSequences(examWords, typedWords);
+
+        finishStageExam(alignment, correctCount, typedWords);
     }
 
-    function finishStageExam() {
+    function finishStageExam(alignment, correctCount, typedWords) {
         examActive = false;
-        if (currentAudio) {
-            currentAudio.stop();
-            currentAudio = null;
-        }
-        if (dosaafLamp) {
-            dosaafLamp.off();
-        }
+        stopExamAudio();
+
         const panel = document.getElementById('dosaaf-exam-panel');
         const resultBox = document.getElementById('dosaaf-exam-result');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
@@ -793,11 +944,37 @@
         if (lengthWrapper) lengthWrapper.style.display = 'block';
 
         const totalWords = examWords.length || 10;
-        const passThreshold = Math.ceil(totalWords * 0.8); // 80% порог (8 из 10, 24 из 30, 40 из 50)
-        const isPassed = examCorrect >= passThreshold;
+        const passThreshold = Math.ceil(totalWords * 0.8); // 80% порог
+        const isPassed = correctCount >= passThreshold;
         const currentWpm = getDosaafWpm();
-        // Бонус опыта в зависимости от объёма: 25 XP (10 слов), 50 XP (30 групп), 100 XP (50 групп)
         const passBonus = totalWords >= 50 ? 100 : (totalWords >= 30 ? 50 : 25);
+
+        // Расчёт XP за верно принятые группы
+        let wordXpSum = 0;
+        alignment.forEach(item => {
+            if (item.status === 'ok') {
+                wordXpSum += Math.max(2, Math.round(item.expected.length * 1.2));
+            }
+        });
+
+        let totalXpEarned = wordXpSum;
+        if (isPassed) {
+            totalXpEarned += passBonus;
+        }
+
+        if (typeof Progress !== 'undefined' && totalXpEarned > 0) {
+            Progress.addXp(totalXpEarned);
+            Progress.logXp(totalXpEarned, isPassed ? 'dosaaf_exam_pass' : 'dosaaf_exam_words');
+            if (isPassed) {
+                Progress.markDailyActivity();
+                if (typeof Progress.incrementStat === 'function') {
+                    Progress.incrementStat('examsPassed', 1);
+                }
+                if (typeof Progress.checkAchievements === 'function') {
+                    Progress.checkAchievements();
+                }
+            }
+        }
 
         if (isPassed) {
             const prev = examPassed[currentStageNum] || {};
@@ -805,7 +982,7 @@
             records[totalWords] = Math.max(records[totalWords] || 0, currentWpm);
 
             examPassed[currentStageNum] = {
-                score: Math.max(prev?.score || 0, examCorrect),
+                score: Math.max(prev?.score || 0, correctCount),
                 total: totalWords,
                 wpm: Math.max(prev?.wpm || 0, currentWpm),
                 maxPassedWords: Math.max(prev?.maxPassedWords || 0, totalWords),
@@ -818,40 +995,47 @@
             }
             saveDosaafProgress();
             renderStageNav();
-
-            // Бонус опыта за успешную сдачу зачёта ступени (+25..+100 XP), учёт сданного экзамена и зачёт серии дней
-            examXpEarned += passBonus;
-            if (typeof Progress !== 'undefined') {
-                Progress.addXp(passBonus);
-                Progress.logXp(passBonus, 'dosaaf_exam_pass');
-                Progress.markDailyActivity();
-                if (typeof Progress.incrementStat === 'function') {
-                    Progress.incrementStat('examsPassed', 1);
-                }
-                if (typeof Progress.checkAchievements === 'function') {
-                    Progress.checkAchievements();
-                }
-            }
         }
 
         if (resultBox) {
             resultBox.style.display = 'block';
             resultBox.className = 'card mt-2 ' + (isPassed ? 'subcard-success' : 'subcard-warn');
-            const pct = Math.round((examCorrect / totalWords) * 100);
+            const pct = Math.round((correctCount / totalWords) * 100);
+
+            // Формируем наглядную раскладку принятой радиограммы
+            const breakdownHtml = alignment.map((item, idx) => {
+                if (item.status === 'ok') {
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); border-radius:4px; font-family:monospace; font-weight:700; color:var(--text); font-size:13px;" title="Группа ${idx+1}: Верно">✓ ${item.expected}</span>`;
+                } else if (item.status === 'wrong') {
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="Ожидалось: ${item.expected}, получено: ${item.typed}">✗ <s>${item.typed}</s> <span style="color:var(--success); font-weight:700;">${item.expected}</span></span>`;
+                } else if (item.status === 'missing') {
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.12); border:1px dashed rgba(239,68,68,0.5); border-radius:4px; font-family:monospace; font-size:13px;" title="Группа пропущена">✗ <span style="color:var(--danger); font-weight:700;">${item.expected}</span> <small style="opacity:0.7;">(пропуск)</small></span>`;
+                } else if (item.status === 'extra') {
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="Лишняя группа">+ <span style="color:#eab308;">${item.typed}</span> <small style="opacity:0.7;">(лишняя)</small></span>`;
+                }
+            }).join(' ');
 
             resultBox.innerHTML = `
                 <div class="bold" style="font-size:16px;">${isPassed ? (t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
                 <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
-                    Результат: <b>${examCorrect} из ${totalWords} слов/групп</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
+                    Результат: <b>${correctCount} из ${totalWords} групп</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
                     ${isPassed 
                         ? (currentStageNum < 7 
-                            ? '<b>Поздравляем!</b> Зачёт успешно сдан, следующая ступень программы ДОСААФ открыта!' 
+                            ? '<b>Поздравляем!</b> Радиограмма принята, следующая ступень программы ДОСААФ открыта!' 
                             : '<b>Поздравляем!</b> Радиограмма 7-й ступени успешно принята! Проверьте вкладку «Классность ДОСААФ».')
-                        : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' слов (80%). Потренируйтесь на словах и повторите зачёт.'}
+                        : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' групп (80%). Потренируйтесь на словах и повторите зачёт.'}
                 </p>
-                ${examXpEarned > 0 ? `
+
+                <div class="mt-2 mb-2 p-2" style="background:var(--surface); border-radius:var(--radius-sm); border:1px solid var(--border);">
+                    <div class="small muted mb-1"><b>Сверка принятой радиограммы:</b></div>
+                    <div style="line-height:1.8; word-break:break-all;">
+                        ${breakdownHtml}
+                    </div>
+                </div>
+
+                ${totalXpEarned > 0 ? `
                     <div class="mt-2 p-2" style="background:var(--surface-2); border-radius:var(--radius-sm); border-left:3px solid var(--accent); font-size:13px; font-weight:600;">
-                        ✨ <b>+${examXpEarned} XP</b> получено за зачёт ${isPassed ? `(включая бонус +${passBonus} XP за сдачу радиограммы)` : ''}
+                        ✨ <b>+${totalXpEarned} XP</b> получено за зачёт ${isPassed ? `(включая бонус +${passBonus} XP за сдачу)` : ''}
                     </div>
                 ` : ''}
                 ${isPassed ? `
@@ -1014,11 +1198,11 @@
     }
 
     function renderAllKeypads() {
-        buildMobileKeypad('dosaaf-words-kbd', 'dosaaf-word-input', checkWordAnswer);
-        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
+        buildMobileKeypad('dosaaf-words-kbd', 'dosaaf-word-input', checkWordAnswer, { showSpace: false });
+        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer, { showSpace: true });
     }
 
-    function buildMobileKeypad(containerId, inputId, checkCallback) {
+    function buildMobileKeypad(containerId, inputId, checkCallback, options = {}) {
         const container = document.getElementById(containerId);
         const input = document.getElementById(inputId);
         if (!container || !input) return;
@@ -1109,20 +1293,33 @@
             if (row2.children.length > 0) container.appendChild(row2);
         }
 
-        // Служебные кнопки в нижнем ряду: Стереть символ (Backspace) и Очистить всё (Clear all)
+        // Служебные кнопки в нижнем ряду: Стереть символ (Backspace), Пробел (если включён) и Очистить всё (Clear all)
         const actionsRow = document.createElement('div');
         actionsRow.className = 'dosaaf-kbd-row dosaaf-kbd-actions';
 
         const backspaceBtn = document.createElement('div');
         backspaceBtn.className = 'dosaaf-key dosaaf-key-action';
         backspaceBtn.innerHTML = t('dosaaf.btn_backspace') || '⌫ Стереть';
-        backspaceBtn.title = t('dosaaf.btn_backspace_title') || 'Стереть последний символ';
+        backspaceBtn.title = t('dosaaf.btn_backspace_title') || 'Стереть символ';
         backspaceBtn.addEventListener('mousedown', (e) => e.preventDefault());
         backspaceBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            input.value = input.value.slice(0, -1);
-            input.dispatchEvent(new Event('input'));
+            deleteCharFromInput(input);
         });
+        actionsRow.appendChild(backspaceBtn);
+
+        if (options && options.showSpace) {
+            const spaceBtn = document.createElement('div');
+            spaceBtn.className = 'dosaaf-key dosaaf-key-action dosaaf-key-space';
+            spaceBtn.innerHTML = t('dosaaf.btn_space') || '␣ Пробел';
+            spaceBtn.title = t('dosaaf.btn_space_title') || 'Разделить слова / группы радиограммы';
+            spaceBtn.addEventListener('mousedown', (e) => e.preventDefault());
+            spaceBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                insertAtCursor(input, ' ');
+            });
+            actionsRow.appendChild(spaceBtn);
+        }
 
         const clearBtn = document.createElement('div');
         clearBtn.className = 'dosaaf-key dosaaf-key-action dosaaf-key-clear';
@@ -1134,9 +1331,8 @@
             input.value = '';
             input.dispatchEvent(new Event('input'));
         });
-
-        actionsRow.appendChild(backspaceBtn);
         actionsRow.appendChild(clearBtn);
+
         container.appendChild(actionsRow);
     }
 
@@ -1161,9 +1357,42 @@
         return btn;
     }
 
-    function appendCharToInput(input, ch) {
-        input.value += ch;
+    function insertAtCursor(input, text) {
+        if (!input) return;
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const val = input.value;
+        input.value = val.substring(0, start) + text + val.substring(end);
+        const newPos = start + text.length;
+        try {
+            input.setSelectionRange(newPos, newPos);
+        } catch (_) {}
         input.dispatchEvent(new Event('input'));
+    }
+
+    function deleteCharFromInput(input) {
+        if (!input) return;
+        const start = input.selectionStart ?? input.value.length;
+        const end = input.selectionEnd ?? input.value.length;
+        const val = input.value;
+        if (start === end) {
+            if (start > 0) {
+                input.value = val.substring(0, start - 1) + val.substring(end);
+                try {
+                    input.setSelectionRange(start - 1, start - 1);
+                } catch (_) {}
+            }
+        } else {
+            input.value = val.substring(0, start) + val.substring(end);
+            try {
+                input.setSelectionRange(start, start);
+            } catch (_) {}
+        }
+        input.dispatchEvent(new Event('input'));
+    }
+
+    function appendCharToInput(input, ch) {
+        insertAtCursor(input, ch);
     }
 
     // =========================================================================
@@ -1412,16 +1641,19 @@
 
         startExamBtn?.addEventListener('click', startStageExam);
         bindRepeatButton(examPlayBtn, () => examInput, () => {
-            if (examActive && examWords[examIndex]) {
-                playDosaafSound(examWords[examIndex]);
+            if (examActive && examWords.length > 0) {
+                runDosaafExamPlayback();
             }
         });
+
+        const examStopBtn = document.getElementById('dosaaf-exam-stop-btn');
+        examStopBtn?.addEventListener('click', abortStageExam);
 
         examCheckBtn?.addEventListener('mousedown', (e) => e.preventDefault());
         examCheckBtn?.addEventListener('click', checkExamAnswer);
 
         examInput?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 checkExamAnswer();
             }

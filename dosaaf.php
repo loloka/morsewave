@@ -165,14 +165,22 @@ include __DIR__ . '/includes/header.php';
                     <div id="dosaaf-exam-panel" class="mt-2" style="display:none;">
                         <div class="flex-between" style="align-items:center;">
                             <span class="muted small"><?= t('dosaaf.exam_word_counter') ?>: <b id="dosaaf-exam-progress">1 / 10</b></span>
-                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-play-btn" title="<?= t('dosaaf.play_again') ?> (F7)"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?> <kbd class="btn-kbd">F7</kbd></button>
+                            <div style="display:flex; gap:8px;">
+                                <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-play-btn" title="<?= t('dosaaf.play_again') ?> (F7)"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?> <kbd class="btn-kbd">F7</kbd></button>
+                                <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-stop-btn" style="color:var(--danger); border-color:rgba(239, 68, 68, 0.4);" title="<?= t('dosaaf.exam_stop_btn') ?>"><?= mw_icon('square', 13) ?> <?= t('dosaaf.exam_stop_btn') ?></button>
+                            </div>
                         </div>
 
-                        <div class="mt-2 flex-between gap-2 flex-wrap">
-                            <input type="text" id="dosaaf-exam-input" class="answer-input"
-                                   placeholder="<?= htmlspecialchars(t('dosaaf.exam_word_ph')) ?>"
-                                   style="text-transform:uppercase; font-size:16px; flex:1;" autocomplete="off">
-                            <button type="button" class="btn btn-primary btn-sm" id="dosaaf-exam-check-btn"><?= t('dosaaf.check_btn') ?> <kbd class="btn-kbd">Enter</kbd></button>
+                        <div class="mt-2">
+                            <textarea id="dosaaf-exam-input" rows="3" class="answer-input"
+                                      placeholder="<?= htmlspecialchars(t('dosaaf.exam_radiogram_ph')) ?>"
+                                      style="text-transform:uppercase; font-size:15px; width:100%; min-height:84px; resize:vertical; font-family:monospace; line-height:1.5; padding:10px; box-sizing:border-box;" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"></textarea>
+                        </div>
+                        <div class="flex-between mt-2 gap-2 flex-wrap" style="align-items:center;">
+                            <div class="muted small" style="font-size:12px;" id="dosaaf-exam-audio-status">
+                                🎧 Приём радиограммы...
+                            </div>
+                            <button type="button" class="btn btn-primary" id="dosaaf-exam-check-btn"><?= t('dosaaf.check_exam_btn') ?> <kbd class="btn-kbd">Ctrl+Enter</kbd></button>
                         </div>
                         <div class="dosaaf-layout-warning muted" id="dosaaf-exam-layout-warn" style="display:none; font-size:12px; margin-top:6px; color:var(--accent);"></div>
 
