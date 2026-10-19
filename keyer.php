@@ -44,9 +44,14 @@ include __DIR__ . '/includes/header.php';
                 <div style="font-size: 13px; color: var(--text-muted);">Соберите стартовую версию на макетке за 15 минут или изучите чертежи заводской платы!</div>
             </div>
         </div>
-        <a href="#diy-keyer" class="btn btn-primary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 16px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
-            Собрать своими руками прямо сейчас ↓
-        </a>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <a href="donate.php" class="btn btn-secondary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; border-color: rgba(232, 163, 61, 0.45); color: #e8a33d;">
+                <span>💖</span> Поддержать проект
+            </a>
+            <a href="#diy-keyer" class="btn btn-primary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 16px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                Собрать своими руками ↓
+            </a>
+        </div>
     </div>
 
     <!-- Информационная плашка подключения -->
@@ -511,9 +516,12 @@ include __DIR__ . '/includes/header.php';
                     <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);">Экран массы B.Cu &gt;95%</span>
                     <span class="badge" style="background:rgba(168,85,247,0.1); color:#c084fc; border:1px solid rgba(168,85,247,0.3);">Универсальные ручки корпуса</span>
                 </div>
-                <div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <a href="keydocs.php?doc=pcb" class="btn btn-secondary" style="font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font-weight:700;">
                         <span>🏭</span> Открыть чертежи и 3D-рендеры платы →
+                    </a>
+                    <a href="donate.php" class="btn" style="background:rgba(232,163,61,0.15); color:#e8a33d; border:1px solid rgba(232,163,61,0.45); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font-weight:700; text-decoration:none; border-radius:6px;">
+                        <span>🛠️</span> Поддержать выпуск платы →
                     </a>
                 </div>
             </div>
@@ -713,6 +721,30 @@ include __DIR__ . '/includes/header.php';
                 <span>📚</span>
                 <span>Центр документации и схемотехники ключа →</span>
             </a>
+        </div>
+
+        <!-- Баннер поддержки разработки ключа -->
+        <div class="card mt-4" style="background: linear-gradient(135deg, rgba(232, 163, 61, 0.1) 0%, rgba(79, 216, 196, 0.08) 100%); border: 1px solid rgba(232, 163, 61, 0.35); border-radius: 14px; padding: 22px 26px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;">
+                <div style="display: flex; align-items: flex-start; gap: 16px; max-width: 720px;">
+                    <span style="font-size: 32px; line-height: 1;">🛠️</span>
+                    <div>
+                        <div style="font-size: 11px; font-weight: 800; color: #e8a33d; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;">
+                            УЧАСТИЕ В РАЗРАБОТКЕ И ПРОИЗВОДСТВЕ ПЛАТ
+                        </div>
+                        <h3 style="margin: 0 0 6px; font-size: 18px; color: var(--text);">
+                            Хотите ускорить появление аппаратного ключа MorseWave Pro?
+                        </h3>
+                        <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
+                            Все средства идут на заказ опытных заводских плат, компонентов и сборку прототипов. Поддержавшие проект на уровне «Разработка ключа» первыми получат проверенную фабричную печатную плату / DIY-кит в подарок!
+                        </div>
+                    </div>
+                </div>
+                <a href="donate.php" class="btn" style="background: var(--accent); color: #111; font-weight: 700; font-size: 14px; padding: 11px 22px; white-space: nowrap; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(232, 163, 61, 0.25);">
+                    <span>💖</span>
+                    <span>Поддержать разработку ключа →</span>
+                </a>
+            </div>
         </div>
     </div>
         </div>
