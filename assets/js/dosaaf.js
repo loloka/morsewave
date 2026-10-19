@@ -48,6 +48,33 @@
     // Загрузка и сохранение состояния (с поддержкой облачной синхронизации Progress)
     function loadDosaafProgress() {
         try {
+            // Однократный сброс ступеней для всех пользователей в связи с переходом на непрерывные радиограммы
+            const DOSAAF_RESET_VER = '2026-10-19-v2';
+            const migrationDone = localStorage.getItem('morse_dosaaf_migration_ver');
+            if (migrationDone !== DOSAAF_RESET_VER) {
+                localStorage.setItem('morse_dosaaf_migration_ver', DOSAAF_RESET_VER);
+                localStorage.setItem('morse_dosaaf_max_stage', '1');
+                localStorage.setItem('morse_dosaaf_current_stage', '1');
+                localStorage.removeItem('morse_dosaaf_exam_passed');
+                localStorage.removeItem('morse_dosaaf_stage_words_done');
+
+                if (typeof Progress !== 'undefined' && Progress.load && Progress.save) {
+                    try {
+                        const p = Progress.load();
+                        if (p && p.dosaaf) {
+                            p.dosaaf.maxStage = 1;
+                            p.dosaaf.currentStage = 1;
+                            p.dosaaf.examPassed = {};
+                            p.dosaaf.stageWordsDone = {};
+                            Progress.save(p);
+                            if (typeof Progress.pushFullProgress === 'function') {
+                                Progress.pushFullProgress();
+                            }
+                        }
+                    } catch (_) {}
+                }
+            }
+
             let prog = null;
             if (typeof Progress !== 'undefined' && Progress.load) {
                 prog = Progress.load()?.dosaaf;
@@ -78,6 +105,17 @@
             stageWordsDone = {};
             examPassed = {};
         }
+    }
+
+    function resetAllDosaafProgress() {
+        maxUnlockedStage = 1;
+        currentStageNum = 1;
+        examPassed = {};
+        stageWordsDone = {};
+        saveDosaafProgress();
+        renderStageNav();
+        renderCurrentStage();
+        switchToSubTab('napevs', true);
     }
 
     function saveDosaafProgress() {
@@ -1656,6 +1694,12 @@
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                 e.preventDefault();
                 checkExamAnswer();
+            }
+        });
+
+        document.getElementById('dosaaf-reset-progress-btn')?.addEventListener('click', () => {
+            if (confirm(t('dosaaf.reset_confirm') || 'Вы уверены, что хотите сбросить открытые ступени ДОСААФ и начать обучение со Ступени 1?')) {
+                resetAllDosaafProgress();
             }
         });
 

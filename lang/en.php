@@ -219,6 +219,8 @@ return [
     'dosaaf.btn_space' => '␣ Space',
     'dosaaf.btn_space_title' => 'Insert space between radiogram groups',
     'dosaaf.exam_passed_title' => '✓ Exam passed!',
+    'dosaaf.reset_progress' => 'Reset progress',
+    'dosaaf.reset_confirm' => 'Are you sure you want to reset all unlocked DOSAAF stages and start from Stage 1?',
     'dosaaf.exam_failed_title' => '✗ Exam failed',
     'dosaaf.ranks_desc' => 'Official radiotelegraphy qualification standards of DOSAAF USSR (EVSK). Earned by passing exams at target speeds.',
     'dosaaf.rank_current' => 'Current Rank',

@@ -17,7 +17,10 @@ include __DIR__ . '/includes/header.php';
 <div id="dosaaf-mode">
     <div class="card mt-2">
         <div class="flex-between flex-wrap gap-2 mb-2" style="align-items:center;">
-            <div class="muted small" style="font-size:13px; font-weight:600;"><?= t('dosaaf.nav_label') ?></div>
+            <div class="muted small" style="font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
+                <span><?= t('dosaaf.nav_label') ?></span>
+                <button type="button" class="btn btn-outline" id="dosaaf-reset-progress-btn" style="padding:2px 7px; font-size:11px; line-height:1.2; border-color:var(--border); color:var(--text-muted);" title="Сбросить прогресс ступеней и начать курс сначала">↺ <?= t('dosaaf.reset_progress') ?></button>
+            </div>
             <div class="speed-control dosaaf-speed-box" style="margin:0;">
                 <?= t('learn.speed') ?>
                 <input type="range" id="dosaaf-wpm" min="5" max="35" step="1" value="12">

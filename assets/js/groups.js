@@ -322,8 +322,10 @@
 
     function updateInputLayoutState() {
         const isCyr = isCyrillicSession();
-        if (answerInput) answerInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
-        if (examAnswerEl) examAnswerEl.dataset.layout = isCyr ? 'cyrillic' : 'latin';
+        const aInput = document.getElementById('groups-answer');
+        const eInput = document.getElementById('exam-answer');
+        if (aInput) aInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
+        if (eInput) eInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
     }
     updateInputLayoutState();
 
