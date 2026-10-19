@@ -318,7 +318,12 @@
             });
 
             if (currentWasLearnedAtStart) {
-                feedbackEl.textContent = t('js.learn.correct_known', { '{ch}': decoded });
+                if (correctStreak < REQUIRED_STREAK) {
+                    feedbackEl.textContent = t('js.learn.correct_streak', { '{ch}': decoded, '{streak}': correctStreak, '{req}': REQUIRED_STREAK });
+                } else {
+                    feedbackEl.textContent = t('js.learn.correct_known', { '{ch}': decoded });
+                    Progress.markDailyActivity();
+                }
                 feedbackEl.className = 'feedback show ok';
             } else if (correctStreak < REQUIRED_STREAK) {
                 // XP пока не начисляем — награда даётся один раз, целиком,
@@ -1155,10 +1160,28 @@
         rhythmBest = Progress.updateRhythmBest(progressKeyForChar(rhythmCurrent), overallPct);
 
         if (rhythmCurrentWasMasteredAtStart) {
-            // Ритм этой буквы уже отточен раньше — просто тренировка,
-            // без XP, независимо от текущей точности (как в "Отправке").
-            rhythmFeedbackEl.textContent = t('js.learn.rhythm_known', { '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr, '{acc}': overallPct });
-            rhythmFeedbackEl.className = 'feedback show ok';
+            // Ритм этой буквы уже отточен раньше — тренировка без повторного XP,
+            // но 5 точных повторов подряд засчитывают активность дня.
+            if (overall >= RHYTHM_ACCURATE_THRESHOLD) {
+                rhythmStreak++;
+                if (rhythmStreak < REQUIRED_RHYTHM_STREAK) {
+                    rhythmFeedbackEl.textContent = t('js.learn.rhythm_streak', {
+                        '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr,
+                        '{streak}': rhythmStreak, '{req}': REQUIRED_RHYTHM_STREAK,
+                    });
+                } else {
+                    rhythmFeedbackEl.textContent = t('js.learn.rhythm_known', { '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr, '{acc}': overallPct });
+                    Progress.markDailyActivity();
+                }
+                rhythmFeedbackEl.className = 'feedback show ok';
+            } else {
+                rhythmStreak = 0;
+                rhythmFeedbackEl.textContent = t('js.learn.rhythm_imprecise', {
+                    '{ch}': decoded, '{sym}': symPctStr, '{pause}': pausePctStr, '{acc}': overallPct,
+                    '{threshold}': Math.round(RHYTHM_ACCURATE_THRESHOLD * 100),
+                });
+                rhythmFeedbackEl.className = 'feedback show bad';
+            }
         } else if (overall >= RHYTHM_ACCURATE_THRESHOLD) {
             rhythmStreak++;
             if (rhythmStreak < REQUIRED_RHYTHM_STREAK) {
