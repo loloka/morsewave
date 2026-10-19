@@ -595,8 +595,50 @@
     }
 
     // =========================================================================
-    // 3. ЗАЧЁТ СТУПЕНИ (10 контрольных слов, 80% порог)
+    // 3. ЗАЧЁТ СТУПЕНИ (10, 30 или 50 контрольных слов/групп, 80% порог)
     // =========================================================================
+    function getExamLength() {
+        const saved = parseInt(localStorage.getItem('morse_dosaaf_exam_length'), 10);
+        if (saved === 30 || saved === 50) return saved;
+        // Для 7-й ступени (квалификация ДОСААФ) по умолчанию предлагаем радиограмму 30 групп, если явно не выбрано 10
+        if (currentStageNum === 7 && saved !== 10) return 30;
+        return 10;
+    }
+
+    function setExamLength(len) {
+        localStorage.setItem('morse_dosaaf_exam_length', len);
+        document.querySelectorAll('#dosaaf-exam-length-chips .chip').forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.length, 10) === len);
+        });
+    }
+
+    function generateStageExamWords(stageData, targetLength) {
+        const result = [];
+        const pool = [...stageData.words].sort(() => Math.random() - 0.5);
+
+        if (stageData.stage === 7) {
+            // Для 7-й ступени (цифры): радиограмма из стандартных 5-значных цифровых групп
+            // и контрольных чисел программы ДОСААФ
+            while (result.length < targetLength) {
+                if (pool.length > 0 && Math.random() < 0.35) {
+                    result.push(pool.pop());
+                } else {
+                    const group = Math.floor(10000 + Math.random() * 90000).toString();
+                    result.push(group);
+                }
+            }
+        } else {
+            // Для буквенных ступеней 1-6
+            while (result.length < targetLength) {
+                if (pool.length === 0) {
+                    pool.push(...stageData.words.sort(() => Math.random() - 0.5));
+                }
+                result.push(pool.pop());
+            }
+        }
+        return result.slice(0, targetLength);
+    }
+
     function renderExamView() {
         const lockedBox = document.getElementById('dosaaf-exam-locked');
         const unlockedBox = document.getElementById('dosaaf-exam-unlocked');
@@ -619,19 +661,19 @@
         if (lockedBox) lockedBox.style.display = 'none';
         if (unlockedBox) unlockedBox.style.display = 'block';
 
+        const currentLen = getExamLength();
+        document.querySelectorAll('#dosaaf-exam-length-chips .chip').forEach(c => {
+            c.classList.toggle('active', parseInt(c.dataset.length, 10) === currentLen);
+        });
+
         buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
     }
 
     function startStageExam() {
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
+        const targetLength = getExamLength();
         
-        // 10 контрольных слов
-        examWords = [...stageData.words].sort(() => Math.random() - 0.5).slice(0, 10);
-        // Если в ступени меньше 10 слов, дополняем повторами в случайном порядке
-        while (examWords.length < 10 && stageData.words.length > 0) {
-            examWords.push(stageData.words[Math.floor(Math.random() * stageData.words.length)]);
-        }
-
+        examWords = generateStageExamWords(stageData, targetLength);
         examIndex = 0;
         examCorrect = 0;
         examXpEarned = 0;
@@ -639,10 +681,12 @@
 
         const panel = document.getElementById('dosaaf-exam-panel');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
+        const lengthWrapper = document.getElementById('dosaaf-exam-length-wrapper');
         const resultBox = document.getElementById('dosaaf-exam-result');
 
         if (panel) panel.style.display = 'block';
         if (startBtn) startBtn.style.display = 'none';
+        if (lengthWrapper) lengthWrapper.style.display = 'none';
         if (resultBox) resultBox.style.display = 'none';
 
         nextExamWord();
@@ -706,22 +750,30 @@
         const panel = document.getElementById('dosaaf-exam-panel');
         const resultBox = document.getElementById('dosaaf-exam-result');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
+        const lengthWrapper = document.getElementById('dosaaf-exam-length-wrapper');
 
         if (panel) panel.style.display = 'none';
         if (startBtn) startBtn.style.display = 'inline-flex';
+        if (lengthWrapper) lengthWrapper.style.display = 'block';
 
         const totalWords = examWords.length || 10;
-        const passThreshold = Math.ceil(totalWords * 0.8); // 80% (8 из 10)
+        const passThreshold = Math.ceil(totalWords * 0.8); // 80% порог (8 из 10, 24 из 30, 40 из 50)
         const isPassed = examCorrect >= passThreshold;
         const currentWpm = getDosaafWpm();
-        const passBonus = 25;
+        // Бонус опыта в зависимости от объёма: 25 XP (10 слов), 50 XP (30 групп), 100 XP (50 групп)
+        const passBonus = totalWords >= 50 ? 100 : (totalWords >= 30 ? 50 : 25);
 
         if (isPassed) {
-            const prev = examPassed[currentStageNum];
+            const prev = examPassed[currentStageNum] || {};
+            const records = prev.records || {};
+            records[totalWords] = Math.max(records[totalWords] || 0, currentWpm);
+
             examPassed[currentStageNum] = {
                 score: Math.max(prev?.score || 0, examCorrect),
                 total: totalWords,
                 wpm: Math.max(prev?.wpm || 0, currentWpm),
+                maxPassedWords: Math.max(prev?.maxPassedWords || 0, totalWords),
+                records: records,
                 date: new Date().toISOString()
             };
 
@@ -731,7 +783,7 @@
             saveDosaafProgress();
             renderStageNav();
 
-            // Бонус опыта за успешную сдачу зачёта ступени (+25 XP), учёт сданного экзамена и зачёт серии дней
+            // Бонус опыта за успешную сдачу зачёта ступени (+25..+100 XP), учёт сданного экзамена и зачёт серии дней
             examXpEarned += passBonus;
             if (typeof Progress !== 'undefined') {
                 Progress.addXp(passBonus);
@@ -754,16 +806,16 @@
             resultBox.innerHTML = `
                 <div class="bold" style="font-size:16px;">${isPassed ? (t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
                 <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
-                    Результат: <b>${examCorrect} из ${totalWords} слов</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
+                    Результат: <b>${examCorrect} из ${totalWords} слов/групп</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
                     ${isPassed 
                         ? (currentStageNum < 7 
                             ? '<b>Поздравляем!</b> Зачёт успешно сдан, следующая ступень программы ДОСААФ открыта!' 
-                            : '<b>Поздравляем!</b> Полный курс ДОСААФ успешно завершён!')
+                            : '<b>Поздравляем!</b> Радиограмма 7-й ступени успешно принята! Проверьте вкладку «Классность ДОСААФ».')
                         : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' слов (80%). Потренируйтесь на словах и повторите зачёт.'}
                 </p>
                 ${examXpEarned > 0 ? `
                     <div class="mt-2 p-2" style="background:var(--surface-2); border-radius:var(--radius-sm); border-left:3px solid var(--accent); font-size:13px; font-weight:600;">
-                        ✨ <b>+${examXpEarned} XP</b> получено за зачёт ${isPassed ? '(включая бонус +25 XP за сдачу ступени)' : ''}
+                        ✨ <b>+${examXpEarned} XP</b> получено за зачёт ${isPassed ? `(включая бонус +${passBonus} XP за сдачу радиограммы)` : ''}
                     </div>
                 ` : ''}
                 ${isPassed ? `
@@ -805,16 +857,24 @@
     function computeCurrentRank() {
         // Присвоение классности радиоспециалиста ДОСААФ (по ЕВСК):
         // Обязательное условие: освоение полного курса (все 7 ступеней: буквы и цифры).
-        // Класс определяется нормативной скоростью сдачи зачёта 7-й ступени.
+        // Класс определяется нормативной скоростью сдачи зачёта 7-й ступени при достаточном объёме радиограммы.
         const stage7Exam = examPassed[7];
         if (stage7Exam) {
-            const wpm7 = stage7Exam.wpm || 0;
-            if (wpm7 >= 28) return 'master'; // 120+ зн/мин
-            if (wpm7 >= 24) return 'class1'; // 100+ зн/мин
-            if (wpm7 >= 19) return 'class2'; // 80+ зн/мин
-            if (wpm7 >= 14) return 'class3'; // 60+ зн/мин
+            const records = stage7Exam.records || {};
+            const maxWords = stage7Exam.maxPassedWords || (stage7Exam.score >= stage7Exam.total * 0.8 ? stage7Exam.total : 0);
+            const generalWpm = stage7Exam.wpm || 0;
+
+            // Мастер радиосвязи ДОСААФ: 28+ WPM (120 зн/мин) И не менее 50 групп в марафоне!
+            const wpm50 = Math.max(records[50] || 0, maxWords >= 50 ? generalWpm : 0);
+            if (wpm50 >= 28) return 'master';
+
+            // 1-й, 2-й, 3-й классы: норматив скорости на радиограмме не менее 30 групп!
+            const wpm30 = Math.max(records[30] || 0, records[50] || 0, maxWords >= 30 ? generalWpm : 0);
+            if (wpm30 >= 24) return 'class1'; // 100+ зн/мин
+            if (wpm30 >= 19) return 'class2'; // 80+ зн/мин
+            if (wpm30 >= 14) return 'class3'; // 60+ зн/мин
         }
-        // Курсант: в процессе обучения (ступени 1-7)
+        // Курсант: в процессе обучения (ступени 1-7 или экспресс-зачёт до 30 групп)
         return 'cadet';
     }
 
@@ -855,14 +915,21 @@
                 statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
             } else {
                 const stage7Exam = examPassed[7];
-                if (stage7Exam && stage7Exam.wpm >= rk.minSpeedWpm) {
+                const records = stage7Exam?.records || {};
+                const maxWords = stage7Exam?.maxPassedWords || (stage7Exam?.score >= stage7Exam?.total * 0.8 ? stage7Exam.total : 0);
+                const generalWpm = stage7Exam?.wpm || 0;
+                const minWords = rk.minWords || 30;
+
+                const bestWpmForRank = (minWords === 50)
+                    ? Math.max(records[50] || 0, maxWords >= 50 ? generalWpm : 0)
+                    : Math.max(records[30] || 0, records[50] || 0, maxWords >= 30 ? generalWpm : 0);
+
+                if (stage7Exam && bestWpmForRank >= rk.minSpeedWpm) {
                     isAchieved = true;
                     statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
+                    statusText = `<div class="muted small mt-1" style="color:var(--success);">✓ Подтверждено: ${bestWpmForRank} WPM на радиограмме ${minWords}+ групп</div>`;
                 } else {
-                    const reqInfo = (t('dosaaf.rank_req_info') || 'Требуется: сдать зачёт полного курса (все 7 ступеней) со скоростью ≥ {wpm} WPM ({cpm} зн/мин).')
-                        .replace('{stage}', rk.requiredStage)
-                        .replace('{wpm}', rk.minSpeedWpm)
-                        .replace('{cpm}', rk.minSpeedCpm);
+                    const reqInfo = `Требуется: сдать зачёт 7 ступени со скоростью ≥ ${rk.minSpeedWpm} WPM (${rk.minSpeedCpm} зн/мин) на радиограмме не менее ${minWords} групп.`;
                     statusBadge = `<span class="badge" style="background:var(--surface); border:1px solid var(--border); color:var(--text-muted);">${t('dosaaf.rank_locked') || '🔒 Не выполнено'}</span>`;
                     statusText = `<div class="muted small mt-1" style="color:var(--accent);">${reqInfo}</div>`;
                 }
@@ -1294,6 +1361,16 @@
         const examCheckBtn = document.getElementById('dosaaf-exam-check-btn');
         const examInput = document.getElementById('dosaaf-exam-input');
         const examPlayBtn = document.getElementById('dosaaf-exam-play-btn');
+
+        document.querySelectorAll('#dosaaf-exam-length-chips .chip').forEach(chip => {
+            chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                const len = parseInt(chip.dataset.length, 10);
+                if (len === 10 || len === 30 || len === 50) {
+                    setExamLength(len);
+                }
+            });
+        });
 
         startExamBtn?.addEventListener('click', startStageExam);
         bindRepeatButton(examPlayBtn, () => examInput, () => {

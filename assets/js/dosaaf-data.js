@@ -222,6 +222,7 @@ const DOSAAF_RANKS = [
         minSpeedWpm: 8,
         minSpeedCpm: 35,
         requiredStage: 1,
+        minWords: 0,
         description: 'Учащийся радиошколы: последовательное освоение ступеней 1–7 (буквы, напевы, смысловые слова и цифры).'
     },
     {
@@ -231,7 +232,8 @@ const DOSAAF_RANKS = [
         minSpeedWpm: 14,
         minSpeedCpm: 60,
         requiredStage: 7,
-        description: 'Полный курс (все 7 ступеней: буквы и цифры). Зачётная скорость приёма не менее 60 зн/мин (14 WPM).'
+        minWords: 30,
+        description: 'Полный курс (все 7 ступеней). Зачётная скорость не менее 60 зн/мин (14 WPM) на радиограмме от 30 групп.'
     },
     {
         id: 'class2',
@@ -240,7 +242,8 @@ const DOSAAF_RANKS = [
         minSpeedWpm: 19,
         minSpeedCpm: 80,
         requiredStage: 7,
-        description: 'Полный курс (все 7 ступеней). Зачётная скорость приёма не менее 80 зн/мин (19 WPM).'
+        minWords: 30,
+        description: 'Полный курс. Зачётная скорость не менее 80 зн/мин (19 WPM) на радиограмме от 30 групп.'
     },
     {
         id: 'class1',
@@ -249,7 +252,8 @@ const DOSAAF_RANKS = [
         minSpeedWpm: 24,
         minSpeedCpm: 100,
         requiredStage: 7,
-        description: 'Полный курс (все 7 ступеней). Зачётная скорость приёма не менее 100 зн/мин (24 WPM).'
+        minWords: 30,
+        description: 'Полный курс. Зачётная скорость не менее 100 зн/мин (24 WPM) на радиограмме от 30 групп.'
     },
     {
         id: 'master',
@@ -258,6 +262,7 @@ const DOSAAF_RANKS = [
         minSpeedWpm: 28,
         minSpeedCpm: 120,
         requiredStage: 7,
-        description: 'Высшая квалификация радиоспециалиста: приём радиограмм со скоростью от 120 зн/мин (28 WPM).'
+        minWords: 50,
+        description: 'Высшая квалификация радиоспециалиста: приём радиограмм со скоростью от 120 зн/мин (28 WPM) на марафоне не менее 50 групп.'
     }
 ];

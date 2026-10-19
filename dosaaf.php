@@ -148,6 +148,16 @@ include __DIR__ . '/includes/header.php';
                     <p class="muted" style="font-size:13px; line-height:1.5;"><?= t('dosaaf.exam_desc') ?></p>
                     <div class="muted small mb-2" id="dosaaf-exam-min-speed" style="color:var(--accent);"></div>
 
+                    <!-- Выбор объёма зачёта (10 / 30 / 50 групп) -->
+                    <div class="mb-3" id="dosaaf-exam-length-wrapper">
+                        <span class="muted small bold d-block mb-1">Объём радиограммы зачёта:</span>
+                        <div class="chips-group" id="dosaaf-exam-length-chips" style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="chip active" data-length="10" title="10 контрольных слов (экспресс-зачёт для допуска к следующей ступени)">10 слов (Экспресс)</button>
+                            <button type="button" class="chip" data-length="30" title="30 групп (радиограмма ДОСААФ ~2.5 мин, норматив на 3-й, 2-й и 1-й класс)">30 групп (Радиограмма ДОСААФ)</button>
+                            <button type="button" class="chip" data-length="50" title="50 групп (квалификационный марафон ~4.5 мин, обязателен для звания «Мастер»)">50 групп (Марафон — Мастер)</button>
+                        </div>
+                    </div>
+
                     <div class="mt-2">
                         <button type="button" class="btn btn-primary" id="dosaaf-start-exam-btn"><?= mw_icon('play', 13) ?> <?= t('dosaaf.start_exam') ?></button>
                     </div>
