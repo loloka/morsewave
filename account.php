@@ -383,6 +383,15 @@ include __DIR__ . '/includes/header.php';
             <button type="button" class="btn btn-sm btn-primary daily-goal-custom-btn"><?= t('common.save') ?></button>
             <span class="muted" style="font-size:12px;"><?= t('acc.mins') ?> (1–720)</span>
         </div>
+
+        <div class="card p-3 mt-3" style="background:var(--surface-2); border-left:3px solid var(--accent); font-size:13px; line-height:1.5;">
+            <div style="font-weight:700; color:var(--accent); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
+                <?= mw_icon('info', 15) ?> <?= t('acc.daily_goal_rec_title') ?>
+            </div>
+            <div class="muted" style="color:var(--text); opacity:0.9;">
+                <?= t('acc.daily_goal_rec_text') ?>
+            </div>
+        </div>
     </div>
 </div>
 
