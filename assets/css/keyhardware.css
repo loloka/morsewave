@@ -435,3 +435,275 @@
     }
 }
 
+/* =========================================================
+   ЛАБОРАТОРИЯ ТАЙМИНГОВ И АНАЛИЗАТОР ПАУЗ 3T / 7T (ITU / ДОСААФ)
+   ========================================================= */
+.keyer-timing-lab {
+    background: #090d12;
+    border: 1px solid #1c2633;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+.timing-lab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.timing-badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    background: #111822;
+    border: 1px solid #233244;
+    color: var(--text-muted);
+}
+
+.timing-badge-status.active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+    color: #10b981;
+}
+
+.timing-presets-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: #0f151e;
+    border: 1px solid #222f3d;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.timing-preset-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid #253342;
+    color: var(--text-muted);
+    transition: all 0.15s ease;
+}
+
+.timing-preset-btn:hover {
+    color: #fff;
+    border-color: #4fd8c4;
+}
+
+.timing-preset-btn.active {
+    background: #4fd8c4;
+    color: #0b0f12;
+    border-color: #4fd8c4;
+    font-weight: 700;
+}
+
+.timing-target-card {
+    background: #0b0f15;
+    border: 1px solid #1c2633;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.timing-target-chars {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    min-height: 44px;
+    align-items: center;
+}
+
+.timing-char-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 42px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: #141b24;
+    color: #64748b;
+    border: 1px solid #233040;
+    transition: all 0.15s ease;
+}
+
+.timing-char-box.space {
+    min-width: 24px;
+    background: transparent;
+    border-color: #1a222c;
+    color: #334155;
+}
+
+.timing-char-box.done {
+    background: rgba(79, 216, 196, 0.15);
+    color: #4fd8c4;
+    border-color: rgba(79, 216, 196, 0.4);
+}
+
+.timing-char-box.current {
+    background: rgba(232, 163, 61, 0.2);
+    color: #e8a33d;
+    border-color: #e8a33d;
+    transform: scale(1.08);
+    box-shadow: 0 0 12px rgba(232, 163, 61, 0.35);
+}
+
+.timing-char-box.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+    border-color: #ef4444;
+}
+
+/* Сетка из 4 индикаторов-метров */
+.timing-gauges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.timing-gauge-card {
+    background: #0d1218;
+    border: 1px solid #1f2a38;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timing-gauge-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 700;
+}
+
+.timing-gauge-value {
+    font-family: var(--font-mono);
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+}
+
+.timing-gauge-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.timing-gauge-track {
+    height: 6px;
+    background: #17212b;
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.timing-gauge-fill {
+    height: 100%;
+    background: #4fd8c4;
+    border-radius: 3px;
+    transition: width 0.2s ease, background-color 0.2s ease;
+}
+
+.timing-gauge-fill.warning {
+    background: #f59e0b;
+}
+
+.timing-gauge-fill.error {
+    background: #ef4444;
+}
+
+.timing-gauge-status {
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Холст таймлайна (осциллограмма передачи) */
+.timing-timeline-wrap {
+    background: #06080b;
+    border: 1px solid #17202b;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 18px;
+    position: relative;
+}
+
+.timing-timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #17202b;
+    padding-bottom: 6px;
+    font-family: var(--font-mono);
+}
+
+#timing-canvas {
+    width: 100%;
+    height: 80px;
+    display: block;
+    background: #020406;
+    border-radius: 6px;
+}
+
+/* Журнал замеров */
+.timing-audit-wrap {
+    background: #0b0f15;
+    border: 1px solid #1c2633;
+    border-radius: 10px;
+    padding: 14px;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.timing-audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    text-align: left;
+}
+
+.timing-audit-table th {
+    padding: 6px 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid #1f2a38;
+}
+
+.timing-audit-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid #141b24;
+}
+
+

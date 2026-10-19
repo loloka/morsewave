@@ -116,6 +116,10 @@
             if (elDah) elDah.textContent = `${dMs * 3} мс`;
             if (elChar) elChar.textContent = `${dMs * 3} мс`;
             if (elWord) elWord.textContent = `${dMs * 7} мс`;
+
+            if (window.TimingLab && window.TimingLab.setWpm) {
+                window.TimingLab.setWpm(currentWpm);
+            }
         }
         if (pitch && oledPitch) {
             currentToneFreq = parseInt(pitch, 10);
@@ -175,10 +179,12 @@
                 pulseKeyIndicator(false);
                 updateOledMorse('.');
                 appendTerminal('.', 'ditdah');
+                if (window.TimingLab && window.TimingLab.onDit) window.TimingLab.onDit();
             } else if (ch === '-') {
                 pulseKeyIndicator(true);
                 updateOledMorse('-');
                 appendTerminal('-', 'ditdah');
+                if (window.TimingLab && window.TimingLab.onDah) window.TimingLab.onDah();
             }
         }
 
@@ -214,6 +220,7 @@
                 if (token.length > 0) {
                     appendDecodedChar(token);
                     appendTerminal(` [${token}] `, 'char');
+                    if (window.TimingLab && window.TimingLab.onChar) window.TimingLab.onChar(token);
                     setTimeout(() => {
                         if (oledMorse && (oledMorse.textContent === '.' || oledMorse.textContent === '-')) {
                             oledMorse.textContent = '- READY -';
@@ -232,6 +239,7 @@
             if (lines.length > 1) {
                 appendDecodedChar(' ');
                 appendTerminal('\n', 'sys');
+                if (window.TimingLab && window.TimingLab.onSpace) window.TimingLab.onSpace();
                 incomingBuffer = lines[lines.length - 1];
             }
         }
@@ -387,9 +395,12 @@
     let echoScore = 0;
     let isPlayingAudio = false;
     let currentMorsePlayer = null;
+    let isEchoRunning = false;
 
     const echoTargetEl = document.getElementById('echo-target-text');
     const echoResultEl = document.getElementById('echo-result-text');
+    const btnToggleEcho = document.getElementById('btn-toggle-echo');
+    const echoToggleLabel = document.getElementById('echo-toggle-label');
     const btnNextEcho = document.getElementById('btn-next-echo');
     const btnPlayEcho = document.getElementById('btn-play-echo');
     const btnResetEcho = document.getElementById('btn-reset-echo');
@@ -451,12 +462,39 @@
             isPlayingAudio = false;
             if (btnPlayEcho) {
                 btnPlayEcho.style.opacity = '1';
-                btnPlayEcho.innerHTML = '<span>▶</span> <span>Прослушать</span>';
+                btnPlayEcho.innerHTML = '<span>🔊</span> <span>Повторить</span>';
             }
         }
     }
 
-    function setEchoPhrase(index) {
+    function toggleEchoSession() {
+        isEchoRunning = !isEchoRunning;
+        if (isEchoRunning) {
+            if (btnToggleEcho) {
+                btnToggleEcho.style.background = '#f59e0b';
+                btnToggleEcho.style.color = '#000';
+            }
+            if (echoToggleLabel) echoToggleLabel.textContent = 'Пауза';
+            if (echoResultEl) {
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Слушайте позывной и повторяйте на ключе...</span>';
+            }
+            playCurrentEchoAudio();
+        } else {
+            if (btnToggleEcho) {
+                btnToggleEcho.style.background = '#10b981';
+                btnToggleEcho.style.color = '#fff';
+            }
+            if (echoToggleLabel) echoToggleLabel.textContent = 'Начать тренировку';
+            if (currentMorsePlayer && currentMorsePlayer.stop) {
+                currentMorsePlayer.stop();
+            }
+            if (echoResultEl) {
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Тренировка на паузе. Нажмите [▶ Начать тренировку]</span>';
+            }
+        }
+    }
+
+    function setEchoPhrase(index, autoPlay = false) {
         const list = echoCategories[activeCategory] || echoCategories.callsigns;
         currentEchoIndex = index % list.length;
         userEchoBuffer = '';
@@ -466,10 +504,14 @@
             echoTargetEl.textContent = target;
         }
         if (echoResultEl) {
-            echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+            if (isEchoRunning) {
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+            } else {
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Нажмите [▶ Начать тренировку], чтобы услышать позывной в эфире</span>';
+            }
         }
 
-        if (activeMode === 'echo') {
+        if (activeMode === 'echo' && autoPlay && isEchoRunning) {
             setTimeout(() => {
                 playCurrentEchoAudio();
             }, 350);
@@ -514,7 +556,7 @@
             playSuccessChirp();
 
             setTimeout(() => {
-                setEchoPhrase(currentEchoIndex + 1);
+                setEchoPhrase(currentEchoIndex + 1, isEchoRunning);
             }, 1400);
         } else if (hasError && userEchoBuffer.length >= target.length) {
             echoStreak = 0;
@@ -523,9 +565,13 @@
         }
     }
 
+    if (btnToggleEcho) {
+        btnToggleEcho.addEventListener('click', toggleEchoSession);
+    }
+
     if (btnNextEcho) {
         btnNextEcho.addEventListener('click', () => {
-            setEchoPhrase(currentEchoIndex + 1);
+            setEchoPhrase(currentEchoIndex + 1, isEchoRunning);
         });
     }
 
@@ -547,7 +593,7 @@
     if (echoCategorySelect) {
         echoCategorySelect.addEventListener('change', (e) => {
             activeCategory = e.target.value;
-            setEchoPhrase(0);
+            setEchoPhrase(0, isEchoRunning);
         });
     }
 
@@ -587,7 +633,7 @@
         btnModeEcho.addEventListener('click', () => {
             activeMode = 'echo';
             updateModeUI();
-            setEchoPhrase(currentEchoIndex);
+            setEchoPhrase(currentEchoIndex, isEchoRunning);
         });
     }
 
@@ -598,8 +644,8 @@
         });
     }
 
-    // Инициализация первой фразы
-    setEchoPhrase(0);
+    // Инициализация первой фразы (БЕЗ автозапуска звука при загрузке страницы!)
+    setEchoPhrase(0, false);
 
     // --- Обработка формы предзаказа ключа ---
     const orderForm = document.getElementById('keyer-order-form');

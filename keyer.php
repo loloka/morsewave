@@ -5,6 +5,7 @@ require_once __DIR__ . '/includes/auth.php';
 $pageTitle = 'Боевой ключ MorseWave Pro · R9OGL Edition';
 $activePage = 'keyer';
 $pageScript = 'keyhardware.js';
+$extraScripts = ['timinglab.js'];
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -232,13 +233,16 @@ include __DIR__ . '/includes/header.php';
             <span id="echo-target-text" style="letter-spacing:2px;">R9OGL</span>
         </div>
         <div style="display:inline-flex; align-items:center; gap:8px;">
-            <button id="btn-play-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;">
-                <span>▶</span> <span>Прослушать</span>
+            <button id="btn-toggle-echo" class="btn btn-primary" style="font-size:12px; padding:6px 14px; background:#10b981; color:#fff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                <span>▶</span> <span id="echo-toggle-label">Начать тренировку</span>
+            </button>
+            <button id="btn-play-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;" title="Прослушать позывной ещё раз">
+                <span>🔊</span> <span>Повторить</span>
             </button>
             <button id="btn-reset-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 12px;" title="Очистить ваш ввод и попробовать снова">
                 ⌫ Сброс
             </button>
-            <button id="btn-next-echo" class="btn btn-primary" style="font-size:12px; padding:6px 14px; background:#4fd8c4; color:#0b0f12; font-weight:700;">
+            <button id="btn-next-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px;">
                 Следующая →
             </button>
         </div>
@@ -246,7 +250,149 @@ include __DIR__ . '/includes/header.php';
 
     <div style="margin-top:14px;">
         <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Ваш ответ с ключа:</span>
-        <div class="echo-user-result" id="echo-result-text" style="letter-spacing:2px;">Ожидание передачи веслом...</div>
+        <div class="echo-user-result" id="echo-result-text" style="letter-spacing:2px;">Нажмите [▶ Начать тренировку], чтобы услышать позывной в эфире</div>
+    </div>
+</div>
+
+<!-- =========================================================
+     ЛАБОРАТОРИЯ ТАЙМИНГОВ И АНАЛИЗАТОР ПАУЗ 3T / 7T (ITU / ДОСААФ)
+     ========================================================= -->
+<div class="keyer-timing-lab" id="keyer-timing-lab">
+    <div class="timing-lab-header">
+        <div>
+            <div class="card-eyebrow" style="color:#4fd8c4;">СУДЕЙСКИЙ КОНТРОЛЬ · ЭТАЛОН ITU / ДОСААФ</div>
+            <h2 style="margin:0 0 6px;">Лаборатория таймингов и анализатор пауз (3T / 7T)</h2>
+            <p class="muted" style="margin:0; font-size:14px; max-width:820px; line-height:1.5;">
+                Аппаратная проверка ритма руки: соотношение точки к тире (1:3), чистота межбуквенных пауз (3T) и защита от слипания слов (7T).
+            </p>
+        </div>
+        <div style="display:inline-flex; align-items:center; gap:10px;">
+            <div class="timing-badge-status" id="timing-status-badge">○ ГОТОВ К ЗАМЕРУ</div>
+            <button id="btn-timing-start" class="btn btn-primary" style="font-size:12px; padding:7px 16px; background:#10b981; color:#fff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+                <span>▶</span> <span>Начать замер</span>
+            </button>
+            <button id="btn-timing-reset" class="btn btn-secondary" style="font-size:12px; padding:7px 12px;" title="Сбросить статистику замера">
+                ↺ Сброс
+            </button>
+        </div>
+    </div>
+
+    <!-- Панель выбора контрольного текста -->
+    <div class="timing-presets-bar">
+        <div style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
+            <span style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Контрольный текст:</span>
+            <button type="button" class="timing-preset-btn active" data-preset="paris">🏆 PARIS PARIS (Эталон ITU)</button>
+            <button type="button" class="timing-preset-btn" data-preset="contest">📻 CQ TEST R9OGL 599 (Эфир)</button>
+            <button type="button" class="timing-preset-btn" data-preset="dosaaf">🎖 РАДИО 73 SK (ДОСААФ)</button>
+            <button type="button" class="timing-preset-btn" data-preset="custom">✍️ Свой текст...</button>
+        </div>
+        <div id="timing-class-badge" style="font-size:13px; font-weight:700;">
+            <span style="color:#10b981;">🏆 МАСТЕР СПОРТА (ИТУ)</span>
+        </div>
+    </div>
+
+    <!-- Поле ввода своего текста (скрыто по умолчанию) -->
+    <div id="timing-custom-wrap" style="display:none; align-items:center; gap:8px; margin-bottom:14px; background:#0b0f15; padding:8px 12px; border-radius:8px; border:1px solid #1c2633;">
+        <input type="text" id="timing-custom-input" placeholder="Введите ваш текст для замера (например: R8OA TEST)" style="flex:1; background:#111822; border:1px solid #253342; color:#fff; padding:6px 10px; border-radius:6px; font-family:var(--font-mono); font-size:13px; text-transform:uppercase;">
+        <button type="button" id="btn-apply-custom" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; font-weight:700; color:#4fd8c4;">Применить</button>
+    </div>
+
+    <!-- Блок отображения цели с токенами знаков -->
+    <div class="timing-target-card">
+        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:6px; letter-spacing:0.05em;">Контрольная строка для передачи на ключе:</div>
+        <div class="timing-target-chars" id="timing-target-chars">
+            <!-- Токены генерируются JS -->
+        </div>
+    </div>
+
+    <!-- Сетка из 4 индикаторов-метров -->
+    <div class="timing-gauges-grid">
+        <!-- 1. Соотношение Тире / Точка -->
+        <div class="timing-gauge-card">
+            <div class="timing-gauge-title">Соотношение Тире : Точка</div>
+            <div class="timing-gauge-value" id="gauge-ratio-val">3.00×</div>
+            <div class="timing-gauge-sub">Норма ITU: <b>3.0×</b> (допуск 2.8 – 3.2×)</div>
+            <div class="timing-gauge-track">
+                <div class="timing-gauge-fill" id="gauge-ratio-bar" style="width:50%;"></div>
+            </div>
+            <div class="timing-gauge-status" id="gauge-ratio-status">
+                <span style="color:#10b981;">✓ Идеальный баланс (ITU)</span>
+            </div>
+        </div>
+
+        <!-- 2. Межзнаковая пауза 3T -->
+        <div class="timing-gauge-card">
+            <div class="timing-gauge-title">Межбуквенная пауза (3T)</div>
+            <div class="timing-gauge-value" id="gauge-char-pause-val">3.0T (180 мс)</div>
+            <div class="timing-gauge-sub">Норма: <b>3.0 длительности точки</b> (2.5 – 3.6T)</div>
+            <div class="timing-gauge-track">
+                <div class="timing-gauge-fill" id="gauge-char-pause-bar" style="width:50%;"></div>
+            </div>
+            <div class="timing-gauge-status" id="gauge-char-pause-status">
+                <span style="color:#10b981;">✓ Чёткий раздельный ритм</span>
+            </div>
+        </div>
+
+        <!-- 3. Межсловная пауза 7T -->
+        <div class="timing-gauge-card">
+            <div class="timing-gauge-title">Межсловная пауза (7T)</div>
+            <div class="timing-gauge-value" id="gauge-word-pause-val">7.0T (420 мс)</div>
+            <div class="timing-gauge-sub">Норма: <b>7.0 длительностей точки</b> (5.8 – 8.5T)</div>
+            <div class="timing-gauge-track">
+                <div class="timing-gauge-fill" id="gauge-word-pause-bar" style="width:50%;"></div>
+            </div>
+            <div class="timing-gauge-status" id="gauge-word-pause-status">
+                <span style="color:#10b981;">✓ Честный пробел 7T</span>
+            </div>
+        </div>
+
+        <!-- 4. Скорость и класс руки -->
+        <div class="timing-gauge-card">
+            <div class="timing-gauge-title">Скорость и класс руки</div>
+            <div class="timing-gauge-value" id="timing-wpm-val" style="color:#4fd8c4;">20 WPM</div>
+            <div class="timing-gauge-sub">Эквивалент ДОСААФ: <b id="timing-cpm-val">100 зн/мин</b></div>
+            <div class="timing-gauge-track">
+                <div class="timing-gauge-fill" style="width:96%; background:#4fd8c4;"></div>
+            </div>
+            <div class="timing-gauge-status">
+                Точность: <b id="timing-score-val" style="color:#10b981; margin-left:4px;">100%</b>
+            </div>
+        </div>
+    </div>
+
+    <!-- Холст таймлайна (осциллограмма передачи) -->
+    <div class="timing-timeline-wrap">
+        <div class="timing-timeline-header">
+            <span>📈 ОСЦИЛЛОГРАММА ПЕРЕДАЧИ В РЕАЛЬНОМ ВРЕМЕНИ (ТОЧКИ, ТИРЕ И ПАУЗЫ В МС)</span>
+            <span style="color:#4fd8c4;">СКОРОСТЬ: ШАГ КВАРЦА 16 МГЦ</span>
+        </div>
+        <canvas id="timing-canvas" height="80"></canvas>
+    </div>
+
+    <!-- Журнал посимвольного судейского аудита -->
+    <div class="timing-audit-wrap">
+        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
+            <span>📋 Посимвольный журнал судейского контроля (ДОСААФ):</span>
+            <span style="color:var(--text-muted);">Строгий учёт отклонений 1:3:7</span>
+        </div>
+        <table class="timing-audit-table">
+            <thead>
+                <tr>
+                    <th>Знак</th>
+                    <th>Отношение Тире/Точка</th>
+                    <th>Пауза перед знаком</th>
+                    <th>Судейский вердикт</th>
+                    <th>Балл</th>
+                </tr>
+            </thead>
+            <tbody id="timing-audit-body">
+                <tr>
+                    <td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">
+                        Включите «Начать замер» и передавайте контрольный текст ключом...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
