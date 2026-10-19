@@ -885,6 +885,36 @@
     // =========================================================================
     // 5. ЭКРАННАЯ КЛАВИАТУРА ДЛЯ ТЕЛЕФОНА (Mobile-Friendly Keypad)
     // =========================================================================
+    const JCUKEN_ROWS = [
+        ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ш', 'Щ', 'З', 'Х', 'Ъ'],
+        ['Ф', 'Ы', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Э'],
+        ['Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю']
+    ];
+
+    const ABVGD_ROWS = [
+        ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й'],
+        ['К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф'],
+        ['Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я']
+    ];
+
+    function getDosaafKbdLayout() {
+        const saved = localStorage.getItem('morse_dosaaf_kbd_layout');
+        if (saved === 'dosaaf' || saved === 'jcuken' || saved === 'abvgd') {
+            return saved;
+        }
+        return currentStageNum >= 4 ? 'jcuken' : 'dosaaf';
+    }
+
+    function setDosaafKbdLayout(layout) {
+        localStorage.setItem('morse_dosaaf_kbd_layout', layout);
+        renderAllKeypads();
+    }
+
+    function renderAllKeypads() {
+        buildMobileKeypad('dosaaf-words-kbd', 'dosaaf-word-input', checkWordAnswer);
+        buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
+    }
+
     function buildMobileKeypad(containerId, inputId, checkCallback) {
         const container = document.getElementById(containerId);
         const input = document.getElementById(inputId);
@@ -892,33 +922,92 @@
 
         container.innerHTML = '';
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
-        const chars = stageData.allLetters;
+        const isDigitStage = stageData.stage === 7;
+        const currentLayout = isDigitStage ? 'digits' : getDosaafKbdLayout();
 
-        // Формируем аккуратные ряды кнопок (по 6-8 кнопок в ряду)
-        const row1 = document.createElement('div');
-        row1.className = 'dosaaf-kbd-row';
+        container.className = `dosaaf-kbd layout-${currentLayout}`;
 
-        const row2 = document.createElement('div');
-        row2.className = 'dosaaf-kbd-row';
+        // Переключатель раскладки (только для буквенных ступеней 1-6)
+        if (!isDigitStage) {
+            const switcher = document.createElement('div');
+            switcher.className = 'dosaaf-kbd-switcher';
+            switcher.innerHTML = `
+                <span class="dosaaf-kbd-switcher-label">Раскладка:</span>
+                <div class="dosaaf-kbd-switcher-btns">
+                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'dosaaf' ? 'active' : ''}" data-layout="dosaaf" title="Только выученные буквы текущей ступени">ДОСААФ</button>
+                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'jcuken' ? 'active' : ''}" data-layout="jcuken" title="Стандартная клавиатура ЙЦУКЕН (неизученные буквы неактивны)">ЙЦУКЕН</button>
+                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'abvgd' ? 'active' : ''}" data-layout="abvgd" title="Алфавитный порядок А-Я (неизученные буквы неактивны)">АБВГД</button>
+                </div>
+            `;
+            switcher.querySelectorAll('.dosaaf-kbd-tab').forEach(btn => {
+                btn.addEventListener('mousedown', (e) => e.preventDefault());
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    setDosaafKbdLayout(btn.dataset.layout);
+                });
+            });
+            container.appendChild(switcher);
+        }
 
-        const row3 = document.createElement('div');
-        row3.className = 'dosaaf-kbd-row';
+        // Ряды букв / цифр в зависимости от выбранной раскладки
+        if (isDigitStage) {
+            const row = document.createElement('div');
+            row.className = 'dosaaf-kbd-row';
+            stageData.allLetters.forEach(num => {
+                row.appendChild(createKeyBtn(num, () => appendCharToInput(input, num)));
+            });
+            container.appendChild(row);
+        } else if (currentLayout === 'jcuken') {
+            JCUKEN_ROWS.forEach(rowChars => {
+                const row = document.createElement('div');
+                row.className = 'dosaaf-kbd-row';
+                rowChars.forEach(ch => {
+                    if (stageData.allLetters.includes(ch)) {
+                        row.appendChild(createKeyBtn(ch, () => appendCharToInput(input, ch)));
+                    } else {
+                        row.appendChild(createDisabledKeyBtn(ch));
+                    }
+                });
+                container.appendChild(row);
+            });
+        } else if (currentLayout === 'abvgd') {
+            ABVGD_ROWS.forEach(rowChars => {
+                const row = document.createElement('div');
+                row.className = 'dosaaf-kbd-row';
+                rowChars.forEach(ch => {
+                    if (stageData.allLetters.includes(ch)) {
+                        row.appendChild(createKeyBtn(ch, () => appendCharToInput(input, ch)));
+                    } else {
+                        row.appendChild(createDisabledKeyBtn(ch));
+                    }
+                });
+                container.appendChild(row);
+            });
+        } else {
+            // Режим 'dosaaf': только буквы текущей ступени (аккуратные 2 ряда)
+            const chars = stageData.allLetters;
+            const row1 = document.createElement('div');
+            row1.className = 'dosaaf-kbd-row';
 
-        const mid = Math.ceil(chars.length / 2);
-        const firstHalf = chars.slice(0, mid);
-        const secondHalf = chars.slice(mid);
+            const row2 = document.createElement('div');
+            row2.className = 'dosaaf-kbd-row';
 
-        firstHalf.forEach(ch => {
-            const btn = createKeyBtn(ch, () => appendCharToInput(input, ch));
-            row1.appendChild(btn);
-        });
+            const mid = Math.ceil(chars.length / 2);
+            chars.slice(0, mid).forEach(ch => {
+                row1.appendChild(createKeyBtn(ch, () => appendCharToInput(input, ch)));
+            });
+            chars.slice(mid).forEach(ch => {
+                row2.appendChild(createKeyBtn(ch, () => appendCharToInput(input, ch)));
+            });
 
-        secondHalf.forEach(ch => {
-            const btn = createKeyBtn(ch, () => appendCharToInput(input, ch));
-            row2.appendChild(btn);
-        });
+            if (row1.children.length > 0) container.appendChild(row1);
+            if (row2.children.length > 0) container.appendChild(row2);
+        }
 
-        // Служебные кнопки в третьем ряду: Стереть символ (Backspace) и Очистить всё (Clear all)
+        // Служебные кнопки в нижнем ряду: Стереть символ (Backspace) и Очистить всё (Clear all)
+        const actionsRow = document.createElement('div');
+        actionsRow.className = 'dosaaf-kbd-row dosaaf-kbd-actions';
+
         const backspaceBtn = document.createElement('div');
         backspaceBtn.className = 'dosaaf-key dosaaf-key-action';
         backspaceBtn.innerHTML = t('dosaaf.btn_backspace') || '⌫ Стереть';
@@ -941,12 +1030,9 @@
             input.dispatchEvent(new Event('input'));
         });
 
-        row3.appendChild(backspaceBtn);
-        row3.appendChild(clearBtn);
-
-        if (row1.children.length > 0) container.appendChild(row1);
-        if (row2.children.length > 0) container.appendChild(row2);
-        container.appendChild(row3);
+        actionsRow.appendChild(backspaceBtn);
+        actionsRow.appendChild(clearBtn);
+        container.appendChild(actionsRow);
     }
 
     function createKeyBtn(ch, clickHandler) {
@@ -958,6 +1044,15 @@
             e.preventDefault();
             clickHandler();
         });
+        return btn;
+    }
+
+    function createDisabledKeyBtn(ch) {
+        const btn = document.createElement('div');
+        btn.className = 'dosaaf-key disabled';
+        btn.textContent = ch;
+        btn.setAttribute('aria-disabled', 'true');
+        btn.title = 'Буква ещё не изучена на этой ступени';
         return btn;
     }
 
