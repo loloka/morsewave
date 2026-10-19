@@ -605,11 +605,40 @@
         return 10;
     }
 
+    function updateExamDescription(targetLength) {
+        const descEl = document.getElementById('dosaaf-exam-desc');
+        if (!descEl) return;
+
+        const threshold = Math.ceil(targetLength * 0.8);
+        const isStage7 = currentStageNum === 7;
+
+        if (targetLength === 10) {
+            if (isStage7) {
+                descEl.innerHTML = `Примите <b>10 контрольных чисел</b> подряд (экспресс-зачёт). Для сдачи курса необходимо верно принять минимум <b>${threshold} из 10 чисел</b> (80%). <i>Примечание: для подтверждения звания радиотелеграфиста ДОСААФ выберите радиограмму от 30 групп.</i>`;
+            } else {
+                descEl.innerHTML = `Примите <b>10 контрольных слов</b> подряд. Для сдачи зачёта и открытия следующей ступени необходимо верно принять минимум <b>${threshold} из 10 слов</b> (80%). Бонус: <b>+25 XP</b>.`;
+            }
+        } else if (targetLength === 30) {
+            if (isStage7) {
+                descEl.innerHTML = `Примите классическую <b>радиограмму ДОСААФ из 30 пятизначных групп</b> (~2.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> тренажёр передаёт стандартные 5-значные цифровые радиогруппы (например, <code>48192</code>, <code>73015</code>), как на настоящих радиограммах ДОСААФ! Для получения звания «Радиотелеграфист 3-го, 2-го или 1-го класса» примите верно минимум <b>${threshold} из 30 групп</b> (80%). Бонус: <b>+50 XP</b>.`;
+            } else {
+                descEl.innerHTML = `Примите зачётную <b>радиограмму ДОСААФ из 30 слов</b> (~2.5 мин непрерывного приёма). Для успешной сдачи зачёта необходимо верно принять минимум <b>${threshold} из 30 слов</b> (80%). Бонус: <b>+50 XP</b>.`;
+            }
+        } else if (targetLength === 50) {
+            if (isStage7) {
+                descEl.innerHTML = `Примите полный <b>квалификационный марафон из 50 пятизначных групп</b> (~4.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> передаются стандартные 5-значные цифровые радиогруппы ДОСААФ (например, <code>48192</code>, <code>73015</code>, <code>19450</code>). Сдача этого марафона со скоростью от 28 WPM (120 зн/мин) необходима для высшего звания <b>«Мастер радиосвязи ДОСААФ»</b> (минимум <b>${threshold} из 50 групп</b> / 80%). Бонус: <b>+100 XP</b>.`;
+            } else {
+                descEl.innerHTML = `Примите зачётный <b>радиомарафон из 50 слов</b> (~4.5 мин на выносливость). Для успешной сдачи зачёта необходимо верно принять минимум <b>${threshold} из 50 слов</b> (80%). Бонус: <b>+100 XP</b>.`;
+            }
+        }
+    }
+
     function setExamLength(len) {
         localStorage.setItem('morse_dosaaf_exam_length', len);
         document.querySelectorAll('#dosaaf-exam-length-chips .chip').forEach(c => {
             c.classList.toggle('active', parseInt(c.dataset.length, 10) === len);
         });
+        updateExamDescription(len);
     }
 
     function generateStageExamWords(stageData, targetLength) {
@@ -665,6 +694,7 @@
         document.querySelectorAll('#dosaaf-exam-length-chips .chip').forEach(c => {
             c.classList.toggle('active', parseInt(c.dataset.length, 10) === currentLen);
         });
+        updateExamDescription(currentLen);
 
         buildMobileKeypad('dosaaf-exam-kbd', 'dosaaf-exam-input', checkExamAnswer);
     }

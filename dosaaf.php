@@ -145,7 +145,7 @@ include __DIR__ . '/includes/header.php';
             <div id="dosaaf-exam-unlocked">
                 <div class="card subcard p-3">
                     <h3 class="mt-0" style="font-size:16px;"><?= t('dosaaf.exam_title') ?></h3>
-                    <p class="muted" style="font-size:13px; line-height:1.5;"><?= t('dosaaf.exam_desc') ?></p>
+                    <p class="muted" id="dosaaf-exam-desc" style="font-size:13px; line-height:1.5;"><?= t('dosaaf.exam_desc') ?></p>
                     <div class="muted small mb-2" id="dosaaf-exam-min-speed" style="color:var(--accent);"></div>
 
                     <!-- Выбор объёма зачёта (10 / 30 / 50 групп) -->
