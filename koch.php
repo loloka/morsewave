@@ -178,7 +178,20 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <button class="btn btn-primary mt-2" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
+    <div class="btn-row mt-2" style="align-items:center;">
+        <button class="btn btn-primary" id="start-session" title="<?= t('common.shortcut_enter') ?>"><?= t('koch.start_session') ?> <kbd class="btn-kbd">Enter</kbd></button>
+        <button class="btn btn-sm" id="method-tips-toggle" type="button"><?= t('koch.method_tips_btn') ?></button>
+    </div>
+
+    <div id="method-tips-box" class="card mt-2" style="display:none; background:var(--surface-2); border-left:3px solid var(--accent); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent);"><?= t('koch.method_tips_title') ?></h4>
+        <div style="display:flex; flex-direction:column; gap:12px; font-size:13px; line-height:1.5;">
+            <div><b><?= t('koch.tip_1_title') ?>:</b> <?= t('koch.tip_1_text') ?></div>
+            <div><b><?= t('koch.tip_2_title') ?>:</b> <?= t('koch.tip_2_text') ?></div>
+            <div><b><?= t('koch.tip_3_title') ?>:</b> <?= t('koch.tip_3_text') ?></div>
+            <div><b><?= t('koch.tip_4_title') ?>:</b> <?= t('koch.tip_4_text') ?></div>
+        </div>
+    </div>
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">

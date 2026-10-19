@@ -496,6 +496,7 @@ include __DIR__ . '/includes/header.php';
             <div><b><?= t('groups.tip_2_title') ?>:</b> <?= t('groups.tip_2_text') ?></div>
             <div><b><?= t('groups.tip_3_title') ?>:</b> <?= t('groups.tip_3_text') ?></div>
             <div><b><?= t('groups.tip_4_title') ?>:</b> <?= t('groups.tip_4_text') ?></div>
+            <div><b><?= t('groups.tip_5_title') ?>:</b> <?= t('groups.tip_5_text') ?></div>
         </div>
     </div>
 </div>

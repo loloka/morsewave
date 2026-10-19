@@ -1452,6 +1452,14 @@
         });
     }
 
+    const tipsToggle = document.getElementById('method-tips-toggle');
+    const tipsBox = document.getElementById('method-tips-box');
+    if (tipsToggle && tipsBox) {
+        tipsToggle.addEventListener('click', () => {
+            tipsBox.style.display = tipsBox.style.display === 'none' ? 'block' : 'none';
+        });
+    }
+
     document.getElementById('retrain-mistakes-btn').addEventListener('click', retrainMistakes);
 
     document.getElementById('start-session').addEventListener('click', startSession);
