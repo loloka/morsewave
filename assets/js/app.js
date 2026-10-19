@@ -111,9 +111,19 @@ document.addEventListener('keydown', (e) => {
     // Игнорируем шорткаты (Ctrl+C, Ctrl+V и т.д.)
     if (e.ctrlKey || e.altKey || e.metaKey) return;
 
+    // Игнорируем цифры и пробелы — они не зависят от раскладки (0-9 и Space одинаковы в RU/EN)
+    if (/^[0-9\s]$/.test(e.key)) {
+        if (window.hideLayoutHint) window.hideLayoutHint();
+        return;
+    }
+
     // Определяем, ожидает ли поле кириллицу или латиницу
-    const isCyr = (e.target.dataset && e.target.dataset.layout === 'cyrillic') ||
-                  ((e.target.id === 'groups-answer' || e.target.id === 'exam-answer') && typeof window.isGroupsCyrillic === 'function' && window.isGroupsCyrillic());
+    let isCyr = false;
+    if (e.target.dataset && e.target.dataset.layout) {
+        isCyr = (e.target.dataset.layout === 'cyrillic');
+    } else if (e.target.id === 'groups-answer' && typeof window.isGroupsCyrillic === 'function') {
+        isCyr = !!window.isGroupsCyrillic();
+    }
 
     // Если введена буква в целевой раскладке — скрываем подсказку и разрешаем ввод
     if (isCyr) {

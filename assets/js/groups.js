@@ -292,21 +292,55 @@
     
     const vkbEl = document.getElementById('groups-vkb');
     function isCyrillicSession(overrideKey, overrideCharset) {
-        if (session && typeof session.isCyrillic === 'boolean') return session.isCyrillic;
+        // 1. Explicit override (e.g. from startSession or explicit caller):
+        // Always determine layout strictly from the requested charset
+        if (overrideKey !== undefined || overrideCharset !== undefined) {
+            const key = overrideKey || charsetKey;
+            if (key === 'cyrillic' || key === 'cyrillic_digits') return true;
+            if (key === 'learned') {
+                const la = localStorage.getItem('morse_groups_learned_alphabet') || 'latin';
+                return la === 'cyrillic';
+            }
+            if (key === 'custom') {
+                if (overrideCharset && Array.isArray(overrideCharset)) {
+                    return overrideCharset.some(ch => /[А-ЯЁ]/.test(ch));
+                }
+                const ci = document.getElementById('custom-charset-input');
+                if (ci) {
+                    const raw = ci.value.toUpperCase();
+                    return /[А-ЯЁ]/.test(raw);
+                }
+            }
+            return false;
+        }
+
+        // 2. Active running session: only consult session.isCyrillic if session is currently active
+        const sessionActive = session && !session.finished && !session.examStopped && !session.paperStopped
+            && sessionPanel && sessionPanel.style.display !== 'none';
+        if (sessionActive && typeof session.isCyrillic === 'boolean') {
+            return session.isCyrillic;
+        }
+
+        // 3. Exam submode in groups is always Latin mixed 5-char groups
+        if (currentSubmode === 'exam') {
+            return false;
+        }
+
+        // 4. Pairs submode
         if (currentSubmode === 'pairs') {
             const pairChars = (typeof getSelectedPairChars === 'function') ? getSelectedPairChars() : null;
             if (pairChars && (/[А-ЯЁ]/.test(pairChars.a || '') || /[А-ЯЁ]/.test(pairChars.b || ''))) return true;
+            return false;
         }
-        const key = overrideKey || charsetKey;
+
+        // 5. Training / QRQ / setup mode: dynamically determine from selected charsetKey
+        const key = charsetKey;
         if (key === 'cyrillic' || key === 'cyrillic_digits') return true;
         if (key === 'learned') {
             const la = localStorage.getItem('morse_groups_learned_alphabet') || 'latin';
             return la === 'cyrillic';
         }
         if (key === 'custom') {
-            if (overrideCharset && Array.isArray(overrideCharset)) {
-                return overrideCharset.some(ch => /[А-ЯЁ]/.test(ch));
-            }
             const ci = document.getElementById('custom-charset-input');
             if (ci) {
                 const raw = ci.value.toUpperCase();
@@ -324,8 +358,10 @@
         const isCyr = isCyrillicSession();
         const aInput = document.getElementById('groups-answer');
         const eInput = document.getElementById('exam-answer');
+        const wInput = document.getElementById('words-answer');
         if (aInput) aInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
-        if (eInput) eInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
+        if (eInput) eInput.dataset.layout = 'latin';
+        if (wInput) wInput.dataset.layout = 'latin';
     }
     updateInputLayoutState();
 
@@ -973,6 +1009,7 @@
             : pairKey;
         selectedPairStage = pt[ptKey]?.stage || pt[pairKey]?.stage || 1;
         updatePairStageUI();
+        updateInputLayoutState();
     }
 
     function checkPairRecommendation() {
@@ -3213,6 +3250,7 @@
             abortCurrentSession();
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
+            updateInputLayoutState();
             return;
         }
         if (session.isPaperMode) {
@@ -3221,8 +3259,10 @@
                 finishPaperSession();
             } else {
                 abortCurrentSession();
+                session = null;
                 sessionPanel.style.display = 'none';
                 setupPanel.style.display = 'block';
+                updateInputLayoutState();
             }
             return;
         }
@@ -3234,8 +3274,10 @@
             finishSession();
         } else {
             abortCurrentSession();
+            session = null;
             sessionPanel.style.display = 'none';
             setupPanel.style.display = 'block';
+            updateInputLayoutState();
         }
     }
     const groupsStopBtn = document.getElementById('groups-stop-btn');
@@ -3262,6 +3304,8 @@
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
+        session = null;
+        updateInputLayoutState();
         const startBtn = document.getElementById('start-session');
         if (startBtn) {
             if (currentSubmode === 'exam' || currentSubmode === 'pairs' || currentSubmode === 'qrq') {
