@@ -26,3 +26,5 @@ config/maintenance_secret.php
 *-save.kicad_sch
 _autosave-*
 .history/
+offline-keyer/
+morse-keyer-offline.zip
