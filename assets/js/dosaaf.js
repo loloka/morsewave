@@ -48,8 +48,8 @@
     // Загрузка и сохранение состояния (с поддержкой облачной синхронизации Progress)
     function loadDosaafProgress() {
         try {
-            // Однократный сброс ступеней для всех пользователей в связи с переходом на непрерывные радиограммы
-            const DOSAAF_RESET_VER = '2026-10-19-v2';
+            // Однократный принудительный сброс ступеней для всех пользователей в связи с переходом на непрерывные радиограммы
+            const DOSAAF_RESET_VER = '2026-10-19-v3';
             const migrationDone = localStorage.getItem('morse_dosaaf_migration_ver');
             if (migrationDone !== DOSAAF_RESET_VER) {
                 localStorage.setItem('morse_dosaaf_migration_ver', DOSAAF_RESET_VER);
@@ -61,14 +61,18 @@
                 if (typeof Progress !== 'undefined' && Progress.load && Progress.save) {
                     try {
                         const p = Progress.load();
-                        if (p && p.dosaaf) {
-                            p.dosaaf.maxStage = 1;
-                            p.dosaaf.currentStage = 1;
-                            p.dosaaf.examPassed = {};
-                            p.dosaaf.stageWordsDone = {};
+                        if (p) {
+                            p.dosaaf = {
+                                ...(p.dosaaf || {}),
+                                maxStage: 1,
+                                currentStage: 1,
+                                examVer: 2,
+                                examPassed: {},
+                                stageWordsDone: {},
+                            };
                             Progress.save(p);
-                            if (typeof Progress.pushFullProgress === 'function') {
-                                Progress.pushFullProgress();
+                            if (typeof Progress.pushNow === 'function') {
+                                Progress.pushNow();
                             }
                         }
                     } catch (_) {}
@@ -79,25 +83,35 @@
             if (typeof Progress !== 'undefined' && Progress.load) {
                 prog = Progress.load()?.dosaaf;
             }
-            const lsMax = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
-            maxUnlockedStage = Math.max(lsMax, parseInt(prog?.maxStage, 10) || 1);
 
-            const lsSaved = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
-            const currentCandidate = Math.max(lsSaved, parseInt(prog?.currentStage, 10) || 1);
-            currentStageNum = Math.min(Math.max(currentCandidate, 1), maxUnlockedStage);
+            const examVer = Number(prog?.examVer) || 0;
+            if (examVer < 2) {
+                // Если данные ещё старые (v1 без непрерывной радиограммы), принудительно ограничиваем 1-й ступенью
+                maxUnlockedStage = 1;
+                currentStageNum = 1;
+                examPassed = {};
+                stageWordsDone = {};
+            } else {
+                const lsMax = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
+                maxUnlockedStage = Math.max(lsMax, parseInt(prog?.maxStage, 10) || 1);
+
+                const lsSaved = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
+                const currentCandidate = Math.max(lsSaved, parseInt(prog?.currentStage, 10) || 1);
+                currentStageNum = Math.min(Math.max(currentCandidate, 1), maxUnlockedStage);
+
+                const rawWords = localStorage.getItem('morse_dosaaf_stage_words_done');
+                const lsWords = rawWords ? JSON.parse(rawWords) : {};
+                stageWordsDone = { ...(prog?.stageWordsDone || {}), ...lsWords };
+
+                const rawExams = localStorage.getItem('morse_dosaaf_exam_passed');
+                const lsExams = rawExams ? JSON.parse(rawExams) : {};
+                examPassed = { ...(prog?.examPassed || {}), ...lsExams };
+            }
 
             const rawListened = localStorage.getItem('morse_dosaaf_listened_letters');
             const lsListened = rawListened ? JSON.parse(rawListened) : [];
             const progListened = Array.isArray(prog?.listenedLetters) ? prog.listenedLetters : [];
             listenedLetters = new Set([...lsListened, ...progListened]);
-
-            const rawWords = localStorage.getItem('morse_dosaaf_stage_words_done');
-            const lsWords = rawWords ? JSON.parse(rawWords) : {};
-            stageWordsDone = { ...(prog?.stageWordsDone || {}), ...lsWords };
-
-            const rawExams = localStorage.getItem('morse_dosaaf_exam_passed');
-            const lsExams = rawExams ? JSON.parse(rawExams) : {};
-            examPassed = { ...(prog?.examPassed || {}), ...lsExams };
         } catch (_) {
             maxUnlockedStage = 1;
             currentStageNum = 1;
@@ -112,6 +126,31 @@
         currentStageNum = 1;
         examPassed = {};
         stageWordsDone = {};
+        localStorage.setItem('morse_dosaaf_max_stage', '1');
+        localStorage.setItem('morse_dosaaf_current_stage', '1');
+        localStorage.removeItem('morse_dosaaf_exam_passed');
+        localStorage.removeItem('morse_dosaaf_stage_words_done');
+
+        if (typeof Progress !== 'undefined' && Progress.load && Progress.save) {
+            try {
+                const p = Progress.load();
+                if (p) {
+                    p.dosaaf = {
+                        ...(p.dosaaf || {}),
+                        maxStage: 1,
+                        currentStage: 1,
+                        examVer: 2,
+                        stageWordsDone: {},
+                        examPassed: {},
+                    };
+                    Progress.save(p);
+                    if (typeof Progress.pushNow === 'function') {
+                        Progress.pushNow();
+                    }
+                }
+            } catch (_) {}
+        }
+
         saveDosaafProgress();
         renderStageNav();
         renderCurrentStage();
@@ -131,15 +170,16 @@
                 pState.dosaaf = {
                     maxStage: maxUnlockedStage,
                     currentStage: currentStageNum,
+                    examVer: 2,
                     listenedLetters: [...listenedLetters],
                     stageWordsDone: stageWordsDone,
                     examPassed: examPassed,
                 };
                 Progress.save(pState);
-                if (typeof Progress.pushFullProgress === 'function') {
-                    Progress.pushFullProgress();
-                } else if (typeof Progress.pushNow === 'function') {
+                if (typeof Progress.pushNow === 'function') {
                     Progress.pushNow();
+                } else if (typeof Progress.pushFullProgress === 'function') {
+                    Progress.pushFullProgress();
                 }
             }
         } catch (_) {}

@@ -154,6 +154,7 @@ const Progress = (() => {
         dosaaf: {
             maxStage: 1,
             currentStage: 1,
+            examVer: 2,
             listenedLetters: [],
             stageWordsDone: {},
             examPassed: {},
@@ -521,6 +522,45 @@ const Progress = (() => {
             const lD = (local.dosaaf && typeof local.dosaaf === 'object') ? local.dosaaf : defaults().dosaaf;
             const sD = (server.dosaaf && typeof server.dosaaf === 'object') ? server.dosaaf : defaults().dosaaf;
 
+            // Миграция v2 (непрерывная зачётная радиограмма):
+            // Если сохранённые данные (локальные или серверные) ещё со старой версии (examVer < 2),
+            // сбрасываем открытые ступени до Ступени 1 и очищаем старые пословные зачёты.
+            const lVer = Number(lD.examVer) || 0;
+            const sVer = Number(sD.examVer) || 0;
+
+            if (lVer < 2 && sVer < 2) {
+                lD.maxStage = 1;
+                lD.currentStage = 1;
+                lD.examPassed = {};
+                lD.stageWordsDone = {};
+                lD.examVer = 2;
+
+                sD.maxStage = 1;
+                sD.currentStage = 1;
+                sD.examPassed = {};
+                sD.stageWordsDone = {};
+                sD.examVer = 2;
+
+                try {
+                    localStorage.setItem('morse_dosaaf_max_stage', '1');
+                    localStorage.setItem('morse_dosaaf_current_stage', '1');
+                    localStorage.removeItem('morse_dosaaf_exam_passed');
+                    localStorage.removeItem('morse_dosaaf_stage_words_done');
+                } catch (_) {}
+            } else if (lVer >= 2 && sVer < 2) {
+                sD.maxStage = 1;
+                sD.currentStage = 1;
+                sD.examPassed = {};
+                sD.stageWordsDone = {};
+                sD.examVer = 2;
+            } else if (sVer >= 2 && lVer < 2) {
+                lD.maxStage = 1;
+                lD.currentStage = 1;
+                lD.examPassed = {};
+                lD.stageWordsDone = {};
+                lD.examVer = 2;
+            }
+
             let lsMax = 1;
             let lsCurr = 1;
             let lsListened = [];
@@ -570,6 +610,7 @@ const Progress = (() => {
             merged.dosaaf = {
                 maxStage: mergedMax,
                 currentStage: mergedCurr,
+                examVer: 2,
                 listenedLetters: mergedListened,
                 stageWordsDone: wordsDone,
                 examPassed: mergedExams,
