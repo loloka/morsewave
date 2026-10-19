@@ -11,7 +11,8 @@ const AudioSettings = (() => {
         waveform: 'sine',
         pseudoStereo: true,
         noiseLevel: 0, // 0 = выкл, 0.035 = тихий, 0.07 = реалистичный
-        readySignal: false // позывной VVV = и 3 сек отсчёта перед стартом сессии (по умолчанию выкл)
+        readySignal: false, // позывной VVV = и 3 сек отсчёта перед стартом сессии (по умолчанию выкл)
+        volume: 80 // громкость 0..100%
     });
 
     function load() {
@@ -27,7 +28,13 @@ const AudioSettings = (() => {
             if (!localStorage.getItem('morsewave_ready_signal_user_set')) {
                 parsed.readySignal = false;
             }
-            return { ...defaults(), ...parsed };
+            const res = { ...defaults(), ...parsed };
+            if (typeof res.volume !== 'number' || isNaN(res.volume)) {
+                res.volume = 80;
+            } else {
+                res.volume = Math.max(0, Math.min(100, Math.round(res.volume)));
+            }
+            return res;
         } catch {
             return defaults();
         }
@@ -37,5 +44,16 @@ const AudioSettings = (() => {
         localStorage.setItem(KEY, JSON.stringify(settings));
     }
 
-    return { load, save, defaults };
+    function getVolume() {
+        return load().volume ?? 80;
+    }
+
+    function setVolume(vol) {
+        const s = load();
+        s.volume = Math.max(0, Math.min(100, Math.round(Number(vol) || 0)));
+        save(s);
+        return s.volume;
+    }
+
+    return { load, save, defaults, getVolume, setVolume };
 })();

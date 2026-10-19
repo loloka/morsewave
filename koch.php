@@ -167,6 +167,16 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
+                    <div>
+                        <div style="font-weight:700; font-size:13px;"><?= t('groups.volume_title') ?></div>
+                        <div class="muted" style="font-size:11px; margin-top:2px;"><?= t('groups.volume_desc') ?></div>
+                    </div>
+                    <div class="speed-control">
+                        <input type="range" id="koch-volume" min="0" max="100" step="5" value="80">
+                        <span class="speed-value mono" id="koch-volume-value">80</span> %
+                    </div>
+                </div>
+                <div class="flex-between flex-wrap gap-2 mt-2" style="align-items:center; border-top:1px solid rgba(255,255,255,0.06); padding-top:10px;">
                     <div class="muted" style="font-size:12px;"><?= t('groups.cw_noise_title') ?>:</div>
                     <div class="chip-row" id="koch-cw-noise-chips" style="gap:6px;">
                         <div class="chip chip-sm active" data-noise="0"><?= t('acc.cw_noise_off') ?></div>

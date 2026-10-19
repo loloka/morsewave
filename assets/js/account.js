@@ -867,6 +867,8 @@
 (function () {
     const freqSlider = document.getElementById('tone-freq');
     const freqValue = document.getElementById('tone-freq-value');
+    const volumeSlider = document.getElementById('master-volume');
+    const volumeValue = document.getElementById('master-volume-value');
     const waveChips = document.querySelectorAll('#waveform-chips .chip');
     const pseudoStereoToggle = document.getElementById('pseudo-stereo-toggle');
 
@@ -874,6 +876,10 @@
     if (freqSlider) {
         freqSlider.value = current.freq;
         freqValue.textContent = current.freq;
+    }
+    if (volumeSlider) {
+        volumeSlider.value = current.volume ?? 80;
+        if (volumeValue) volumeValue.textContent = volumeSlider.value;
     }
     if (pseudoStereoToggle) {
         pseudoStereoToggle.checked = current.pseudoStereo !== false;
@@ -907,7 +913,7 @@
         AudioSettings.save(current);
         if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
             const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
-            bus.configure({ pseudoStereo: current.pseudoStereo, noiseLevel: current.noiseLevel });
+            bus.configure({ pseudoStereo: current.pseudoStereo, noiseLevel: current.noiseLevel, volume: current.volume });
         }
     }
 
@@ -918,6 +924,26 @@
             save();
         });
     }
+
+    if (volumeSlider) {
+        volumeSlider.addEventListener('input', () => {
+            current.volume = parseInt(volumeSlider.value, 10);
+            if (volumeValue) volumeValue.textContent = current.volume;
+            if (typeof setGlobalVolume === 'function') {
+                setGlobalVolume(current.volume);
+            } else {
+                save();
+            }
+        });
+    }
+
+    window.addEventListener('morse:volume-change', (e) => {
+        if (e.detail && typeof e.detail.volume === 'number' && volumeSlider) {
+            current.volume = e.detail.volume;
+            volumeSlider.value = current.volume;
+            if (volumeValue) volumeValue.textContent = current.volume;
+        }
+    });
 
     waveChips.forEach(chip => {
         chip.addEventListener('click', () => {
@@ -969,6 +995,10 @@
             if (freqSlider) {
                 freqSlider.value = current.freq;
                 freqValue.textContent = current.freq;
+            }
+            if (volumeSlider) {
+                volumeSlider.value = current.volume ?? 80;
+                if (volumeValue) volumeValue.textContent = volumeSlider.value;
             }
             waveChips.forEach(c => c.classList.toggle('active', c.dataset.wave === current.waveform));
             if (pseudoStereoToggle) {

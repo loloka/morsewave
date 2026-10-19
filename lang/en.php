@@ -305,6 +305,8 @@ return [
     'groups.ready_signal_chip' => 'Ready signal VVV = (3s)',
     'groups.extra_audio_title' => 'Pitch & Noise',
     'groups.extra_audio_desc' => 'Morse tone pitch and HF receiver atmospheric noise',
+    'groups.volume_title' => 'Volume',
+    'groups.volume_desc' => 'Overall sound volume of the trainer',
     'groups.cw_noise_title' => 'Radio background noise',
     'groups.ready_countdown_ready' => 'Get ready: {n}…',
     'groups.ready_countdown_go' => 'Copy!',
@@ -539,6 +541,7 @@ return [
     'acc.sound_h2' => 'Signal tone',
     'acc.sound_intro' => 'Applies immediately across all trainer pages — listening, sending with the key, and sidetone. No account needed, stored in this browser.',
     'acc.tone_freq_hint' => 'Tone frequency',
+    'acc.volume_hint' => 'Volume level',
     'acc.waveform_hint' => 'Waveform',
     'acc.wave_sine' => 'Sine (soft)',
     'acc.wave_triangle' => 'Triangle (warm)',
@@ -1293,6 +1296,8 @@ HTML
 
     // --- assets/js/app.js ---
     'js.app.achievement_unlocked' => 'Achievement unlocked!',
+    'js.app.layout_warn_ru' => 'Russian layout active!<br><span style="font-size:12px;opacity:0.8;">Characters are automatically converted to Latin.</span>',
+    'js.app.layout_warn_en' => 'English layout active!<br><span style="font-size:12px;opacity:0.8;">Characters are automatically converted to Cyrillic.</span>',
 
     // --- assets/js/signal.js ---
     'js.signal.hide' => '🙈 Hide',

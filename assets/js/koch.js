@@ -417,6 +417,8 @@
     const readySignalEl = document.getElementById('koch-ready-signal-enabled');
     const kochToneFreq = document.getElementById('koch-tone-freq');
     const kochToneFreqVal = document.getElementById('koch-tone-freq-value');
+    const kochVolume = document.getElementById('koch-volume');
+    const kochVolumeVal = document.getElementById('koch-volume-value');
     const kochCwNoiseChips = document.querySelectorAll('#koch-cw-noise-chips .chip');
 
     if (typeof AudioSettings !== 'undefined') {
@@ -439,6 +441,27 @@
                 s.freq = parseInt(kochToneFreq.value, 10);
                 kochToneFreqVal.textContent = s.freq;
                 AudioSettings.save(s);
+            });
+        }
+        if (kochVolume && kochVolumeVal) {
+            kochVolume.value = audioSettings.volume ?? 80;
+            kochVolumeVal.textContent = kochVolume.value;
+            kochVolume.addEventListener('input', () => {
+                const val = parseInt(kochVolume.value, 10);
+                kochVolumeVal.textContent = val;
+                if (typeof setGlobalVolume === 'function') {
+                    setGlobalVolume(val);
+                } else {
+                    const s = AudioSettings.load();
+                    s.volume = val;
+                    AudioSettings.save(s);
+                }
+            });
+            window.addEventListener('morse:volume-change', (e) => {
+                if (e.detail && typeof e.detail.volume === 'number') {
+                    kochVolume.value = e.detail.volume;
+                    kochVolumeVal.textContent = e.detail.volume;
+                }
             });
         }
         if (kochCwNoiseChips.length) {

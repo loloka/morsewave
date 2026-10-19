@@ -289,6 +289,14 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="mt-3">
+            <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('acc.volume_hint') ?></div>
+            <div class="speed-control">
+                <input type="range" id="master-volume" min="0" max="100" step="5" value="80">
+                <span class="speed-value mono" id="master-volume-value">80</span> %
+            </div>
+        </div>
+
+        <div class="mt-3">
             <div class="muted" style="font-size:13px;margin-bottom:6px;"><?= t('acc.waveform_hint') ?></div>
             <div class="chip-row" id="waveform-chips">
                 <div class="chip active" data-wave="sine"><?= t('acc.wave_sine') ?></div>

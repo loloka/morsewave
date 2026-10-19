@@ -197,11 +197,23 @@ class MorseAudioBus {
         return !!this._sessionNoiseActive;
     }
 
+    setMasterVolume(vol) {
+        if (!this.masterGain) return;
+        const now = this.ctx.currentTime;
+        const pct = Math.max(0, Math.min(100, (vol !== undefined && vol !== null && !isNaN(vol)) ? Number(vol) : 80));
+        const gainValue = pct / 100;
+        this.masterGain.gain.cancelScheduledValues(now);
+        this.masterGain.gain.setTargetAtTime(gainValue, now, 0.02);
+    }
+
     configure(overrides = {}) {
-        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true, noiseLevel: 0 };
+        const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { pseudoStereo: true, noiseLevel: 0, volume: 80 };
         const pseudoStereo = overrides.pseudoStereo ?? settings.pseudoStereo ?? true;
         this.configuredNoiseLevel = overrides.noiseLevel ?? settings.noiseLevel ?? 0;
+        const volume = overrides.volume ?? settings.volume ?? 80;
         const now = this.ctx.currentTime;
+
+        this.setMasterVolume(volume);
 
         if (pseudoStereo) {
             this.monoBus.gain.setTargetAtTime(0, now, 0.01);
@@ -215,6 +227,22 @@ class MorseAudioBus {
             this.setNoiseLevel(this.configuredNoiseLevel);
         }
     }
+}
+
+function setGlobalVolume(vol) {
+    const val = Math.max(0, Math.min(100, Math.round(Number(vol) || 0)));
+    if (typeof AudioSettings !== 'undefined') {
+        const s = AudioSettings.load();
+        s.volume = val;
+        AudioSettings.save(s);
+    }
+    if (window.__morseSharedAudioCtx && typeof getSharedMorseAudioBus === 'function') {
+        try {
+            const bus = getSharedMorseAudioBus(window.__morseSharedAudioCtx);
+            bus.setMasterVolume(val);
+        } catch (_) {}
+    }
+    window.dispatchEvent(new CustomEvent('morse:volume-change', { detail: { volume: val } }));
 }
 
 function getSharedMorseAudioBus(ctx) {

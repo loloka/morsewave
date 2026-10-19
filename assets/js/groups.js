@@ -635,6 +635,8 @@
     const readySignalEl = document.getElementById('groups-ready-signal-enabled');
     const groupsToneFreq = document.getElementById('groups-tone-freq');
     const groupsToneFreqVal = document.getElementById('groups-tone-freq-value');
+    const groupsVolume = document.getElementById('groups-volume');
+    const groupsVolumeVal = document.getElementById('groups-volume-value');
     const groupsCwNoiseChips = document.querySelectorAll('#groups-cw-noise-chips .chip');
 
     if (typeof AudioSettings !== 'undefined') {
@@ -657,6 +659,27 @@
                 s.freq = parseInt(groupsToneFreq.value, 10);
                 groupsToneFreqVal.textContent = s.freq;
                 AudioSettings.save(s);
+            });
+        }
+        if (groupsVolume && groupsVolumeVal) {
+            groupsVolume.value = audioSettings.volume ?? 80;
+            groupsVolumeVal.textContent = groupsVolume.value;
+            groupsVolume.addEventListener('input', () => {
+                const val = parseInt(groupsVolume.value, 10);
+                groupsVolumeVal.textContent = val;
+                if (typeof setGlobalVolume === 'function') {
+                    setGlobalVolume(val);
+                } else {
+                    const s = AudioSettings.load();
+                    s.volume = val;
+                    AudioSettings.save(s);
+                }
+            });
+            window.addEventListener('morse:volume-change', (e) => {
+                if (e.detail && typeof e.detail.volume === 'number') {
+                    groupsVolume.value = e.detail.volume;
+                    groupsVolumeVal.textContent = e.detail.volume;
+                }
             });
         }
         if (groupsCwNoiseChips.length) {

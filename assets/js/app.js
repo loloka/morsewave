@@ -52,21 +52,26 @@ window.addEventListener('achievements:unlocked', (e) => {
     e.detail.forEach((a, i) => setTimeout(() => showAchievementToast(a), i * 400));
 });
 
-window.showLayoutHint = function() {
+window.showLayoutHint = function(msg) {
     if (!window.__layoutHintEl) {
         const hint = document.createElement('div');
-        hint.innerHTML = 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘), чтобы избежать проблем с горячими клавишами.</span>';
         hint.style.cssText = `
             position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #fff; padding: 15px 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); font-family: var(--font-ui); font-weight: 700; font-size: 15px; z-index: 9999; opacity: 0; transform: translateY(20px); transition: opacity 0.4s, transform 0.4s; pointer-events: none;
         `;
         document.body.appendChild(hint);
         window.__layoutHintEl = hint;
     }
+    const defaultText = (typeof t === 'function' && t('js.app.layout_warn_ru'))
+        ? t('js.app.layout_warn_ru')
+        : 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘), чтобы избежать проблем с горячими клавишами.</span>';
+    window.__layoutHintEl.innerHTML = msg || defaultText;
     clearTimeout(window.__layoutHintTimer);
     window.__layoutHintEl.style.display = 'block';
     requestAnimationFrame(() => {
-        window.__layoutHintEl.style.opacity = '1';
-        window.__layoutHintEl.style.transform = 'translateY(0)';
+        if (window.__layoutHintEl) {
+            window.__layoutHintEl.style.opacity = '1';
+            window.__layoutHintEl.style.transform = 'translateY(0)';
+        }
     });
 };
 
@@ -75,19 +80,14 @@ window.hideLayoutHint = function() {
         window.__layoutHintEl.style.opacity = '0';
         window.__layoutHintEl.style.transform = 'translateY(20px)';
         window.__layoutHintTimer = setTimeout(() => {
-            window.__layoutHintEl.style.display = 'none';
+            if (window.__layoutHintEl) window.__layoutHintEl.style.display = 'none';
         }, 400);
     }
 };
 
-// Перехват физической клавиатуры для ввода ответов на русской раскладке
-// Позволяет печатать ответы, не переключая ОС на английский.
+// Перехват физической клавиатуры для ввода ответов на русской/английской раскладке
+// Позволяет печатать ответы, не переключая ОС между языками.
 document.addEventListener('keydown', (e) => {
-    // Если введена латиница, скрываем подсказку
-    if (/^[a-zA-Z]$/.test(e.key)) {
-        if (window.hideLayoutHint) window.hideLayoutHint();
-    }
-
     // Горячая клавиша F7 — Повторить (общепринятый стандарт в Morse-софте)
     if (e.key === 'F7') {
         e.preventDefault();
@@ -111,6 +111,23 @@ document.addEventListener('keydown', (e) => {
     // Игнорируем шорткаты (Ctrl+C, Ctrl+V и т.д.)
     if (e.ctrlKey || e.altKey || e.metaKey) return;
 
+    // Определяем, ожидает ли поле кириллицу или латиницу
+    const isCyr = (e.target.dataset && e.target.dataset.layout === 'cyrillic') ||
+                  ((e.target.id === 'groups-answer' || e.target.id === 'exam-answer') && typeof window.isGroupsCyrillic === 'function' && window.isGroupsCyrillic());
+
+    // Если введена буква в целевой раскладке — скрываем подсказку и разрешаем ввод
+    if (isCyr) {
+        if (/^[а-яА-ЯёЁ]$/.test(e.key)) {
+            if (window.hideLayoutHint) window.hideLayoutHint();
+            return;
+        }
+    } else {
+        if (/^[a-zA-Z]$/.test(e.key)) {
+            if (window.hideLayoutHint) window.hideLayoutHint();
+            return;
+        }
+    }
+
     const RU_TO_EN = {
         'й': 'q', 'ц': 'w', 'у': 'e', 'к': 'r', 'е': 't', 'н': 'y', 'г': 'u', 'ш': 'i', 'щ': 'o', 'з': 'p', 'х': '[', 'ъ': ']',
         'ф': 'a', 'ы': 's', 'в': 'd', 'а': 'f', 'п': 'g', 'р': 'h', 'о': 'j', 'л': 'k', 'д': 'l', 'ж': ';', 'э': "'",
@@ -120,24 +137,55 @@ document.addEventListener('keydown', (e) => {
         'Я': 'Z', 'Ч': 'X', 'С': 'C', 'М': 'V', 'И': 'B', 'Т': 'N', 'Ь': 'M', 'Б': '<', 'Ю': '>', 'Ё': '~'
     };
 
-    if (RU_TO_EN[e.key]) {
-        e.preventDefault();
-        const enChar = RU_TO_EN[e.key];
-        
-        const target = e.target;
-        const start = target.selectionStart;
-        const end = target.selectionEnd;
-        const val = target.value;
-        
-        // Вставляем английскую букву
-        target.value = val.slice(0, start) + enChar + val.slice(end);
-        target.setSelectionRange(start + 1, start + 1);
-        
-        // Дергаем событие input, чтобы сработали внутренние обработчики (подсветка ошибок в Кохе и т.д.)
-        target.dispatchEvent(new Event('input', { bubbles: true }));
+    const EN_TO_RU = {
+        'q': 'й', 'w': 'ц', 'e': 'у', 'r': 'к', 't': 'е', 'y': 'н', 'u': 'г', 'i': 'ш', 'o': 'щ', 'p': 'з', '[': 'х', ']': 'ъ',
+        'a': 'ф', 's': 'ы', 'd': 'в', 'f': 'а', 'g': 'п', 'h': 'р', 'j': 'о', 'k': 'л', 'l': 'д', ';': 'ж', "'": 'э',
+        'z': 'я', 'x': 'ч', 'c': 'с', 'v': 'м', 'b': 'и', 'n': 'т', 'm': 'ь', ',': 'б', '.': 'ю', '`': 'ё',
+        'Q': 'Й', 'W': 'Ц', 'E': 'У', 'R': 'К', 'T': 'Е', 'Y': 'Н', 'U': 'Г', 'I': 'Ш', 'O': 'Щ', 'P': 'З', '{': 'Х', '}': 'Ъ',
+        'A': 'Ф', 'S': 'Ы', 'D': 'В', 'F': 'А', 'G': 'П', 'H': 'Р', 'J': 'О', 'K': 'Л', 'L': 'Д', ':': 'Ж', '"': 'Э',
+        'Z': 'Я', 'X': 'Ч', 'C': 'С', 'V': 'М', 'B': 'И', 'N': 'Т', 'M': 'Ь', '<': 'Б', '>': 'Ю', '~': 'Ё'
+    };
 
-        // Показываем подсказку (висит, пока не переключатся на латиницу)
-        if (window.showLayoutHint) window.showLayoutHint();
+    if (isCyr) {
+        if (EN_TO_RU[e.key]) {
+            e.preventDefault();
+            const ruChar = EN_TO_RU[e.key];
+            const target = e.target;
+            const start = target.selectionStart ?? target.value.length;
+            const end = target.selectionEnd ?? target.value.length;
+            const val = target.value;
+
+            target.value = val.slice(0, start) + ruChar + val.slice(end);
+            target.setSelectionRange(start + 1, start + 1);
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+
+            if (window.showLayoutHint) {
+                const hintMsg = (typeof t === 'function' && t('js.app.layout_warn_en'))
+                    ? t('js.app.layout_warn_en')
+                    : 'Включена английская раскладка!<br><span style="font-size:12px;opacity:0.8;">Символы автоматически переводятся в кириллицу.</span>';
+                window.showLayoutHint(hintMsg);
+            }
+        }
+    } else {
+        if (RU_TO_EN[e.key]) {
+            e.preventDefault();
+            const enChar = RU_TO_EN[e.key];
+            const target = e.target;
+            const start = target.selectionStart ?? target.value.length;
+            const end = target.selectionEnd ?? target.value.length;
+            const val = target.value;
+
+            target.value = val.slice(0, start) + enChar + val.slice(end);
+            target.setSelectionRange(start + 1, start + 1);
+            target.dispatchEvent(new Event('input', { bubbles: true }));
+
+            if (window.showLayoutHint) {
+                const hintMsg = (typeof t === 'function' && t('js.app.layout_warn_ru'))
+                    ? t('js.app.layout_warn_ru')
+                    : 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Переключите язык в системе (возле часов ↘), чтобы избежать проблем с горячими клавишами.</span>';
+                window.showLayoutHint(hintMsg);
+            }
+        }
     }
 });
 

@@ -308,6 +308,8 @@ return [
     'groups.ready_signal_chip' => 'Сигнал VVV = (3 сек)',
     'groups.extra_audio_title' => 'Тон и эфир',
     'groups.extra_audio_desc' => 'Высота тона морзянки и атмосферный шум КВ-приёмника',
+    'groups.volume_title' => 'Громкость',
+    'groups.volume_desc' => 'Общий уровень звука тренажёра',
     'groups.cw_noise_title' => 'Шум эфира',
     'groups.ready_countdown_ready' => 'Приготовьтесь: {n}…',
     'groups.ready_countdown_go' => 'Приём!',
@@ -543,6 +545,7 @@ return [
     'acc.sound_h2' => 'Тон сигнала',
     'acc.sound_intro' => 'Применяется сразу на всех страницах тренажёра — прослушивание, отправка ключом и сайдтон. Аккаунт не нужен, хранится в этом браузере.',
     'acc.tone_freq_hint' => 'Частота тона',
+    'acc.volume_hint' => 'Громкость звука',
     'acc.waveform_hint' => 'Форма волны',
     'acc.wave_sine' => 'Синусоида (мягкая)',
     'acc.wave_triangle' => 'Треугольная (тёплая)',
@@ -1281,6 +1284,8 @@ HTML
 
     // --- assets/js/app.js ---
     'js.app.achievement_unlocked' => 'Достижение открыто!',
+    'js.app.layout_warn_ru' => 'Включена русская раскладка!<br><span style="font-size:12px;opacity:0.8;">Символы автоматически переводятся в латиницу.</span>',
+    'js.app.layout_warn_en' => 'Включена английская раскладка!<br><span style="font-size:12px;opacity:0.8;">Символы автоматически переводятся в кириллицу.</span>',
 
     // --- assets/js/signal.js ---
     'js.signal.hide' => '🙈 Скрыть',
