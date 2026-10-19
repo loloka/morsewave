@@ -3172,8 +3172,8 @@ select.select-styled option {
     -webkit-user-select: none;
     transition: background 0.1s, border-color 0.1s, transform 0.05s;
 }
-.dosaaf-kbd.layout-jcuken .dosaaf-key,
-.dosaaf-kbd.layout-abvgd .dosaaf-key {
+.dosaaf-kbd.layout-jcuken .dosaaf-key:not(.dosaaf-key-action),
+.dosaaf-kbd.layout-abvgd .dosaaf-key:not(.dosaaf-key-action) {
     min-width: 0;
     flex: 1 1 0;
     max-width: 44px;
@@ -3197,16 +3197,22 @@ select.select-styled option {
     transform: none !important;
 }
 .dosaaf-kbd-actions {
-    display: flex;
-    gap: 6px;
-    justify-content: center;
-    width: 100%;
-    margin-top: 2px;
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    width: 100% !important;
+    margin-top: 4px !important;
 }
-.dosaaf-kbd-actions .dosaaf-key-action {
-    flex: 1;
-    max-width: 220px;
-    justify-content: center;
+.dosaaf-kbd .dosaaf-key-action {
+    flex: 1 1 0 !important;
+    max-width: 220px !important;
+    min-width: 110px !important;
+    height: 40px !important;
+    padding: 0 14px !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    justify-content: center !important;
+    text-align: center !important;
 }
 .dosaaf-key-action {
     background: var(--surface-2);
@@ -3244,17 +3250,18 @@ select.select-styled option {
         font-size: 14px;
         padding: 0 4px;
     }
-    .dosaaf-kbd.layout-jcuken .dosaaf-key,
-    .dosaaf-kbd.layout-abvgd .dosaaf-key {
+    .dosaaf-kbd.layout-jcuken .dosaaf-key:not(.dosaaf-key-action),
+    .dosaaf-kbd.layout-abvgd .dosaaf-key:not(.dosaaf-key-action) {
         min-width: 0;
         height: 38px;
         font-size: 13px;
         padding: 0;
     }
-    .dosaaf-key-action {
-        font-size: 12px;
-        padding: 0 8px;
-        height: 36px;
+    .dosaaf-kbd .dosaaf-key-action {
+        font-size: 12px !important;
+        padding: 0 8px !important;
+        height: 36px !important;
+        min-width: 90px !important;
     }
     .dosaaf-kbd-tab {
         font-size: 10px;
@@ -3262,14 +3269,14 @@ select.select-styled option {
     }
 }
 @media (max-width: 360px) {
-    .dosaaf-kbd.layout-jcuken .dosaaf-key,
-    .dosaaf-kbd.layout-abvgd .dosaaf-key {
+    .dosaaf-kbd.layout-jcuken .dosaaf-key:not(.dosaaf-key-action),
+    .dosaaf-kbd.layout-abvgd .dosaaf-key:not(.dosaaf-key-action) {
         font-size: 11px;
         height: 35px;
     }
-    .dosaaf-key-action {
-        font-size: 11px;
-        padding: 0 6px;
+    .dosaaf-kbd .dosaaf-key-action {
+        font-size: 11px !important;
+        padding: 0 6px !important;
     }
 }
 
