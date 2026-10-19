@@ -116,8 +116,10 @@
 
     function updateKochCpmHint() {
         const type = getKochCpmType();
+        const isFw = fwEnabled && fwEnabled.checked && fwSlider;
+        const effectiveWpm = isFw ? fwSlider.value : wpmSlider.value;
         if (wpmCpm && typeof cpmHintText === 'function') {
-            wpmCpm.textContent = cpmHintText(wpmSlider.value, type);
+            wpmCpm.textContent = cpmHintText(effectiveWpm, type);
             wpmCpm.dataset.cpmType = type;
         }
         if (fwCpm && fwSlider && typeof cpmHintText === 'function') {
@@ -168,6 +170,7 @@
     if (fwEnabled) {
         fwEnabled.addEventListener('change', () => {
             updateKochFarnsworthVisibility();
+            updateKochCpmHint();
             localStorage.setItem('morse_koch_fw_enabled', fwEnabled.checked);
         });
     }

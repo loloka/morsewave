@@ -64,16 +64,28 @@
     const paperCopyBtn = document.getElementById('cs-paper-copy-btn');
     const csSubmitRow = document.getElementById('cs-submit-row');
 
+    function updateCsCpmHint() {
+        const isFw = fwEnabled && fwEnabled.checked && fwSlider;
+        const effectiveWpm = isFw ? fwSlider.value : (wpmSlider ? wpmSlider.value : 12);
+        if (typeof cpmHintText === 'function' && wpmCpm) {
+            wpmCpm.textContent = cpmHintText(effectiveWpm, 'callsigns');
+            wpmCpm.dataset.cpmType = 'callsigns';
+        }
+        if (fwCpm && fwSlider && typeof cpmHintText === 'function') {
+            fwCpm.textContent = cpmHintText(fwSlider.value, 'callsigns');
+            fwCpm.dataset.cpmType = 'callsigns';
+        }
+    }
+
     const savedWpm = safeStorage.getItem('morse_cs_wpm');
     if (savedWpm && wpmSlider) {
         wpmSlider.value = savedWpm;
         if (wpmValue) wpmValue.textContent = savedWpm;
-        if (typeof cpmHintText === 'function' && wpmCpm) wpmCpm.textContent = cpmHintText(savedWpm, 'callsigns');
     }
     if (wpmSlider) {
         wpmSlider.addEventListener('input', () => { 
             if (wpmValue) wpmValue.textContent = wpmSlider.value; 
-            if (typeof cpmHintText === 'function' && wpmCpm) wpmCpm.textContent = cpmHintText(wpmSlider.value, 'callsigns'); 
+            updateCsCpmHint();
             safeStorage.setItem('morse_cs_wpm', wpmSlider.value);
         });
     }
@@ -93,18 +105,20 @@
     if (savedFwWpm && fwSlider) {
         fwSlider.value = savedFwWpm;
         if (fwValue) fwValue.textContent = savedFwWpm;
-        if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(savedFwWpm, 'callsigns');
     }
+    updateCsCpmHint();
+
     if (fwSlider) {
         fwSlider.addEventListener('input', () => {
             if (fwValue) fwValue.textContent = fwSlider.value;
-            if (fwCpm && typeof cpmHintText === 'function') fwCpm.textContent = cpmHintText(fwSlider.value, 'callsigns');
+            updateCsCpmHint();
             safeStorage.setItem('morse_cs_fw_wpm', fwSlider.value);
         });
     }
     if (fwEnabled) {
         fwEnabled.addEventListener('change', () => {
             updateCsFarnsworthVisibility();
+            updateCsCpmHint();
             safeStorage.setItem('morse_cs_fw_enabled', fwEnabled.checked);
         });
     }

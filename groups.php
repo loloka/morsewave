@@ -203,6 +203,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="speed-control" id="groups-farnsworth-wrap">
                             <input type="range" id="groups-farnsworth" min="5" max="30" step="1" value="10">
                             <span class="speed-value" id="groups-farnsworth-value">10</span> wpm
+                            <span class="muted cpm-hint" id="groups-farnsworth-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 50]) ?></span>
                         </div>
                     </div>
                     <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
@@ -384,6 +385,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="speed-control" id="pairs-farnsworth-wrap">
                     <input type="range" id="pairs-farnsworth" min="5" max="30" step="1" value="10">
                     <span class="speed-value" id="pairs-farnsworth-value">10</span> wpm
+                    <span class="muted cpm-hint" id="pairs-farnsworth-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 50]) ?></span>
                 </div>
             </div>
             <div class="muted mt-2" style="font-size:12px; line-height:1.4; border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
@@ -648,6 +650,7 @@ include __DIR__ . '/includes/header.php';
         <div class="speed-control" id="words-farnsworth-wrap">
             <input type="range" id="words-farnsworth" min="5" max="30" step="1" value="9">
             <span class="speed-value" id="words-farnsworth-value">9</span> wpm
+            <span class="muted cpm-hint" id="words-farnsworth-cpm"><?= t('js.common.cpm_hint', ['{cpm}' => 45]) ?></span>
         </div>
 
         <label class="chip"><?= t('groups.words_per_session') ?>

@@ -1410,23 +1410,41 @@ input[type="range"] {
     display: inline-block;
     text-align: right;
 }
-/* Подсказка "≈N зн/мин" рядом со скоростью — вспомогательная, мельче и
-   тише основного значения wpm. Кликабельна для вызова шпаргалки PARIS vs зн/мин. */
+/* Подсказка "≈N зн/мин" рядом со скоростью — интерактивная плашка-кнопка.
+   Кликабельна для вызова калькулятора PARIS vs зн/мин (на мобильных и десктопе). */
+.cpm-hint,
 .speed-control .cpm-hint {
     font-size: 11px;
-    margin-left: -4px;
+    margin-left: 4px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px dashed rgba(255, 255, 255, 0.35);
+    color: var(--text-muted, #a0a0a0);
     cursor: pointer;
-    text-decoration: underline dotted rgba(255, 255, 255, 0.35);
-    text-underline-offset: 3px;
-    transition: color 0.15s, text-decoration-color 0.15s;
     user-select: none;
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
+    -webkit-tap-highlight-color: transparent;
 }
-.speed-control .cpm-hint:hover {
+.cpm-hint::after,
+.speed-control .cpm-hint::after {
+    content: "ⓘ";
+    font-size: 10px;
+    opacity: 0.75;
+    margin-left: 2px;
+}
+.cpm-hint:hover,
+.cpm-hint:active,
+.speed-control .cpm-hint:hover,
+.speed-control .cpm-hint:active {
     color: var(--accent);
-    text-decoration-color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(74, 158, 255, 0.15);
 }
 
 /* ---------- Paris Speed Modal (WPM vs CPM) ---------- */

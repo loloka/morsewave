@@ -132,8 +132,10 @@
 
     function updateGroupsCpmHint() {
         const type = getGroupsCpmType();
+        const isFw = fwEnabled && fwEnabled.checked && fwSlider;
+        const effectiveWpm = isFw ? fwSlider.value : wpmSlider.value;
         if (wpmCpm && typeof cpmHintText === 'function') {
-            wpmCpm.textContent = cpmHintText(wpmSlider.value, type);
+            wpmCpm.textContent = cpmHintText(effectiveWpm, type);
             wpmCpm.dataset.cpmType = type;
         }
         const fwValCpm = document.getElementById('groups-farnsworth-cpm');
@@ -380,6 +382,7 @@
     if (fwEnabled) {
         fwEnabled.addEventListener('change', () => {
             updateFarnsworthVisibility();
+            updateGroupsCpmHint();
             localStorage.setItem('morse_groups_fw_enabled', fwEnabled.checked);
         });
     }
@@ -453,7 +456,7 @@
                 if (learnedNoneLink) learnedNoneLink.href = isCyr ? 'learn.php?tab=cyrillic' : 'learn.php';
             }
             if (learnedCharsPreview) learnedCharsPreview.style.display = 'none';
-            if (startBtn && charsetKey === 'learned') startBtn.disabled = true;
+            if (startBtn && charsetKey === 'learned' && currentSubmode === 'training') startBtn.disabled = true;
         } else {
             if (learnedNoneWarning) learnedNoneWarning.style.display = 'none';
             if (learnedCharsPreview) {
@@ -497,13 +500,13 @@
         }
 
         if (conflict) {
-            if (startBtn && charsetKey === 'custom') startBtn.disabled = true;
+            if (startBtn && charsetKey === 'custom' && currentSubmode === 'training') startBtn.disabled = true;
             return false;
         }
 
         const parsed = parseCustomCharset();
         const isValid = parsed.length >= 2;
-        if (startBtn && charsetKey === 'custom') {
+        if (startBtn && charsetKey === 'custom' && currentSubmode === 'training') {
             startBtn.disabled = !isValid;
         }
         if (typeof updateCharsetSummary === 'function') updateCharsetSummary();
@@ -1215,6 +1218,10 @@
 
     function startSession() {
         abortCurrentSession();
+        const startBtn = document.getElementById('start-session');
+        if (startBtn && (currentSubmode === 'exam' || currentSubmode === 'pairs' || currentSubmode === 'qrq')) {
+            startBtn.disabled = false;
+        }
 
         if (currentSubmode === 'qrq') {
             const activeWpm = parseInt(wpmSlider.value, 10);
@@ -2698,14 +2705,20 @@
             if (examConfig) examConfig.style.display = (type === 'exam') ? 'block' : 'none';
 
             if (type === 'exam') {
-                startBtn.innerHTML = '▶ ' + t('groups.mode_exam') + ' <kbd class="btn-kbd">Enter</kbd>';
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = '▶ ' + t('groups.mode_exam') + ' <kbd class="btn-kbd">Enter</kbd>';
+                }
                 if (typeof AudioSettings !== 'undefined') {
                     const audioSettings = AudioSettings.load();
                     audioSettings.freq = 550;
                     AudioSettings.save(audioSettings);
                 }
             } else if (type === 'pairs') {
-                startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
+                }
                 checkPairRecommendation();
                 if (!userHasChosenPair && typeof Progress.getRecommendedPair === 'function') {
                     const rec = Progress.getRecommendedPair();
@@ -2715,10 +2728,22 @@
                 }
                 updatePairStageUI();
             } else if (type === 'qrq') {
-                startBtn.innerHTML = t('groups.qrq_start') + ' <kbd class="btn-kbd">Enter</kbd>';
+                if (startBtn) {
+                    startBtn.disabled = false;
+                    startBtn.innerHTML = t('groups.qrq_start') + ' <kbd class="btn-kbd">Enter</kbd>';
+                }
                 updateQrqUI();
             } else { // training
-                startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
+                if (startBtn) {
+                    startBtn.innerHTML = t('groups.start_session') + ' <kbd class="btn-kbd">Enter</kbd>';
+                    if (charsetKey === 'learned') {
+                        updateLearnedPreview();
+                    } else if (charsetKey === 'custom') {
+                        validateCustomCharset();
+                    } else {
+                        startBtn.disabled = false;
+                    }
+                }
                 updateBufferDepthOptions(groupLen);
             }
             updateGroupsCpmHint();
@@ -2740,8 +2765,10 @@
     const examFwValCpm = document.getElementById('groups-exam-farnsworth-cpm');
 
     function updateExamCpmHints() {
+        const isFw = examFwEnabled && examFwEnabled.checked && examFwSlider;
+        const effectiveWpm = isFw ? examFwSlider.value : (examCustomWpmSlider ? examCustomWpmSlider.value : 12);
         if (examCustomWpmCpm && examCustomWpmSlider && typeof cpmHintText === 'function') {
-            examCustomWpmCpm.textContent = cpmHintText(examCustomWpmSlider.value, 'letters');
+            examCustomWpmCpm.textContent = cpmHintText(effectiveWpm, 'letters');
             examCustomWpmCpm.dataset.cpmType = 'letters';
         }
         if (examFwValCpm && examFwSlider && typeof cpmHintText === 'function') {
@@ -2794,6 +2821,7 @@
             const on = examFwEnabled.checked;
             if (examFwWrap) examFwWrap.style.display = on ? 'inline-flex' : 'none';
             if (examFwDesc) examFwDesc.style.display = on ? 'block' : 'none';
+            updateExamCpmHints();
             localStorage.setItem('morse_exam_fw_enabled', on);
         });
     }
@@ -2888,29 +2916,36 @@
     const pairsWpmSlider = document.getElementById('pairs-wpm');
     const pairsWpmValue = document.getElementById('pairs-wpm-value');
     const pairsWpmCpm = document.getElementById('pairs-wpm-cpm');
-    if (pairsWpmSlider) {
-        const savedPairsWpm = localStorage.getItem('morse_pairs_wpm') || wpmSlider.value;
-        pairsWpmSlider.value = savedPairsWpm;
-        if (pairsWpmValue) pairsWpmValue.textContent = savedPairsWpm;
-        if (pairsWpmCpm) {
-            pairsWpmCpm.textContent = cpmHintText(savedPairsWpm, 'letters');
-            pairsWpmCpm.dataset.cpmType = 'letters';
-        }
-
-        pairsWpmSlider.addEventListener('input', () => {
-            if (pairsWpmValue) pairsWpmValue.textContent = pairsWpmSlider.value;
-            if (pairsWpmCpm) {
-                pairsWpmCpm.textContent = cpmHintText(pairsWpmSlider.value, 'letters');
-                pairsWpmCpm.dataset.cpmType = 'letters';
-            }
-            localStorage.setItem('morse_pairs_wpm', pairsWpmSlider.value);
-        });
-    }
-
     const pairsFwEnabled = document.getElementById('pairs-farnsworth-enabled');
     const pairsFwPanel = document.getElementById('pairs-farnsworth-panel');
     const pairsFwSlider = document.getElementById('pairs-farnsworth');
     const pairsFwValue = document.getElementById('pairs-farnsworth-value');
+    const pairsFwCpm = document.getElementById('pairs-farnsworth-cpm');
+
+    function updatePairsCpmHint() {
+        const isFw = pairsFwEnabled && pairsFwEnabled.checked && pairsFwSlider;
+        const effectiveWpm = isFw ? pairsFwSlider.value : (pairsWpmSlider ? pairsWpmSlider.value : 12);
+        if (pairsWpmCpm && typeof cpmHintText === 'function') {
+            pairsWpmCpm.textContent = cpmHintText(effectiveWpm, 'letters');
+            pairsWpmCpm.dataset.cpmType = 'letters';
+        }
+        if (pairsFwCpm && pairsFwSlider && typeof cpmHintText === 'function') {
+            pairsFwCpm.textContent = cpmHintText(pairsFwSlider.value, 'letters');
+            pairsFwCpm.dataset.cpmType = 'letters';
+        }
+    }
+
+    if (pairsWpmSlider) {
+        const savedPairsWpm = localStorage.getItem('morse_pairs_wpm') || wpmSlider.value;
+        pairsWpmSlider.value = savedPairsWpm;
+        if (pairsWpmValue) pairsWpmValue.textContent = savedPairsWpm;
+
+        pairsWpmSlider.addEventListener('input', () => {
+            if (pairsWpmValue) pairsWpmValue.textContent = pairsWpmSlider.value;
+            updatePairsCpmHint();
+            localStorage.setItem('morse_pairs_wpm', pairsWpmSlider.value);
+        });
+    }
 
     function updatePairsFwVisibility() {
         const on = pairsFwEnabled && pairsFwEnabled.checked;
@@ -2925,6 +2960,7 @@
         updatePairsFwVisibility();
         pairsFwEnabled.addEventListener('change', () => {
             updatePairsFwVisibility();
+            updatePairsCpmHint();
             localStorage.setItem('morse_pairs_fw_enabled', pairsFwEnabled.checked);
         });
     }
@@ -2937,9 +2973,11 @@
         }
         pairsFwSlider.addEventListener('input', () => {
             if (pairsFwValue) pairsFwValue.textContent = pairsFwSlider.value;
+            updatePairsCpmHint();
             localStorage.setItem('morse_pairs_fw_wpm', pairsFwSlider.value);
         });
     }
+    updatePairsCpmHint();
 
     const pairsBufferCheckbox = document.getElementById('pairs-buffer-enabled');
     const pairsBufferPanel = document.getElementById('pairs-buffer-panel');
@@ -3178,6 +3216,21 @@
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
+        const startBtn = document.getElementById('start-session');
+        if (startBtn) {
+            if (currentSubmode === 'exam' || currentSubmode === 'pairs' || currentSubmode === 'qrq') {
+                startBtn.disabled = false;
+            } else if (charsetKey === 'learned') {
+                updateLearnedPreview();
+            } else if (charsetKey === 'custom') {
+                validateCustomCharset();
+            } else {
+                startBtn.disabled = false;
+            }
+        }
+        const diffBlock = document.getElementById('exam-diff-block');
+        if (diffBlock) diffBlock.style.display = 'none';
+        document.querySelectorAll('#result-panel .js-result-note').forEach(n => n.remove());
         const pairsBlock = document.getElementById('pairs-result-block');
         if (pairsBlock) pairsBlock.style.display = 'none';
         const qrqBlock = document.getElementById('qrq-result-block');
@@ -3572,11 +3625,19 @@
         updateWordsCpmHint();
     }
 
+    const wordsFwCpm = document.getElementById('words-farnsworth-cpm');
+
     function updateWordsCpmHint() {
         const type = wordsSet === 'phrases' || wordsSet === 'mixed' ? 'mixed' : 'letters';
-        if (wordsWpmCpm && wordsWpmSlider) {
-            wordsWpmCpm.textContent = cpmHintText(wordsWpmSlider.value, type);
+        const isFw = wordsFwEnabled && wordsFwEnabled.checked && wordsFwSlider;
+        const effectiveWpm = isFw ? wordsFwSlider.value : (wordsWpmSlider ? wordsWpmSlider.value : 12);
+        if (wordsWpmCpm && wordsWpmSlider && typeof cpmHintText === 'function') {
+            wordsWpmCpm.textContent = cpmHintText(effectiveWpm, type);
             wordsWpmCpm.dataset.cpmType = type;
+        }
+        if (wordsFwCpm && wordsFwSlider && typeof cpmHintText === 'function') {
+            wordsFwCpm.textContent = cpmHintText(wordsFwSlider.value, type);
+            wordsFwCpm.dataset.cpmType = type;
         }
     }
 
@@ -3592,10 +3653,15 @@
         wordsWpmValue.textContent = wordsWpmSlider.value;
         updateWordsCpmHint();
     });
-    wordsFwSlider.addEventListener('input', () => { wordsFwValue.textContent = wordsFwSlider.value; });
+    wordsFwSlider.addEventListener('input', () => {
+        wordsFwValue.textContent = wordsFwSlider.value;
+        updateWordsCpmHint();
+    });
     wordsFwEnabled.addEventListener('change', () => {
         wordsFwWrap.style.display = wordsFwEnabled.checked ? 'inline-flex' : 'none';
+        updateWordsCpmHint();
     });
+    updateWordsCpmHint();
 
     function wordsPool() {
         if (wordsSet === 'phrases') return RADIO_PHRASES;
