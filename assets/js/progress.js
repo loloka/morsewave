@@ -151,6 +151,13 @@ const Progress = (() => {
         pairConfusion: {},
         pairTrainer: {},
         dailyTraining: { date: null, seconds: 0 },
+        dosaaf: {
+            maxStage: 1,
+            currentStage: 1,
+            listenedLetters: [],
+            stageWordsDone: {},
+            examPassed: {},
+        },
     });
 
     function load() {
@@ -178,6 +185,44 @@ const Progress = (() => {
             if (!state.stats || typeof state.stats !== 'object') {
                 state.stats = defaults().stats;
             }
+            if (!state.dosaaf || typeof state.dosaaf !== 'object') {
+                state.dosaaf = defaults().dosaaf;
+            }
+            // Подтягиваем данные из legacy localStorage ДОСААФ, если они новее
+            try {
+                const lsMax = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10);
+                if (lsMax && lsMax > (Number(state.dosaaf.maxStage) || 1)) {
+                    state.dosaaf.maxStage = lsMax;
+                }
+                const lsCurr = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10);
+                if (lsCurr && (!state.dosaaf.currentStage || lsCurr > state.dosaaf.currentStage)) {
+                    state.dosaaf.currentStage = lsCurr;
+                }
+                const lsListened = localStorage.getItem('morse_dosaaf_listened_letters');
+                if (lsListened) {
+                    const parsedL = JSON.parse(lsListened);
+                    if (Array.isArray(parsedL) && parsedL.length) {
+                        state.dosaaf.listenedLetters = [...new Set([
+                            ...(Array.isArray(state.dosaaf.listenedLetters) ? state.dosaaf.listenedLetters : []),
+                            ...parsedL
+                        ])];
+                    }
+                }
+                const lsWords = localStorage.getItem('morse_dosaaf_stage_words_done');
+                if (lsWords) {
+                    const parsedW = JSON.parse(lsWords);
+                    if (parsedW && typeof parsedW === 'object') {
+                        state.dosaaf.stageWordsDone = { ...(state.dosaaf.stageWordsDone || {}), ...parsedW };
+                    }
+                }
+                const lsExams = localStorage.getItem('morse_dosaaf_exam_passed');
+                if (lsExams) {
+                    const parsedE = JSON.parse(lsExams);
+                    if (parsedE && typeof parsedE === 'object') {
+                        state.dosaaf.examPassed = { ...(state.dosaaf.examPassed || {}), ...parsedE };
+                    }
+                }
+            } catch (_) {}
             return state;
         } catch {
             return defaults();
@@ -470,6 +515,75 @@ const Progress = (() => {
         // получить второй раз, залогинившись с другого устройства.
         merged.dailyChallengeDate = laterDate(local.dailyChallengeDate, server.dailyChallengeDate);
         merged.invasionDailyWinDate = laterDate(local.invasionDailyWinDate, server.invasionDailyWinDate);
+
+        // dosaaf — прогресс ДОСААФ (maxStage, currentStage, listenedLetters, stageWordsDone, examPassed)
+        {
+            const lD = (local.dosaaf && typeof local.dosaaf === 'object') ? local.dosaaf : defaults().dosaaf;
+            const sD = (server.dosaaf && typeof server.dosaaf === 'object') ? server.dosaaf : defaults().dosaaf;
+
+            let lsMax = 1;
+            let lsCurr = 1;
+            let lsListened = [];
+            let lsWords = {};
+            let lsExams = {};
+            try {
+                lsMax = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
+                lsCurr = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
+                const rL = localStorage.getItem('morse_dosaaf_listened_letters');
+                if (rL) lsListened = JSON.parse(rL) || [];
+                const rW = localStorage.getItem('morse_dosaaf_stage_words_done');
+                if (rW) lsWords = JSON.parse(rW) || {};
+                const rE = localStorage.getItem('morse_dosaaf_exam_passed');
+                if (rE) lsExams = JSON.parse(rE) || {};
+            } catch (_) {}
+
+            const mergedMax = Math.max(Number(lD.maxStage) || 1, Number(sD.maxStage) || 1, lsMax);
+            const candidateCurr = Math.max(Number(lD.currentStage) || 1, Number(sD.currentStage) || 1, lsCurr);
+            const mergedCurr = Math.min(candidateCurr, mergedMax);
+
+            const mergedListened = [...new Set([
+                ...(Array.isArray(lD.listenedLetters) ? lD.listenedLetters : []),
+                ...(Array.isArray(sD.listenedLetters) ? sD.listenedLetters : []),
+                ...(Array.isArray(lsListened) ? lsListened : []),
+            ])];
+
+            const wordsDone = {};
+            const allWordsStages = new Set([
+                ...Object.keys(lD.stageWordsDone || {}),
+                ...Object.keys(sD.stageWordsDone || {}),
+                ...Object.keys(lsWords || {})
+            ]);
+            allWordsStages.forEach(st => {
+                wordsDone[st] = Math.max(
+                    Number(lD.stageWordsDone?.[st]) || 0,
+                    Number(sD.stageWordsDone?.[st]) || 0,
+                    Number(lsWords[st]) || 0
+                );
+            });
+
+            const mergedExams = {
+                ...(lsExams || {}),
+                ...(sD.examPassed || {}),
+                ...(lD.examPassed || {}),
+            };
+
+            merged.dosaaf = {
+                maxStage: mergedMax,
+                currentStage: mergedCurr,
+                listenedLetters: mergedListened,
+                stageWordsDone: wordsDone,
+                examPassed: mergedExams,
+            };
+
+            // Зеркалируем в legacy localStorage для полной совместимости
+            try {
+                localStorage.setItem('morse_dosaaf_max_stage', String(mergedMax));
+                localStorage.setItem('morse_dosaaf_current_stage', String(mergedCurr));
+                localStorage.setItem('morse_dosaaf_listened_letters', JSON.stringify(mergedListened));
+                localStorage.setItem('morse_dosaaf_stage_words_done', JSON.stringify(wordsDone));
+                localStorage.setItem('morse_dosaaf_exam_passed', JSON.stringify(mergedExams));
+            } catch (_) {}
+        }
 
         return merged;
     }
@@ -1152,6 +1266,13 @@ const Progress = (() => {
     function resetAll() {
         localStorage.removeItem(KEY);
         localStorage.removeItem(SYNC_KEY);
+        try {
+            localStorage.removeItem('morse_dosaaf_max_stage');
+            localStorage.removeItem('morse_dosaaf_current_stage');
+            localStorage.removeItem('morse_dosaaf_listened_letters');
+            localStorage.removeItem('morse_dosaaf_stage_words_done');
+            localStorage.removeItem('morse_dosaaf_exam_passed');
+        } catch (_) {}
         window.dispatchEvent(new CustomEvent('progress:updated', { detail: defaults() }));
         window.dispatchEvent(new CustomEvent('progress:synced', { detail: { at: null } }));
     }
@@ -1206,7 +1327,7 @@ const Progress = (() => {
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         completeInvasionDailyWin, isInvasionDailyWinDone, markProjectSupporter,
-        mergeFromServer, syncWithServer, pushNow,
+        mergeFromServer, syncWithServer, pushNow, pushFullProgress,
         lastSyncAt, exportBackup, importBackup,
         fetchDashboard, clearDashCache,
     };

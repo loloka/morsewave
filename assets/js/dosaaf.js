@@ -45,25 +45,32 @@
         'z': 'Я', 'x': 'Ч', 'c': 'С', 'v': 'М', 'b': 'И', 'n': 'Т', 'm': 'Ь', '<': 'Б', '>': 'Ю', '~': 'Ё'
     };
 
-    // Загрузка и сохранение состояния
+    // Загрузка и сохранение состояния (с поддержкой облачной синхронизации Progress)
     function loadDosaafProgress() {
         try {
-            maxUnlockedStage = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
-            const savedStage = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
-            currentStageNum = Math.min(Math.max(savedStage, 1), maxUnlockedStage);
+            let prog = null;
+            if (typeof Progress !== 'undefined' && Progress.load) {
+                prog = Progress.load()?.dosaaf;
+            }
+            const lsMax = parseInt(localStorage.getItem('morse_dosaaf_max_stage'), 10) || 1;
+            maxUnlockedStage = Math.max(lsMax, parseInt(prog?.maxStage, 10) || 1);
+
+            const lsSaved = parseInt(localStorage.getItem('morse_dosaaf_current_stage'), 10) || 1;
+            const currentCandidate = Math.max(lsSaved, parseInt(prog?.currentStage, 10) || 1);
+            currentStageNum = Math.min(Math.max(currentCandidate, 1), maxUnlockedStage);
 
             const rawListened = localStorage.getItem('morse_dosaaf_listened_letters');
-            if (rawListened) {
-                listenedLetters = new Set(JSON.parse(rawListened));
-            } else {
-                listenedLetters = new Set();
-            }
+            const lsListened = rawListened ? JSON.parse(rawListened) : [];
+            const progListened = Array.isArray(prog?.listenedLetters) ? prog.listenedLetters : [];
+            listenedLetters = new Set([...lsListened, ...progListened]);
 
             const rawWords = localStorage.getItem('morse_dosaaf_stage_words_done');
-            stageWordsDone = rawWords ? JSON.parse(rawWords) : {};
+            const lsWords = rawWords ? JSON.parse(rawWords) : {};
+            stageWordsDone = { ...(prog?.stageWordsDone || {}), ...lsWords };
 
             const rawExams = localStorage.getItem('morse_dosaaf_exam_passed');
-            examPassed = rawExams ? JSON.parse(rawExams) : {};
+            const lsExams = rawExams ? JSON.parse(rawExams) : {};
+            examPassed = { ...(prog?.examPassed || {}), ...lsExams };
         } catch (_) {
             maxUnlockedStage = 1;
             currentStageNum = 1;
@@ -80,6 +87,23 @@
             localStorage.setItem('morse_dosaaf_listened_letters', JSON.stringify([...listenedLetters]));
             localStorage.setItem('morse_dosaaf_stage_words_done', JSON.stringify(stageWordsDone));
             localStorage.setItem('morse_dosaaf_exam_passed', JSON.stringify(examPassed));
+
+            if (typeof Progress !== 'undefined' && Progress.load && Progress.save) {
+                const pState = Progress.load();
+                pState.dosaaf = {
+                    maxStage: maxUnlockedStage,
+                    currentStage: currentStageNum,
+                    listenedLetters: [...listenedLetters],
+                    stageWordsDone: stageWordsDone,
+                    examPassed: examPassed,
+                };
+                Progress.save(pState);
+                if (typeof Progress.pushFullProgress === 'function') {
+                    Progress.pushFullProgress();
+                } else if (typeof Progress.pushNow === 'function') {
+                    Progress.pushNow();
+                }
+            }
         } catch (_) {}
     }
 
@@ -1095,6 +1119,18 @@
                 e.preventDefault();
                 checkExamAnswer();
             }
+        });
+
+        // Реакция на синхронизацию прогресса с сервером (например, открытие с телефона)
+        window.addEventListener('progress:updated', () => {
+            loadDosaafProgress();
+            renderStageNav();
+            renderCurrentStage();
+        });
+        window.addEventListener('progress:synced', () => {
+            loadDosaafProgress();
+            renderStageNav();
+            renderCurrentStage();
         });
     });
 

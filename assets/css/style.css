@@ -1488,6 +1488,7 @@ input[type="range"] {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-shrink: 0;
 }
 .paris-modal-header h3 {
     margin: 0;
@@ -1513,6 +1514,8 @@ input[type="range"] {
 .paris-modal-body {
     padding: 18px 20px;
     overflow-y: auto;
+    flex: 1 1 auto;
+    -webkit-overflow-scrolling: touch;
     font-size: 14px;
     line-height: 1.5;
     color: var(--text);
@@ -1563,14 +1566,20 @@ input[type="range"] {
     border-top: 1px solid var(--border);
     display: flex;
     justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 @media (max-width: 520px) {
     .paris-modal-overlay {
-        padding: 8px;
+        padding-top: max(12px, env(safe-area-inset-top, 12px));
+        padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+        padding-left: max(8px, env(safe-area-inset-left, 8px));
+        padding-right: max(8px, env(safe-area-inset-right, 8px));
+        box-sizing: border-box;
     }
     .paris-modal-dialog {
-        max-height: 94vh;
+        max-height: 90vh;
+        max-height: calc(100dvh - max(24px, env(safe-area-inset-top, 0px) + env(safe-area-inset-bottom, 0px) + 20px));
         border-radius: var(--radius-md, 12px);
     }
     .paris-modal-header {
