@@ -89,7 +89,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                         <span class="muted" id="dosaaf-word-length-hint" style="font-size:13px;"></span>
                         <div class="flex-between gap-1">
-                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-play-word-btn" title="Прослушать слово снова"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?></button>
+                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-play-word-btn" title="<?= t('dosaaf.play_again') ?> (F7)"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?> <kbd class="btn-kbd">F7</kbd></button>
                             <button type="button" class="btn btn-sm btn-outline" id="dosaaf-next-word-btn" title="Пропустить и перейти к следующему"><?= mw_icon('skip-forward', 13) ?> <?= t('dosaaf.next_word') ?></button>
                         </div>
                     </div>
@@ -155,7 +155,7 @@ include __DIR__ . '/includes/header.php';
                     <div id="dosaaf-exam-panel" class="mt-2" style="display:none;">
                         <div class="flex-between" style="align-items:center;">
                             <span class="muted small"><?= t('dosaaf.exam_word_counter') ?>: <b id="dosaaf-exam-progress">1 / 10</b></span>
-                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-play-btn"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?></button>
+                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-exam-play-btn" title="<?= t('dosaaf.play_again') ?> (F7)"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?> <kbd class="btn-kbd">F7</kbd></button>
                         </div>
 
                         <div class="mt-2 flex-between gap-2 flex-wrap">

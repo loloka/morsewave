@@ -91,9 +91,12 @@ document.addEventListener('keydown', (e) => {
     // Горячая клавиша F7 — Повторить (общепринятый стандарт в Morse-софте)
     if (e.key === 'F7') {
         e.preventDefault();
-        const replayBtns = document.querySelectorAll('#replay-btn, #words-replay-btn');
+        const replayBtns = document.querySelectorAll('#replay-btn, #words-replay-btn, #dosaaf-play-word-btn, #dosaaf-exam-play-btn');
         for (const btn of replayBtns) {
-            if (btn.offsetParent !== null && !btn.disabled) {
+            const isVisible = (typeof btn.checkVisibility === 'function')
+                ? btn.checkVisibility()
+                : (btn.offsetParent !== null);
+            if (isVisible && !btn.disabled) {
                 btn.click();
                 break;
             }

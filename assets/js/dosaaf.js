@@ -918,6 +918,7 @@
         backspaceBtn.className = 'dosaaf-key dosaaf-key-action';
         backspaceBtn.innerHTML = t('dosaaf.btn_backspace') || '⌫ Стереть';
         backspaceBtn.title = t('dosaaf.btn_backspace_title') || 'Стереть последний символ';
+        backspaceBtn.addEventListener('mousedown', (e) => e.preventDefault());
         backspaceBtn.addEventListener('click', (e) => {
             e.preventDefault();
             input.value = input.value.slice(0, -1);
@@ -928,6 +929,7 @@
         clearBtn.className = 'dosaaf-key dosaaf-key-action dosaaf-key-clear';
         clearBtn.innerHTML = t('dosaaf.btn_clear') || '✕ Очистить всё';
         clearBtn.title = t('dosaaf.btn_clear_title') || 'Очистить всё введённое поле';
+        clearBtn.addEventListener('mousedown', (e) => e.preventDefault());
         clearBtn.addEventListener('click', (e) => {
             e.preventDefault();
             input.value = '';
@@ -946,6 +948,7 @@
         const btn = document.createElement('div');
         btn.className = 'dosaaf-key';
         btn.textContent = ch;
+        btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', (e) => {
             e.preventDefault();
             clickHandler();
@@ -955,6 +958,7 @@
 
     function appendCharToInput(input, ch) {
         input.value += ch;
+        input.dispatchEvent(new Event('input'));
     }
 
     // =========================================================================
@@ -1080,6 +1084,80 @@
         });
     }
 
+    /**
+     * Привязка кнопки повтора звука (F7 / клик мышью / тач на телефоне)
+     * с гарантированным сохранением фокуса в поле ввода (и открытой экранной клавиатуры на мобильных).
+     */
+    function bindRepeatButton(btn, getInput, playAction) {
+        if (!btn) return;
+
+        // 1. Предотвращаем потерю фокуса при нажатии мыши (десктоп)
+        btn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+        });
+
+        // 2. Предотвращаем сброс фокуса и скрытие клавиатуры при касании на телефонах (touch)
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchMoved = false;
+        let touchHandled = false;
+
+        btn.addEventListener('touchstart', (e) => {
+            touchMoved = false;
+            if (e.touches && e.touches.length > 0) {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        btn.addEventListener('touchmove', (e) => {
+            if (e.touches && e.touches.length > 0) {
+                const dx = Math.abs(e.touches[0].clientX - touchStartX);
+                const dy = Math.abs(e.touches[0].clientY - touchStartY);
+                if (dx > 10 || dy > 10) {
+                    touchMoved = true;
+                }
+            }
+        }, { passive: true });
+
+        btn.addEventListener('touchend', (e) => {
+            if (touchMoved) return; // Пользователь скроллил страницу пальцем
+            const input = getInput();
+            const wasFocused = input && (document.activeElement === input);
+
+            // e.preventDefault() отменяет blur поля ввода и скрытие экранной клавиатуры в мобильных браузерах
+            e.preventDefault();
+            touchHandled = true;
+
+            playAction();
+
+            // Если поле уже было в фокусе (пользователь печатает на телефоне), удерживаем фокус.
+            // На десктопе/не-сенсорных устройствах фокусируем поле, чтобы сразу продолжать ввод.
+            if (input) {
+                if (wasFocused || !('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+                    input.focus({ preventScroll: true });
+                }
+            }
+
+            setTimeout(() => {
+                touchHandled = false;
+            }, 400);
+        });
+
+        // 3. Стандартный клик (для мыши на десктопе, активации с клавиатуры и программного btn.click() по F7)
+        btn.addEventListener('click', (e) => {
+            if (touchHandled) {
+                touchHandled = false;
+                return;
+            }
+            const input = getInput();
+            playAction();
+            if (input) {
+                input.focus({ preventScroll: true });
+            }
+        });
+    }
+
     // Инициализация при загрузке документа
     window.addEventListener('DOMContentLoaded', () => {
         initDosaafMode();
@@ -1091,8 +1169,18 @@
         const wordInput = document.getElementById('dosaaf-word-input');
 
         startWordsBtn?.addEventListener('click', startWordsTraining);
-        playBtn?.addEventListener('click', playCurrentWord);
-        checkBtn?.addEventListener('click', checkWordAnswer);
+        bindRepeatButton(playBtn, () => wordInput, playCurrentWord);
+
+        // Предотвращаем сброс фокуса при клике мышкой
+        checkBtn?.addEventListener('mousedown', (e) => e.preventDefault());
+        checkBtn?.addEventListener('click', () => {
+            checkWordAnswer();
+            if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+                wordInput?.focus({ preventScroll: true });
+            }
+        });
+
+        nextBtn?.addEventListener('mousedown', (e) => e.preventDefault());
         nextBtn?.addEventListener('click', () => nextWord(true));
 
         wordInput?.addEventListener('keydown', (e) => {
@@ -1108,12 +1196,15 @@
         const examPlayBtn = document.getElementById('dosaaf-exam-play-btn');
 
         startExamBtn?.addEventListener('click', startStageExam);
-        examCheckBtn?.addEventListener('click', checkExamAnswer);
-        examPlayBtn?.addEventListener('click', () => {
+        bindRepeatButton(examPlayBtn, () => examInput, () => {
             if (examActive && examWords[examIndex]) {
                 playDosaafSound(examWords[examIndex]);
             }
         });
+
+        examCheckBtn?.addEventListener('mousedown', (e) => e.preventDefault());
+        examCheckBtn?.addEventListener('click', checkExamAnswer);
+
         examInput?.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
