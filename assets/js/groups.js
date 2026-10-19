@@ -316,6 +316,17 @@
         return false;
     }
 
+    window.isGroupsCyrillic = function() {
+        return isCyrillicSession();
+    };
+
+    function updateInputLayoutState() {
+        const isCyr = isCyrillicSession();
+        if (answerInput) answerInput.dataset.layout = isCyr ? 'cyrillic' : 'latin';
+        if (examAnswerEl) examAnswerEl.dataset.layout = isCyr ? 'cyrillic' : 'latin';
+    }
+    updateInputLayoutState();
+
     function renderVkb(inputEl, isExam) {
         if (typeof VirtualKeyboard !== 'undefined' && vkbEl) {
             const hasPunctuation = (charsetKey === 'koch') || (charsetKey === 'custom' && customInput && /[.?]/.test(customInput.value));
@@ -473,6 +484,7 @@
             learnedAlphabet = chip.dataset.alphabet;
             localStorage.setItem('morse_groups_learned_alphabet', learnedAlphabet);
             updateLearnedPanel();
+            updateInputLayoutState();
         });
     });
 
@@ -519,6 +531,7 @@
             if (cleaned !== customInput.value) customInput.value = cleaned;
             validateCustomCharset();
             updateCharsetSummary();
+            updateInputLayoutState();
         });
     }
 
@@ -719,6 +732,7 @@
             chip.classList.add('active');
             charsetKey = chip.dataset.set;
             localStorage.setItem('morse_groups_charset', charsetKey);
+            updateInputLayoutState();
             const isCustom = charsetKey === 'custom';
             const isKoch = charsetKey === 'koch';
             const isLearned = charsetKey === 'learned';
@@ -884,8 +898,8 @@
         if (selectedPairKey === 'custom') {
             const inputA = document.getElementById('custom-pair-a');
             const inputB = document.getElementById('custom-pair-b');
-            const valA = inputA?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
-            const valB = inputB?.value.toUpperCase().replace(/[^A-Z0-9]/g, '') || '';
+            const valA = inputA?.value.toUpperCase().replace(/[^A-Z0-9А-ЯЁ]/g, '') || '';
+            const valB = inputB?.value.toUpperCase().replace(/[^A-Z0-9А-ЯЁ]/g, '') || '';
             if (valA && valB) {
                 return { a: valA[0], b: valB[0] };
             }
@@ -1378,6 +1392,7 @@
             paperStopped: false,
             ...(pairData || {})
         };
+        updateInputLayoutState();
 
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
@@ -2260,6 +2275,7 @@
     }
 
     async function finishSession() {
+        if (window.hideLayoutHint) window.hideLayoutHint();
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
 
@@ -2645,6 +2661,7 @@
             startTime: Date.now(), history: []
         };
         session = retrySession;
+        updateInputLayoutState();
 
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
@@ -2715,6 +2732,7 @@
             const type = target.dataset.type; // 'training' | 'pairs' | 'qrq' | 'exam'
             currentSubmode = type;
             pendingExamMode = (type === 'exam');
+            updateInputLayoutState();
             
             const trainingConfig = document.getElementById('groups-training-config');
             const pairsConfig = document.getElementById('groups-pairs-config');
@@ -2877,7 +2895,7 @@
     if (customPairA && customPairB) {
         customPairA.addEventListener('input', () => {
             userHasChosenPair = true;
-            const cleaned = customPairA.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const cleaned = customPairA.value.toUpperCase().replace(/[^A-Z0-9А-ЯЁ]/g, '');
             customPairA.value = cleaned.slice(0, 1);
             if (customPairA.value.length === 1) {
                 customPairB.focus();
@@ -2888,16 +2906,18 @@
             const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
             selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
+            updateInputLayoutState();
         });
         customPairB.addEventListener('input', () => {
             userHasChosenPair = true;
-            const cleaned = customPairB.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            const cleaned = customPairB.value.toUpperCase().replace(/[^A-Z0-9А-ЯЁ]/g, '');
             customPairB.value = cleaned.slice(0, 1);
             const chars = getSelectedPairChars();
             const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
             const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
             selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
+            updateInputLayoutState();
         });
         customPairA.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === 'Enter') {
@@ -3173,6 +3193,7 @@
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
     function stopGroupsSession() {
+        if (window.hideLayoutHint) window.hideLayoutHint();
         if (session) {
             session.examStopped = true;
             session.paperStopped = true;
