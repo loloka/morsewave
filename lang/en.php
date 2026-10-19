@@ -39,6 +39,7 @@ return [
     'footer.privacy' => 'Privacy',
     'footer.key_hardware' => 'Real key (DIY)',
     'footer.keyer' => 'MorseWave Pro Keyer',
+    'footer.keydocs' => 'Keyer Schematics & Code',
     'footer.donate' => 'Support project',
 
     // --- index.php ---
@@ -789,7 +790,7 @@ HTML
     </li>
     <li><b>Flashing the firmware:</b>
         <ul>
-            <li>Download the sketch <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">keyer_breadboard.ino ↗</a>.</li>
+            <li>Open the sketch in our viewer <a href="keydocs.php?doc=sketch" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">keyer_breadboard.ino</a> or <a href="keydocs.php?download=sketch" style="color:#4fd8c4; text-decoration:underline;">download the .ino file</a>.</li>
             <li>Open it in the free official <b>Arduino IDE</b>.</li>
             <li>Select <i>«Arduino Nano»</i> (processor <i>ATmega328P</i>) under <b>Tools → Board</b>, select your COM port under <b>Tools → Port</b>, and click <b>Upload</b>.</li>
         </ul>
@@ -803,16 +804,17 @@ HTML
     </li>
 </ol>
 
-<p><b>Useful build guides on GitHub:</b></p>
+<p><b>Useful build guides on our site:</b></p>
 <ul>
-    <li>📘 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-guide-full.md" target="_blank" style="color:#4fd8c4;">Complete step-by-step guide with photos and parts list (cw-keyer-guide-full.md) ↗</a></li>
-    <li>🔌 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/breadboard-wiring.md" target="_blank" style="color:#4fd8c4;">Solderless breadboard wiring map (breadboard-wiring.md) ↗</a></li>
-    <li>📐 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-schematic.md" target="_blank" style="color:#4fd8c4;">Schematic with analog filter (cw-keyer-schematic.md) ↗</a></li>
-    <li>💻 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4;">Direct firmware download link (keyer_breadboard.ino) ↗</a></li>
+    <li>📘 <a href="keydocs.php?doc=guide" style="color:#4fd8c4;">Complete step-by-step guide with photos and parts list (BOM) →</a></li>
+    <li>🔌 <a href="keydocs.php?doc=wiring" style="color:#4fd8c4;">Solderless breadboard wiring map (Breadboard Wiring) →</a></li>
+    <li>📐 <a href="keydocs.php?doc=schematic" style="color:#4fd8c4;">Schematic with analog audio filter →</a></li>
+    <li>💻 <a href="keydocs.php?doc=sketch" style="color:#4fd8c4;">Online firmware viewer (with 1-click copy & download) →</a></li>
+    <li>🏭 <a href="keydocs.php?doc=pcb" style="color:#4fd8c4;">MorseWave Pro v2.0 factory PCB (KiCad, 3D renders, PDF schematic, Gerber) →</a></li>
 </ul>
 
 <h2>3. Feedback & Community</h2>
-<p>The project is actively evolving with enclosures and PCB batches in progress. If you've assembled a starter build or have ideas for timing algorithms — reach out to us at <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a> or follow repository updates!</p>
+<p>The project is actively evolving with enclosures and PCB batches in progress. If you've assembled a starter build or have ideas for timing algorithms — reach out to us at <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a> or follow updates on the website!</p>
 HTML
 ,
 

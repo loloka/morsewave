@@ -18,6 +18,8 @@
         <span class="dot">·</span>
         <a href="keyer.php" style="color: var(--accent);"><?= t('footer.keyer') ?></a>
         <span class="dot">·</span>
+        <a href="keydocs.php"><?= t('footer.keydocs') ?></a>
+        <span class="dot">·</span>
         <a href="donate.php" class="footer-donate-btn"><?= mw_icon('heart', 14) ?> <?= t('footer.donate') ?></a>
     </div>
 </footer>

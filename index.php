@@ -181,7 +181,7 @@ include __DIR__ . '/includes/header.php';
                 <p><?= t('index.step5_text') ?></p>
                 <p class="muted" style="font-size:12px;"><?= strtr(t('index.step5_credit'), [
                     '{author}' => '<a href="https://github.com/sc0tfree/morsewalker" target="_blank" rel="noopener">W6NYC</a>',
-                    '{adapter}' => '<a href="https://github.com/loloka/morsewalker" target="_blank" rel="noopener">R9OGL</a>',
+                    '{adapter}' => '<b>R9OGL</b>',
                 ]) ?></p>
                 <a href="https://morse.r9o.ru" class="btn btn-primary btn-sm" target="_blank" rel="noopener"><?= t('index.step5_btn') ?></a>
             </div>

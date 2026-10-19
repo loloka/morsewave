@@ -42,6 +42,7 @@ return [
     'footer.privacy' => 'Конфиденциальность',
     'footer.key_hardware' => 'Настоящий ключ (DIY)',
     'footer.keyer' => 'Ключ MorseWave Pro',
+    'footer.keydocs' => 'Схемы и скетч ключа',
     'footer.donate' => 'Поддержать проект',
 
     // --- index.php ---
@@ -789,7 +790,7 @@ HTML
     </li>
     <li><b>Прошивка платы:</b>
         <ul>
-            <li>Скачайте скетч <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">keyer_breadboard.ino ↗</a>.</li>
+            <li>Откройте скетч в просмотрщике <a href="keydocs.php?doc=sketch" style="color:#4fd8c4; font-weight:600; text-decoration:underline;">keyer_breadboard.ino</a> или <a href="keydocs.php?download=sketch" style="color:#4fd8c4; text-decoration:underline;">скачайте файл .ino</a>.</li>
             <li>Откройте его в стандартной бесплатной программе <b>Arduino IDE</b>.</li>
             <li>В меню выберите плату <i>«Arduino Nano»</i> (процессор <i>ATmega328P</i>), укажите COM-порт и нажмите <b>«Загрузить»</b>.</li>
         </ul>
@@ -803,16 +804,17 @@ HTML
     </li>
 </ol>
 
-<p><b>Полезные руководства по сборке на GitHub:</b></p>
+<p><b>Полезные руководства по сборке на сайте:</b></p>
 <ul>
-    <li>📘 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-guide-full.md" target="_blank" style="color:#4fd8c4;">Полное пошаговое руководство с фотографиями и списком покупок (cw-keyer-guide-full.md) ↗</a></li>
-    <li>🔌 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/breadboard-wiring.md" target="_blank" style="color:#4fd8c4;">Монтажная карта беспаечной макетки (breadboard-wiring.md) ↗</a></li>
-    <li>📐 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-schematic.md" target="_blank" style="color:#4fd8c4;">Принципиальная схема с аналоговым фильтром (cw-keyer-schematic.md) ↗</a></li>
-    <li>💻 <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="color:#4fd8c4;">Прямая ссылка на файл прошивки keyer_breadboard.ino ↗</a></li>
+    <li>📘 <a href="keydocs.php?doc=guide" style="color:#4fd8c4;">Полное пошаговое руководство с фотографиями и списком покупок (BOM) →</a></li>
+    <li>🔌 <a href="keydocs.php?doc=wiring" style="color:#4fd8c4;">Монтажная карта беспаечной макетки (Breadboard Wiring) →</a></li>
+    <li>📐 <a href="keydocs.php?doc=schematic" style="color:#4fd8c4;">Принципиальная схема с аналоговым фильтром →</a></li>
+    <li>💻 <a href="keydocs.php?doc=sketch" style="color:#4fd8c4;">Просмотрщик прошивки keyer_breadboard.ino (с копированием в 1 клик) →</a></li>
+    <li>🏭 <a href="keydocs.php?doc=pcb" style="color:#4fd8c4;">Заводская плата MorseWave Pro v2.0 (KiCad, 3D-рендеры, схема PDF, Gerber) →</a></li>
 </ul>
 
 <h2>3. Обратная связь</h2>
-<p>Проект находится в активной разработке, готовятся печатные платы и корпуса. Если вы собрали стартовую версию или у вас есть идеи по улучшению алгоритмов — пишите нам на <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a> или следите за обновлениями репозитория!</p>
+<p>Проект находится в активной разработке, готовятся печатные платы и корпуса. Если вы собрали стартовую версию или у вас есть идеи по улучшению алгоритмов — пишите нам на <a href="mailto:morse@r9o.ru" class="link">morse@r9o.ru</a> или следите за новостями на сайте!</p>
 HTML
 ,
 

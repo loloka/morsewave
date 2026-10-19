@@ -21,6 +21,20 @@ include __DIR__ . '/includes/header.php';
         Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод).
     </p>
 
+    <!-- Верхний баннер быстрого перехода к сборке ключа своими руками -->
+    <div style="background: linear-gradient(90deg, rgba(79, 216, 196, 0.12) 0%, rgba(232, 163, 61, 0.08) 100%); border: 1px solid rgba(79, 216, 196, 0.35); border-radius: 12px; padding: 12px 18px; margin-top: 14px; max-width: 860px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 20px;">🛠️</span>
+            <div>
+                <strong style="color: var(--text); font-size: 14px;">Хотите себе такой же ключ?</strong>
+                <div style="font-size: 13px; color: var(--text-muted);">Соберите стартовую версию на макетке за 15 минут или изучите чертежи заводской платы!</div>
+            </div>
+        </div>
+        <a href="#diy-keyer" class="btn btn-primary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 16px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+            Собрать своими руками прямо сейчас ↓
+        </a>
+    </div>
+
     <!-- Информационная плашка подключения -->
     <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -33,9 +47,12 @@ include __DIR__ . '/includes/header.php';
         </div>
         <div style="font-size: 14px; color: var(--text); line-height: 1.6;">
             Манипулятор подключается к компьютеру через плату <b>Arduino (Nano / Uno)</b> со скетчем открытой прошивки.
-            <div style="margin-top: 6px;">
-                <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(79, 216, 196, 0.15); border: 1px solid #4fd8c4; color: #4fd8c4; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none;">
-                    <span>📥</span> Скачать файл прошивки: keyer_breadboard.ino ↗
+            <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <a href="keydocs.php?doc=sketch" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(79, 216, 196, 0.15); border: 1px solid #4fd8c4; color: #4fd8c4; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none;">
+                    <span>💻</span> Открыть скетч в просмотрщике →
+                </a>
+                <a href="keydocs.php?download=sketch" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; text-decoration: none;">
+                    <span>📥</span> Скачать .ino
                 </a>
             </div>
         </div>
@@ -603,7 +620,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Блок "Где взять ключ / Сборка своими руками" -->
-    <div class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px;">
+    <div id="diy-keyer" class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px; scroll-margin-top: 80px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
             <div>
                 <div class="card-eyebrow" style="color:#4fd8c4;">СДЕЛАЙ САМ (DIY) · СТАРТОВАЯ ВЕРСИЯ</div>
@@ -617,55 +634,66 @@ include __DIR__ . '/includes/header.php';
             </span>
         </div>
 
-        <!-- Сетка полезных ссылок и гайдов -->
+        <!-- Сетка полезных ссылок и гайдов (встроенный центр документации сайта) -->
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:16px;">
-            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-guide-full.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+            <a href="keydocs.php?doc=guide" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>📘</span> Полное руководство по сборке ↗
+                    <span>📘</span> Полное руководство по сборке →
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
                     Пошаговый мануал, список всех деталей с номиналами (BOM) и схема запуска с нуля.
                 </div>
             </a>
 
-            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/breadboard-wiring.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+            <a href="keydocs.php?doc=wiring" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>🔌</span> Карта соединений на макетке ↗
+                    <span>🔌</span> Карта соединений на макетке →
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
                     Наглядная монтажная схема сборки проводками на беспаечной плате за 15 минут.
                 </div>
             </a>
 
-            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/cw-keyer-schematic.md" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+            <a href="keydocs.php?doc=schematic" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>📐</span> Принципиальная схема (PDF/MD) ↗
+                    <span>📐</span> Принципиальная схема →
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
                     Электрическая схема, фильтры радиопомех, опторазвязка манипулятора и распиновка.
                 </div>
             </a>
 
-            <a href="https://github.com/loloka/morsewave/blob/main/hardware/cw-keyer/keyer_breadboard.ino" target="_blank" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+            <a href="keydocs.php?doc=sketch" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#e8a33d; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>💻</span> Файл прошивки: keyer_breadboard.ino ↗
+                    <span>💻</span> Прошивка: keyer_breadboard.ino →
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    Готовый исходный код скетча для заливки в Arduino Nano / Uno через Arduino IDE.
+                    Просмотрщик скетча прямо на сайте, копирование в 1 клик и скачивание для Arduino IDE.
+                </div>
+            </a>
+
+            <a href="keydocs.php?doc=pcb" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
+                <div style="font-weight:700; color:#a78bfa; font-size:14px; display:flex; align-items:center; gap:6px;">
+                    <span>🏭</span> Заводская плата v2.0 (KiCad) →
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
+                    3D-рендеры платы, схема PDF, характеристики THT-монтажа и файлы для производства.
                 </div>
             </a>
         </div>
 
-        <!-- Нижняя плашка репозитория GitHub и уведомления о разработке -->
+        <!-- Нижняя плашка центра документации -->
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:14px; border-top:1px dashed #1c2633;">
             <div style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px;">
                 <span>🛠️</span>
-                <span>Проект в активной разработке, следите за обновлениями схем, прошивок и выпуском заводских плат!</span>
+                <span>Все схемы, прошивки и спецификации доступны прямо на нашем сайте.</span>
             </div>
-            <a href="https://github.com/loloka/morsewave/tree/main/hardware/cw-keyer" target="_blank" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px; font-size:13px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-                <span>Репозиторий проекта на GitHub ↗</span>
+            <a href="keydocs.php" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px; font-size:13px;">
+                <span>📚</span>
+                <span>Центр документации и схемотехники ключа →</span>
             </a>
+        </div>
+    </div>
         </div>
     </div>
 </div>
