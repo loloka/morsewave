@@ -30,11 +30,6 @@ $downloads = [
         'filename' => 'MorseWave_Pro_Schematic.pdf',
         'mime' => 'application/pdf',
     ],
-    'gerbers' => [
-        'path' => $hardwareDir . '/MorseWave_Pro/MorseWave_Pro_Gerber_v2.0.zip',
-        'filename' => 'MorseWave_Pro_Gerber_v2.0.zip',
-        'mime' => 'application/zip',
-    ],
 ];
 
 // Отдача файлов на скачивание
@@ -446,11 +441,8 @@ include __DIR__ . '/includes/header.php';
                     <span class="sketch-line-counter">KiCad 8.0 · 100% THT (выводной монтаж) · Встроенный аналоговый фильтр и опторазвязка</span>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <a href="keydocs.php?download=schematic_pdf" class="btn btn-secondary" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; text-decoration: none;">
-                        <span>📄</span> Схема (PDF)
-                    </a>
-                    <a href="keydocs.php?download=gerbers" class="btn btn-primary" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; text-decoration: none; font-weight: 700;">
-                        <span>📦</span> Скачать Gerber (ZIP)
+                    <a href="keydocs.php?download=schematic_pdf" class="btn btn-primary" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; text-decoration: none; font-weight: 700;">
+                        <span>📄</span> Скачать схему платы (PDF)
                     </a>
                 </div>
             </div>
@@ -538,19 +530,19 @@ include __DIR__ . '/includes/header.php';
                         <tr>
                             <td><b>Органы управления</b></td>
                             <td>3 потенциометра (WPM, Tone, Vol)</td>
-                            <td>Линейные потенциометры 9 мм со стандартными ручками 6 мм</td>
+                            <td>Универсальные контактные площадки: можно монтировать любые стандартные потенциометры (от компактных 9 мм типа RK09 до 16 мм WH148 или СП3-4). Все 3 ручки выстроены в одну удобную линию сверху платы для лёгкого монтажа и выноса ручек на лицевую панель корпуса</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap;">
-                <a href="keydocs.php?download=schematic_pdf" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 6px;">
+            <div style="margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <a href="keydocs.php?download=schematic_pdf" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
                     <span>📄</span> Скачать принципиальную электрическую схему (PDF)
                 </a>
-                <a href="keydocs.php?download=gerbers" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 700;">
-                    <span>📦</span> Скачать Gerber-архив для заказа плат v2.0 (ZIP)
-                </a>
+                <span style="font-size: 13px; color: var(--text-muted); display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.05); padding: 8px 14px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.1);">
+                    <span>📦</span> Файлы производства (Gerber) — проект находится в подготовке к заказу первой партии
+                </span>
             </div>
 
         <?php else: ?>

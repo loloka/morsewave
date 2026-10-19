@@ -450,9 +450,9 @@ include __DIR__ . '/includes/header.php';
 
         <div class="spec-item">
             <div class="spec-item-icon">🔊</div>
-            <div class="spec-item-title">Аналоговый теплый звук (Soft Audio)</div>
+            <div class="spec-item-title">Аналоговый мягкий звук (Soft Audio)</div>
             <div class="spec-item-desc">
-                Усилитель на NPN-транзисторе BC547 с конденсатором 100 нФ для сглаживания колючего меандра. Овальный динамик 8 Ом 1.5 Вт в капсуле звучит сочно, мягко и округло, не утомляя слух радиолюбителя часами.
+                Встроенный 2-звенный сглаживающий RC-фильтр на транзисторе BC547 срезает колючие высокочастотные гармоники цифрового прямоугольного ШИМ, формируя чистый, бархатный аналоговый тон (псевдосинус). Звук не утомляет слух часами даже при долгой работе в наушниках. Плавная регулировка тона (400–1200 Гц) и отдельный реостат громкости с балансировочным шунтом для динамика 8 Ом.
             </div>
         </div>
 
@@ -471,81 +471,88 @@ include __DIR__ . '/includes/header.php';
                 Автоматический алгоритм сегментации расшифровывает символы, даже если буквы переданы без идеальной паузы (например, R9 или CQ не превращаются в ошибку). Контроль межсловных пауз 7T выдаёт честные пробелы без спама.
             </div>
         </div>
+    </div>
 
-        <!-- 3D модель печатной платы (заполняет пустые 2 колонки) -->
-        <div class="spec-item spec-item-pcb" style="display:flex; flex-direction:column; justify-content:space-between; background:linear-gradient(135deg, rgba(14,20,26,0.95), rgba(9,12,16,0.98)); border:1px solid rgba(239,68,68,0.45); border-radius:12px; padding:18px; position:relative; overflow:hidden;">
+    <!-- Выделенный шоукейс фабричной печатной платы (полная ширина, без пустых мест в сетке характеристик) -->
+    <div class="card mt-3" style="background:linear-gradient(135deg, rgba(14,20,26,0.98), rgba(9,12,16,0.98)); border:1px solid rgba(79,216,196,0.3); border-radius:14px; padding:22px; position:relative; overflow:hidden;">
+        <div class="pcb-showcase-grid">
             <div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:8px; font-weight:700; color:#4fd8c4; font-size:14px; text-transform:uppercase; letter-spacing:0.04em;">
-                        <span>🎛️</span>
-                        <span>Печатная плата MorseWave Pro v2.0 (100% THT)</span>
-                    </div>
-                    <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:3px 10px; border-radius:4px; letter-spacing:0.08em; text-transform:uppercase; box-shadow:0 0 12px rgba(220,38,38,0.5);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                    <span style="font-size:11px; font-weight:800; color:#4fd8c4; background:rgba(79,216,196,0.12); border:1px solid rgba(79,216,196,0.3); padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase;">
+                        ⚡ АППАРАТНАЯ ПЛАТФОРМА
+                    </span>
+                    <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase; box-shadow:0 0 10px rgba(220,38,38,0.4);">
                         ● В РАЗРАБОТКЕ
                     </span>
                 </div>
-                <div class="spec-item-desc" style="margin-bottom:10px;">
-                    Заводская плата 100×75 мм под стандартный корпус. Полностью на классических выводных компонентах (0 SMD — собирается обычным паяльником). Опторазвязка манипулятора и PTT на PC817, 2-звенный Butterworth ФНЧ звука, разъёмы под СП3-4 и непрерывный экран земли B.Cu (&gt;95%).
+                <h3 style="margin:0 0 8px; font-size:18px; color:#4fd8c4;">
+                    Заводская печатная плата MorseWave Pro v2.0 (100% THT)
+                </h3>
+                <p class="muted" style="font-size:14px; line-height:1.6; margin:0 0 14px;">
+                    Специально спроектированная фабричная двухсторонняя плата 85×55 мм под стандартный компактный корпус. Полностью на классических выводных компонентах (0 SMD деталей — собирается дома обычным паяльником). Гальваническая опторазвязка манипулятора и PTT на PC817, 2-звенный сглаживающий RC-фильтр звука, универсальные посадочные места под любые потенциометры (9–16 мм, СП3-4) с удобным выводом ручек на лицевую панель и сплошной экран массы B.Cu (>95%).
+                </p>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px; margin-bottom:16px;">
+                    <span class="badge" style="background:rgba(79,216,196,0.1); color:#4fd8c4; border:1px solid rgba(79,216,196,0.3);">100% THT Classic (0 SMD)</span>
+                    <span class="badge" style="background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">Класс Резонит 3/4 (DRC 0 ошибок)</span>
+                    <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);">Экран массы B.Cu &gt;95%</span>
+                    <span class="badge" style="background:rgba(168,85,247,0.1); color:#c084fc; border:1px solid rgba(168,85,247,0.3);">Универсальные ручки корпуса</span>
+                </div>
+                <div>
+                    <a href="keydocs.php?doc=pcb" class="btn btn-secondary" style="font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font-weight:700;">
+                        <span>🏭</span> Открыть чертежи и 3D-рендеры платы →
+                    </a>
                 </div>
             </div>
 
-            <!-- Переключатель ракурса платы -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin: 4px 0 8px; flex-wrap:wrap; gap:6px;">
-                <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Ракурс платы:</span>
-                <div style="display:inline-flex; gap:6px;">
-                    <button type="button" id="btn-pcb-top" onclick="setPcbView('top')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; cursor:pointer; background:#162330; border:1px solid #4fd8c4; color:#4fd8c4; transition:all 0.2s ease;">
-                        📐 Вид сверху (Чёткий)
-                    </button>
-                    <button type="button" id="btn-pcb-iso" onclick="setPcbView('iso')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #233140; color:var(--text-muted); transition:all 0.2s ease;">
-                        🔍 3D Изометрия
-                    </button>
+            <!-- Правая колонка: интерактивный просмотр 3D платы -->
+            <div style="background:#06080a; border:1px solid rgba(79,216,196,0.25); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Ракурс платы:</span>
+                    <div style="display:inline-flex; gap:6px;">
+                        <button type="button" id="btn-pcb-top" onclick="setPcbView('top')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; cursor:pointer; background:#162330; border:1px solid #4fd8c4; color:#4fd8c4; transition:all 0.2s ease;">
+                            📐 Вид сверху (Монтажный)
+                        </button>
+                        <button type="button" id="btn-pcb-iso" onclick="setPcbView('iso')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #233140; color:var(--text-muted); transition:all 0.2s ease;">
+                            🔍 3D Изометрия
+                        </button>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Изображение 3D платы с эффектом интерактивности -->
-            <div style="position:relative; border-radius:8px; overflow:hidden; border:1px solid rgba(79,216,196,0.25); background:#06080a; margin:0 0 10px;">
-                <img id="pcb-preview-img" src="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-top="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-iso="<?= asset_v('assets/img/morsewave_pro_3d_iso.png') ?>" alt="Плата MorseWave Pro v2.0 (100% THT)" style="width:100%; height:auto; display:block; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                <div style="position:absolute; top:8px; right:8px; background:rgba(220,38,38,0.92); color:#fff; font-size:10px; font-weight:800; padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase; box-shadow:0 2px 6px rgba(0,0,0,0.6);">
-                    В РАЗРАБОТКЕ
+                <div style="position:relative; border-radius:6px; overflow:hidden; background:#040608;">
+                    <img id="pcb-preview-img" src="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-top="<?= asset_v('assets/img/morsewave_pro_3d_top.png') ?>" data-iso="<?= asset_v('assets/img/morsewave_pro_3d_iso.png') ?>" alt="Плата MorseWave Pro v2.0 (100% THT)" style="width:100%; height:auto; display:block; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                 </div>
-            </div>
-
-            <script>
-            function setPcbView(view) {
-                var img = document.getElementById('pcb-preview-img');
-                var btnTop = document.getElementById('btn-pcb-top');
-                var btnIso = document.getElementById('btn-pcb-iso');
-                if (!img) return;
-                if (view === 'iso') {
-                    img.src = img.getAttribute('data-iso');
-                    btnIso.style.background = '#162330';
-                    btnIso.style.borderColor = '#4fd8c4';
-                    btnIso.style.color = '#4fd8c4';
-                    btnIso.style.fontWeight = '700';
-                    btnTop.style.background = 'transparent';
-                    btnTop.style.borderColor = '#233140';
-                    btnTop.style.color = 'var(--text-muted)';
-                    btnTop.style.fontWeight = '600';
-                } else {
-                    img.src = img.getAttribute('data-top');
-                    btnTop.style.background = '#162330';
-                    btnTop.style.borderColor = '#4fd8c4';
-                    btnTop.style.color = '#4fd8c4';
-                    btnTop.style.fontWeight = '700';
-                    btnIso.style.background = 'transparent';
-                    btnIso.style.borderColor = '#233140';
-                    btnIso.style.color = 'var(--text-muted)';
-                    btnIso.style.fontWeight = '600';
-                }
-            }
-            </script>
-
-            <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px;">
-                <span class="badge" style="background:rgba(79,216,196,0.1); color:#4fd8c4; border:1px solid rgba(79,216,196,0.3);">100% THT Classic (0 SMD)</span>
-                <span class="badge" style="background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">Класс Резонит 3/4 (DRC 0 ошибок)</span>
-                <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);">Экран массы B.Cu &gt;95%</span>
             </div>
         </div>
+
+        <script>
+        function setPcbView(view) {
+            var img = document.getElementById('pcb-preview-img');
+            var btnTop = document.getElementById('btn-pcb-top');
+            var btnIso = document.getElementById('btn-pcb-iso');
+            if (!img) return;
+            if (view === 'iso') {
+                img.src = img.getAttribute('data-iso');
+                btnIso.style.background = '#162330';
+                btnIso.style.borderColor = '#4fd8c4';
+                btnIso.style.color = '#4fd8c4';
+                btnIso.style.fontWeight = '700';
+                btnTop.style.background = 'transparent';
+                btnTop.style.borderColor = '#233140';
+                btnTop.style.color = 'var(--text-muted)';
+                btnTop.style.fontWeight = '600';
+            } else {
+                img.src = img.getAttribute('data-top');
+                btnTop.style.background = '#162330';
+                btnTop.style.borderColor = '#4fd8c4';
+                btnTop.style.color = '#4fd8c4';
+                btnTop.style.fontWeight = '700';
+                btnIso.style.background = 'transparent';
+                btnIso.style.borderColor = '#233140';
+                btnIso.style.color = 'var(--text-muted)';
+                btnIso.style.fontWeight = '600';
+            }
+        }
+        </script>
     </div>
 
     <!-- Сравнение с китайским MX-K2 -->
@@ -591,8 +598,8 @@ include __DIR__ . '/includes/header.php';
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Качество звука самоконтроля</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Резкий колючий меандр без фильтра (утомляет уши за 15 минут)</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Аналоговый каскад с RC-фильтром</b> на BC547: мягкий, округлый ламповый звук</td>
+                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Резкий колючий прямоугольный ШИМ (меандр) без фильтрации или пьезопищалка. Режет слух и утомляет уши уже через 15 минут занятий в наушниках</td>
+                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>2-звенный сглаживающий RC-фильтр на BC547</b>: срезает резкие гармоники в бархатный аналоговый псевдосинус. Не утомляет слух часами даже в мониторных наушниках. Плавная регулировка тона (400–1200 Гц) и громкости с балансировочным шунтом динамика 8 Ом</td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
                         <td style="padding:12px; font-weight:600; color:var(--text);">Тайминг и ямбическая память</td>

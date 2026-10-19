@@ -424,16 +424,21 @@
     text-align: center;
 }
 
-/* Карточка 3D-модели печатной платы в specs-grid */
-.spec-item-pcb {
-    grid-column: span 2;
+/* Выделенный блок фабричной печатной платы (полная ширина) */
+.pcb-showcase-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    gap: 22px;
+    align-items: center;
 }
 
 @media (max-width: 820px) {
-    .spec-item-pcb {
-        grid-column: span 1;
+    .pcb-showcase-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
     }
 }
+
 
 /* =========================================================
    ЛАБОРАТОРИЯ ТАЙМИНГОВ И АНАЛИЗАТОР ПАУЗ 3T / 7T (ITU / ДОСААФ)
