@@ -12,7 +12,7 @@
     const PRESETS = {
         paris: 'PARIS PARIS',
         contest: 'CQ TEST R9OGL 599',
-        dosaaf: 'РАДИО 73 SK'
+        russian: 'РАДИО Ж19Ф5 Э3Ю7'
     };
 
     // Состояние лаборатории
@@ -259,6 +259,40 @@
         renderTimeline();
     }
 
+    // Таблица соответствий русских и латинских символов с одинаковым кодом Морзе
+    const RU_LAT_MAP = {
+        'А':'A', 'Б':'B', 'В':'W', 'Г':'G', 'Д':'D', 'Е':'E', 'Ё':'E',
+        'Ж':'V', 'З':'Z', 'И':'I', 'Й':'J', 'К':'K', 'Л':'L', 'М':'M',
+        'Н':'N', 'О':'O', 'П':'P', 'Р':'R', 'С':'S', 'Т':'T', 'У':'U',
+        'Ф':'F', 'Х':'H', 'Ц':'C', 'Ч':'C', 'Ш':'SH', 'Щ':'Q', 'Ы':'Y',
+        'Э':'E', 'Ю':'U', 'Я':'A'
+    };
+
+    function isCharMatch(inputCh, expCh) {
+        if (!inputCh || !expCh) return false;
+        if (inputCh === expCh) return true;
+        if (RU_LAT_MAP[expCh] && (RU_LAT_MAP[expCh] === inputCh || inputCh === RU_LAT_MAP[expCh])) return true;
+        if (RU_LAT_MAP[inputCh] && (RU_LAT_MAP[inputCh] === expCh || expCh === RU_LAT_MAP[inputCh])) return true;
+        if (expCh === 'Ж' && (inputCh === 'V' || inputCh === 'Ж')) return true;
+        if (expCh === 'Ф' && (inputCh === 'F' || inputCh === 'Ф')) return true;
+        if (expCh === 'Ч' && (inputCh === 'CH' || inputCh === 'Ö' || inputCh === 'C' || inputCh === 'Ч')) return true;
+        if (expCh === 'Ш' && (inputCh === 'SH' || inputCh === 'Ш')) return true;
+        if (expCh === 'Э' && (inputCh === 'É' || inputCh === 'E' || inputCh === 'Э')) return true;
+        if (expCh === 'Ю' && (inputCh === 'Ü' || inputCh === 'U' || inputCh === 'Ю')) return true;
+        if (expCh === 'Я' && (inputCh === 'Ä' || inputCh === 'A' || inputCh === 'Q' || inputCh === 'Я')) return true;
+        return false;
+    }
+
+    // Расчёт фактического темпа в знаках в минуту в зависимости от состава текста (буквы, цифры, PARIS)
+    function calculateEffectiveCpm(text, wpm) {
+        if (!text || text.includes('PARIS')) return Math.round(wpm * 5.0);
+        const digits = (text.match(/[0-9]/g) || []).length;
+        const letters = (text.match(/[A-Za-zА-Яа-яЁё]/g) || []).length;
+        if (digits === 0 && letters > 0) return Math.round(wpm * 4.22);
+        if (letters === 0 && digits > 0) return Math.round(wpm * 2.90);
+        return Math.round(wpm * 3.65);
+    }
+
     function onChar(char) {
         if (!state.isRunning) return;
         const now = performance.now();
@@ -266,7 +300,7 @@
         if (!ch) return;
 
         const expected = state.targetChars[state.currentIndex];
-        const isMatch = (ch === expected);
+        const isMatch = isCharMatch(ch, expected);
 
         const ditT = 1200 / state.currentWpm;
         let pauseBeforeMs = 0;
@@ -471,9 +505,10 @@
             }
         }
 
-        // 4. Скорость и общий класс
+        // 4. Скорость и точность ритма
         if (elSpeedWpmVal) elSpeedWpmVal.textContent = `${state.currentWpm} WPM`;
-        if (elSpeedCpmVal) elSpeedCpmVal.textContent = `${state.currentWpm * 5} зн/мин`;
+        const effCpm = calculateEffectiveCpm(state.targetText, state.currentWpm);
+        if (elSpeedCpmVal) elSpeedCpmVal.textContent = `~${effCpm} зн/мин`;
 
         // Итоговый балл
         let totalScore = 100;
@@ -483,15 +518,23 @@
         }
         if (elScoreVal) elScoreVal.textContent = `${totalScore}%`;
 
+        const elScoreBar = document.getElementById('timing-score-bar');
+        if (elScoreBar) {
+            elScoreBar.style.width = `${totalScore}%`;
+            elScoreBar.style.background = totalScore >= 85 ? '#4fd8c4' : (totalScore >= 70 ? '#f59e0b' : '#ef4444');
+        }
+
         if (elClassBadge) {
-            if (totalScore >= 95) {
-                elClassBadge.innerHTML = '<span style="color:#10b981; font-weight:800;">🏆 МАСТЕР СПОРТА (ИТУ)</span>';
+            if (!state.isRunning && state.auditLog.length === 0) {
+                elClassBadge.innerHTML = '<span style="color:var(--text-muted); font-weight:600;">○ Ожидание замера</span>';
+            } else if (totalScore >= 95) {
+                elClassBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">🟢 ЭТАЛОННЫЙ МЕТРОНОМ (${totalScore}%)</span>`;
             } else if (totalScore >= 85) {
-                elClassBadge.innerHTML = '<span style="color:#4fd8c4; font-weight:800;">🥇 1-Й РАЗРЯД ДОСААФ</span>';
+                elClassBadge.innerHTML = `<span style="color:#4fd8c4; font-weight:800;">🟢 СТАБИЛЬНЫЙ ПОЧЕРК (${totalScore}%)</span>`;
             } else if (totalScore >= 70) {
-                elClassBadge.innerHTML = '<span style="color:#f59e0b; font-weight:800;">🥈 2-Й РАЗРЯД</span>';
+                elClassBadge.innerHTML = `<span style="color:#f59e0b; font-weight:800;">🟡 УДОВЛЕТВОРИТЕЛЬНО (${totalScore}%)</span>`;
             } else {
-                elClassBadge.innerHTML = '<span style="color:#ef4444; font-weight:800;">🛠 КАЛИБРОВКА РУКИ</span>';
+                elClassBadge.innerHTML = `<span style="color:#ef4444; font-weight:800;">🔴 ПЛАВАЮЩИЙ РИТМ (${totalScore}%)</span>`;
             }
         }
     }

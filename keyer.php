@@ -255,12 +255,12 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <!-- =========================================================
-     ЛАБОРАТОРИЯ ТАЙМИНГОВ И АНАЛИЗАТОР ПАУЗ 3T / 7T (ITU / ДОСААФ)
+     ЛАБОРАТОРИЯ ТАЙМИНГОВ И АНАЛИЗАТОР ПАУЗ 3T / 7T (ITU / PARIS)
      ========================================================= -->
 <div class="keyer-timing-lab" id="keyer-timing-lab">
     <div class="timing-lab-header">
         <div>
-            <div class="card-eyebrow" style="color:#4fd8c4;">СУДЕЙСКИЙ КОНТРОЛЬ · ЭТАЛОН ITU / ДОСААФ</div>
+            <div class="card-eyebrow" style="color:#4fd8c4;">ЭТАЛОН ТАЙМИНГОВ · СИСТЕМА ITU / PARIS</div>
             <h2 style="margin:0 0 6px;">Лаборатория таймингов и анализатор пауз (3T / 7T)</h2>
             <p class="muted" style="margin:0; font-size:14px; max-width:820px; line-height:1.5;">
                 Аппаратная проверка ритма руки: соотношение точки к тире (1:3), чистота межбуквенных пауз (3T) и защита от слипания слов (7T).
@@ -283,11 +283,11 @@ include __DIR__ . '/includes/header.php';
             <span style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Контрольный текст:</span>
             <button type="button" class="timing-preset-btn active" data-preset="paris">🏆 PARIS PARIS (Эталон ITU)</button>
             <button type="button" class="timing-preset-btn" data-preset="contest">📻 CQ TEST R9OGL 599 (Эфир)</button>
-            <button type="button" class="timing-preset-btn" data-preset="dosaaf">🎖 РАДИО 73 SK (ДОСААФ)</button>
+            <button type="button" class="timing-preset-btn" data-preset="russian">🇷🇺 РАДИО Ж19Ф5 Э3Ю7 (Сложный ритм)</button>
             <button type="button" class="timing-preset-btn" data-preset="custom">✍️ Свой текст...</button>
         </div>
         <div id="timing-class-badge" style="font-size:13px; font-weight:700;">
-            <span style="color:#10b981;">🏆 МАСТЕР СПОРТА (ИТУ)</span>
+            <span style="color:var(--text-muted);">Точность: <b id="timing-badge-pct" style="color:#4fd8c4;">--%</b> (ожидание замера)</span>
         </div>
     </div>
 
@@ -348,14 +348,14 @@ include __DIR__ . '/includes/header.php';
 
         <!-- 4. Скорость и класс руки -->
         <div class="timing-gauge-card">
-            <div class="timing-gauge-title">Скорость и класс руки</div>
+            <div class="timing-gauge-title">Скорость и точность ритма</div>
             <div class="timing-gauge-value" id="timing-wpm-val" style="color:#4fd8c4;">20 WPM</div>
-            <div class="timing-gauge-sub">Эквивалент ДОСААФ: <b id="timing-cpm-val">100 зн/мин</b></div>
+            <div class="timing-gauge-sub">Фактический темп: <b id="timing-cpm-val">~100 зн/мин</b></div>
             <div class="timing-gauge-track">
-                <div class="timing-gauge-fill" style="width:96%; background:#4fd8c4;"></div>
+                <div class="timing-gauge-fill" id="timing-score-bar" style="width:96%; background:#4fd8c4;"></div>
             </div>
             <div class="timing-gauge-status">
-                Точность: <b id="timing-score-val" style="color:#10b981; margin-left:4px;">100%</b>
+                Точность ритма: <b id="timing-score-val" style="color:#10b981; margin-left:4px;">100%</b>
             </div>
         </div>
     </div>
@@ -372,7 +372,7 @@ include __DIR__ . '/includes/header.php';
     <!-- Журнал посимвольного судейского аудита -->
     <div class="timing-audit-wrap">
         <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
-            <span>📋 Посимвольный журнал судейского контроля (ДОСААФ):</span>
+            <span>📋 Посимвольный журнал проверки передачи:</span>
             <span style="color:var(--text-muted);">Строгий учёт отклонений 1:3:7</span>
         </div>
         <table class="timing-audit-table">
