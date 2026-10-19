@@ -614,19 +614,19 @@
 
         if (targetLength === 10) {
             if (isStage7) {
-                descEl.innerHTML = `Примите <b>10 контрольных чисел</b> подряд (экспресс-зачёт). Для сдачи курса необходимо верно принять минимум <b>${threshold} из 10 чисел</b> (80%). <i>Примечание: для подтверждения звания радиотелеграфиста ДОСААФ выберите радиограмму от 30 групп.</i>`;
+                descEl.innerHTML = `Примите комплексную радиограмму из <b>10 контрольных слов и чисел</b> со всего курса (экспресс-зачёт). Для сдачи курса необходимо верно принять минимум <b>${threshold} из 10 слов/групп</b> (80%). <i>Примечание: для подтверждения звания радиотелеграфиста ДОСААФ выберите радиограмму от 30 групп.</i>`;
             } else {
                 descEl.innerHTML = `Примите <b>10 контрольных слов</b> подряд. Для сдачи зачёта и открытия следующей ступени необходимо верно принять минимум <b>${threshold} из 10 слов</b> (80%). Бонус: <b>+25 XP</b>.`;
             }
         } else if (targetLength === 30) {
             if (isStage7) {
-                descEl.innerHTML = `Примите классическую <b>радиограмму ДОСААФ из 30 пятизначных групп</b> (~2.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> тренажёр передаёт стандартные 5-значные цифровые радиогруппы (например, <code>48192</code>, <code>73015</code>), как на настоящих радиограммах ДОСААФ! Для получения звания «Радиотелеграфист 3-го, 2-го или 1-го класса» примите верно минимум <b>${threshold} из 30 групп</b> (80%). Бонус: <b>+50 XP</b>.`;
+                descEl.innerHTML = `Примите классическую <b>комплексную радиограмму ДОСААФ из 30 групп</b> (~2.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> радиограмма включает полный курс — смысловые слова из всех 31 буквы алфавита, радиокоды и пятизначные цифровые радиогруппы (например, <code>РАДИОГРАММА</code>, <code>48192</code>, <code>73</code>), как на настоящих экзаменах ДОСААФ! Для получения звания «Радиотелеграфист 3-го, 2-го или 1-го класса» примите верно минимум <b>${threshold} из 30 групп</b> (80%). Бонус: <b>+50 XP</b>.`;
             } else {
                 descEl.innerHTML = `Примите зачётную <b>радиограмму ДОСААФ из 30 слов</b> (~2.5 мин непрерывного приёма). Для успешной сдачи зачёта необходимо верно принять минимум <b>${threshold} из 30 слов</b> (80%). Бонус: <b>+50 XP</b>.`;
             }
         } else if (targetLength === 50) {
             if (isStage7) {
-                descEl.innerHTML = `Примите полный <b>квалификационный марафон из 50 пятизначных групп</b> (~4.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> передаются стандартные 5-значные цифровые радиогруппы ДОСААФ (например, <code>48192</code>, <code>73015</code>, <code>19450</code>). Сдача этого марафона со скоростью от 28 WPM (120 зн/мин) необходима для высшего звания <b>«Мастер радиосвязи ДОСААФ»</b> (минимум <b>${threshold} из 50 групп</b> / 80%). Бонус: <b>+100 XP</b>.`;
+                descEl.innerHTML = `Примите полный <b>квалификационный радиомарафон из 50 групп</b> (~4.5 мин непрерывного приёма). ⚠️ <b>Внимание:</b> марафон охватывает всю программу радиошколы — слова из всех 31 буквы алфавита, радиокоды и 5-значные цифровые радиогруппы ДОСААФ. Сдача этого марафона со скоростью от 28 WPM (120 зн/мин) необходима для высшего звания <b>«Мастер радиосвязи ДОСААФ»</b> (минимум <b>${threshold} из 50 групп</b> / 80%). Бонус: <b>+100 XP</b>.`;
             } else {
                 descEl.innerHTML = `Примите зачётный <b>радиомарафон из 50 слов</b> (~4.5 мин на выносливость). Для успешной сдачи зачёта необходимо верно принять минимум <b>${threshold} из 50 слов</b> (80%). Бонус: <b>+100 XP</b>.`;
             }
@@ -646,14 +646,20 @@
         const pool = [...stageData.words].sort(() => Math.random() - 0.5);
 
         if (stageData.stage === 7) {
-            // Для 7-й ступени (цифры): радиограмма из стандартных 5-значных цифровых групп
-            // и контрольных чисел программы ДОСААФ
+            // Комплексная зачётная радиограмма полного курса ДОСААФ:
+            // сбалансированное сочетание смысловых слов всех ступеней, радиокодов и 5-значных цифровых групп
             while (result.length < targetLength) {
-                if (pool.length > 0 && Math.random() < 0.35) {
+                if (pool.length > 0) {
                     result.push(pool.pop());
                 } else {
-                    const group = Math.floor(10000 + Math.random() * 90000).toString();
-                    result.push(group);
+                    // При нехватке слов (например, при 50 группах) чередуем слова курса и 5-значные группы
+                    if (Math.random() < 0.45) {
+                        const allStagesWords = DOSAAF_STAGES.flatMap(s => s.words);
+                        result.push(allStagesWords[Math.floor(Math.random() * allStagesWords.length)]);
+                    } else {
+                        const group = Math.floor(10000 + Math.random() * 90000).toString();
+                        result.push(group);
+                    }
                 }
             }
         } else {
@@ -1019,42 +1025,43 @@
 
         container.innerHTML = '';
         const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum) || DOSAAF_STAGES[0];
-        const isDigitStage = stageData.stage === 7;
-        const currentLayout = isDigitStage ? 'digits' : getDosaafKbdLayout();
+        const currentLayout = getDosaafKbdLayout();
 
         container.className = `dosaaf-kbd layout-${currentLayout}`;
 
-        // Переключатель раскладки (только для буквенных ступеней 1-6)
-        if (!isDigitStage) {
-            const switcher = document.createElement('div');
-            switcher.className = 'dosaaf-kbd-switcher';
-            switcher.innerHTML = `
-                <span class="dosaaf-kbd-switcher-label">Раскладка:</span>
-                <div class="dosaaf-kbd-switcher-btns">
-                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'dosaaf' ? 'active' : ''}" data-layout="dosaaf" title="Только выученные буквы текущей ступени">ДОСААФ</button>
-                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'jcuken' ? 'active' : ''}" data-layout="jcuken" title="Стандартная клавиатура ЙЦУКЕН (неизученные буквы неактивны)">ЙЦУКЕН</button>
-                    <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'abvgd' ? 'active' : ''}" data-layout="abvgd" title="Алфавитный порядок А-Я (неизученные буквы неактивны)">АБВГД</button>
-                </div>
-            `;
-            switcher.querySelectorAll('.dosaaf-kbd-tab').forEach(btn => {
-                btn.addEventListener('mousedown', (e) => e.preventDefault());
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    setDosaafKbdLayout(btn.dataset.layout);
-                });
+        // Переключатель раскладки (доступен на всех ступенях 1-7)
+        const switcher = document.createElement('div');
+        switcher.className = 'dosaaf-kbd-switcher';
+        switcher.innerHTML = `
+            <span class="dosaaf-kbd-switcher-label">Раскладка:</span>
+            <div class="dosaaf-kbd-switcher-btns">
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'dosaaf' ? 'active' : ''}" data-layout="dosaaf" title="Только выученные буквы текущей ступени">ДОСААФ</button>
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'jcuken' ? 'active' : ''}" data-layout="jcuken" title="Стандартная клавиатура ЙЦУКЕН (неизученные буквы неактивны)">ЙЦУКЕН</button>
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'abvgd' ? 'active' : ''}" data-layout="abvgd" title="Алфавитный порядок А-Я (неизученные буквы неактивны)">АБВГД</button>
+            </div>
+        `;
+        switcher.querySelectorAll('.dosaaf-kbd-tab').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => e.preventDefault());
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                setDosaafKbdLayout(btn.dataset.layout);
             });
-            container.appendChild(switcher);
+        });
+        container.appendChild(switcher);
+
+        // На 7-й ступени (освоены цифры) вверху добавляется ряд цифр 1..0
+        if (currentStageNum === 7) {
+            const numRow = document.createElement('div');
+            numRow.className = 'dosaaf-kbd-row';
+            const digits = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+            digits.forEach(num => {
+                numRow.appendChild(createKeyBtn(num, () => appendCharToInput(input, num)));
+            });
+            container.appendChild(numRow);
         }
 
-        // Ряды букв / цифр в зависимости от выбранной раскладки
-        if (isDigitStage) {
-            const row = document.createElement('div');
-            row.className = 'dosaaf-kbd-row';
-            stageData.allLetters.forEach(num => {
-                row.appendChild(createKeyBtn(num, () => appendCharToInput(input, num)));
-            });
-            container.appendChild(row);
-        } else if (currentLayout === 'jcuken') {
+        // Ряды букв в зависимости от выбранной раскладки
+        if (currentLayout === 'jcuken') {
             JCUKEN_ROWS.forEach(rowChars => {
                 const row = document.createElement('div');
                 row.className = 'dosaaf-kbd-row';
@@ -1081,8 +1088,9 @@
                 container.appendChild(row);
             });
         } else {
-            // Режим 'dosaaf': только буквы текущей ступени (аккуратные 2 ряда)
-            const chars = stageData.allLetters;
+            // Режим 'dosaaf': только выученные русские буквы ступени (аккуратные 2 ряда)
+            const lettersOnly = stageData.allLetters.filter(ch => isNaN(parseInt(ch, 10)));
+            const chars = lettersOnly.length > 0 ? lettersOnly : stageData.allLetters;
             const row1 = document.createElement('div');
             row1.className = 'dosaaf-kbd-row';
 
