@@ -253,12 +253,13 @@
     // --- WebSerial API подключение ---
     async function connectSerial() {
         if (!('serial' in navigator)) {
-            if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
-                alert('⚠️ WebSerial API требует безопасного протокола HTTPS!\n\nПожалуйста, откройте страницу через https:// (с замочком в строке адреса).');
-                appendTerminal('\n[ОШИБКА] WebSerial заблокирован браузером из-за небезопасного соединения HTTP. Откройте сайт по HTTPS!\n', 'sys');
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            if (window.location.protocol !== 'https:' && !isLocal) {
+                alert('⚠️ WebSerial API требует безопасного соединения HTTPS или localhost!\n\nПожалуйста, откройте страницу через https:// или запустите локальный сервер.');
+                appendTerminal('\n[ОШИБКА] WebSerial заблокирован браузером из-за небезопасного соединения HTTP. Откройте сайт по HTTPS или через localhost!\n', 'sys');
             } else {
-                alert('⚠️ Ваш браузер не поддерживает WebSerial API.\n\nПожалуйста, используйте Google Chrome, Яндекс.Браузер, Microsoft Edge или Opera на компьютере.');
-                appendTerminal('\n[ОШИБКА] Браузер не поддерживает WebSerial API. Нужен Chrome, Edge или Яндекс.Браузер.\n', 'sys');
+                alert('⚠️ Ваш браузер не поддерживает WebSerial API (доступ к USB COM-портам).\n\nПожалуйста, используйте браузер на движке Chromium:\n• Google Chrome\n• Яндекс.Браузер\n• Microsoft Edge\n• Opera\n\nВ Mozilla Firefox и Apple Safari технология WebSerial заблокирована разработчиками браузера.');
+                appendTerminal('\n[ОШИБКА] Браузер не поддерживает WebSerial API. Нужен Chrome, Edge, Яндекс.Браузер или Opera (в Firefox и Safari WebSerial не поддерживается).\n', 'sys');
             }
             return;
         }
@@ -357,6 +358,15 @@
         navigator.serial.addEventListener('disconnect', () => {
             disconnectSerial();
         });
+    } else {
+        if (badgeStatus) {
+            badgeStatus.textContent = '● НЕТ WEBSERIAL';
+            badgeStatus.style.color = '#f87171';
+            badgeStatus.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        }
+        if (btnConnect) {
+            btnConnect.title = 'WebSerial недоступен в этом браузере. Откройте в Chrome, Яндекс.Браузере или Edge.';
+        }
     }
 
     // --- Интерактивный эхо-тренажёр CW Pro ---

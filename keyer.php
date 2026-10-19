@@ -21,6 +21,20 @@ include __DIR__ . '/includes/header.php';
         Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод).
     </p>
 
+    <!-- Совместимость браузеров (Chromium WebSerial) -->
+    <div style="background: rgba(96, 165, 250, 0.08); border: 1px solid rgba(96, 165, 250, 0.25); border-radius: 12px; padding: 12px 18px; margin-top: 14px; max-width: 860px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; line-height: 1.5;">
+            <span style="font-size: 20px;">🌐</span>
+            <div>
+                <strong style="color: #60a5fa;">Поддерживаемые браузеры:</strong>
+                <span style="color: var(--text);">требуется браузер на движке <b>Chromium</b> (Google Chrome, Яндекс.Браузер, Microsoft Edge, Opera).</span>
+            </div>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #f87171; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 6px;">
+            <span>❌</span> Firefox и Safari не поддерживаются (нет WebSerial)
+        </div>
+    </div>
+
     <!-- Верхний баннер быстрого перехода к сборке ключа своими руками -->
     <div style="background: linear-gradient(90deg, rgba(79, 216, 196, 0.12) 0%, rgba(232, 163, 61, 0.08) 100%); border: 1px solid rgba(79, 216, 196, 0.35); border-radius: 12px; padding: 12px 18px; margin-top: 14px; max-width: 860px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -162,8 +176,8 @@ include __DIR__ . '/includes/header.php';
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
                 <span>Подключить ключ по USB (115200)</span>
             </button>
-            <div style="font-size:11px; color:var(--text-faint); margin-top:8px; text-align:center;">
-                Работает напрямую через WebSerial в Chrome, Edge, Яндекс.Браузере и Opera
+            <div style="font-size:11px; color:var(--text-faint); margin-top:8px; text-align:center; line-height:1.4;">
+                Движок <b>Chromium</b>: Chrome, Яндекс, Edge, Opera. <span style="color:#f87171;">Firefox и Safari не поддерживаются</span>.
             </div>
         </div>
 
