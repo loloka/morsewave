@@ -537,7 +537,10 @@
             if (typeof Progress !== 'undefined') {
                 Progress.addXp(1);
                 Progress.logXp(1, 'dosaaf_words');
-                Progress.markDailyActivity();
+                // Серия дней (стрик) засчитывается при приёме 5 верных слов
+                if (wordSessionCorrect >= 5) {
+                    Progress.markDailyActivity();
+                }
             }
         } else {
             wordStreak = 0;
@@ -550,7 +553,10 @@
         if (feedback) {
             feedback.className = 'feedback show ' + (isCorrect ? 'ok' : 'bad');
             if (isCorrect) {
-                feedback.innerHTML = `✓ <b>${currentWord}</b> — ${t('dosaaf.correct') || 'Верно!'} <span class="badge-xp" style="margin-left:6px; font-size:12px; font-weight:700; color:var(--accent);">+1 XP</span>`;
+                const streakBadge = (wordSessionCorrect === 5)
+                    ? ` <span class="badge" style="margin-left:6px; font-size:11px; font-weight:700; background:rgba(230,168,34,0.18); color:var(--accent); border:1px solid rgba(230,168,34,0.45); padding:2px 7px; border-radius:4px;">🔥 Серия дней зачтена (5/5 слов)!</span>`
+                    : '';
+                feedback.innerHTML = `✓ <b>${currentWord}</b> — ${t('dosaaf.correct') || 'Верно!'} <span class="badge-xp" style="margin-left:6px; font-size:12px; font-weight:700; color:var(--accent);">+1 XP</span>${streakBadge}`;
                 setTimeout(() => nextWord(true), 900);
             } else {
                 const stageData = DOSAAF_STAGES.find(s => s.stage === currentStageNum);
@@ -685,7 +691,6 @@
             if (typeof Progress !== 'undefined') {
                 Progress.addXp(wordXp);
                 Progress.logXp(wordXp, 'dosaaf_exam_word');
-                Progress.markDailyActivity();
             }
         }
         examIndex++;
@@ -729,12 +734,15 @@
             saveDosaafProgress();
             renderStageNav();
 
-            // Бонус опыта за успешную сдачу зачёта ступени (+25 XP)
+            // Бонус опыта за успешную сдачу зачёта ступени (+25 XP), учёт сданного экзамена и зачёт серии дней
             examXpEarned += passBonus;
             if (typeof Progress !== 'undefined') {
                 Progress.addXp(passBonus);
                 Progress.logXp(passBonus, 'dosaaf_exam_pass');
                 Progress.markDailyActivity();
+                if (typeof Progress.incrementStat === 'function') {
+                    Progress.incrementStat('examsPassed', 1);
+                }
                 if (typeof Progress.checkAchievements === 'function') {
                     Progress.checkAchievements();
                 }
@@ -747,7 +755,7 @@
             const pct = Math.round((examCorrect / totalWords) * 100);
 
             resultBox.innerHTML = `
-                <div class="bold" style="font-size:16px;">${isPassed ? (t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
+                <div class="bold" style="font-size:16px;">${isPassed ? ((t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') + ' <span class="badge" style="font-size:11px; font-weight:700; background:rgba(230,168,34,0.18); color:var(--accent); border:1px solid rgba(230,168,34,0.45); padding:2px 7px; border-radius:4px; vertical-align:middle; margin-left:6px;">🔥 Серия дней зачтена</span>') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
                 <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
                     Результат: <b>${examCorrect} из ${totalWords} слов</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
                     ${isPassed 
