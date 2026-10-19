@@ -1,6 +1,15 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.7.0 (Curtis Lookahead, Live Tuning & R9OGL Edition)
+ *  MorseWave Pro Keyer v1.7.1 (Curtis Latch, Single-Paddle & Low Speed Timing Fix)
+ *  - Адаптивный межзнаковый порог по стандарту ITU-R (2.5T вместо 1.2T):
+ *      * На скоростях 10..14 WPM сложные буквы C (-.-.), Q (--.-), Y (-.--),
+ *        L (.-..), F (..-.) больше не разрываются при переброске весла.
+ *  - Аппаратная защелка памяти (Single-Paddle Memory Latch):
+ *      * Контакты весел опрашиваются с микрофильтром антидребезга (6 мс).
+ *      * Любое быстрое касание весла точки или тире гарантированно встает
+ *        в память и доигрывается до конца, даже если рычаг вернулся в центр.
+ *  - Подхват очереди элементов при переходе в STATE_IDLE:
+ *      * Устранено выпадение завершающего тире или точки при медленной передаче.
  *  - Честная обработка межсловных пробелов (Smart Word Spacing):
  *      * Ровно ОДИН пробел между словами при паузе > 4.5 точек.
  *      * Никакого спама пробелами, если ключ долго молчит!
@@ -8,8 +17,6 @@
  *      * Все знаки препинания: = (BT), + (AR), <SK>, <KN>, <AS>, @, -, :, ;, ', ", !, _, $, <HH>
  *      * Русские буквы Морзе (СРТ / ГОСТ): Ч (---.), Ш (----), Э (..-..), Ю (..--), Я (.-.-)
  *      * Жадный декодер слитных символов (R9 не превращается в ?)
- *  - Двухуровневая предвыборка (Lookahead Memory): знаки K (-.-) и R (.-.)
- *    передаются мгновенно без необходимости «дожимать» весло.
  *  - Регулировка WPM (10..60) и PITCH (400..1200 Гц) НА ЛЕТУ.
  *  - Калибровка АЦП (ADC_MIN=15, ADC_MAX=850) под просадку VIN.
  *  - Приветственная заставка при включении (VVV = R9OGL).
@@ -274,7 +281,7 @@ void setup() {
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("  MorseWave Pro Keyer v1.7.0 (R9OGL Edition)      "));
+  Serial.println(F("  MorseWave Pro Keyer v1.7.1 (R9OGL Edition)      "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -305,32 +312,39 @@ void loop() {
   handleDecodedPauses();
 }
 
-// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА CURTIS 8044 ---
+// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА CURTIS 8044 С ПАМЯТЬЮ LATCH ---
 void handleKeyer() {
   unsigned long now = millis();
-  bool ditPin = (digitalRead(PIN_DIT) == LOW);
-  bool dahPin = (digitalRead(PIN_DAH) == LOW);
+
+  // 1. Аппаратно-программный фильтр антидребезга контактов манипулятора (6 мс)
+  static unsigned long lastDitLowTime = 0;
+  static unsigned long lastDahLowTime = 0;
+  if (digitalRead(PIN_DIT) == LOW) lastDitLowTime = now;
+  if (digitalRead(PIN_DAH) == LOW) lastDahLowTime = now;
+
+  bool ditRaw = (digitalRead(PIN_DIT) == LOW);
+  bool dahRaw = (digitalRead(PIN_DAH) == LOW);
+  bool ditPin = ditRaw || (now - lastDitLowTime < 6);
+  bool dahPin = dahRaw || (now - lastDahLowTime < 6);
 
   static bool prevDitState = HIGH;
   static bool prevDahState = HIGH;
 
-  bool ditJustPressed = (ditPin && prevDitState == HIGH);
-  bool dahJustPressed = (dahPin && prevDahState == HIGH);
+  bool ditJustPressed = (ditRaw && prevDitState == HIGH);
+  bool dahJustPressed = (dahRaw && prevDahState == HIGH);
 
-  // Память элементов (Двухуровневая предвыборка Lookahead):
-  // 1. Пока звучит точка (или ее пауза):
+  // 2. Память элементов (Двухуровневая предвыборка Lookahead + Single-Paddle Latch):
+  // Любое касание весла во время воспроизведения противоположного элемента
+  // или его паузы мгновенно защёлкивается в памяти и обязательно доигрывается.
   if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
     if (dahPin) dahMemory = true;
-    // Если тире уже в памяти, и мы кликнули точку (буква 'R': . - .)
     if (dahMemory && ditJustPressed) {
       ditMemory = true;
     }
   }
 
-  // 2. Пока звучит тире (или его пауза):
   if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
     if (ditPin) ditMemory = true;
-    // Если точка уже в памяти, и мы кликнули тире (буква 'K': - . -)
     if (ditMemory && dahJustPressed) {
       dahMemory = true;
     }
@@ -341,9 +355,12 @@ void handleKeyer() {
 
   switch (state) {
     case STATE_IDLE:
-      if (dahPin) {
+      // Подхватываем как живое нажатие весла, так и сохраненную защелку памяти
+      if (dahPin || dahMemory) {
+        dahMemory = false;
         startDah();
-      } else if (ditPin) {
+      } else if (ditPin || ditMemory) {
+        ditMemory = false;
         startDit();
       }
       break;
@@ -361,7 +378,8 @@ void handleKeyer() {
         if (dahMemory || dahPin) {
           dahMemory = false;
           startDah();
-        } else if (ditPin) {
+        } else if (ditMemory || ditPin) {
+          ditMemory = false;
           startDit();
         } else {
           state = STATE_IDLE;
@@ -385,7 +403,8 @@ void handleKeyer() {
         if (ditMemory || ditPin) {
           ditMemory = false;
           startDit();
-        } else if (dahPin) {
+        } else if (dahMemory || dahPin) {
+          dahMemory = false;
           startDah();
         } else {
           state = STATE_IDLE;
@@ -508,9 +527,9 @@ void handleDecodedPauses() {
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // 1. Межзнаковая пауза (в сумме с межэлементной паузой дает 2.2 длительности точки)
-  // При 20 WPM это всего ~72 мс после окончания знака — мгновенное разделение букв!
-  unsigned long charSpaceThreshold = (ditMs * 12) / 10;
+  // 1. Межзнаковая пауза (по стандарту ITU: 1.0T межэлементная + 2.5T тишина = 3.5T между буквами)
+  // При 10 WPM (dit: 120 мс) порог = 300 мс — комфортный люфт для переброски весла без разрыва букв C, Q, Y!
+  unsigned long charSpaceThreshold = (ditMs * 25) / 10;
   if (currentMorseChar.length() > 0 && pause >= charSpaceThreshold) {
     String decoded = decodeMorse(currentMorseChar);
     decodedLine += decoded;
