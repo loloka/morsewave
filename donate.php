@@ -66,7 +66,7 @@ include __DIR__ . '/includes/header.php';
         <div class="donate-tier-card" data-amount="3000" data-tier="<?= htmlspecialchars(t('donate.tier5_title')) ?>">
             <div class="donate-tier-header">
                 <span class="donate-tier-amount">3 000 ₽</span>
-                <span style="font-size:20px;">💡</span>
+                <span style="font-size:20px;">🛠️</span>
             </div>
             <div class="donate-tier-title"><?= t('donate.tier5_title') ?></div>
             <div class="donate-tier-desc"><?= t('donate.tier5_desc') ?></div>
