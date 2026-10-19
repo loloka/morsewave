@@ -4,7 +4,7 @@
 
 ---
 
-## Актуальная версия: v1.7.0 (Curtis Lookahead, Live Tuning & Smart Spacing)
+## Актуальная версия: v1.7.1 (Curtis Latch, Single-Paddle & Low Speed Timing Fix)
 Подробная история изменений и разбор всех решенных багов — в [CHANGELOG.md](CHANGELOG.md).
 
 ### Ключевые возможности:
