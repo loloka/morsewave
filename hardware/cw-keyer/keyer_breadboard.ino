@@ -310,11 +310,11 @@ void loop() {
   handleDecodedPauses();
 }
 
-// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА CURTIS 8044 С ПАМЯТЬЮ LATCH ---
+// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА (ОДНОРЫЧАЖНИК + ЯМБИК КЕРТИС) ---
 void handleKeyer() {
   unsigned long now = millis();
 
-  // 1. Аппаратно-программный опрос весел с микрофильтром антидребезга (5 мс)
+  // 1. Аппаратно-программный опрос весел с фильтром антидребезга (5 мс)
   static unsigned long lastDitLowTime = 0;
   static unsigned long lastDahLowTime = 0;
   if (digitalRead(PIN_DIT) == LOW) lastDitLowTime = now;
@@ -325,20 +325,25 @@ void handleKeyer() {
   bool ditPin = ditRaw || (now - lastDitLowTime < 5);
   bool dahPin = dahRaw || (now - lastDahLowTime < 5);
 
-  // 2. Память элементов (Классический Curtis 8044 iambic/single-paddle):
-  // Защёлка противоположного элемента взводится во время передачи текущего
-  if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
-    if (dahPin) dahMemory = true;
-  } else if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
-    if (ditPin) ditMemory = true;
-  }
+  // Детектор фронта (быстрый клик весла)
+  static bool prevDitRaw = false;
+  static bool prevDahRaw = false;
+  bool ditEdge = (ditRaw && !prevDitRaw);
+  bool dahEdge = (dahRaw && !prevDahRaw);
+  prevDitRaw = ditRaw;
+  prevDahRaw = dahRaw;
+
+  // 2. Память элементов (K3NG / Single-Paddle Latch):
+  // Любое нажатие или фронт касания весла фиксируется в памяти соответствующего элемента
+  if (ditEdge || ditPin) ditMemory = true;
+  if (dahEdge || dahPin) dahMemory = true;
 
   switch (state) {
     case STATE_IDLE:
-      // При живом нажатии весла
-      if (dahPin) {
+      // В покое: если есть память тире или нажато весло тире
+      if (dahMemory || dahPin) {
         startDah();
-      } else if (ditPin) {
+      } else if (ditMemory || ditPin) {
         startDit();
       }
       break;
@@ -352,16 +357,15 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DIT:
+      // Межэлементная пауза после точки равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
+        // Приоритет чередования: после точки сначала проверяем тире
         if (dahMemory || dahPin) {
-          dahMemory = false;
           startDah();
-        } else if (ditPin) {
+        } else if (ditMemory || ditPin) {
           startDit();
         } else {
           state = STATE_IDLE;
-          ditMemory = false;
-          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -376,16 +380,15 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DAH:
+      // Межэлементная пауза после тире равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
+        // Приоритет чередования: после тире сначала проверяем точку
         if (ditMemory || ditPin) {
-          ditMemory = false;
           startDit();
-        } else if (dahPin) {
+        } else if (dahMemory || dahPin) {
           startDah();
         } else {
           state = STATE_IDLE;
-          ditMemory = false;
-          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -394,7 +397,7 @@ void handleKeyer() {
 }
 
 void startDit() {
-  ditMemory = false; // Сбрасываем память только при фактическом старте звучания
+  ditMemory = false; // Очищаем память точки ТОЛЬКО при ее старте
   state = STATE_PLAY_DIT;
   stateStartTime = millis();
 
@@ -407,7 +410,7 @@ void startDit() {
 }
 
 void startDah() {
-  dahMemory = false; // Сбрасываем память только при фактическом старте звучания
+  dahMemory = false; // Очищаем память тире ТОЛЬКО при его старте
   state = STATE_PLAY_DAH;
   stateStartTime = millis();
 
