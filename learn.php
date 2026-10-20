@@ -218,6 +218,18 @@ include __DIR__ . '/includes/header.php';
 <!-- ======================= РЕЖИМ: ВТОРЖЕНИЕ (BETA) ======================= -->
 <div id="invasion-mode" style="display:none;">
     <div class="card mt-2">
+        
+        <!-- Баннер перехода во Вторжение-2 -->
+        <div class="alert alert-info mb-3" style="background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            <div>
+                <div style="font-weight: 700; color: #00ff66; margin-bottom: 3px;">⚡ Доступен новый режим: Вторжение-2 (Радиоперехват)!</div>
+                <div style="font-size: 13.5px; color: var(--text-muted);">В отличие от первой версии, здесь знаки нужно передавать <b>ключом</b> (MorseWave Pro, клавиатура или тач) на опережение в аутентичном CRT-радаре.</div>
+            </div>
+            <a href="invaders.php" class="btn btn-primary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 16px; text-decoration: none; border-radius: 6px; background: #00ff66; color: #030604; border: none;">
+                Вторжение-2 →
+            </a>
+        </div>
+
         <p class="mt-0"><?= t('learn.invasion_intro') ?></p>
 
         <div class="flex-between flex-wrap gap-2 mt-2">

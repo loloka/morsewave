@@ -1,0 +1,646 @@
+/**
+ * =========================================================
+ * Morse Invaders II: Radio Intercept (Вторжение-2: Радиоперехват)
+ * Стили аутентичного CRT-радара / терминала ПВО (P1 Green фосфор)
+ * =========================================================
+ */
+
+:root {
+    --crt-bg: #070b09;
+    --crt-bg-deep: #030604;
+    --crt-p1-green: #00ff66;
+    --crt-p1-bright: #33ff88;
+    --crt-p1-dim: rgba(0, 255, 102, 0.45);
+    --crt-p1-faint: rgba(0, 255, 102, 0.15);
+    --crt-crit-cyan: #38bdf8;
+    --crt-crit-bright: #7dd3fc;
+    --crt-amber: #ffb000;
+    --crt-alert-red: #ef4444;
+    --crt-border: rgba(0, 255, 102, 0.28);
+    --crt-glow: 0 0 10px rgba(0, 255, 102, 0.45);
+    --crt-crit-glow: 0 0 14px rgba(56, 189, 248, 0.65);
+}
+
+.invaders-terminal-wrap {
+    background: var(--crt-bg);
+    border: 1px solid var(--crt-border);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.75), inset 0 0 25px rgba(0, 255, 102, 0.06);
+    margin: 16px auto 32px;
+    max-width: 1040px;
+    font-family: var(--font-mono, 'JetBrains Mono', monospace);
+    color: var(--crt-p1-green);
+    position: relative;
+    user-select: none;
+    animation: terminalFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes terminalFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Заголовок и статус-бар терминала --- */
+.invaders-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--crt-border);
+    margin-bottom: 14px;
+}
+
+.invaders-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    font-size: 13.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    text-shadow: var(--crt-glow);
+}
+
+.invaders-radar-blip {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: var(--crt-p1-green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--crt-p1-bright);
+    animation: blipPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes blipPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.85); }
+    50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 14px var(--crt-p1-bright); }
+}
+
+.invaders-serial-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Бейдж активности физического ключа MorseWave Pro */
+.invaders-pro-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid var(--crt-crit-cyan);
+    color: var(--crt-crit-bright);
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    box-shadow: var(--crt-crit-glow);
+    animation: proBadgePulse 2s infinite ease-in-out;
+}
+
+.invaders-pro-status.hidden {
+    display: none;
+}
+
+@keyframes proBadgePulse {
+    0%, 100% { border-color: rgba(56, 189, 248, 0.6); box-shadow: 0 0 8px rgba(56, 189, 248, 0.3); }
+    50% { border-color: #38bdf8; box-shadow: 0 0 16px rgba(56, 189, 248, 0.7); }
+}
+
+.invaders-btn-serial {
+    background: rgba(0, 255, 102, 0.08);
+    border: 1px solid var(--crt-border);
+    color: var(--crt-p1-green);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: transform 0.1s cubic-bezier(0.22, 1, 0.36, 1), background 0.15s, box-shadow 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.invaders-btn-serial:hover {
+    background: rgba(0, 255, 102, 0.18);
+    border-color: var(--crt-p1-green);
+    box-shadow: var(--crt-glow);
+    transform: translateY(-1px);
+}
+
+.invaders-btn-serial:active {
+    transform: translateY(1px);
+}
+
+.invaders-btn-serial.connected {
+    background: rgba(56, 189, 248, 0.15);
+    border-color: var(--crt-crit-cyan);
+    color: var(--crt-crit-bright);
+    box-shadow: var(--crt-crit-glow);
+}
+
+/* --- HUD Панель боевых показателей --- */
+.invaders-hud-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.hud-tile {
+    background: rgba(0, 255, 102, 0.04);
+    border: 1px solid rgba(0, 255, 102, 0.18);
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: transform 0.15s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s;
+}
+
+.hud-tile .hud-label {
+    font-size: 10.5px;
+    color: var(--crt-p1-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.hud-tile .hud-value {
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--crt-p1-bright);
+    text-shadow: var(--crt-glow);
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+    transform-origin: left center;
+}
+
+/* Анимация скачка числа (number pop) при обновлении */
+.hud-tile.hud-pop .hud-value {
+    animation: hudNumPop 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes hudNumPop {
+    0% { transform: scale(1.25); filter: brightness(1.6); }
+    100% { transform: scale(1); filter: none; }
+}
+
+.hud-tile.hud-hp .hud-value {
+    color: var(--crt-p1-green);
+}
+
+.hud-tile.hud-hp.danger {
+    border-color: rgba(239, 68, 68, 0.45);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.hud-tile.hud-hp.danger .hud-value {
+    color: var(--crt-alert-red);
+    text-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
+    animation: dangerBlink 0.7s infinite;
+}
+
+@keyframes dangerBlink {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.97); }
+}
+
+.hud-tile.hud-combo .hud-value {
+    color: var(--crt-crit-cyan);
+    text-shadow: var(--crt-crit-glow);
+}
+
+/* Огонь на комбо */
+.hud-tile.hud-combo.active-combo {
+    border-color: var(--crt-crit-cyan);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+/* --- CRT Экран Радара --- */
+.invaders-screen-bezel {
+    position: relative;
+    background: var(--crt-bg-deep);
+    border: 2px solid rgba(0, 255, 102, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 45px rgba(0, 0, 0, 0.95), 0 0 20px rgba(0, 255, 102, 0.12);
+    aspect-ratio: 16 / 10;
+    min-height: 440px;
+    max-height: 600px;
+    transition: transform 0.05s ease-out;
+}
+
+/* Эффект включения кинескопа (CRT Turn-On) */
+.invaders-screen-bezel.crt-turn-on {
+    animation: crtTurnOn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes crtTurnOn {
+    0% {
+        transform: scale(0.98, 0.003);
+        filter: brightness(25);
+        opacity: 0.9;
+    }
+    45% {
+        transform: scale(1.01, 0.01);
+        filter: brightness(18);
+        opacity: 1;
+    }
+    80% {
+        transform: scale(1.015, 1.01);
+        filter: brightness(1.6);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1, 1);
+        filter: brightness(1);
+        opacity: 1;
+    }
+}
+
+/* Тряска экрана при попадании врага по базе */
+.invaders-screen-bezel.screen-shake {
+    animation: crtShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes crtShake {
+    10%, 90% { transform: translate3d(-3px, 1px, 0); }
+    20%, 80% { transform: translate3d(4px, -2px, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 3px, 0); }
+    40%, 60% { transform: translate3d(3px, -1px, 0); }
+}
+
+.invaders-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent;
+}
+
+/* Сканлайны кинескопа (Raster lines) */
+.invaders-scanlines {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.38) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 10;
+    opacity: 0.85;
+}
+
+/* Эффект виньетирования кинескопа */
+.invaders-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.85), inset 0 0 120px rgba(7, 11, 9, 0.7);
+    z-index: 11;
+}
+
+/* Вспышка критического перехвата */
+.invaders-crit-flash {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(56, 189, 248, 0.35) 0%, rgba(0, 0, 0, 0) 75%);
+    opacity: 0;
+    transition: opacity 0.12s ease-out;
+    z-index: 12;
+}
+
+.invaders-crit-flash.active {
+    opacity: 1;
+}
+
+/* Помеха при ошибке передачи */
+.invaders-glitch-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(239, 68, 68, 0.18) 0px,
+        rgba(239, 68, 68, 0.18) 2px,
+        transparent 2px,
+        transparent 6px
+    );
+    opacity: 0;
+    transition: opacity 0.08s ease-out;
+    z-index: 13;
+}
+
+.invaders-glitch-overlay.active {
+    opacity: 1;
+}
+
+/* Тактический баннер новой волны или предупреждения */
+.invaders-tactical-banner {
+    position: absolute;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(3, 6, 4, 0.92);
+    border: 1px solid var(--crt-p1-green);
+    border-radius: 8px;
+    padding: 10px 24px;
+    text-align: center;
+    z-index: 16;
+    pointer-events: none;
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.35);
+    animation: bannerSlideIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    max-width: 90%;
+}
+
+.invaders-tactical-banner.hidden {
+    display: none;
+}
+
+@keyframes bannerSlideIn {
+    from { opacity: 0; transform: translate(-50%, -15px); }
+    to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.tactical-banner-title {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--crt-p1-bright);
+    text-shadow: var(--crt-glow);
+}
+
+.tactical-banner-sub {
+    font-size: 12px;
+    color: var(--crt-p1-dim);
+    margin-top: 3px;
+    letter-spacing: 0.05em;
+}
+
+/* Индикатор текущего буфера точек/тире прямо на экране */
+.invaders-buffer-display {
+    position: absolute;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(3, 6, 4, 0.88);
+    border: 1px solid var(--crt-p1-green);
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--crt-p1-bright);
+    box-shadow: var(--crt-glow);
+    z-index: 15;
+    pointer-events: none;
+    min-width: 110px;
+    text-align: center;
+    transition: transform 0.08s ease, border-color 0.15s;
+}
+
+/* --- Оверлей паузы и старта --- */
+.invaders-overlay-modal {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 6, 4, 0.92);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    text-align: center;
+    z-index: 20;
+    backdrop-filter: blur(4px);
+    animation: modalReveal 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes modalReveal {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.invaders-overlay-modal.hidden {
+    display: none;
+}
+
+.invaders-overlay-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--crt-p1-bright);
+    text-shadow: var(--crt-glow);
+    margin-bottom: 12px;
+    letter-spacing: 0.06em;
+}
+
+.invaders-overlay-desc {
+    font-size: 14.5px;
+    color: var(--crt-p1-dim);
+    max-width: 580px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.invaders-btn-start {
+    background: var(--crt-p1-green);
+    color: #030604;
+    border: none;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 12px 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.45);
+    transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.15s, background 0.15s;
+}
+
+.invaders-btn-start:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 30px rgba(0, 255, 102, 0.8);
+    background: #4dff88;
+}
+
+.invaders-btn-start:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+/* --- Нижняя панель управления и экранный ключ --- */
+.invaders-bottom-console {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--crt-border);
+}
+
+.invaders-settings-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    font-size: 13px;
+}
+
+.invaders-wpm-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.invaders-wpm-slider-wrap input[type="range"] {
+    accent-color: var(--crt-p1-green);
+    width: 140px;
+    cursor: pointer;
+}
+
+.invaders-controls-hint {
+    color: var(--crt-p1-dim);
+    font-size: 12.5px;
+}
+
+/* --- Большой экранный сенсорный ключ (Touch Paddle с 3D-механикой) --- */
+.invaders-key-paddle {
+    background: linear-gradient(180deg, rgba(0, 255, 102, 0.12) 0%, rgba(0, 255, 102, 0.03) 100%);
+    border: 2px solid var(--crt-border);
+    border-radius: 10px;
+    color: var(--crt-p1-bright);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 18px 24px;
+    width: 100%;
+    cursor: pointer;
+    touch-action: manipulation;
+    perspective: 800px;
+    transform-style: preserve-3d;
+    transition: transform 0.06s cubic-bezier(0.22, 1, 0.36, 1), background 0.1s, box-shadow 0.1s, border-color 0.1s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(0, 255, 102, 0.25);
+}
+
+.invaders-key-paddle:hover {
+    border-color: var(--crt-p1-green);
+    background: rgba(0, 255, 102, 0.16);
+    box-shadow: var(--crt-glow);
+}
+
+.invaders-key-paddle:active,
+.invaders-key-paddle.pressed {
+    transform: rotateX(4deg) translateY(3px) scale(0.985);
+    background: var(--crt-p1-green);
+    color: #030604;
+    border-color: var(--crt-p1-bright);
+    box-shadow: 0 0 28px rgba(0, 255, 102, 0.95), inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.invaders-key-paddle .paddle-lamp {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(0, 255, 102, 0.3);
+    border: 1px solid var(--crt-p1-green);
+    transition: all 0.06s ease;
+}
+
+.invaders-key-paddle:active .paddle-lamp,
+.invaders-key-paddle.pressed .paddle-lamp {
+    background: #ffffff;
+    box-shadow: 0 0 16px #ffffff;
+}
+
+/* --- Дебрифинг и результаты миссии --- */
+.debrief-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+    max-width: 440px;
+    margin: 16px auto 24px;
+    text-align: left;
+}
+
+.debrief-stat-item {
+    background: rgba(0, 255, 102, 0.05);
+    border: 1px solid rgba(0, 255, 102, 0.2);
+    padding: 10px 14px;
+    border-radius: 6px;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.debrief-stat-item:hover {
+    transform: translateY(-2px);
+    border-color: var(--crt-p1-green);
+}
+
+.debrief-stat-item .d-label {
+    font-size: 11px;
+    color: var(--crt-p1-dim);
+    text-transform: uppercase;
+}
+
+.debrief-stat-item .d-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--crt-p1-bright);
+    margin-top: 4px;
+}
+
+.debrief-xp-reward {
+    grid-column: span 2;
+    background: rgba(56, 189, 248, 0.08);
+    border-color: var(--crt-crit-cyan);
+    text-align: center;
+}
+
+.debrief-xp-reward .d-value {
+    color: var(--crt-crit-cyan);
+    text-shadow: var(--crt-crit-glow);
+    font-size: 24px;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .invaders-terminal-wrap {
+        padding: 10px;
+        margin: 8px auto 24px;
+        border-radius: 10px;
+    }
+
+    .invaders-screen-bezel {
+        aspect-ratio: 1 / 1;
+        min-height: 340px;
+    }
+
+    .hud-tile .hud-value {
+        font-size: 16px;
+    }
+
+    .invaders-key-paddle {
+        padding: 24px 18px;
+        font-size: 14px;
+    }
+
+    .debrief-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .debrief-xp-reward {
+        grid-column: span 1;
+    }
+}

@@ -54,6 +54,21 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
+    
+    <!-- Баннер боевого симулятора Вторжение-2: Радиоперехват -->
+    <div style="background: linear-gradient(90deg, rgba(0, 255, 102, 0.12) 0%, rgba(56, 189, 248, 0.08) 100%); border: 1px solid rgba(0, 255, 102, 0.35); border-radius: 12px; padding: 14px 20px; margin-top: 14px; max-width: 860px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px;">🎯</span>
+            <div>
+                <strong style="color: #00ff66; font-size: 15px;"><?= t('invaders.promo_in_keyer') ?></strong>
+                <div style="font-size: 13px; color: var(--text-muted);"><?= t('invaders.promo_in_keyer_desc') ?></div>
+            </div>
+        </div>
+        <a href="invaders.php" class="btn btn-primary" style="white-space: nowrap; font-size: 13.5px; font-weight: 700; padding: 8px 18px; text-decoration: none; border-radius: 6px; background: #00ff66; color: #030604; border: none; box-shadow: 0 0 14px rgba(0, 255, 102, 0.4);">
+            <?= t('invaders.promo_in_keyer_btn') ?>
+        </a>
+    </div>
+
     <!-- Информационная плашка подключения -->
     <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">

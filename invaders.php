@@ -1,0 +1,154 @@
+<?php
+require_once __DIR__ . '/includes/i18n.php';
+require_once __DIR__ . '/includes/auth.php';
+
+$pageTitle = t('invaders.title');
+$activePage = 'invaders';
+$pageScript = 'invaders.js';
+
+include __DIR__ . '/includes/header.php';
+?>
+
+<link rel="stylesheet" href="<?= asset_v('assets/css/invaders.css') ?>">
+
+<div class="card-eyebrow"><?= t('invaders.radar_badge') ?></div>
+<div class="flex-between flex-wrap gap-2" style="align-items: center; margin-bottom: 6px;">
+    <div>
+        <h1 style="margin: 0; font-family: var(--font-mono, monospace); letter-spacing: 0.04em;">
+            <?= t('invaders.title') ?>
+        </h1>
+        <p class="muted mt-1 mb-0" style="font-size: 14.5px; max-width: 780px;">
+            <?= t('invaders.subtitle') ?>
+        </p>
+    </div>
+    <div>
+        <a href="keyer.php" class="btn btn-secondary btn-sm" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
+            <?= mw_icon('zap', 14) ?> <span>Хаб ключа MorseWave Pro →</span>
+        </a>
+    </div>
+</div>
+
+<!-- =========================================================
+     ТЕРМИНАЛ ПВО: CRT РАДАР ПЕРЕХВАТА
+     ========================================================= -->
+<div class="invaders-terminal-wrap">
+    
+    <!-- Верхняя статусная строка -->
+    <div class="invaders-top-bar">
+        <div class="invaders-brand">
+            <span class="invaders-radar-blip"></span>
+            <span>R9OGL AIR DEFENSE · SECTOR P1-RADAR</span>
+        </div>
+        <div class="invaders-serial-ctrl">
+            <div class="invaders-pro-status hidden" id="invaders-pro-badge">
+                <span>⚡</span>
+                <span>MORSEWAVE PRO ACTIVE</span>
+            </div>
+            <button id="btn-serial-connect" class="invaders-btn-serial" type="button">
+                <?= t('invaders.connect_key') ?>
+            </button>
+        </div>
+    </div>
+
+    <!-- HUD Боевых параметров -->
+    <div class="invaders-hud-panel">
+        <div class="hud-tile hud-hp" id="hud-hp-tile">
+            <span class="hud-label"><?= t('invaders.base_integrity') ?></span>
+            <span class="hud-value" id="hud-hp-val">100%</span>
+        </div>
+        <div class="hud-tile" id="hud-wave-tile">
+            <span class="hud-label"><?= t('invaders.wave') ?></span>
+            <span class="hud-value" id="hud-wave-val">1</span>
+        </div>
+        <div class="hud-tile" id="hud-score-tile">
+            <span class="hud-label"><?= t('invaders.score') ?></span>
+            <span class="hud-value" id="hud-score-val">0</span>
+        </div>
+        <div class="hud-tile hud-combo" id="hud-combo-tile">
+            <span class="hud-label"><?= t('invaders.combo') ?></span>
+            <span class="hud-value" id="hud-combo-val">0x</span>
+        </div>
+        <div class="hud-tile" id="hud-crit-tile">
+            <span class="hud-label"><?= t('invaders.critical') ?></span>
+            <span class="hud-value" id="hud-crit-val">0</span>
+        </div>
+    </div>
+
+    <!-- CRT Экран кинескопа с Canvas -->
+    <div class="invaders-screen-bezel" id="invaders-screen-bezel">
+        <canvas id="invaders-radar-canvas" class="invaders-canvas"></canvas>
+        <div class="invaders-scanlines"></div>
+        <div class="invaders-vignette"></div>
+        <div class="invaders-crit-flash" id="invaders-crit-flash"></div>
+        <div class="invaders-glitch-overlay" id="invaders-glitch-overlay"></div>
+        
+        <!-- Тактический всплывающий баннер волны и связи -->
+        <div class="invaders-tactical-banner hidden" id="invaders-tactical-banner">
+            <div class="tactical-banner-title" id="tactical-banner-title">WAVE 1 // AIRSPACE COMPROMISED</div>
+            <div class="tactical-banner-sub" id="tactical-banner-sub">TRANSMIT TARGET CHARACTERS WITH KEY</div>
+        </div>
+
+        <div class="invaders-buffer-display" id="invaders-buffer-display">READY</div>
+
+        <!-- Стартовый оверлей -->
+        <div class="invaders-overlay-modal" id="invaders-start-overlay">
+            <div class="invaders-overlay-title">РАДИОПЕРЕХВАТ: БОЕВОЙ РЕЖИМ</div>
+            <div class="invaders-overlay-desc">
+                Вражеские дроны и радиопомехи атакуют антенное поле базы!<br>
+                Отбивайте падающие знаки <b>на телеграфном ключе</b> (удерживайте <b>ПРОБЕЛ</b>, экранную педаль или подключите <b>MorseWave Pro</b> по USB).<br><br>
+                ⚡ Идеальный ритм 1:3:1 даёт <b>Критический перехват (х2 XP)</b>. Ошибки сбивают комбо!
+            </div>
+            <button id="btn-start-game" class="invaders-btn-start" type="button">
+                <?= t('invaders.start_game') ?>
+            </button>
+        </div>
+
+        <!-- Оверлей итогов боя (Дебрифинг) -->
+        <div class="invaders-overlay-modal hidden" id="invaders-debrief-overlay">
+            <div class="invaders-overlay-title" style="color: #ef4444;"><?= t('invaders.game_over_title') ?></div>
+            <div class="debrief-stats-grid">
+                <div class="debrief-stat-item">
+                    <div class="d-label"><?= t('invaders.debrief_score') ?></div>
+                    <div class="d-value" id="debrief-score-val">0</div>
+                </div>
+                <div class="debrief-stat-item">
+                    <div class="d-label"><?= t('invaders.debrief_wave') ?></div>
+                    <div class="d-value" id="debrief-wave-val">1</div>
+                </div>
+                <div class="debrief-stat-item">
+                    <div class="d-label"><?= t('invaders.debrief_crits') ?></div>
+                    <div class="d-value" id="debrief-crits-val">0</div>
+                </div>
+                <div class="debrief-stat-item debrief-xp-reward">
+                    <div class="d-label"><?= t('invaders.debrief_xp') ?></div>
+                    <div class="d-value" id="debrief-xp-val">+0 XP</div>
+                </div>
+            </div>
+            <button id="btn-debrief-restart" class="invaders-btn-start" type="button">
+                <?= t('invaders.debrief_restart') ?>
+            </button>
+        </div>
+    </div>
+
+    <!-- Нижняя консоль управления и манипулятор -->
+    <div class="invaders-bottom-console">
+        <div class="invaders-settings-bar">
+            <div class="invaders-wpm-slider-wrap">
+                <label for="invaders-wpm-slider"><?= t('invaders.wpm_label') ?></label>
+                <input type="range" id="invaders-wpm-slider" min="10" max="35" step="1" value="18">
+                <span class="mono" style="font-weight: 700; color: var(--crt-p1-bright);"><span id="invaders-wpm-val">18</span> WPM</span>
+            </div>
+            <div class="invaders-controls-hint">
+                <?= t('invaders.key_space_hint') ?>
+            </div>
+        </div>
+
+        <!-- Большой экранный сенсорный ключ с 3D-механикой -->
+        <button id="touch-key-paddle" class="invaders-key-paddle" type="button">
+            <span class="paddle-lamp"></span>
+            <span><?= t('invaders.touch_key_btn') ?></span>
+        </button>
+    </div>
+</div>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>
