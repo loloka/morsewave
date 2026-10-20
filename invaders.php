@@ -166,4 +166,94 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- =========================================================
+     РУКОВОДСТВО ОПЕРАТОРА: РАСЧЁТ ОЧКОВ И РИТМИКА МОРЗЕ
+     ========================================================= -->
+<div class="invaders-manual-section card mt-4">
+    <div class="flex-between flex-wrap gap-2" style="align-items: center; margin-bottom: 14px;">
+        <div>
+            <h2 style="margin: 0; font-size: 19px; display: flex; align-items: center; gap: 8px;">
+                <?= mw_icon('notebook', 20) ?>
+                <span><?= t('invaders.manual_title') ?></span>
+            </h2>
+            <p class="muted mt-1 mb-0" style="font-size: 13.5px;">
+                <?= t('invaders.manual_subtitle') ?>
+            </p>
+        </div>
+        <div class="mono" style="font-size: 12px; color: var(--crt-p1-green, #00ff66); background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.25); padding: 5px 12px; border-radius: 6px;">
+            PARIS: T = 1200 / WPM
+        </div>
+    </div>
+
+    <!-- Таблица допусков таймингов (1:3:1) -->
+    <div class="manual-timing-table-wrap">
+        <table class="manual-timing-table">
+            <thead>
+                <tr>
+                    <th>Элемент передачи</th>
+                    <th>Эталонная длительность</th>
+                    <th>Допустимое отклонение (Критический перехват х2)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><b><?= t('invaders.manual_el_dit') ?></b></td>
+                    <td><span class="badge-timing"><?= t('invaders.manual_ideal_dit') ?></span></td>
+                    <td class="timing-highlight"><?= t('invaders.manual_tol_dit') ?></td>
+                </tr>
+                <tr>
+                    <td><b><?= t('invaders.manual_el_dah') ?></b></td>
+                    <td><span class="badge-timing"><?= t('invaders.manual_ideal_dah') ?></span></td>
+                    <td class="timing-highlight"><?= t('invaders.manual_tol_dah') ?></td>
+                </tr>
+                <tr>
+                    <td><b><?= t('invaders.manual_el_pause') ?></b></td>
+                    <td><span class="badge-timing"><?= t('invaders.manual_ideal_pause') ?></span></td>
+                    <td><?= t('invaders.manual_tol_pause') ?></td>
+                </tr>
+                <tr>
+                    <td><b><?= t('invaders.manual_el_finalize') ?></b></td>
+                    <td><span class="badge-timing"><?= t('invaders.manual_ideal_finalize') ?></span></td>
+                    <td style="color: var(--crt-p1-bright, #33ff88);"><?= t('invaders.manual_tol_finalize') ?></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Карточки пояснений -->
+    <div class="manual-cards-grid mt-3">
+        <div class="manual-rule-card">
+            <div class="m-card-header">
+                <span class="m-card-icon">⚡</span>
+                <strong><?= t('invaders.manual_rhythm_heading') ?></strong>
+            </div>
+            <p><?= t('invaders.manual_rhythm_text') ?></p>
+        </div>
+
+        <div class="manual-rule-card">
+            <div class="m-card-header">
+                <span class="m-card-icon">🔥</span>
+                <strong><?= t('invaders.manual_combo_heading') ?></strong>
+            </div>
+            <p><?= t('invaders.manual_combo_text') ?></p>
+        </div>
+
+        <div class="manual-rule-card">
+            <div class="m-card-header">
+                <span class="m-card-icon">🏆</span>
+                <strong><?= t('invaders.manual_xp_heading') ?></strong>
+            </div>
+            <p><?= t('invaders.manual_xp_text') ?></p>
+        </div>
+
+        <div class="manual-rule-card">
+            <div class="m-card-header">
+                <span class="m-card-icon">🛠️</span>
+                <strong><?= t('invaders.manual_hardware_heading') ?></strong>
+            </div>
+            <p><?= t('invaders.manual_hardware_text') ?></p>
+        </div>
+    </div>
+</div>
+
 <?php include __DIR__ . '/includes/footer.php'; ?>

@@ -644,3 +644,99 @@
         grid-column: span 1;
     }
 }
+
+
+/* --- Секция руководства оператора под радаром --- */
+.invaders-manual-section {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-top: 26px;
+    background: var(--bg-card);
+}
+
+.manual-timing-table-wrap {
+    overflow-x: auto;
+    margin-top: 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.manual-timing-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+}
+
+.manual-timing-table th,
+.manual-timing-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.manual-timing-table th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.badge-timing {
+    font-family: var(--font-mono, monospace);
+    font-weight: 700;
+    background: rgba(79, 216, 196, 0.12);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(79, 216, 196, 0.3);
+}
+
+.timing-highlight {
+    font-family: var(--font-mono, monospace);
+    color: var(--crt-p1-green, #00ff66);
+    font-weight: 600;
+}
+
+.manual-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.manual-rule-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manual-rule-card .m-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.manual-rule-card p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin: 0;
+}
+
+.manual-rule-card code {
+    font-family: var(--font-mono, monospace);
+    background: rgba(0, 255, 102, 0.08);
+    color: var(--crt-p1-green, #00ff66);
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 255, 102, 0.2);
+}

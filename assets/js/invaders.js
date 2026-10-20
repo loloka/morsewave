@@ -450,10 +450,12 @@
             this.critCount = 0;
             this.wave = 1;
             this.totalKills = 0;
+            this.waveTransitioning = false;
 
             this.isRunning = false;
             this.lastTime = performance.now();
             this.glitchTimer = 0;
+            this.waveTransitioning = false;
 
             this._resize();
             window.addEventListener('resize', () => this._resize());
@@ -506,6 +508,7 @@
         spawnWave(waveNum) {
             this.targets = [];
             this.wave = waveNum;
+            this.waveTransitioning = false;
 
             // Наборы символов по прогрессии
             const POOL_EASY = ['E', 'T', 'A', 'N', 'M', 'I', 'S', 'O', 'R', 'D'];
@@ -660,14 +663,25 @@
             });
 
             // Проверка завершения волны
-            if (this.targets.every(t => !t.alive)) {
+            this._checkWaveCompletion();
+        }
+
+        _checkWaveCompletion() {
+            if (this.waveTransitioning || this.baseHp <= 0) return;
+            if (this.targets.length > 0 && this.targets.every(t => !t.alive)) {
+                this.waveTransitioning = true;
                 this.audio.playWaveClear();
                 this._showFloatingText(this.width / 2, this.height / 2 - 30, 'SECTOR CLEARED!', '#38bdf8');
                 setTimeout(() => {
+                    if (this.baseHp <= 0) {
+                        this.waveTransitioning = false;
+                        return;
+                    }
                     this.wave++;
                     const isBoss = (this.wave % 3 === 0);
                     this.onWaveChange?.(this.wave, isBoss);
                     this.spawnWave(this.wave);
+                    this.waveTransitioning = false;
                 }, 1600);
             }
         }
@@ -764,6 +778,9 @@
                     }
                 }
             }
+
+            // Если все цели волны сбиты или упали на базу (но база ещё жива) — переходим к новой волне
+            this._checkWaveCompletion();
 
             // Затухание лучей
             for (let i = this.beams.length - 1; i >= 0; i--) {
