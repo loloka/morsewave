@@ -537,6 +537,11 @@ p { color: var(--text-muted); line-height: 1.6; margin: 0 0 12px; }
 .hero-main, .hero-promo {
     min-width: 0;
 }
+.hero-promo {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
 /* На широких экранах раскладка 2 колонки */
 @media (min-width: 900px) {
     .hero-grid { grid-template-columns: 1.15fr 0.85fr; }
@@ -1863,6 +1868,59 @@ input[type="range"] {
     .promo-card { padding: 14px; }
     .promo-card-title { font-size: 16px; }
     .promo-card-desc { font-size: 13px; }
+}
+
+/* ---------- Promo card (Morse Invaders II: Intercept) ---------- */
+.promo-card-invaders2 {
+    background: radial-gradient(circle at 85% 15%, rgba(0, 255, 102, 0.06) 0%, #080d0a 65%, #050806 100%);
+    border: 1px solid rgba(0, 255, 102, 0.25);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.promo-card-invaders2::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff66, transparent);
+    opacity: 0.75;
+    pointer-events: none;
+}
+.promo-card-invaders2:hover {
+    border-color: rgba(0, 255, 102, 0.55);
+    box-shadow: 0 8px 28px rgba(0, 255, 102, 0.16), 0 4px 18px rgba(0, 0, 0, 0.55);
+    transform: translateY(-2px);
+}
+.promo-terminal-path .path-name.path-phosphor {
+    color: #00ff66;
+    text-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+}
+.promo-badge.badge-key {
+    background: rgba(0, 255, 102, 0.12);
+    color: #00ff66;
+    border: 1px solid rgba(0, 255, 102, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.tag-pulse-phosphor {
+    background: #00ff66 !important;
+    box-shadow: 0 0 8px #00ff66 !important;
+}
+.btn-invaders2 {
+    background: #00ff66;
+    color: #041407;
+    font-weight: 700;
+    border: 1px solid #00ff66;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.32);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-invaders2:hover {
+    background: #2aff83;
+    color: #020a04;
+    box-shadow: 0 0 20px rgba(0, 255, 102, 0.6);
+    transform: translateY(-1px);
 }
 
 .daily-card {

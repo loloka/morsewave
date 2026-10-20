@@ -69,6 +69,34 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
             </div>
+
+            <div class="card promo-card promo-card-invaders2">
+                <div class="promo-header">
+                    <div class="promo-terminal-path mono">
+                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-phosphor">interceptor-2</span>
+                    </div>
+                    <div class="promo-badges">
+                        <span class="promo-badge mono badge-key">⚡ KEY PRO</span>
+                        <span class="promo-badge mono badge-beta">BETA</span>
+                    </div>
+                </div>
+
+                <div class="promo-card-body">
+                    <h3 class="promo-card-title"><?= t('index.invaders2_title') ?></h3>
+                    <p class="promo-card-desc"><?= t('index.invaders2_text') ?></p>
+
+                    <div class="promo-tags-row mono">
+                        <span class="promo-tag"><span class="tag-pulse tag-pulse-phosphor"></span><?= t('index.invaders2_tag_key') ?></span>
+                        <span class="promo-tag"><?= mw_icon('zap', 12) ?> <?= t('index.invaders2_tag_rhythm') ?></span>
+                        <span class="promo-tag"><?= mw_icon('target', 12) ?> <?= t('index.invaders2_tag_crt') ?></span>
+                    </div>
+
+                    <div class="promo-card-footer">
+                        <a href="invaders.php" class="btn btn-invaders2 btn-sm"><?= t('index.invaders2_btn') ?></a>
+                        <span class="promo-sub-meta mono muted">invaders.php</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </section>
