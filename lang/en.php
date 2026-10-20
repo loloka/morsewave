@@ -91,7 +91,7 @@ return [
     'index.invasion_tag_bosses' => '3 bosses',
     'index.invasion_tag_bonus' => '+50 XP daily bonus',
     'index.invaders2_title' => 'Morse Invaders II: Intercept',
-    'index.invaders2_text' => 'New vector CRT combat simulator: defeat jamming probes and drones — transmit Morse characters directly from your paddle via the MorseWave Pro electronic key or Space bar!',
+    'index.invaders2_text' => 'Arcade combat simulator: defeat jamming probes and drones — transmit Morse characters directly from your paddle via the MorseWave Pro electronic key or Space bar!',
     'index.invaders2_btn' => 'To radar →',
     'index.invaders2_tag_key' => 'Key / Space',
     'index.invaders2_tag_rhythm' => '1:3:1 Rhythm (x2 XP)',
