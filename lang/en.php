@@ -1344,7 +1344,7 @@ HTML
     'donate.tier4_title' => 'Half a year of server hosting 📡',
     'donate.tier4_desc' => 'Covers fast VPS hosting and domain for 6 months ahead. Keeps MorseWave online 24/7 with zero downtime.',
     'donate.tier5_title' => 'MorseWave Pro Hardware Keyer R&D 🛠️',
-    'donate.tier5_desc' => 'Direct contribution to physical keyer development: ordering factory PCBs, parts and assembling prototypes. Once the first PCB revision passes testing, we will send you a DIY kit (PCB + parts + flashed Arduino) as a gift! <span style="display:block; margin-top:5px; font-size:11.5px; opacity:0.85;">📦 Shipping anywhere at recipient’s expense, or free local pickup in Novosibirsk.</span>',
+    'donate.tier5_desc' => 'Direct contribution to physical keyer development for training & on-air QSO: ordering factory PCBs, parts and assembling prototypes. The keyer connects via USB (WebSerial / Type-C OTG) straight to our website on <b>Windows, Android, and Linux</b> — practice right in your browser using a real paddle with hardware timing analysis! Once the first batch passes testing, we will send you a DIY kit (PCB + parts + flashed Arduino) as a gift! <span style="display:block; margin-top:5px; font-size:11.5px; opacity:0.85;">📦 Shipping anywhere at recipient’s expense, or free local pickup in Novosibirsk.</span>',
     'donate.tier0_title' => 'Warm CQ and good vibes 💌',
     'donate.tier0_desc' => 'Free support with warm words (0 ₽). Available to everyone and immediately unlocks an achievement!',
     'donate.tier_custom_title' => 'Custom amount 🎁',
