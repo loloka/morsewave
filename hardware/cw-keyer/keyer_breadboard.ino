@@ -310,11 +310,11 @@ void loop() {
   handleDecodedPauses();
 }
 
-// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА (ОДНОРЫЧАЖНИК + ЯМБИК КЕРТИС) ---
+// --- АВТОМАТ СОСТОЯНИЙ КЛАССИЧЕСКОГО КЕЙЕРА (CURTIS 8044 / K3NG ARCHITECTURE) ---
 void handleKeyer() {
   unsigned long now = millis();
 
-  // 1. Аппаратно-программный опрос весел с фильтром антидребезга (5 мс)
+  // 1. Аппаратно-программный опрос весел с надежным антидребезгом (8 мс)
   static unsigned long lastDitLowTime = 0;
   static unsigned long lastDahLowTime = 0;
   if (digitalRead(PIN_DIT) == LOW) lastDitLowTime = now;
@@ -322,28 +322,24 @@ void handleKeyer() {
 
   bool ditRaw = (digitalRead(PIN_DIT) == LOW);
   bool dahRaw = (digitalRead(PIN_DAH) == LOW);
-  bool ditPin = ditRaw || (now - lastDitLowTime < 5);
-  bool dahPin = dahRaw || (now - lastDahLowTime < 5);
+  bool ditPin = ditRaw || (now - lastDitLowTime < 8);
+  bool dahPin = dahRaw || (now - lastDahLowTime < 8);
 
-  // Детектор фронта (быстрый клик весла)
-  static bool prevDitRaw = false;
-  static bool prevDahRaw = false;
-  bool ditEdge = (ditRaw && !prevDitRaw);
-  bool dahEdge = (dahRaw && !prevDahRaw);
-  prevDitRaw = ditRaw;
-  prevDahRaw = dahRaw;
-
-  // 2. Память элементов (K3NG / Single-Paddle Latch):
-  // Любое нажатие или фронт касания весла фиксируется в памяти соответствующего элемента
-  if (ditEdge || ditPin) ditMemory = true;
-  if (dahEdge || dahPin) dahMemory = true;
+  // 2. Память элементов (Канонический Curtis 8044 / K3NG):
+  // Защёлка противоположного элемента взводится ИСКЛЮЧИТЕЛЬНО во время звучания текущего тона.
+  // Во время пауз память НЕ опрашивается, чтобы исключить паразитный отскок (bounce) весла об упор!
+  if (state == STATE_PLAY_DIT) {
+    if (dahPin) dahMemory = true;
+  } else if (state == STATE_PLAY_DAH) {
+    if (ditPin) ditMemory = true;
+  }
 
   switch (state) {
     case STATE_IDLE:
-      // В покое: если есть память тире или нажато весло тире
-      if (dahMemory || dahPin) {
+      // В покое реагируем строго на живое физическое касание весла
+      if (dahPin) {
         startDah();
-      } else if (ditMemory || ditPin) {
+      } else if (ditPin) {
         startDit();
       }
       break;
@@ -359,13 +355,17 @@ void handleKeyer() {
     case STATE_PAUSE_DIT:
       // Межэлементная пауза после точки равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
-        // Приоритет чередования: после точки сначала проверяем тире
+        // Приоритет противоположного элемента: если в памяти есть тире
         if (dahMemory || dahPin) {
+          dahMemory = false;
           startDah();
-        } else if (ditMemory || ditPin) {
+        } else if (ditPin) {
+          // Повтор точки ТОЛЬКО если весло реально зажато
           startDit();
         } else {
           state = STATE_IDLE;
+          ditMemory = false;
+          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -382,13 +382,17 @@ void handleKeyer() {
     case STATE_PAUSE_DAH:
       // Межэлементная пауза после тире равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
-        // Приоритет чередования: после тире сначала проверяем точку
+        // Приоритет противоположного элемента: если в памяти есть точка
         if (ditMemory || ditPin) {
+          ditMemory = false;
           startDit();
-        } else if (dahMemory || dahPin) {
+        } else if (dahPin) {
+          // Повтор тире ТОЛЬКО если весло реально зажато
           startDah();
         } else {
           state = STATE_IDLE;
+          ditMemory = false;
+          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -397,7 +401,7 @@ void handleKeyer() {
 }
 
 void startDit() {
-  ditMemory = false; // Очищаем память точки ТОЛЬКО при ее старте
+  ditMemory = false;
   state = STATE_PLAY_DIT;
   stateStartTime = millis();
 
@@ -410,7 +414,7 @@ void startDit() {
 }
 
 void startDah() {
-  dahMemory = false; // Очищаем память тире ТОЛЬКО при его старте
+  dahMemory = false;
   state = STATE_PLAY_DAH;
   stateStartTime = millis();
 
