@@ -1430,7 +1430,7 @@ HTML
     'invaders.key_space_hint' => 'Straight key: hold <b>SPACE</b> or tap screen key',
     'invaders.touch_key_btn' => 'TELEGRAPH KEY PADDLE (HOLD TO TRANSMIT)',
     'invaders.start_modal_title' => 'RADIO INTERCEPT: COMBAT MODE',
-    'invaders.start_modal_desc' => 'Hostile drones and radio jammers are attacking the base antenna field!<br>Transmit falling characters with your <b>telegraph key</b> (hold <b>SPACE</b>, screen button, or connect your combat paddle — single or dual-lever — via the <b>MorseWave Pro</b> electronic key over USB).<br><br>⚡ Perfect 1:3:1 rhythm triggers <b>Critical Intercept (x2 XP)</b>. Errors reset combo!',
+    'invaders.start_modal_desc' => 'Hostile drones and radio jammers are attacking the base antenna field!<br>Transmit falling characters with your <b>telegraph key</b>: hold <b>SPACE</b>, screen button, or connect your paddle (single or dual-lever) via the <b>MorseWave Pro</b> key over USB.<br><span style="display:inline-block; margin-top:8px;">⚡ Perfect 1:3:1 rhythm triggers <b>Critical Intercept (x2 XP)</b>. Errors reset combo!</span>',
     'invaders.start_game' => 'ACTIVATE RADAR (ENGAGE)',
     'invaders.pause_game' => 'PAUSE',
     'invaders.resume_game' => 'RESUME',
