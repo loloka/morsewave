@@ -1399,6 +1399,7 @@
     let invasionGroupSpawnTimer = null;
     let invasionDbXpEarned = 0;
     let invasionSessionStartTime = 0;
+    let invasionLastSessionDuration = 0;
     let invasionHitFlashTimer = null;
     let invasionPowerups = { slow: 0, nuke: 0 };
     let invasionSlowUntil = 0;
@@ -2666,19 +2667,8 @@
             }
         }
 
-        const todaySecs = (typeof Progress.getTodayTrainingSeconds === 'function') ? Progress.getTodayTrainingSeconds() : 0;
-        const todayMins = Math.floor(todaySecs / 60);
-        const goalMins = (typeof Progress.getDailyGoalMinutes === 'function') ? Progress.getDailyGoalMinutes() : 30;
-        const dailyBlock = document.getElementById('invasion-daily-time-block');
-        const dailyText = document.getElementById('invasion-daily-time-text');
-        if (dailyBlock && dailyText) {
-            dailyBlock.style.display = 'block';
-            if (todayMins >= goalMins) {
-                dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-            } else {
-                const leftMins = Math.max(1, goalMins - todayMins);
-                dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-            }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('invasion-daily-time-block', invasionLastSessionDuration);
         }
 
         invasionResultPanelEl.style.display = 'block';
@@ -2687,6 +2677,7 @@
 
     function logInvasionXp() {
         const dur = invasionSessionStartTime ? Math.round((Date.now() - invasionSessionStartTime) / 1000) : 0;
+        if (dur > 0) invasionLastSessionDuration = dur;
         if (dur >= 3 && typeof Progress.addTrainingTime === 'function') {
             Progress.addTrainingTime(dur);
             invasionSessionStartTime = 0;
@@ -2793,6 +2784,8 @@
         invasionWaveStart = performance.now();
         invasionDbXpEarned = 0;
         invasionSessionStartTime = Date.now();
+        const dailyBlock = document.getElementById('invasion-daily-time-block');
+        if (dailyBlock) dailyBlock.style.display = 'none';
         updateInvasionHpUI();
         updateInvasionStatsUI();
         invasionOverlayEl.classList.remove('show');

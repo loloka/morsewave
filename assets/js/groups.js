@@ -1257,9 +1257,12 @@
         }
         if (session && !session.finished) {
             const dur = session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0;
-            if (dur >= 5 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            if (dur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
                 Progress.addTrainingTime(dur);
                 session.timeLogged = true;
+                session.durationSec = dur;
+            } else if (dur > 0 && !session.durationSec) {
+                session.durationSec = dur;
             }
             if (session.dbXpEarned > 0) {
                 const isAbbrev = !!session.abbrevActive;
@@ -1436,6 +1439,8 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        const groupsDailyBlock = document.getElementById('groups-daily-time-block');
+        if (groupsDailyBlock) groupsDailyBlock.style.display = 'none';
         document.body.classList.add('morse-session-active');
         window.scrollTo({ top: 0, behavior: 'auto' });
         groupTotalEl.textContent = activeCount;
@@ -1858,26 +1863,14 @@
             if (stdGrid) stdGrid.insertAdjacentElement('beforebegin', stopNote);
         }
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime && !session.timeLogged) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            if (dur > 0) {
-                Progress.addTrainingTime(dur);
-                session.timeLogged = true;
-                const todaySecs = Progress.getTodayTrainingSeconds();
-                const todayMins = Math.floor(todaySecs / 60);
-                const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-                const dailyBlock = document.getElementById('groups-daily-time-block');
-                const dailyText = document.getElementById('groups-daily-time-text');
-                if (dailyBlock && dailyText) {
-                    dailyBlock.style.display = 'block';
-                    if (todayMins >= goalMins) {
-                        dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                    } else {
-                        const leftMins = Math.max(1, goalMins - todayMins);
-                        dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                    }
-                }
-            }
+        const paperDur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
+        if (paperDur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            Progress.addTrainingTime(paperDur);
+            session.timeLogged = true;
+            session.durationSec = paperDur;
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('groups-daily-time-block', session.durationSec || paperDur);
         }
 
         abortCurrentSession();
@@ -2487,24 +2480,14 @@
         postStat('total_sessions', 1);
         flushStats();
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime && !session.timeLogged) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.addTrainingTime(dur);
+        const sessionDur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
+        if (sessionDur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            Progress.addTrainingTime(sessionDur);
             session.timeLogged = true;
-            const todaySecs = Progress.getTodayTrainingSeconds();
-            const todayMins = Math.floor(todaySecs / 60);
-            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-            const dailyBlock = document.getElementById('groups-daily-time-block');
-            const dailyText = document.getElementById('groups-daily-time-text');
-            if (dailyBlock && dailyText) {
-                dailyBlock.style.display = 'block';
-                if (todayMins >= goalMins) {
-                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                } else {
-                    const leftMins = Math.max(1, goalMins - todayMins);
-                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                }
-            }
+            session.durationSec = sessionDur;
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('groups-daily-time-block', session.durationSec || sessionDur);
         }
 
         if (dailyBonusMsg) {
@@ -3978,20 +3961,9 @@
 
         if (typeof Progress.addTrainingTime === 'function' && wordsSession.startTime) {
             const dur = Math.round((Date.now() - wordsSession.startTime) / 1000);
-            Progress.addTrainingTime(dur);
-            const todaySecs = Progress.getTodayTrainingSeconds();
-            const todayMins = Math.floor(todaySecs / 60);
-            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-            const dailyBlock = document.getElementById('words-daily-time-block');
-            const dailyText = document.getElementById('words-daily-time-text');
-            if (dailyBlock && dailyText) {
-                dailyBlock.style.display = 'block';
-                if (todayMins >= goalMins) {
-                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                } else {
-                    const leftMins = Math.max(1, goalMins - todayMins);
-                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                }
+            if (dur >= 3) Progress.addTrainingTime(dur);
+            if (typeof Progress.renderTrainingSummary === 'function') {
+                Progress.renderTrainingSummary('words-daily-time-block', dur);
             }
         }
 

@@ -151,6 +151,7 @@ const Progress = (() => {
         pairConfusion: {},
         pairTrainer: {},
         dailyTraining: { date: null, seconds: 0 },
+        trainingHistory: {},
         dosaaf: {
             maxStage: 1,
             currentStage: 1,
@@ -185,6 +186,9 @@ const Progress = (() => {
             }
             if (!state.stats || typeof state.stats !== 'object') {
                 state.stats = defaults().stats;
+            }
+            if (!state.trainingHistory || typeof state.trainingHistory !== 'object') {
+                state.trainingHistory = {};
             }
             if (!state.dosaaf || typeof state.dosaaf !== 'object') {
                 state.dosaaf = defaults().dosaaf;
@@ -486,6 +490,15 @@ const Progress = (() => {
                 }
             } else {
                 merged.dailyTraining = sDt.date ? { date: sDt.date, seconds: Number(sDt.seconds) || 0 } : (lDt.date ? { date: lDt.date, seconds: Number(lDt.seconds) || 0 } : { date: null, seconds: 0 });
+            }
+        }
+
+        // trainingHistory — история времени тренировок по дням
+        {
+            merged.trainingHistory = { ...((local.trainingHistory && typeof local.trainingHistory === 'object') ? local.trainingHistory : {}) };
+            const sHist = (server.trainingHistory && typeof server.trainingHistory === 'object') ? server.trainingHistory : {};
+            for (const [d, sec] of Object.entries(sHist)) {
+                merged.trainingHistory[d] = Math.max(Number(merged.trainingHistory[d]) || 0, Number(sec) || 0);
             }
         }
 
@@ -898,6 +911,20 @@ const Progress = (() => {
             state.dailyTraining = { date: todayStr, seconds: 0 };
         }
         state.dailyTraining.seconds = (state.dailyTraining.seconds || 0) + capped;
+
+        if (!state.trainingHistory || typeof state.trainingHistory !== 'object') {
+            state.trainingHistory = {};
+        }
+        state.trainingHistory[todayStr] = (Number(state.trainingHistory[todayStr]) || 0) + capped;
+
+        // Ограничиваем историю последними 30 днями
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 30);
+        const cutoffStr = cutoff.toISOString().slice(0, 10);
+        for (const k of Object.keys(state.trainingHistory)) {
+            if (k < cutoffStr) delete state.trainingHistory[k];
+        }
+
         save(state);
         pushFullProgress();
         return state.dailyTraining.seconds;
@@ -910,6 +937,111 @@ const Progress = (() => {
             return Number(state.dailyTraining.seconds) || 0;
         }
         return 0;
+    }
+
+    function getWeekTrainingSeconds() {
+        const state = load();
+        const hist = (state.trainingHistory && typeof state.trainingHistory === 'object') ? state.trainingHistory : {};
+        const todayStr = today();
+        const todaySecs = getTodayTrainingSeconds();
+
+        // Понедельник текущей недели
+        const now = new Date();
+        const dayOfWeek = (now.getDay() + 6) % 7; // 0 = Пн, ..., 6 = Вс
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - dayOfWeek);
+        const mondayStr = monday.toISOString().slice(0, 10);
+
+        let total = 0;
+        let todayFound = false;
+        for (const [dStr, sec] of Object.entries(hist)) {
+            if (dStr >= mondayStr && dStr <= todayStr) {
+                total += Number(sec) || 0;
+                if (dStr === todayStr) todayFound = true;
+            }
+        }
+        if (!todayFound && todaySecs > 0) {
+            total += todaySecs;
+        }
+        return total;
+    }
+
+    function formatDuration(seconds) {
+        const sec = Math.max(0, Math.round(Number(seconds) || 0));
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        const isEn = (typeof currentLang === 'function' && currentLang() === 'en') || (document.documentElement.lang === 'en');
+        if (m === 0) {
+            return isEn ? `${s} sec` : `${s} сек`;
+        }
+        if (s === 0) {
+            return isEn ? `${m} min` : `${m} мин`;
+        }
+        return isEn ? `${m} min ${s} sec` : `${m} мин ${s} сек`;
+    }
+
+    function renderTrainingSummary(containerOrId, sessionSeconds = 0) {
+        const container = (typeof containerOrId === 'string') ? document.getElementById(containerOrId) : containerOrId;
+        if (!container) return;
+
+        const todaySecs = getTodayTrainingSeconds();
+        const todayMins = Math.floor(todaySecs / 60);
+        const goalMins = getDailyGoalMinutes();
+        const weekSecs = getWeekTrainingSeconds();
+        const weekMins = Math.floor(weekSecs / 60);
+        const weeklyGoalMins = 135; // Норматив ДОСААФ / радиоспорта: 3 x 45 мин = 135 мин
+
+        let sessionHtml = '';
+        if (sessionSeconds && sessionSeconds >= 3) {
+            const timeStr = formatDuration(sessionSeconds);
+            const sessionLabel = (typeof t === 'function' && t('groups.session_duration'))
+                ? t('groups.session_duration', { '{time}': `<b>${timeStr}</b>` })
+                : `Время тренировки: <b>${timeStr}</b>`;
+            sessionHtml = `<div style="font-weight:700; color:var(--text); font-size:14px; margin-bottom:4px;">⏱ ${sessionLabel}</div>`;
+        }
+
+        let dailyHtml = '';
+        if (todayMins >= goalMins) {
+            dailyHtml = (typeof t === 'function' && t('groups.daily_time_done'))
+                ? t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins })
+                : `🎉 Отличная работа! Сегодня вы тренировались ${todayMins} мин — норма дня (${goalMins} мин) выполнена!`;
+        } else {
+            const leftMins = Math.max(1, goalMins - todayMins);
+            dailyHtml = (typeof t === 'function' && t('groups.daily_time_progress'))
+                ? t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins })
+                : `⏱ Сегодня вы тренировались ${todayMins} мин. До нормы дня (${goalMins} мин) — ещё ${leftMins} мин.`;
+        }
+
+        let weeklyHtml = '';
+        if (weekMins >= weeklyGoalMins) {
+            weeklyHtml = (typeof t === 'function' && t('groups.weekly_time_done'))
+                ? t('groups.weekly_time_done', { '{done}': weekMins, '{goal}': weeklyGoalMins })
+                : `🎉 Недельная норма 3 по 45 мин (${weeklyGoalMins} мин) выполнена: ${weekMins} мин!`;
+        } else {
+            weeklyHtml = (typeof t === 'function' && t('groups.weekly_time_progress'))
+                ? t('groups.weekly_time_progress', { '{done}': weekMins, '{goal}': weeklyGoalMins })
+                : `📅 Недельная цель: 3 по 45 мин (на этой неделе ${weekMins} из ${weeklyGoalMins} мин)`;
+        }
+
+        const weeklyRec = (typeof t === 'function' && t('groups.weekly_time_rec'))
+            ? t('groups.weekly_time_rec')
+            : 'Рекомендуемый ритм: 3 тренировки по 45 мин (или 15–20 мин ежедневно)';
+
+        const changeHint = (typeof t === 'function' && t('groups.daily_time_change_hint'))
+            ? t('groups.daily_time_change_hint')
+            : '(изменить норму можно в <a href="account.php?tab=display" class="link">профиле</a>)';
+
+        container.innerHTML = `
+            ${sessionHtml}
+            <div style="font-size:13px; color:var(--text); line-height:1.45;">${dailyHtml}</div>
+            <div class="muted mt-1" style="font-size:11px; line-height:1.4; opacity:0.88;">
+                ${weeklyHtml} · <span>${weeklyRec}</span>
+            </div>
+            <div class="muted mt-1" style="font-size:11px;">
+                ${changeHint}
+            </div>
+        `;
+        container.style.display = 'block';
     }
 
     function getPairTrainer() {
@@ -1364,7 +1496,7 @@ const Progress = (() => {
         groupsLetterScore, recordGroupsAttempt,
         kochLetterScore, recordKochAttempt,
         recordPairConfusion, clearPairConfusion, getPairTrainer, savePairStage, getRecommendedPair, getMostConfusedPair, formatMistakes, CLASSIC_PAIRS,
-        addTrainingTime, getTodayTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes,
+        addTrainingTime, getTodayTrainingSeconds, getWeekTrainingSeconds, getDailyGoalMinutes, setDailyGoalMinutes, formatDuration, renderTrainingSummary,
         levelFromXp, xpForNextLevel, fetchAchievementDefs, checkAchievements,
         resetAll, markDailyActivity, markKochLevelEarned, completeDailyChallenge,
         completeInvasionDailyWin, isInvasionDailyWinDone, markProjectSupporter,

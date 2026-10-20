@@ -682,8 +682,12 @@
         }
         cancelPaperSleep();
         document.body.classList.remove('morse-session-active');
+        if (session) {
+            const dur = session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0;
+            if (dur > 0 && !session.durationSec) session.durationSec = dur;
+        }
         if (session && session.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            const dur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
             Progress.logXp(session.dbXpEarned, 'koch', {
                 wpm: session.wpm,
                 fw: session.farnsworth,
@@ -959,6 +963,8 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        const kochDailyBlock = document.getElementById('koch-daily-time-block');
+        if (kochDailyBlock) kochDailyBlock.style.display = 'none';
 
         const settings = typeof AudioSettings !== 'undefined' ? AudioSettings.load() : { readySignal: false };
         const needReadySignal = readySignalEl ? readySignalEl.checked : (settings.readySignal === true);
@@ -1206,23 +1212,14 @@
         Progress.markDailyActivity();
         flushStats();
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.addTrainingTime(dur);
-            const todaySecs = Progress.getTodayTrainingSeconds();
-            const todayMins = Math.floor(todaySecs / 60);
-            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-            const dailyBlock = document.getElementById('koch-daily-time-block');
-            const dailyText = document.getElementById('koch-daily-time-text');
-            if (dailyBlock && dailyText) {
-                dailyBlock.style.display = 'block';
-                if (todayMins >= goalMins) {
-                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                } else {
-                    const leftMins = Math.max(1, goalMins - todayMins);
-                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                }
-            }
+        const sessionDur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
+        if (sessionDur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            Progress.addTrainingTime(sessionDur);
+            session.timeLogged = true;
+            session.durationSec = sessionDur;
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('koch-daily-time-block', session.durationSec || sessionDur);
         }
 
         const msg = document.getElementById('result-message');

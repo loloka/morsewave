@@ -814,26 +814,14 @@
         const oldNote = document.getElementById('cs-daily-note');
         if (oldNote) oldNote.remove();
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime && !session.timeLogged) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            if (dur > 0) {
-                Progress.addTrainingTime(dur);
-                session.timeLogged = true;
-                const todaySecs = Progress.getTodayTrainingSeconds();
-                const todayMins = Math.floor(todaySecs / 60);
-                const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-                const dailyBlock = document.getElementById('cs-daily-time-block');
-                const dailyText = document.getElementById('cs-daily-time-text');
-                if (dailyBlock && dailyText) {
-                    dailyBlock.style.display = 'block';
-                    if (todayMins >= goalMins) {
-                        dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                    } else {
-                        const leftMins = Math.max(1, goalMins - todayMins);
-                        dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                    }
-                }
-            }
+        const paperDur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
+        if (paperDur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            Progress.addTrainingTime(paperDur);
+            session.timeLogged = true;
+            session.durationSec = paperDur;
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('cs-daily-time-block', session.durationSec || paperDur);
         }
     }
 
@@ -847,8 +835,12 @@
         if (typeof stopSessionAudioNoise === 'function') {
             stopSessionAudioNoise();
         }
+        if (session) {
+            const dur = session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0;
+            if (dur > 0 && !session.durationSec) session.durationSec = dur;
+        }
         if (session && !session.finished && session.dbXpEarned > 0) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
+            const dur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
             const total = session.index || 1; // estimate
             const acc = total ? Math.round((session.correct / total) * 100) : 0;
             Progress.logXp(session.dbXpEarned, 'callsigns', {
@@ -867,6 +859,8 @@
     window.addEventListener('pagehide', abortCurrentSession);
 
     async function startSession() {
+        const dailyBlock = document.getElementById('cs-daily-time-block');
+        if (dailyBlock) dailyBlock.style.display = 'none';
         // Синхронно разблокируем Web Audio прямо в стеке пользовательского тапа/клика
         const ctx = getSharedAudioContext();
         if (typeof unlockAudioContext === 'function') {
@@ -1110,23 +1104,14 @@
         postStat('total_sessions', 1);
         flushStats();
 
-        if (typeof Progress.addTrainingTime === 'function' && session.startTime) {
-            const dur = Math.round((Date.now() - session.startTime) / 1000);
-            Progress.addTrainingTime(dur);
-            const todaySecs = Progress.getTodayTrainingSeconds();
-            const todayMins = Math.floor(todaySecs / 60);
-            const goalMins = typeof Progress.getDailyGoalMinutes === 'function' ? Progress.getDailyGoalMinutes() : 30;
-            const dailyBlock = document.getElementById('cs-daily-time-block');
-            const dailyText = document.getElementById('cs-daily-time-text');
-            if (dailyBlock && dailyText) {
-                dailyBlock.style.display = 'block';
-                if (todayMins >= goalMins) {
-                    dailyText.textContent = t('groups.daily_time_done', { '{done}': todayMins, '{goal}': goalMins });
-                } else {
-                    const leftMins = Math.max(1, goalMins - todayMins);
-                    dailyText.textContent = t('groups.daily_time_progress', { '{done}': todayMins, '{goal}': goalMins, '{left}': leftMins });
-                }
-            }
+        const sessionDur = session.durationSec || (session.startTime ? Math.round((Date.now() - session.startTime) / 1000) : 0);
+        if (sessionDur >= 3 && typeof Progress.addTrainingTime === 'function' && !session.timeLogged) {
+            Progress.addTrainingTime(sessionDur);
+            session.timeLogged = true;
+            session.durationSec = sessionDur;
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('cs-daily-time-block', session.durationSec || sessionDur);
         }
     }
 

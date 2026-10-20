@@ -130,6 +130,8 @@ include __DIR__ . '/includes/header.php';
                         </button>
                     </div>
 
+                    <div id="dosaaf-words-daily-time-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);"></div>
+
                     <div class="mt-2" id="dosaaf-word-history"></div>
                 </div>
             </div>
@@ -192,6 +194,7 @@ include __DIR__ . '/includes/header.php';
                     </div>
 
                     <div id="dosaaf-exam-result" style="display:none;"></div>
+                    <div id="dosaaf-exam-daily-time-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:10px 14px; text-align:center; font-size:13px; color:var(--text-muted);"></div>
                 </div>
             </div>
         </div>

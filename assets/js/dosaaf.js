@@ -22,6 +22,10 @@
     let wordSessionCorrect = 0;
     let wordSessionTotal = 0;
     let wordsSessionStarted = false;
+    let wordsStartTime = 0;
+    let lastWordsTickTime = 0;
+    let wordsSessionDurationSec = 0;
+    let examStartTime = 0;
 
     // Состояние зачёта (10 слов)
     let examActive = false;
@@ -514,8 +518,13 @@
 
     function startWordsTraining() {
         wordsSessionStarted = true;
+        wordsStartTime = Date.now();
+        lastWordsTickTime = Date.now();
+        wordsSessionDurationSec = 0;
         const startBox = document.getElementById('dosaaf-words-start-box');
         const playBox = document.getElementById('dosaaf-words-play-box');
+        const wordsDailyBlock = document.getElementById('dosaaf-words-daily-time-block');
+        if (wordsDailyBlock) wordsDailyBlock.style.display = 'none';
         if (startBox) startBox.style.display = 'none';
         if (playBox) playBox.style.display = 'block';
 
@@ -543,6 +552,9 @@
         if (nextActionEl) {
             if (currentCount >= target) {
                 nextActionEl.style.display = 'block';
+                if (typeof Progress !== 'undefined' && typeof Progress.renderTrainingSummary === 'function') {
+                    Progress.renderTrainingSummary('dosaaf-words-daily-time-block', wordsSessionDurationSec);
+                }
             } else {
                 nextActionEl.style.display = 'none';
             }
@@ -603,6 +615,18 @@
 
         const isCorrect = answer === currentWord.toUpperCase();
         wordSessionTotal++;
+
+        if (lastWordsTickTime) {
+            const now = Date.now();
+            const delta = Math.round((now - lastWordsTickTime) / 1000);
+            if (delta >= 1 && delta <= 120) {
+                wordsSessionDurationSec += delta;
+                if (typeof Progress !== 'undefined') {
+                    Progress.addTrainingTime(delta);
+                }
+            }
+            lastWordsTickTime = now;
+        }
 
         if (isCorrect) {
             wordStreak++;
@@ -897,6 +921,13 @@
     }
 
     function abortStageExam() {
+        if (examStartTime) {
+            const dur = Math.round((Date.now() - examStartTime) / 1000);
+            if (dur >= 3 && typeof Progress !== 'undefined') {
+                Progress.addTrainingTime(dur);
+            }
+            examStartTime = 0;
+        }
         stopExamAudio();
         examActive = false;
         const panel = document.getElementById('dosaaf-exam-panel');
@@ -908,6 +939,8 @@
         if (startBtn) startBtn.style.display = 'inline-flex';
         if (lengthWrapper) lengthWrapper.style.display = 'block';
         if (statusEl) statusEl.textContent = '';
+        const examDailyBlock = document.getElementById('dosaaf-exam-daily-time-block');
+        if (examDailyBlock) examDailyBlock.style.display = 'none';
     }
 
     function startStageExam() {
@@ -916,17 +949,20 @@
         
         examWords = generateStageExamWords(stageData, targetLength);
         examActive = true;
+        examStartTime = Date.now();
 
         const panel = document.getElementById('dosaaf-exam-panel');
         const startBtn = document.getElementById('dosaaf-start-exam-btn');
         const lengthWrapper = document.getElementById('dosaaf-exam-length-wrapper');
         const resultBox = document.getElementById('dosaaf-exam-result');
         const checkBtn = document.getElementById('dosaaf-exam-check-btn');
+        const examDailyBlock = document.getElementById('dosaaf-exam-daily-time-block');
 
         if (panel) panel.style.display = 'block';
         if (startBtn) startBtn.style.display = 'none';
         if (lengthWrapper) lengthWrapper.style.display = 'none';
         if (resultBox) resultBox.style.display = 'none';
+        if (examDailyBlock) examDailyBlock.style.display = 'none';
         if (checkBtn) {
             checkBtn.classList.remove('pulse-attention');
             checkBtn.disabled = false;
@@ -1011,6 +1047,12 @@
     function finishStageExam(alignment, correctCount, typedWords) {
         examActive = false;
         stopExamAudio();
+
+        const examDur = examStartTime ? Math.round((Date.now() - examStartTime) / 1000) : 0;
+        examStartTime = 0;
+        if (examDur >= 3 && typeof Progress !== 'undefined') {
+            Progress.addTrainingTime(examDur);
+        }
 
         const panel = document.getElementById('dosaaf-exam-panel');
         const resultBox = document.getElementById('dosaaf-exam-result');
@@ -1146,6 +1188,10 @@
             document.getElementById('dosaaf-retry-exam-btn')?.addEventListener('click', () => {
                 startStageExam();
             });
+        }
+
+        if (typeof Progress !== 'undefined' && typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('dosaaf-exam-daily-time-block', examDur);
         }
     }
 
@@ -1753,6 +1799,23 @@
             loadDosaafProgress();
             renderStageNav();
             renderCurrentStage();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (examActive && examStartTime) {
+                const dur = Math.round((Date.now() - examStartTime) / 1000);
+                if (dur >= 3 && typeof Progress !== 'undefined') {
+                    Progress.addTrainingTime(dur);
+                }
+                examStartTime = 0;
+            }
+            if (wordsSessionStarted && lastWordsTickTime) {
+                const delta = Math.round((Date.now() - lastWordsTickTime) / 1000);
+                if (delta >= 1 && delta <= 120 && typeof Progress !== 'undefined') {
+                    Progress.addTrainingTime(delta);
+                }
+                lastWordsTickTime = 0;
+            }
         });
     });
 
