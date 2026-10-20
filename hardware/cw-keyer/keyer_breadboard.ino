@@ -576,23 +576,6 @@ void handleDecodedPauses() {
     }
   }
 }
-    wordSpaceNeeded = false; // Однократное срабатывание: не будет спама пробелами!
-
-    if (decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
-      decodedLine += " ";
-      if (decodedLine.length() > 32) {
-        decodedLine = decodedLine.substring(decodedLine.length() - 32);
-      }
-
-      Serial.print(" ");
-      Serial.println(); // Перевод строки в Serial для красивого чтения слов
-
-      if (hasOled) {
-        updateScreenText();
-      }
-    }
-  }
-}
 
 // --- ОТРИСОВКА ИНТЕРФЕЙСА OLED (БЫСТРАЯ, БЕЗ МЕРЦАНИЯ) ---
 void drawScreenLayout() {
