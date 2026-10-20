@@ -75,34 +75,117 @@
     border-bottom: 1px dashed rgba(79, 216, 196, 0.35);
 }
 
-.oled-middle-char {
-    display: flex;
-    justify-content: center;
+.oled-main-display-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
     align-items: center;
-    font-size: 38px;
+    gap: 14px;
+    padding: 10px 0;
+    min-height: 74px;
+}
+
+.oled-code-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.oled-code-label, .oled-char-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(79, 216, 196, 0.6);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.oled-morse-code {
+    font-size: 32px;
     font-weight: 800;
-    letter-spacing: 4px;
-    min-height: 64px;
+    letter-spacing: 6px;
     color: #5effeb;
-    text-shadow: 0 0 14px rgba(79, 216, 196, 0.8);
+    text-shadow: 0 0 16px rgba(79, 216, 196, 0.85);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     transition: transform 0.05s ease;
 }
 
-.oled-middle-char.pulse {
-    transform: scale(1.08);
+.oled-morse-code.pulse {
+    transform: scale(1.04);
     color: #fff;
-    text-shadow: 0 0 20px rgba(255, 255, 255, 0.9);
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.95);
+}
+
+.oled-char-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border-left: 1px dashed rgba(79, 216, 196, 0.35);
+    padding-left: 16px;
+}
+
+.oled-char-badge {
+    min-width: 54px;
+    height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 900;
+    color: #030605;
+    background: #4fd8c4;
+    border-radius: 8px;
+    box-shadow: 0 0 18px rgba(79, 216, 196, 0.8), inset 0 0 6px rgba(255, 255, 255, 0.6);
+    transition: all 0.1s ease;
+}
+
+.oled-char-badge.pop {
+    transform: scale(1.15);
+    background: #5effeb;
+    box-shadow: 0 0 26px rgba(94, 255, 235, 1);
+}
+
+.oled-footer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(79, 216, 196, 0.06);
+    border-radius: 6px;
+    padding: 6px 10px;
+    border-left: 3px solid #4fd8c4;
 }
 
 .oled-footer-ticker {
-    background: rgba(79, 216, 196, 0.05);
-    border-radius: 4px;
-    padding: 6px 10px;
+    flex: 1;
     font-size: 13px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    border-left: 2px solid #4fd8c4;
+    color: #4fd8c4;
+}
+
+.oled-clear-btn {
+    background: transparent;
+    border: 1px solid rgba(79, 216, 196, 0.3);
+    color: rgba(79, 216, 196, 0.7);
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    padding: 0;
+}
+
+.oled-clear-btn:hover {
+    background: rgba(79, 216, 196, 0.2);
+    color: #fff;
+    border-color: #4fd8c4;
 }
 
 /* Панель индикаторов над OLED */

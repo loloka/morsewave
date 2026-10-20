@@ -20,7 +20,12 @@
     const oledWpm = document.getElementById('oled-wpm-text');
     const oledPitch = document.getElementById('oled-pitch-text');
     const oledMorse = document.getElementById('oled-morse-display');
+    const oledLastChar = document.getElementById('oled-last-char');
     const oledTicker = document.getElementById('oled-ticker-text');
+    const btnClearOled = document.getElementById('btn-clear-oled');
+
+    // Накопитель текущего кода морзе (точки и тире текущего знака)
+    let currentMorseBuffer = '';
 
     // Телеметрия
     const gaugeWpmVal = document.getElementById('gauge-wpm-value');
@@ -132,17 +137,38 @@
         }
     }
 
-    function updateOledMorse(char) {
+    function appendOledMorseElement(el) {
         if (!oledMorse) return;
-        oledMorse.textContent = char;
+        currentMorseBuffer += el;
+        if (currentMorseBuffer.length > 8) {
+            currentMorseBuffer = currentMorseBuffer.substring(currentMorseBuffer.length - 8);
+        }
+        oledMorse.textContent = currentMorseBuffer;
         oledMorse.classList.add('pulse');
         setTimeout(() => oledMorse.classList.remove('pulse'), 80);
     }
 
+    function setOledDecodedChar(char) {
+        if (oledLastChar) {
+            oledLastChar.textContent = char;
+            oledLastChar.classList.add('pop');
+            setTimeout(() => oledLastChar.classList.remove('pop'), 200);
+        }
+        // Сбрасываем накопитель точек/тире после распознавания знака
+        currentMorseBuffer = '';
+        setTimeout(() => {
+            if (oledMorse && currentMorseBuffer === '') {
+                oledMorse.textContent = '- READY -';
+            }
+        }, 350);
+    }
+
     function appendDecodedChar(char) {
+        setOledDecodedChar(char);
+
         currentDecodedText += char;
-        if (currentDecodedText.length > 24) {
-            currentDecodedText = currentDecodedText.substring(currentDecodedText.length - 24);
+        if (currentDecodedText.length > 28) {
+            currentDecodedText = currentDecodedText.substring(currentDecodedText.length - 28);
         }
         if (oledTicker) {
             oledTicker.textContent = `TXT: ${currentDecodedText}`;
@@ -168,6 +194,16 @@
         });
     }
 
+    if (btnClearOled) {
+        btnClearOled.addEventListener('click', () => {
+            currentDecodedText = '';
+            currentMorseBuffer = '';
+            if (oledTicker) oledTicker.textContent = 'TXT: ';
+            if (oledMorse) oledMorse.textContent = '- READY -';
+            if (oledLastChar) oledLastChar.textContent = '_';
+        });
+    }
+
     // --- Парсер входящего потока данных Arduino ---
     let incomingBuffer = '';
 
@@ -177,12 +213,12 @@
             const ch = chunk[i];
             if (ch === '.') {
                 pulseKeyIndicator(false);
-                updateOledMorse('.');
+                appendOledMorseElement('.');
                 appendTerminal('.', 'ditdah');
                 if (window.TimingLab && window.TimingLab.onDit) window.TimingLab.onDit();
             } else if (ch === '-') {
                 pulseKeyIndicator(true);
-                updateOledMorse('-');
+                appendOledMorseElement('-');
                 appendTerminal('-', 'ditdah');
                 if (window.TimingLab && window.TimingLab.onDah) window.TimingLab.onDah();
             }
@@ -221,11 +257,6 @@
                     appendDecodedChar(token);
                     appendTerminal(` [${token}] `, 'char');
                     if (window.TimingLab && window.TimingLab.onChar) window.TimingLab.onChar(token);
-                    setTimeout(() => {
-                        if (oledMorse && (oledMorse.textContent === '.' || oledMorse.textContent === '-')) {
-                            oledMorse.textContent = '- READY -';
-                        }
-                    }, 300);
                 }
             }
 

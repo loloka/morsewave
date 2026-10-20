@@ -117,20 +117,34 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <!-- Экран OLED 128x64 -->
+        <!-- Экран OLED 128x64 (Информативный эмулятор SSD1306 Fast I2C) -->
         <div class="oled-bezel">
             <div class="oled-header-line">
                 <span id="oled-wpm-text">WPM: 20</span>
-                <span>[CW CURTIS]</span>
+                <span style="opacity:0.85; font-size:11.5px; letter-spacing:0.04em;">[CURTIS B · LATCH]</span>
                 <span id="oled-pitch-text">700Hz</span>
             </div>
 
-            <div class="oled-middle-char" id="oled-morse-display">
-                - READY -
+            <!-- Главный информативный блок: текущий напев + распознанный знак -->
+            <div class="oled-main-display-row">
+                <div class="oled-code-col">
+                    <div class="oled-code-label">КОД МОРЗЕ:</div>
+                    <div class="oled-morse-code" id="oled-morse-display">- READY -</div>
+                </div>
+                <div class="oled-char-col">
+                    <div class="oled-char-label">СИМВОЛ:</div>
+                    <div class="oled-char-badge" id="oled-last-char">_</div>
+                </div>
             </div>
 
-            <div class="oled-footer-ticker" id="oled-ticker-text">
-                TXT: VVV = R9OGL KEYER ONLINE
+            <!-- Бегущая строка радиограммы с кнопкой очистки -->
+            <div class="oled-footer-row">
+                <div class="oled-footer-ticker" id="oled-ticker-text">
+                    TXT: VVV = R9OGL KEYER ONLINE
+                </div>
+                <button type="button" id="btn-clear-oled" class="oled-clear-btn" title="Очистить текст дисплея">
+                    ✕
+                </button>
             </div>
         </div>
         
