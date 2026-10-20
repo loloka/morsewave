@@ -190,6 +190,12 @@ const Progress = (() => {
             if (!state.trainingHistory || typeof state.trainingHistory !== 'object') {
                 state.trainingHistory = {};
             }
+            if (state.dailyTraining && state.dailyTraining.date && state.dailyTraining.seconds) {
+                state.trainingHistory[state.dailyTraining.date] = Math.max(
+                    Number(state.trainingHistory[state.dailyTraining.date]) || 0,
+                    Number(state.dailyTraining.seconds) || 0
+                );
+            }
             if (!state.dosaaf || typeof state.dosaaf !== 'object') {
                 state.dosaaf = defaults().dosaaf;
             }
@@ -499,6 +505,12 @@ const Progress = (() => {
             const sHist = (server.trainingHistory && typeof server.trainingHistory === 'object') ? server.trainingHistory : {};
             for (const [d, sec] of Object.entries(sHist)) {
                 merged.trainingHistory[d] = Math.max(Number(merged.trainingHistory[d]) || 0, Number(sec) || 0);
+            }
+            if (merged.dailyTraining && merged.dailyTraining.date && merged.dailyTraining.seconds) {
+                merged.trainingHistory[merged.dailyTraining.date] = Math.max(
+                    Number(merged.trainingHistory[merged.dailyTraining.date]) || 0,
+                    Number(merged.dailyTraining.seconds) || 0
+                );
             }
         }
 
@@ -915,7 +927,10 @@ const Progress = (() => {
         if (!state.trainingHistory || typeof state.trainingHistory !== 'object') {
             state.trainingHistory = {};
         }
-        state.trainingHistory[todayStr] = (Number(state.trainingHistory[todayStr]) || 0) + capped;
+        state.trainingHistory[todayStr] = Math.max(
+            (Number(state.trainingHistory[todayStr]) || 0) + capped,
+            state.dailyTraining.seconds
+        );
 
         // Ограничиваем историю последними 30 днями
         const cutoff = new Date();
@@ -945,25 +960,28 @@ const Progress = (() => {
         const todayStr = today();
         const todaySecs = getTodayTrainingSeconds();
 
-        // Понедельник текущей недели
+        // Понедельник текущей недели (в UTC, синхронно с today())
         const now = new Date();
-        const dayOfWeek = (now.getDay() + 6) % 7; // 0 = Пн, ..., 6 = Вс
-        const monday = new Date(now);
-        monday.setDate(now.getDate() - dayOfWeek);
-        const mondayStr = monday.toISOString().slice(0, 10);
+        const utcDay = (now.getUTCDay() + 6) % 7; // 0 = Пн, ..., 6 = Вс
+        const mondayUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - utcDay));
+        const mondayStr = mondayUtc.toISOString().slice(0, 10);
 
         let total = 0;
         let todayFound = false;
         for (const [dStr, sec] of Object.entries(hist)) {
             if (dStr >= mondayStr && dStr <= todayStr) {
-                total += Number(sec) || 0;
-                if (dStr === todayStr) todayFound = true;
+                if (dStr === todayStr) {
+                    total += Math.max(Number(sec) || 0, todaySecs);
+                    todayFound = true;
+                } else {
+                    total += Number(sec) || 0;
+                }
             }
         }
         if (!todayFound && todaySecs > 0) {
             total += todaySecs;
         }
-        return total;
+        return Math.max(total, todaySecs);
     }
 
     function formatDuration(seconds) {

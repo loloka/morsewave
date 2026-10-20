@@ -195,6 +195,40 @@ if (isset($want['progress'])) {
             }
         }
 
+        // Автоматически подтягиваем историю тренировок из логов XP за последние 7 дней,
+        // чтобы недельная норма точно учитывала сессии, пройденные до появления trainingHistory
+        if ($progress) {
+            try {
+                $logStmt = $pdo->prepare("
+                    SELECT DATE(created_at) as log_date, details
+                    FROM xp_log
+                    WHERE user_id = :id
+                      AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+                      AND details IS NOT NULL
+                ");
+                $logStmt->execute(['id' => $userId]);
+                $logRows = $logStmt->fetchAll(PDO::FETCH_ASSOC);
+                if ($logRows) {
+                    if (!isset($progress['trainingHistory']) || !is_array($progress['trainingHistory'])) {
+                        $progress['trainingHistory'] = [];
+                    }
+                    $historyFromLogs = [];
+                    foreach ($logRows as $lr) {
+                        $det = json_decode($lr['details'], true);
+                        if (is_array($det) && isset($det['dur']) && (int)$det['dur'] > 0) {
+                            $d = $lr['log_date'];
+                            $historyFromLogs[$d] = ($historyFromLogs[$d] ?? 0) + (int)$det['dur'];
+                        }
+                    }
+                    foreach ($historyFromLogs as $d => $sec) {
+                        $progress['trainingHistory'][$d] = max((int)($progress['trainingHistory'][$d] ?? 0), $sec);
+                    }
+                }
+            } catch (Exception $e) {
+                // Игнорируем ошибки при чтении логов
+            }
+        }
+
         $out['progress'] = $progress;
         $out['progress_updated_at'] = $row['updated_at'] ?? null;
     }
