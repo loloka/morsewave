@@ -107,11 +107,9 @@ include __DIR__ . '/includes/header.php';
 
         <!-- Стартовый оверлей -->
         <div class="invaders-overlay-modal" id="invaders-start-overlay">
-            <div class="invaders-overlay-title">РАДИОПЕРЕХВАТ: БОЕВОЙ РЕЖИМ</div>
+            <div class="invaders-overlay-title"><?= t('invaders.start_modal_title') ?></div>
             <div class="invaders-overlay-desc">
-                Вражеские дроны и радиопомехи атакуют антенное поле базы!<br>
-                Отбивайте падающие знаки <b>на телеграфном ключе</b> (удерживайте <b>ПРОБЕЛ</b>, экранную педаль или подключите <b>MorseWave Pro</b> по USB).<br><br>
-                ⚡ Идеальный ритм 1:3:1 даёт <b>Критический перехват (х2 XP)</b>. Ошибки сбивают комбо!
+                <?= t('invaders.start_modal_desc') ?>
             </div>
             <button id="btn-start-game" class="invaders-btn-start" type="button">
                 <?= t('invaders.start_game') ?>

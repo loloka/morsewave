@@ -16,9 +16,9 @@ include __DIR__ . '/includes/header.php';
     <div class="hardware-callsign-badge">
         <span>⚡</span> R9OGL HARDWARE EDITION · v1.7.2 BETA
     </div>
-    <h1>Боевой телеграфный ключ MorseWave Pro</h1>
+    <h1>Боевой электронный ключ MorseWave Pro</h1>
     <p class="muted mt-0" style="font-size: 16px; max-width: 860px; line-height: 1.6;">
-        Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод).
+        Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод). Устройство создано для подключения вашего личного манипулятора (однорычажного или двухрычажного) через электронный ключ MorseWave Pro.
     </p>
 
     <!-- Совместимость браузеров (Chromium WebSerial) -->
