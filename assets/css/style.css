@@ -1922,6 +1922,25 @@ input[type="range"] {
     box-shadow: 0 0 20px rgba(0, 255, 102, 0.6);
     transform: translateY(-1px);
 }
+.chip-invaders2 {
+    border-color: rgba(0, 255, 102, 0.35) !important;
+    background: rgba(0, 255, 102, 0.08) !important;
+    color: #00ff66 !important;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.chip-invaders2:hover {
+    border-color: #00ff66 !important;
+    background: rgba(0, 255, 102, 0.18) !important;
+    color: #2aff83 !important;
+    box-shadow: 0 0 10px rgba(0, 255, 102, 0.28);
+}
+.chip-invaders2 .badge-beta {
+    background: rgba(0, 255, 102, 0.22);
+    color: #00ff66;
+    border: 1px solid rgba(0, 255, 102, 0.45);
+}
 
 .daily-card {
     background: linear-gradient(135deg, var(--surface), #1f1a10 150%);

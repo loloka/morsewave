@@ -48,7 +48,6 @@ include __DIR__ . '/includes/header.php';
                         <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name">invasion</span>
                     </div>
                     <div class="promo-badges">
-                        <span class="promo-badge mono badge-beta">BETA</span>
                         <span class="promo-badge mono badge-v"><?= MW_VERSION ?></span>
                     </div>
                 </div>

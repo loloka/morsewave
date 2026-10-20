@@ -117,6 +117,7 @@ return [
     'learn.rhythm_signal_up_hint' => '▲ longer than ideal — go faster',
     'learn.rhythm_signal_down_hint' => '▼ shorter than ideal — go slower',
     'learn.mode_invasion' => '👽 Invasion',
+    'learn.mode_invaders2' => '⚡ Invaders 2',
     'learn.invasion_intro' => 'Aliens are advancing on your base — listen to the signal, identify the letter, and press it before the alien reaches the base. The game consists of 3 stages: 1) single targets + Boss 1 (10 characters); 2) groups of 2 characters + Boss 2 (20 characters); 3) groups of 3 characters + Final Boss (Latin quote). Build combos to activate abilities (Repair, Slow, Nuke)! Defeating the 3rd boss saves the base with a huge bonus.',
     'learn.invasion_start' => 'Engage',
     'learn.invasion_stop' => 'Stop',
