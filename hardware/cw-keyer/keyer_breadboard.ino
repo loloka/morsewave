@@ -131,17 +131,20 @@ String decodeMorse(const String& code) {
     }
   }
 
-  // 2. Если знак слитный (оператор передал буквы без достаточной паузы, например R9 или CQ):
-  // Автоматический жадный парсер (Greedy Segmentation) разбивает слипшуюся цепочку на валидные знаки
+  // 2. Если знак слитный (оператор передал буквы слитно, например R9 или CQ):
+  // Приоритетный парсер: сначала ищем совпадения среди латинских букв (A-Z) и цифр (0-9)
+  // чтобы позывные вроде R9 (.-.----.) не превращались ошибочно в YACH (.-.- ---.)
   String result = "";
   String remaining = code;
 
   while (remaining.length() > 0) {
     bool matched = false;
-    int maxLen = min((int)remaining.length(), 6);
+    int maxLen = min((int)remaining.length(), 5);
+
+    // Сначала пробуем сопоставить со стандартными латинскими буквами и цифрами (индексы 0..35)
     for (int len = maxLen; len >= 1; len--) {
       String prefix = remaining.substring(0, len);
-      for (int i = 0; i < MORSE_TABLE_SIZE; i++) {
+      for (int i = 0; i <= 35; i++) { // 0..25: A-Z, 26..35: 0-9
         if (prefix == morseTable[i].code) {
           result += morseTable[i].text;
           remaining = remaining.substring(len);
@@ -151,6 +154,23 @@ String decodeMorse(const String& code) {
       }
       if (matched) break;
     }
+
+    // Если стандартная латиница/цифра не подошла — ищем по всей расширенной таблице (знаки, спецсимволы)
+    if (!matched) {
+      for (int len = maxLen; len >= 1; len--) {
+        String prefix = remaining.substring(0, len);
+        for (int i = 36; i < MORSE_TABLE_SIZE; i++) {
+          if (prefix == morseTable[i].code) {
+            result += morseTable[i].text;
+            remaining = remaining.substring(len);
+            matched = true;
+            break;
+          }
+        }
+        if (matched) break;
+      }
+    }
+
     if (!matched) {
       result += "?";
       remaining = remaining.substring(1);
@@ -512,9 +532,9 @@ void handleDecodedPauses() {
 
   unsigned long pause = millis() - lastSymbolEndTime;
 
-  // 1. Межзнаковая пауза (по стандарту ITU: 1.0T межэлементная + 2.5T тишина = 3.5T между буквами)
-  // При 10 WPM (dit: 120 мс) порог = 300 мс — комфортный люфт для переброски весла без разрыва букв C, Q, Y!
-  unsigned long charSpaceThreshold = (ditMs * 25) / 10;
+  // 1. Межзнаковая пауза (по стандарту ITU: 1.0T межэлементная + 2.0T тишина = 3.0T между буквами)
+  // Комфортный порог, чтобы буквы не разрывались, но распознавались сразу после окончания передачи
+  unsigned long charSpaceThreshold = (ditMs * 20) / 10;
   if (currentMorseChar.length() > 0 && pause >= charSpaceThreshold) {
     String decoded = decodeMorse(currentMorseChar);
     decodedLine += decoded;
@@ -535,9 +555,27 @@ void handleDecodedPauses() {
     }
   }
 
-  // 2. Межсловная пауза (в сумме с межэлементной дает 5.5 точек) -> ровно ОДИН пробел
-  unsigned long wordSpaceThreshold = (ditMs * 45) / 10;
+  // 2. Межсловная пауза (по стандарту ITU: 7.0T тишины между словами/позывными)
+  // Порог 6.5T гарантирует, что позывной R9OGL пишется единым словом без паразитных пробелов!
+  unsigned long wordSpaceThreshold = (ditMs * 65) / 10;
   if (wordSpaceNeeded && pause >= wordSpaceThreshold) {
+    wordSpaceNeeded = false; // Однократное срабатывание: не будет спама пробелами!
+
+    if (decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
+      decodedLine += " ";
+      if (decodedLine.length() > 32) {
+        decodedLine = decodedLine.substring(decodedLine.length() - 32);
+      }
+
+      Serial.print(" ");
+      Serial.println(); // Перевод строки в Serial для красивого чтения слов
+
+      if (hasOled) {
+        updateScreenText();
+      }
+    }
+  }
+}
     wordSpaceNeeded = false; // Однократное срабатывание: не будет спама пробелами!
 
     if (decodedLine.length() > 0 && !decodedLine.endsWith(" ")) {
