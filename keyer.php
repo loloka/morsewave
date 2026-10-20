@@ -14,7 +14,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="hardware-hero">
     <div class="hardware-callsign-badge">
-        <span>⚡</span> R9OGL HARDWARE EDITION · v1.7.1 BETA
+        <span>⚡</span> R9OGL HARDWARE EDITION · v1.7.2 BETA
     </div>
     <h1>Боевой телеграфный ключ MorseWave Pro</h1>
     <p class="muted mt-0" style="font-size: 16px; max-width: 860px; line-height: 1.6;">

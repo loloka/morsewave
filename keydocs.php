@@ -356,7 +356,7 @@ include __DIR__ . '/includes/header.php';
     <div class="doc-hub-header">
         <div>
             <div class="hardware-callsign-badge" style="margin-bottom: 6px;">
-                <span>⚡</span> R9OGL HARDWARE DOCS · v1.7.1
+                <span>⚡</span> R9OGL HARDWARE DOCS · v1.7.2
             </div>
             <h1 style="margin: 0 0 6px; font-size: 26px;">Центр документации и схемотехники</h1>
             <p class="muted mt-0 mb-0" style="font-size: 15px;">
@@ -400,7 +400,7 @@ include __DIR__ . '/includes/header.php';
             <div class="doc-top-actions">
                 <div>
                     <h2 style="margin: 0; font-size: 20px; color: var(--text);">Исходный код скетча: <code>keyer_breadboard.ino</code></h2>
-                    <span class="sketch-line-counter">Версия 1.7.1 · ATmega328P (Arduino Uno / Nano) · <?= $linesCount ?> строк кода</span>
+                    <span class="sketch-line-counter">Версия 1.7.2 · ATmega328P (Arduino Uno / Nano) · <?= $linesCount ?> строк кода</span>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button type="button" class="btn btn-secondary" onclick="mwCopyFullSketch()" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px;">

@@ -4,7 +4,7 @@
 
 ---
 
-## Актуальная версия: v1.7.1 (Curtis Latch, Single-Paddle & Low Speed Timing Fix)
+## Актуальная версия: v1.7.2 (Single-Paddle & Iambic B Rock-Solid Latch)
 Подробная история изменений и разбор всех решенных багов — в [CHANGELOG.md](CHANGELOG.md).
 
 ### Ключевые возможности:

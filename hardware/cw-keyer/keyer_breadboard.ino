@@ -1,27 +1,25 @@
 /*
  * =====================================================================
- *  MorseWave Pro Keyer v1.7.1 (Curtis Latch, Single-Paddle & Low Speed Timing Fix)
- *  - Адаптивный межзнаковый порог по стандарту ITU-R (2.5T вместо 1.2T):
- *      * На скоростях 10..14 WPM сложные буквы C (-.-.), Q (--.-), Y (-.--),
- *        L (.-..), F (..-.) больше не разрываются при переброске весла.
- *  - Аппаратная защелка памяти (Single-Paddle Memory Latch):
- *      * Контакты весел опрашиваются с микрофильтром антидребезга (6 мс).
- *      * Любое быстрое касание весла точки или тире гарантированно встает
- *        в память и доигрывается до конца, даже если рычаг вернулся в центр.
- *  - Подхват очереди элементов при переходе в STATE_IDLE:
- *      * Устранено выпадение завершающего тире или точки при медленной передаче.
+ *  MorseWave Pro Keyer v1.7.2 (Single-Paddle & Iambic B Rock-Solid Latch)
+ *  - Аппаратная защелка памяти (Single-Paddle Independent Latch):
+ *      * Контакты весел опрашиваются непрерывно в каждом цикле loop().
+ *      * Быстрое одиночное касание точки или тире (даже длительностью 15-30 мс)
+ *        гарантированно защелкивается в памяти ditPending / dahPending.
+ *      * Память очищается ИСКЛЮЧИТЕЛЬНО при фактическом старте звучания элемента
+ *        (в startDit() / startDah()), а НЕ при переходе в IDLE.
+ *      * В сложных знаках (Ц / C -.-., Ч ---., Q --.-, Y -.--, L .-..)
+ *        второе тире или завершающая точка никогда не теряются на малых скоростях (10-14 WPM).
+ *  - Адаптивный межзнаковый порог по стандарту ITU-R (2.5T):
+ *      * На малых скоростях исключен преждевременный сброс текущей буквы при медленном переносе весла.
  *  - Честная обработка межсловных пробелов (Smart Word Spacing):
  *      * Ровно ОДИН пробел между словами при паузе > 4.5 точек.
- *      * Никакого спама пробелами, если ключ долго молчит!
  *  - Полная расширенная таблица Морзе (по стандарту ITU и ARRL):
  *      * Все знаки препинания: = (BT), + (AR), <SK>, <KN>, <AS>, @, -, :, ;, ', ", !, _, $, <HH>
  *      * Русские буквы Морзе (СРТ / ГОСТ): Ч (---.), Ш (----), Э (..-..), Ю (..--), Я (.-.-)
- *      * Жадный декодер слитных символов (R9 не превращается в ?)
  *  - Регулировка WPM (10..60) и PITCH (400..1200 Гц) НА ЛЕТУ.
  *  - Калибровка АЦП (ADC_MIN=15, ADC_MAX=850) под просадку VIN.
- *  - Приветственная заставка при включении (VVV = R9OGL).
  *  - Скоростной Fast I2C (400 кГц) + OLED 0.96" SSD1306.
- *  - Поддержка двухрычажного ямбического манипулятора (режим B) и однорычажного весла.
+ *  - Поддержка как однорычажного манипулятора (Single Paddle), так и двухрычажного (Iambic B).
  * =====================================================================
  */
 
@@ -281,7 +279,7 @@ void setup() {
 
   Serial.println();
   Serial.println(F("=================================================="));
-  Serial.println(F("  MorseWave Pro Keyer v1.7.1 (R9OGL Edition)      "));
+  Serial.println(F("  MorseWave Pro Keyer v1.7.2 (R9OGL Edition)      "));
   Serial.println(F("=================================================="));
   Serial.print(F("Speed : "));
   Serial.print(currentWpm);
@@ -316,7 +314,7 @@ void loop() {
 void handleKeyer() {
   unsigned long now = millis();
 
-  // 1. Аппаратно-программный фильтр антидребезга контактов манипулятора (6 мс)
+  // 1. Аппаратно-программный опрос весел с микрофильтром антидребезга (5 мс)
   static unsigned long lastDitLowTime = 0;
   static unsigned long lastDahLowTime = 0;
   if (digitalRead(PIN_DIT) == LOW) lastDitLowTime = now;
@@ -324,43 +322,22 @@ void handleKeyer() {
 
   bool ditRaw = (digitalRead(PIN_DIT) == LOW);
   bool dahRaw = (digitalRead(PIN_DAH) == LOW);
-  bool ditPin = ditRaw || (now - lastDitLowTime < 6);
-  bool dahPin = dahRaw || (now - lastDahLowTime < 6);
+  bool ditPin = ditRaw || (now - lastDitLowTime < 5);
+  bool dahPin = dahRaw || (now - lastDahLowTime < 5);
 
-  static bool prevDitState = HIGH;
-  static bool prevDahState = HIGH;
-
-  bool ditJustPressed = (ditRaw && prevDitState == HIGH);
-  bool dahJustPressed = (dahRaw && prevDahState == HIGH);
-
-  // 2. Память элементов (Двухуровневая предвыборка Lookahead + Single-Paddle Latch):
-  // Любое касание весла во время воспроизведения противоположного элемента
-  // или его паузы мгновенно защёлкивается в памяти и обязательно доигрывается.
-  if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
-    if (dahPin) dahMemory = true;
-    if (dahMemory && ditJustPressed) {
-      ditMemory = true;
-    }
-  }
-
-  if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
-    if (ditPin) ditMemory = true;
-    if (ditMemory && dahJustPressed) {
-      dahMemory = true;
-    }
-  }
-
-  prevDitState = digitalRead(PIN_DIT);
-  prevDahState = digitalRead(PIN_DAH);
+  // 2. Независимая защёлка (Persistent Latch Memory):
+  // Любое касание весла в любой момент времени (даже ультра-короткий клик 15 мс)
+  // немедленно запоминается в ditMemory / dahMemory.
+  // Флаг сбрасывается ИСКЛЮЧИТЕЛЬНО в startDit() / startDah(), когда элемент пошёл звучать!
+  if (ditPin) ditMemory = true;
+  if (dahPin) dahMemory = true;
 
   switch (state) {
     case STATE_IDLE:
-      // Подхватываем как живое нажатие весла, так и сохраненную защелку памяти
-      if (dahPin || dahMemory) {
-        dahMemory = false;
+      // В состоянии покоя: если есть отложенное тире или нажато весло тире
+      if (dahMemory || dahPin) {
         startDah();
-      } else if (ditPin || ditMemory) {
-        ditMemory = false;
+      } else if (ditMemory || ditPin) {
         startDit();
       }
       break;
@@ -374,17 +351,16 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DIT:
+      // Межэлементная пауза после точки равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
+        // Приоритет чередования (Curtis Mode B): после точки сначала проверяем тире
         if (dahMemory || dahPin) {
-          dahMemory = false;
           startDah();
         } else if (ditMemory || ditPin) {
-          ditMemory = false;
+          // Если весло точки все еще удерживается или повторно кликнуто - продолжаем точки
           startDit();
         } else {
           state = STATE_IDLE;
-          ditMemory = false;
-          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -399,17 +375,16 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DAH:
+      // Межэлементная пауза после тире равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
+        // Приоритет чередования (Curtis Mode B): после тире сначала проверяем точку
         if (ditMemory || ditPin) {
-          ditMemory = false;
           startDit();
         } else if (dahMemory || dahPin) {
-          dahMemory = false;
+          // Если весло тире все еще удерживается или повторно кликнуто - продолжаем тире
           startDah();
         } else {
           state = STATE_IDLE;
-          ditMemory = false;
-          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -418,6 +393,7 @@ void handleKeyer() {
 }
 
 void startDit() {
+  ditMemory = false; // Сбрасываем память только при фактическом старте звучания
   state = STATE_PLAY_DIT;
   stateStartTime = millis();
 
@@ -430,6 +406,7 @@ void startDit() {
 }
 
 void startDah() {
+  dahMemory = false; // Сбрасываем память только при фактическом старте звучания
   state = STATE_PLAY_DAH;
   stateStartTime = millis();
 
