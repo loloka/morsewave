@@ -325,19 +325,20 @@ void handleKeyer() {
   bool ditPin = ditRaw || (now - lastDitLowTime < 5);
   bool dahPin = dahRaw || (now - lastDahLowTime < 5);
 
-  // 2. Независимая защёлка (Persistent Latch Memory):
-  // Любое касание весла в любой момент времени (даже ультра-короткий клик 15 мс)
-  // немедленно запоминается в ditMemory / dahMemory.
-  // Флаг сбрасывается ИСКЛЮЧИТЕЛЬНО в startDit() / startDah(), когда элемент пошёл звучать!
-  if (ditPin) ditMemory = true;
-  if (dahPin) dahMemory = true;
+  // 2. Память элементов (Классический Curtis 8044 iambic/single-paddle):
+  // Защёлка противоположного элемента взводится во время передачи текущего
+  if (state == STATE_PLAY_DIT || state == STATE_PAUSE_DIT) {
+    if (dahPin) dahMemory = true;
+  } else if (state == STATE_PLAY_DAH || state == STATE_PAUSE_DAH) {
+    if (ditPin) ditMemory = true;
+  }
 
   switch (state) {
     case STATE_IDLE:
-      // В состоянии покоя: если есть отложенное тире или нажато весло тире
-      if (dahMemory || dahPin) {
+      // При живом нажатии весла
+      if (dahPin) {
         startDah();
-      } else if (ditMemory || ditPin) {
+      } else if (ditPin) {
         startDit();
       }
       break;
@@ -351,16 +352,16 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DIT:
-      // Межэлементная пауза после точки равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
-        // Приоритет чередования (Curtis Mode B): после точки сначала проверяем тире
         if (dahMemory || dahPin) {
+          dahMemory = false;
           startDah();
-        } else if (ditMemory || ditPin) {
-          // Если весло точки все еще удерживается или повторно кликнуто - продолжаем точки
+        } else if (ditPin) {
           startDit();
         } else {
           state = STATE_IDLE;
+          ditMemory = false;
+          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
@@ -375,16 +376,16 @@ void handleKeyer() {
       break;
 
     case STATE_PAUSE_DAH:
-      // Межэлементная пауза после тире равна ровно 1 ditMs
       if (now - stateStartTime >= ditMs) {
-        // Приоритет чередования (Curtis Mode B): после тире сначала проверяем точку
         if (ditMemory || ditPin) {
+          ditMemory = false;
           startDit();
-        } else if (dahMemory || dahPin) {
-          // Если весло тире все еще удерживается или повторно кликнуто - продолжаем тире
+        } else if (dahPin) {
           startDah();
         } else {
           state = STATE_IDLE;
+          ditMemory = false;
+          dahMemory = false;
           lastSymbolEndTime = millis();
         }
       }
