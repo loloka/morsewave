@@ -1394,8 +1394,10 @@ HTML
 
     // --- Morse Invaders II: Radio Intercept ---
     'invaders.title' => 'Вторжение-2: Радиоперехват',
-    'invaders.subtitle' => 'Военный терминал ПВО и перехвата радиосигналов. Отбивайте знаки ключом на опережение!',
-    'invaders.radar_badge' => 'P1 ФОСФОР · СИСТЕМА ПВО «РАДИОПЕРЕХВАТ»',
+    'invaders.subtitle' => 'Терминал перехвата радиосигналов. Отбивайте знаки ключом на опережение!',
+    'invaders.radar_badge' => 'P1 ФОСФОР · ТЕРМИНАЛ ПЕРЕХВАТА РАДИОСИГНАЛОВ',
+    'invaders.dev_banner_title' => 'Режим в разработке (BETA):',
+    'invaders.dev_banner_desc' => 'тренируйтесь на ключе MorseWave Pro, клавиатуре или тач-паде. Набирайте опыт и делитесь отзывами!',
     'invaders.connect_key' => '⚡ Подключить MorseWave Pro (115200)',
     'invaders.connected_key' => '● НА СВЯЗИ (115200)',
     'invaders.disconnect_key' => 'Отключить',

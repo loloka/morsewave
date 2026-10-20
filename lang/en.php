@@ -1407,8 +1407,10 @@ HTML
 
     // --- Morse Invaders II: Radio Intercept ---
     'invaders.title' => 'Morse Invaders II: Radio Intercept',
-    'invaders.subtitle' => 'Military air defense and radio intercept terminal. Transmit characters with your telegraph key to destroy targets!',
-    'invaders.radar_badge' => 'P1 PHOSPHOR · AIR DEFENSE RADIO INTERCEPT',
+    'invaders.subtitle' => 'Radio intercept terminal. Transmit characters with your telegraph key on the fly!',
+    'invaders.radar_badge' => 'P1 PHOSPHOR · RADIO INTERCEPT TERMINAL',
+    'invaders.dev_banner_title' => 'Mode under active development (BETA):',
+    'invaders.dev_banner_desc' => 'train using MorseWave Pro key, keyboard, or touch paddle. Earn XP and share your feedback!',
     'invaders.connect_key' => '⚡ Connect MorseWave Pro (115200)',
     'invaders.connected_key' => '● CONNECTED (115200)',
     'invaders.disconnect_key' => 'Disconnect',

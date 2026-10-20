@@ -14,8 +14,9 @@ include __DIR__ . '/includes/header.php';
 <div class="card-eyebrow"><?= t('invaders.radar_badge') ?></div>
 <div class="flex-between flex-wrap gap-2" style="align-items: center; margin-bottom: 6px;">
     <div>
-        <h1 style="margin: 0; font-family: var(--font-mono, monospace); letter-spacing: 0.04em;">
-            <?= t('invaders.title') ?>
+        <h1 style="margin: 0; font-family: var(--font-mono, monospace); letter-spacing: 0.04em; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span><?= t('invaders.title') ?></span>
+            <span class="badge-beta" style="font-size: 11.5px; vertical-align: middle;">BETA</span>
         </h1>
         <p class="muted mt-1 mb-0" style="font-size: 14.5px; max-width: 780px;">
             <?= t('invaders.subtitle') ?>
@@ -28,8 +29,22 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- Информационная плашка: Режим в разработке -->
+<div class="alert alert-info mt-3 mb-3" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 10px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+    <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px;">
+        <span style="font-size: 18px;">⚡</span>
+        <div>
+            <strong style="color: #4fd8c4;"><?= t('invaders.dev_banner_title') ?></strong>
+            <span style="color: var(--text-muted);"><?= t('invaders.dev_banner_desc') ?></span>
+        </div>
+    </div>
+    <span style="font-size: 11px; font-weight: 800; color: #f87171; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.04em; white-space: nowrap;">
+        ⚡ В РАЗРАБОТКЕ
+    </span>
+</div>
+
 <!-- =========================================================
-     ТЕРМИНАЛ ПВО: CRT РАДАР ПЕРЕХВАТА
+     ТЕРМИНАЛ: CRT РАДАР ПЕРЕХВАТА
      ========================================================= -->
 <div class="invaders-terminal-wrap">
     
@@ -37,7 +52,7 @@ include __DIR__ . '/includes/header.php';
     <div class="invaders-top-bar">
         <div class="invaders-brand">
             <span class="invaders-radar-blip"></span>
-            <span>R9OGL AIR DEFENSE · SECTOR P1-RADAR</span>
+            <span>MORSEWAVE PRO KEY AIR DEFENSE · SECTOR P1-RADAR</span>
         </div>
         <div class="invaders-serial-ctrl">
             <div class="invaders-pro-status hidden" id="invaders-pro-badge">
@@ -84,7 +99,7 @@ include __DIR__ . '/includes/header.php';
         
         <!-- Тактический всплывающий баннер волны и связи -->
         <div class="invaders-tactical-banner hidden" id="invaders-tactical-banner">
-            <div class="tactical-banner-title" id="tactical-banner-title">WAVE 1 // AIRSPACE COMPROMISED</div>
+            <div class="tactical-banner-title" id="tactical-banner-title">WAVE 1 // SECTOR ENGAGED</div>
             <div class="tactical-banner-sub" id="tactical-banner-sub">TRANSMIT TARGET CHARACTERS WITH KEY</div>
         </div>
 
