@@ -359,6 +359,8 @@ return [
     'groups.pair_prompt_msg' => 'Заметили, что у вас часто путаются {A} и {B} ({count}). 3 минуты изолированной тренировки помогут закрепить разницу на слух.',
     'groups.pair_prompt_btn' => 'Тренировать пару {A} / {B}',
     'groups.pairs_choose_pair' => 'Выберите пару знаков:',
+    'groups.pairs_charset_label' => 'Набор символов (фон радиограммы):',
+    'groups.pairs_conflict_warning' => 'В паре смешаны буквы разных алфавитов (латиница и кириллица). Введите оба символа из одного алфавита.',
     'groups.pairs_custom' => 'Своя пара',
     'groups.pairs_custom_placeholder' => 'Например: S H',
     'groups.pairs_stage_label' => 'Этап тренировки:',

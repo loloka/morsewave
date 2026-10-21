@@ -357,6 +357,8 @@ return [
     'groups.pair_prompt_msg' => 'Noticed you often confuse {A} and {B} ({count}). 3 minutes of focused pair training will help lock in the difference.',
     'groups.pair_prompt_btn' => 'Train pair {A} / {B}',
     'groups.pairs_choose_pair' => 'Choose a character pair:',
+    'groups.pairs_charset_label' => 'Character set (background text):',
+    'groups.pairs_conflict_warning' => 'The pair mixes characters from different alphabets (Latin and Cyrillic). Use characters from the same alphabet.',
     'groups.pairs_custom' => 'Custom pair',
     'groups.pairs_custom_placeholder' => 'e.g. S H',
     'groups.pairs_stage_label' => 'Training stage:',

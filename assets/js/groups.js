@@ -102,14 +102,37 @@
     let pendingExamMode = false;
     let selectedPairKey = 'SH';
     let selectedPairStage = 1;
+    let pairsCharsetKey = localStorage.getItem('morse_pairs_charset') || 'latin';
     let userHasChosenPair = false;
     let qrqStopRequested = false;
     let qrqSessionActive = false;
     let qrqAudio = null;
     let currentAudio = null;
 
+    function getPairsCpmType() {
+        const chars = (typeof getSelectedPairChars === 'function') ? getSelectedPairChars() : { a: 'S', b: 'H' };
+        const a = chars.a || '';
+        const b = chars.b || '';
+        const hasDigitsInPair = /[0-9]/.test(a) || /[0-9]/.test(b);
+        const hasLettersInPair = /[A-Za-zА-Яа-яЁё]/.test(a) || /[A-Za-zА-Яа-яЁё]/.test(b);
+
+        if (pairsCharsetKey === 'digits') return 'digits';
+        if (pairsCharsetKey === 'mixed' || pairsCharsetKey === 'cyrillic_digits') return 'mixed';
+        if (pairsCharsetKey === 'latin' || pairsCharsetKey === 'cyrillic' || pairsCharsetKey === 'letters') {
+            if (hasDigitsInPair && hasLettersInPair) return 'mixed';
+            if (hasDigitsInPair) return 'mixed';
+            return 'letters';
+        }
+        if (hasDigitsInPair && hasLettersInPair) return 'mixed';
+        if (hasDigitsInPair) return 'digits';
+        return 'letters';
+    }
+
     function getGroupsCpmType() {
-        if (currentSubmode === 'pairs' || currentSubmode === 'abbrev' || currentSubmode === 'words') {
+        if (currentSubmode === 'pairs') {
+            return getPairsCpmType();
+        }
+        if (currentSubmode === 'abbrev' || currentSubmode === 'words') {
             return 'letters';
         }
         if (currentSubmode === 'exam') {
@@ -328,6 +351,8 @@
 
         // 4. Pairs submode
         if (currentSubmode === 'pairs') {
+            if (pairsCharsetKey === 'cyrillic' || pairsCharsetKey === 'cyrillic_digits') return true;
+            if (pairsCharsetKey === 'latin' || pairsCharsetKey === 'mixed' || pairsCharsetKey === 'digits') return false;
             const pairChars = (typeof getSelectedPairChars === 'function') ? getSelectedPairChars() : null;
             if (pairChars && (/[А-ЯЁ]/.test(pairChars.a || '') || /[А-ЯЁ]/.test(pairChars.b || ''))) return true;
             return false;
@@ -370,7 +395,11 @@
             const hasPunctuation = (charsetKey === 'koch') || (charsetKey === 'custom' && customInput && /[.?]/.test(customInput.value));
             const isCyr = isCyrillicSession();
             let layout = isCyr ? 'cyrillic' : 'qwerty';
-            if (charsetKey === 'digits') {
+            if (currentSubmode === 'pairs') {
+                if (pairsCharsetKey === 'digits') {
+                    layout = 'numeric';
+                }
+            } else if (charsetKey === 'digits') {
                 layout = 'numeric';
             }
             vkb = new VirtualKeyboard(vkbEl, inputEl, {
@@ -897,11 +926,11 @@
      * - Этап 2: знак pairB частый, знак pairA СТРОГО ИСКЛЮЧЕН.
      * - Этап 3: знаки pairA и pairB оба присутствуют с повышенной частотой (дуэль).
      */
-    function generatePairGroups(pairA, pairB, stage, count, len) {
-        const isDigits = '0123456789'.includes(pairA) || '0123456789'.includes(pairB);
-        const baseAlphabet = (isDigits ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' : 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-            .split('')
-            .filter(c => c !== pairA && c !== pairB);
+    function generatePairGroups(pairA, pairB, stage, count, len, cKey = pairsCharsetKey) {
+        let baseAlphabet = getCharset(cKey).filter(c => c !== pairA && c !== pairB);
+        if (!baseAlphabet || baseAlphabet.length === 0) {
+            baseAlphabet = getCharset(cKey);
+        }
 
         const groups = [];
         for (let g = 0; g < count; g++) {
@@ -952,8 +981,49 @@
             'B6': { a: 'B', b: '6' },
             'FL': { a: 'F', b: 'L' },
             'PJ': { a: 'P', b: 'J' },
+            'ШЩ': { a: 'Ш', b: 'Щ' },
+            'ЧЦ': { a: 'Ч', b: 'Ц' },
+            'ВЖ': { a: 'В', b: 'Ж' },
+            'ДБ': { a: 'Д', b: 'Б' },
         };
         return mapping[selectedPairKey] || { a: 'S', b: 'H' };
+    }
+
+    function autoAdaptPairsCharset(a, b) {
+        const isCyrA = /[А-ЯЁ]/.test(a);
+        const isCyrB = /[А-ЯЁ]/.test(b);
+        const isLatA = /[A-Z]/.test(a);
+        const isLatB = /[A-Z]/.test(b);
+        const isDigA = /[0-9]/.test(a);
+        const isDigB = /[0-9]/.test(b);
+
+        if (isCyrA || isCyrB) {
+            if (isDigA || isDigB) {
+                setPairsCharset('cyrillic_digits', false);
+            } else if (pairsCharsetKey !== 'cyrillic_digits') {
+                setPairsCharset('cyrillic', false);
+            }
+        } else if (isDigA && isDigB) {
+            setPairsCharset('digits', false);
+        } else if (isLatA || isLatB) {
+            if (isDigA || isDigB) {
+                setPairsCharset('mixed', false);
+            } else if (pairsCharsetKey === 'cyrillic' || pairsCharsetKey === 'cyrillic_digits' || pairsCharsetKey === 'digits') {
+                setPairsCharset('latin', false);
+            }
+        }
+    }
+
+    function setPairsCharset(newKey, userExplicit = true) {
+        pairsCharsetKey = newKey;
+        if (userExplicit) {
+            localStorage.setItem('morse_pairs_charset', newKey);
+        }
+        document.querySelectorAll('#pairs-charset-chips .chip').forEach(c => {
+            c.classList.toggle('active', c.dataset.set === newKey);
+        });
+        updatePairsCpmHint();
+        updateInputLayoutState();
     }
 
     function updatePairStageUI() {
@@ -1003,12 +1073,15 @@
                 if (!a && customA && !customA.value) customA.focus();
             }
         }
+        const chars = getSelectedPairChars();
+        autoAdaptPairsCharset(chars.a, chars.b);
         const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
         const ptKey = (pairKey === 'custom')
             ? `custom_${[(a || customA?.value || 'A'), (b || customB?.value || 'B')].map(s => s.toUpperCase()).sort().join('-')}`
             : pairKey;
         selectedPairStage = pt[ptKey]?.stage || pt[pairKey]?.stage || 1;
         updatePairStageUI();
+        updatePairsCpmHint();
         updateInputLayoutState();
     }
 
@@ -1345,6 +1418,26 @@
         const isPairs = (currentSubmode === 'pairs');
         const isPaperMode = (currentSubmode === 'training' && paperCheckbox && paperCheckbox.checked);
 
+        if (isPairs && selectedPairKey === 'custom') {
+            const chars = getSelectedPairChars();
+            const isCyrA = /[А-ЯЁ]/.test(chars.a);
+            const isCyrB = /[А-ЯЁ]/.test(chars.b);
+            const isLatA = /[A-Z]/.test(chars.a);
+            const isLatB = /[A-Z]/.test(chars.b);
+            if ((isCyrA && isLatB) || (isLatA && isCyrB)) {
+                const conflictEl = document.getElementById('custom-pair-conflict');
+                if (conflictEl) {
+                    conflictEl.style.display = 'block';
+                    conflictEl.classList.remove('pairs-shake');
+                    void conflictEl.offsetWidth;
+                    conflictEl.classList.add('pairs-shake');
+                }
+                const customA = document.getElementById('custom-pair-a');
+                if (customA) customA.focus();
+                return;
+            }
+        }
+
         let activeWpm = parseInt(wpmSlider.value, 10);
         let activeFarnsworth = (fwEnabled && fwEnabled.checked) ? parseInt(fwSlider.value, 10) : 0;
         let activeCount = parseInt(document.getElementById('groups-count').value, 10);
@@ -1398,7 +1491,7 @@
             const activeChar = isStage1 ? pairA : (isStage2 ? pairB : null);
             const disabledChar = isStage1 ? pairB : (isStage2 ? pairA : null);
 
-            generatedGroups = generatePairGroups(pairA, pairB, stage, activeCount, activeGroupLen);
+            generatedGroups = generatePairGroups(pairA, pairB, stage, activeCount, activeGroupLen, pairsCharsetKey);
             pairData = {
                 pairKey: (selectedPairKey === 'custom') ? `custom_${[pairA, pairB].sort().join('-')}` : selectedPairKey,
                 rawPairKey: selectedPairKey,
@@ -1415,14 +1508,14 @@
             generatedGroups = Array.from({ length: activeCount }, () => (isExam ? randomGroup : weightedRandomGroup)(activeCharset, activeGroupLen));
         }
 
-        const isCyrillic = isCyrillicSession(activeCharsetKey, activeCharset);
+        const isCyrillic = isCyrillicSession(isPairs ? pairsCharsetKey : activeCharsetKey, activeCharset);
 
         session = {
             groups: generatedGroups,
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
             groupLen: activeGroupLen,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
-            xpRate: xpRateForSession(isPairs ? 'letters' : activeCharsetKey, isPairs ? 2 : (activeCharset ? activeCharset.length : 26), activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
+            xpRate: xpRateForSession(isPairs ? pairsCharsetKey : activeCharsetKey, isPairs ? 2 : (activeCharset ? activeCharset.length : 26), activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
             isExam, examStopped: false, playedCount: 0, finished: false,
             wrongGroups: [], startTime: Date.now(), history: [],
             isBufferMode,
@@ -2790,6 +2883,8 @@
                     }
                 }
                 updatePairStageUI();
+                updatePairsCpmHint();
+                updateInputLayoutState();
             } else if (type === 'qrq') {
                 if (startBtn) {
                     startBtn.disabled = false;
@@ -2924,10 +3019,21 @@
                 customPairB.select();
             }
             const chars = getSelectedPairChars();
+            const isCyrA = /[А-ЯЁ]/.test(chars.a);
+            const isCyrB = /[А-ЯЁ]/.test(chars.b);
+            const isLatA = /[A-Z]/.test(chars.a);
+            const isLatB = /[A-Z]/.test(chars.b);
+            const hasConflict = (isCyrA && isLatB) || (isLatA && isCyrB);
+            const conflictEl = document.getElementById('custom-pair-conflict');
+            if (conflictEl) conflictEl.style.display = hasConflict ? 'block' : 'none';
+            if (!hasConflict) {
+                autoAdaptPairsCharset(chars.a, chars.b);
+            }
             const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
             const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
             selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
+            updatePairsCpmHint();
             updateInputLayoutState();
         });
         customPairB.addEventListener('input', () => {
@@ -2935,10 +3041,21 @@
             const cleaned = customPairB.value.toUpperCase().replace(/[^A-Z0-9А-ЯЁ]/g, '');
             customPairB.value = cleaned.slice(0, 1);
             const chars = getSelectedPairChars();
+            const isCyrA = /[А-ЯЁ]/.test(chars.a);
+            const isCyrB = /[А-ЯЁ]/.test(chars.b);
+            const isLatA = /[A-Z]/.test(chars.a);
+            const isLatB = /[A-Z]/.test(chars.b);
+            const hasConflict = (isCyrA && isLatB) || (isLatA && isCyrB);
+            const conflictEl = document.getElementById('custom-pair-conflict');
+            if (conflictEl) conflictEl.style.display = hasConflict ? 'block' : 'none';
+            if (!hasConflict) {
+                autoAdaptPairsCharset(chars.a, chars.b);
+            }
             const pt = (typeof Progress.getPairTrainer === 'function') ? Progress.getPairTrainer() : {};
             const ptKey = `custom_${[chars.a, chars.b].sort().join('-')}`;
             selectedPairStage = pt[ptKey]?.stage || 1;
             updatePairStageUI();
+            updatePairsCpmHint();
             updateInputLayoutState();
         });
         customPairA.addEventListener('keydown', (e) => {
@@ -2978,6 +3095,26 @@
         });
     }
 
+    // Чипы набора символов (фон) для режима пар
+    document.querySelectorAll('#pairs-charset-chips .chip').forEach(c => {
+        c.classList.toggle('active', c.dataset.set === pairsCharsetKey);
+        c.addEventListener('click', () => {
+            const set = c.dataset.set;
+            if (!set) return;
+            setPairsCharset(set, true);
+            const chars = getSelectedPairChars();
+            const isCyr = /[А-ЯЁ]/.test(chars.a) || /[А-ЯЁ]/.test(chars.b);
+            const isLat = /[A-Z]/.test(chars.a) || /[A-Z]/.test(chars.b);
+            if ((set === 'cyrillic' || set === 'cyrillic_digits') && isLat && selectedPairKey !== 'custom') {
+                selectPair('ШЩ');
+            } else if ((set === 'latin' || set === 'mixed') && isCyr && selectedPairKey !== 'custom') {
+                selectPair('SH');
+            } else if (set === 'digits' && (isLat || isCyr) && selectedPairKey !== 'custom') {
+                selectPair('78');
+            }
+        });
+    });
+
     const pairsWpmSlider = document.getElementById('pairs-wpm');
     const pairsWpmValue = document.getElementById('pairs-wpm-value');
     const pairsWpmCpm = document.getElementById('pairs-wpm-cpm');
@@ -2990,13 +3127,14 @@
     function updatePairsCpmHint() {
         const isFw = pairsFwEnabled && pairsFwEnabled.checked && pairsFwSlider;
         const effectiveWpm = isFw ? pairsFwSlider.value : (pairsWpmSlider ? pairsWpmSlider.value : 12);
+        const cpmType = getPairsCpmType();
         if (pairsWpmCpm && typeof cpmHintText === 'function') {
-            pairsWpmCpm.textContent = cpmHintText(effectiveWpm, 'letters');
-            pairsWpmCpm.dataset.cpmType = 'letters';
+            pairsWpmCpm.textContent = cpmHintText(effectiveWpm, cpmType);
+            pairsWpmCpm.dataset.cpmType = cpmType;
         }
         if (pairsFwCpm && pairsFwSlider && typeof cpmHintText === 'function') {
-            pairsFwCpm.textContent = cpmHintText(pairsFwSlider.value, 'letters');
-            pairsFwCpm.dataset.cpmType = 'letters';
+            pairsFwCpm.textContent = cpmHintText(pairsFwSlider.value, cpmType);
+            pairsFwCpm.dataset.cpmType = cpmType;
         }
     }
 

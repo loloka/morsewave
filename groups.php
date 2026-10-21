@@ -313,17 +313,34 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <!-- 1. Набор символов (фон радиограммы) -->
         <div class="mt-2">
+            <div class="muted" style="font-size:13px; margin-bottom:6px;"><?= t('groups.pairs_charset_label') ?></div>
+            <div class="chip-row" id="pairs-charset-chips">
+                <div class="chip active" data-set="latin"><?= t('groups.set_letters') ?></div>
+                <div class="chip" data-set="cyrillic"><?= t('groups.set_cyrillic') ?></div>
+                <div class="chip" data-set="mixed"><?= t('groups.set_mixed') ?></div>
+                <div class="chip" data-set="cyrillic_digits"><?= t('groups.set_cyrillic_digits') ?></div>
+                <div class="chip" data-set="digits"><?= t('groups.set_digits') ?></div>
+            </div>
+        </div>
+
+        <!-- 2. Выбор пары знаков -->
+        <div class="mt-3">
             <div class="muted" style="font-size:13px; margin-bottom:6px;"><?= t('groups.pairs_choose_pair') ?></div>
             <div class="chip-row" id="pairs-chips">
-                <div class="chip active" data-pair="SH">S / H</div>
-                <div class="chip" data-pair="BD">B / D</div>
-                <div class="chip" data-pair="UV">U / V</div>
-                <div class="chip" data-pair="H5">H / 5</div>
-                <div class="chip" data-pair="78">7 / 8</div>
-                <div class="chip" data-pair="B6">B / 6</div>
-                <div class="chip" data-pair="FL">F / L</div>
-                <div class="chip" data-pair="PJ">P / J</div>
+                <div class="chip active" data-pair="SH" data-alphabet="latin">S / H</div>
+                <div class="chip" data-pair="BD" data-alphabet="latin">B / D</div>
+                <div class="chip" data-pair="UV" data-alphabet="latin">U / V</div>
+                <div class="chip" data-pair="FL" data-alphabet="latin">F / L</div>
+                <div class="chip" data-pair="PJ" data-alphabet="latin">P / J</div>
+                <div class="chip" data-pair="ШЩ" data-alphabet="cyrillic">Ш / Щ</div>
+                <div class="chip" data-pair="ЧЦ" data-alphabet="cyrillic">Ч / Ц</div>
+                <div class="chip" data-pair="ВЖ" data-alphabet="cyrillic">В / Ж</div>
+                <div class="chip" data-pair="ДБ" data-alphabet="cyrillic">Д / Б</div>
+                <div class="chip" data-pair="H5" data-alphabet="mixed">H / 5</div>
+                <div class="chip" data-pair="B6" data-alphabet="mixed">B / 6</div>
+                <div class="chip" data-pair="78" data-alphabet="digits">7 / 8</div>
                 <div class="chip" data-pair="custom"><?= t('groups.pairs_custom') ?></div>
             </div>
 
@@ -336,6 +353,9 @@ include __DIR__ . '/includes/header.php';
                     <input type="text" id="custom-pair-b" class="custom-pair-input-char mono" maxlength="1"
                            placeholder="H" autocomplete="off">
                     <span class="muted" style="font-size:12px; margin-left:8px;"><?= t('groups.pairs_custom_hint') ?></span>
+                </div>
+                <div id="custom-pair-conflict" class="mt-2" style="display:none; background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.3); border-radius:8px; padding:8px 12px; font-size:12px; line-height:1.45; color:var(--text);">
+                    <?= t('groups.pairs_conflict_warning') ?>
                 </div>
             </div>
         </div>

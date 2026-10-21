@@ -866,6 +866,10 @@ const Progress = (() => {
         { a: 'B', b: '6', key: 'B6' },
         { a: 'F', b: 'L', key: 'FL' },
         { a: 'P', b: 'J', key: 'PJ' },
+        { a: 'Ш', b: 'Щ', key: 'ШЩ' },
+        { a: 'Ч', b: 'Ц', key: 'ЧЦ' },
+        { a: 'В', b: 'Ж', key: 'ВЖ' },
+        { a: 'Д', b: 'Б', key: 'ДБ' },
     ];
 
     /**
@@ -875,7 +879,7 @@ const Progress = (() => {
         if (!ch1 || !ch2 || ch1 === ch2) return;
         const a = String(ch1).toUpperCase();
         const b = String(ch2).toUpperCase();
-        if (!/^[A-Z0-9]$/.test(a) || !/^[A-Z0-9]$/.test(b)) return;
+        if (!/^[A-Z0-9А-ЯЁ]$/.test(a) || !/^[A-Z0-9А-ЯЁ]$/.test(b)) return;
         const key = [a, b].sort().join('-');
         const state = load();
         if (!state.pairConfusion || typeof state.pairConfusion !== 'object') {
