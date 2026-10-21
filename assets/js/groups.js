@@ -983,10 +983,16 @@
             'PJ': { a: 'P', b: 'J' },
             'ШЩ': { a: 'Ш', b: 'Щ' },
             'ЧЦ': { a: 'Ч', b: 'Ц' },
-            'ВЖ': { a: 'В', b: 'Ж' },
             'ДБ': { a: 'Д', b: 'Б' },
+            'УЖ': { a: 'У', b: 'Ж' },
+            'ГЗ': { a: 'Г', b: 'З' },
+            'ПЛ': { a: 'П', b: 'Л' },
         };
-        return mapping[selectedPairKey] || { a: 'S', b: 'H' };
+        if (mapping[selectedPairKey]) return mapping[selectedPairKey];
+        if (typeof selectedPairKey === 'string' && selectedPairKey.length === 2) {
+            return { a: selectedPairKey[0], b: selectedPairKey[1] };
+        }
+        return { a: 'S', b: 'H' };
     }
 
     function autoAdaptPairsCharset(a, b) {

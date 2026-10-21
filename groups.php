@@ -336,8 +336,10 @@ include __DIR__ . '/includes/header.php';
                 <div class="chip" data-pair="PJ" data-alphabet="latin">P / J</div>
                 <div class="chip" data-pair="ШЩ" data-alphabet="cyrillic">Ш / Щ</div>
                 <div class="chip" data-pair="ЧЦ" data-alphabet="cyrillic">Ч / Ц</div>
-                <div class="chip" data-pair="ВЖ" data-alphabet="cyrillic">В / Ж</div>
                 <div class="chip" data-pair="ДБ" data-alphabet="cyrillic">Д / Б</div>
+                <div class="chip" data-pair="УЖ" data-alphabet="cyrillic">У / Ж</div>
+                <div class="chip" data-pair="ГЗ" data-alphabet="cyrillic">Г / З</div>
+                <div class="chip" data-pair="ПЛ" data-alphabet="cyrillic">П / Л</div>
                 <div class="chip" data-pair="H5" data-alphabet="mixed">H / 5</div>
                 <div class="chip" data-pair="B6" data-alphabet="mixed">B / 6</div>
                 <div class="chip" data-pair="78" data-alphabet="digits">7 / 8</div>
