@@ -95,7 +95,7 @@ include __DIR__ . '/includes/header.php';
         <?= t('donate.sbp_desc') ?>
     </p>
 
-    <?php if (current_lang() === 'en'): ?>
+    <?php if (mw_current_lang() === 'en'): ?>
     <div class="card mb-4" style="background: rgba(232, 163, 61, 0.08); border: 1px solid rgba(232, 163, 61, 0.35); border-radius: 10px; padding: 14px 18px; text-align: left; max-width: 550px; margin: 0 auto 16px;">
         <div style="font-weight: 700; color: #e8a33d; margin-bottom: 4px;">🌍 <?= t('donate.intl_notice_title') ?></div>
         <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;"><?= t('donate.intl_notice_desc') ?></div>

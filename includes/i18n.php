@@ -9,6 +9,10 @@
  * русский и на сам ключ, если перевода нет вовсе.
  */
 
+function current_lang() {
+    return mw_current_lang();
+}
+
 function mw_current_lang() {
     static $lang = null;
     if ($lang !== null) {
