@@ -227,36 +227,6 @@ include __DIR__ . '/includes/header.php';
             </div>
         </details>
 
-        <div class="card mt-2">
-            <h3 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('target', 18) ?> <?= t('acc.daily_goal_title') ?></h3>
-            <p class="muted mt-1" style="font-size:12px;">
-                <?= t('acc.daily_goal_desc') ?>
-            </p>
-            <div class="chip-row mt-2 daily-goal-chips" id="profile-daily-goal-chips">
-                <div class="chip" data-mins="10">10 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="15">15 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="20">20 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="30">30 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="45">45 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="60">60 <?= t('acc.mins') ?></div>
-                <div class="chip" data-mins="custom"><?= t('acc.daily_goal_custom') ?></div>
-            </div>
-            <div class="daily-goal-custom-wrap mt-2 flex gap-2" style="display:none; align-items:center; flex-wrap:wrap;">
-                <input type="number" class="daily-goal-custom-input mono" min="1" max="720" placeholder="30" style="width:90px; padding:6px 10px; border-radius:6px; background:var(--surface-2); border:1px solid var(--border); color:var(--text);">
-                <button type="button" class="btn btn-sm btn-primary daily-goal-custom-btn"><?= t('common.save') ?></button>
-                <span class="muted" style="font-size:12px;"><?= t('acc.mins') ?> (1–720)</span>
-            </div>
-
-            <div class="card p-3 mt-3" style="background:var(--surface-2); border-left:3px solid var(--accent); font-size:13px; line-height:1.5;">
-                <div style="font-weight:700; color:var(--accent); margin-bottom:4px; display:flex; align-items:center; gap:6px;">
-                    <?= mw_icon('info', 15) ?> <?= t('acc.daily_goal_rec_title') ?>
-                </div>
-                <div class="muted" style="color:var(--text); opacity:0.9;">
-                    <?= t('acc.daily_goal_rec_text') ?>
-                </div>
-            </div>
-        </div>
-
         <!-- Опасная зона: удаление аккаунта. -->
         <div class="card mt-2" style="border-color:var(--danger);">
             <h3 class="mt-0" style="color:var(--danger);"><?= t('acc.delete_account_h3') ?></h3>
@@ -351,29 +321,11 @@ include __DIR__ . '/includes/header.php';
 
 <!-- ======================= ВКЛАДКА: ОТОБРАЖЕНИЕ ======================= -->
 <div class="account-tab-panel" data-tab-panel="display" style="display:none;">
-    <h2 class="mt-2"><?= t('acc.display_h2') ?></h2>
-    <div class="card mt-2">
-        <label class="flex gap-2" style="align-items:center; cursor:pointer;">
-            <input type="checkbox" id="show-signal-line-toggle" checked>
-            <span><?= t('acc.signal_line_label') ?></span>
-        </label>
-        <p class="muted mt-2" style="font-size:12px;">
-            <?= t('acc.signal_line_note') ?>
-        </p>
-    </div>
+    <h2 class="mt-2"><?= t('acc.tab_display') ?></h2>
 
+    <!-- Дневная норма тренировки и таймер цели -->
     <div class="card mt-2">
-        <label class="flex gap-2" style="align-items:center; cursor:pointer;">
-            <input type="checkbox" id="show-lamp-toggle" checked>
-            <span><?= t('acc.lamp_label') ?></span>
-        </label>
-        <p class="muted mt-2" style="font-size:12px;">
-            <?= t('acc.lamp_note') ?>
-        </p>
-    </div>
-
-    <div class="card mt-2">
-        <h3 class="mt-0"><?= t('acc.daily_goal_title') ?></h3>
+        <h3 class="mt-0 flex gap-1" style="align-items:center;"><?= mw_icon('target', 18) ?> <?= t('acc.daily_goal_title') ?></h3>
         <p class="muted mt-1" style="font-size:12px;">
             <?= t('acc.daily_goal_desc') ?>
         </p>
@@ -401,6 +353,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <!-- Переключатель таймера цели дня -->
         <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
             <label class="flex gap-2" style="align-items:center; cursor:pointer;">
                 <input type="checkbox" id="show-daily-timer-toggle">
@@ -410,6 +363,27 @@ include __DIR__ . '/includes/header.php';
                 <?= t('acc.live_timer_note') ?>
             </p>
         </div>
+    </div>
+
+    <!-- Визуальные элементы на экране -->
+    <div class="card mt-2">
+        <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+            <input type="checkbox" id="show-signal-line-toggle" checked>
+            <span><?= t('acc.signal_line_label') ?></span>
+        </label>
+        <p class="muted mt-2" style="font-size:12px;">
+            <?= t('acc.signal_line_note') ?>
+        </p>
+    </div>
+
+    <div class="card mt-2">
+        <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+            <input type="checkbox" id="show-lamp-toggle" checked>
+            <span><?= t('acc.lamp_label') ?></span>
+        </label>
+        <p class="muted mt-2" style="font-size:12px;">
+            <?= t('acc.lamp_note') ?>
+        </p>
     </div>
 </div>
 
