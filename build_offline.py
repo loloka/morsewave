@@ -4,7 +4,7 @@ import shutil
 import re
 import json
 
-BASE_DIR = r'e:\dev\morse-trainer'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUT_DIR = os.path.join(BASE_DIR, 'offline-keyer')
 
 os.makedirs(OUT_DIR, exist_ok=True)
