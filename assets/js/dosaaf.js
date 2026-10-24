@@ -1129,29 +1129,46 @@
             // Формируем наглядную раскладку принятой радиограммы
             const breakdownHtml = alignment.map((item, idx) => {
                 if (item.status === 'ok') {
-                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); border-radius:4px; font-family:monospace; font-weight:700; color:var(--text); font-size:13px;" title="Группа ${idx+1}: Верно">✓ ${item.expected}</span>`;
+                    const titleStr = (t('dosaaf.exam_group_ok') || 'Группа {n}: Верно').replace('{n}', idx + 1);
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); border-radius:4px; font-family:monospace; font-weight:700; color:var(--text); font-size:13px;" title="${titleStr}">✓ ${item.expected}</span>`;
                 } else if (item.status === 'wrong') {
-                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="Ожидалось: ${item.expected}, получено: ${item.typed}">✗ <s>${item.typed}</s> <span style="color:var(--success); font-weight:700;">${item.expected}</span></span>`;
+                    const titleStr = (t('dosaaf.exam_group_mismatch') || 'Ожидалось: {expected}, получено: {typed}').replace('{expected}', item.expected).replace('{typed}', item.typed);
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="${titleStr}">✗ <s>${item.typed}</s> <span style="color:var(--success); font-weight:700;">${item.expected}</span></span>`;
                 } else if (item.status === 'missing') {
-                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.12); border:1px dashed rgba(239,68,68,0.5); border-radius:4px; font-family:monospace; font-size:13px;" title="Группа пропущена">✗ <span style="color:var(--danger); font-weight:700;">${item.expected}</span> <small style="opacity:0.7;">(пропуск)</small></span>`;
+                    const titleStr = t('dosaaf.exam_group_missing') || 'Группа пропущена';
+                    const lblStr = t('dosaaf.exam_label_missing') || '(пропуск)';
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(239,68,68,0.12); border:1px dashed rgba(239,68,68,0.5); border-radius:4px; font-family:monospace; font-size:13px;" title="${titleStr}">✗ <span style="color:var(--danger); font-weight:700;">${item.expected}</span> <small style="opacity:0.7;">${lblStr}</small></span>`;
                 } else if (item.status === 'extra') {
-                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="Лишняя группа">+ <span style="color:#eab308;">${item.typed}</span> <small style="opacity:0.7;">(лишняя)</small></span>`;
+                    const titleStr = t('dosaaf.exam_group_extra') || 'Лишняя группа';
+                    const lblStr = t('dosaaf.exam_label_extra') || '(лишняя)';
+                    return `<span style="display:inline-block; margin:2px 4px; padding:3px 7px; background:rgba(234,179,8,0.15); border:1px solid rgba(234,179,8,0.4); border-radius:4px; font-family:monospace; font-size:13px;" title="${titleStr}">+ <span style="color:#eab308;">${item.typed}</span> <small style="opacity:0.7;">${lblStr}</small></span>`;
                 }
             }).join(' ');
+
+            const examSummaryTpl = t('dosaaf.exam_result_summary') || 'Результат: <b>{correct} из {total} групп</b> ({pct}%) на скорости <b>{wpm} WPM</b>';
+            const failHintTpl = t('dosaaf.exam_fail_hint') || 'Для зачёта необходимо принять верно минимум {threshold} из {total} групп (80%). Попробуйте ещё раз!';
+            const summaryHtml = examSummaryTpl
+                .replace('{correct}', correctCount)
+                .replace('{total}', totalWords)
+                .replace('{pct}', pct)
+                .replace('{wpm}', currentWpm)
+                .replace('{cpm}', Math.round(currentWpm * 4.22));
+
+            const passMsgHtml = isPassed 
+                ? (currentStageNum < 7 
+                    ? (t('dosaaf.exam_congrats_stage') || '<b>Поздравляем!</b> Радиограмма принята, следующая ступень программы ДОСААФ открыта!') 
+                    : (t('dosaaf.exam_congrats_stage7') || '<b>Поздравляем!</b> Радиограмма 7-й ступени успешно принята! Проверьте вкладку «Классность ДОСААФ».'))
+                : failHintTpl.replace('{threshold}', passThreshold).replace('{total}', totalWords);
 
             resultBox.innerHTML = `
                 <div class="bold" style="font-size:16px;">${isPassed ? (t('dosaaf.exam_passed_title') || '✓ Зачёт сдан!') : (t('dosaaf.exam_failed_title') || '✗ Зачёт не сдан')}</div>
                 <p class="muted mt-1" style="font-size:13px; line-height:1.5;">
-                    Результат: <b>${correctCount} из ${totalWords} групп</b> (${pct}%) на скорости <b>${currentWpm} WPM</b>.<br>
-                    ${isPassed 
-                        ? (currentStageNum < 7 
-                            ? '<b>Поздравляем!</b> Радиограмма принята, следующая ступень программы ДОСААФ открыта!' 
-                            : '<b>Поздравляем!</b> Радиограмма 7-й ступени успешно принята! Проверьте вкладку «Классность ДОСААФ».')
-                        : 'Для зачёта необходимо принять верно минимум ' + passThreshold + ' из ' + totalWords + ' групп (80%). Потренируйтесь на словах и повторите зачёт.'}
+                    ${summaryHtml}.<br>
+                    ${passMsgHtml}
                 </p>
 
                 <div class="mt-2 mb-2 p-2" style="background:var(--surface); border-radius:var(--radius-sm); border:1px solid var(--border);">
-                    <div class="small muted mb-1"><b>Сверка принятой радиограммы:</b></div>
+                    <div class="small muted mb-1"><b>${t('dosaaf.exam_check_heading') || 'Сверка принятой радиограммы:'}</b></div>
                     <div style="line-height:1.8; word-break:break-all;">
                         ${breakdownHtml}
                     </div>
@@ -1159,25 +1176,25 @@
 
                 ${totalXpEarned > 0 ? `
                     <div class="mt-2 p-2" style="background:var(--surface-2); border-radius:var(--radius-sm); border-left:3px solid var(--accent); font-size:13px; font-weight:600;">
-                        ✨ <b>+${totalXpEarned} XP</b> получено за зачёт ${isPassed ? `(включая бонус +${passBonus} XP за сдачу)` : ''}
+                        ✨ <b>+${totalXpEarned} XP</b> ${t('dosaaf.exam_xp_earned') || 'получено за зачёт'} ${isPassed ? (t('dosaaf.exam_xp_bonus', {'{bonus}': passBonus}) || `(включая бонус +${passBonus} XP за сдачу)`) : ''}
                     </div>
                 ` : ''}
                 ${isPassed ? `
                     <div class="mt-3">
                         ${currentStageNum < 7 ? `
                             <button type="button" class="btn btn-primary" id="dosaaf-next-stage-btn" style="width:100%; font-size:15px; padding:12px 18px; font-weight:700;">
-                                Перейти к Ступени ${currentStageNum + 1} ➔
+                                ${(t('dosaaf.exam_goto_stage_btn') || 'Перейти к Ступени {next} ➔').replace('{next}', currentStageNum + 1)}
                             </button>
                         ` : `
                             <button type="button" class="btn btn-primary" id="dosaaf-view-rank-btn" style="width:100%; font-size:15px; padding:12px 18px; font-weight:700;">
-                                🏆 Посмотреть мою классность ДОСААФ ➔
+                                ${t('dosaaf.exam_view_ranks_btn') || '🏆 Посмотреть мою классность ДОСААФ ➔'}
                             </button>
                         `}
                     </div>
                 ` : `
                     <div class="mt-3">
                         <button type="button" class="btn btn-outline" id="dosaaf-retry-exam-btn" style="width:100%; padding:10px 16px;">
-                            Повторить зачёт
+                            ${t('dosaaf.exam_retry_btn') || 'Повторить зачёт'}
                         </button>
                     </div>
                 `}
@@ -1232,6 +1249,16 @@
         if (!container) return;
         container.innerHTML = '';
 
+        function getRankTitle(rk) {
+            return t('dosaaf.rank_' + rk.id + '_title') || rk.title;
+        }
+        function getRankBadge(rk) {
+            return t('dosaaf.rank_' + rk.id + '_badge') || rk.badge;
+        }
+        function getRankDesc(rk) {
+            return t('dosaaf.rank_' + rk.id + '_desc') || rk.description;
+        }
+
         const activeRankId = computeCurrentRank();
         const activeRank = DOSAAF_RANKS.find(r => r.id === activeRankId) || DOSAAF_RANKS[0];
 
@@ -1240,10 +1267,10 @@
                 <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                     <div>
                         <span class="muted small text-uppercase" style="letter-spacing:1px; font-weight:700;">${t('dosaaf.rank_current') || 'Текущее звание'}</span>
-                        <h3 class="mt-0 mb-0" style="font-size:18px; color:var(--accent);">${activeRank.title}</h3>
-                        <div class="muted mt-1" style="font-size:13px;">${activeRank.description}</div>
+                        <h3 class="mt-0 mb-0" style="font-size:18px; color:var(--accent);">${getRankTitle(activeRank)}</h3>
+                        <div class="muted mt-1" style="font-size:13px;">${getRankDesc(activeRank)}</div>
                     </div>
-                    <span class="badge" style="font-size:14px; font-weight:800; padding:6px 14px; background:var(--accent); color:#1a1200;">${activeRank.badge}</span>
+                    <span class="badge" style="font-size:14px; font-weight:800; padding:6px 14px; background:var(--accent); color:#1a1200;">${getRankBadge(activeRank)}</span>
                 </div>
             `;
         }
@@ -1275,9 +1302,11 @@
                 if (stage7Exam && bestWpmForRank >= rk.minSpeedWpm) {
                     isAchieved = true;
                     statusBadge = `<span class="badge" style="background:rgba(74, 222, 128, 0.15); color:var(--success);">${t('dosaaf.rank_achieved') || '✓ Присвоено'}</span>`;
-                    statusText = `<div class="muted small mt-1" style="color:var(--success);">✓ Подтверждено: ${bestWpmForRank} WPM на радиограмме ${minWords}+ групп</div>`;
+                    const confTpl = t('dosaaf.rank_confirmed_info') || '✓ Подтверждено: {wpm} WPM на радиограмме {words}+ групп';
+                    statusText = `<div class="muted small mt-1" style="color:var(--success);">${confTpl.replace('{wpm}', bestWpmForRank).replace('{words}', minWords)}</div>`;
                 } else {
-                    const reqInfo = `Требуется: сдать зачёт 7 ступени со скоростью ≥ ${rk.minSpeedWpm} WPM (${rk.minSpeedCpm} зн/мин) на радиограмме не менее ${minWords} групп.`;
+                    const reqTpl = t('dosaaf.rank_req_info') || 'Требуется: сдать зачёт 7 ступени со скоростью ≥ {wpm} WPM ({cpm} зн/мин) на радиограмме не менее {words} групп.';
+                    const reqInfo = reqTpl.replace('{wpm}', rk.minSpeedWpm).replace('{cpm}', rk.minSpeedCpm).replace('{words}', minWords);
                     statusBadge = `<span class="badge" style="background:var(--surface); border:1px solid var(--border); color:var(--text-muted);">${t('dosaaf.rank_locked') || '🔒 Не выполнено'}</span>`;
                     statusText = `<div class="muted small mt-1" style="color:var(--accent);">${reqInfo}</div>`;
                 }
@@ -1286,8 +1315,8 @@
             card.innerHTML = `
                 <div class="flex-between flex-wrap gap-2" style="align-items:center;">
                     <div>
-                        <div class="bold" style="font-size:15px; color:${isAchieved ? 'var(--text)' : 'var(--text-muted)'};">${rk.title}</div>
-                        <div class="muted mt-1" style="font-size:13px;">${rk.description}</div>
+                        <div class="bold" style="font-size:15px; color:${isAchieved ? 'var(--text)' : 'var(--text-muted)'};">${getRankTitle(rk)}</div>
+                        <div class="muted mt-1" style="font-size:13px;">${getRankDesc(rk)}</div>
                         ${statusText}
                     </div>
                     ${statusBadge}
@@ -1345,11 +1374,11 @@
         const switcher = document.createElement('div');
         switcher.className = 'dosaaf-kbd-switcher';
         switcher.innerHTML = `
-            <span class="dosaaf-kbd-switcher-label">Раскладка:</span>
+            <span class="dosaaf-kbd-switcher-label">${t('dosaaf.kbd_layout_label') || 'Раскладка:'}</span>
             <div class="dosaaf-kbd-switcher-btns">
-                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'dosaaf' ? 'active' : ''}" data-layout="dosaaf" title="Только выученные буквы текущей ступени">ДОСААФ</button>
-                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'jcuken' ? 'active' : ''}" data-layout="jcuken" title="Стандартная клавиатура ЙЦУКЕН (неизученные буквы неактивны)">ЙЦУКЕН</button>
-                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'abvgd' ? 'active' : ''}" data-layout="abvgd" title="Алфавитный порядок А-Я (неизученные буквы неактивны)">АБВГД</button>
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'dosaaf' ? 'active' : ''}" data-layout="dosaaf" title="${t('dosaaf.kbd_tab_dosaaf_title') || 'Только выученные буквы текущей ступени'}">${t('dosaaf.kbd_tab_dosaaf') || 'ДОСААФ'}</button>
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'jcuken' ? 'active' : ''}" data-layout="jcuken" title="${t('dosaaf.kbd_tab_jcuken_title') || 'Стандартная клавиатура ЙЦУКЕН (неизученные буквы неактивны)'}">${t('dosaaf.kbd_tab_jcuken') || 'ЙЦУКЕН'}</button>
+                <button type="button" class="dosaaf-kbd-tab ${currentLayout === 'abvgd' ? 'active' : ''}" data-layout="abvgd" title="${t('dosaaf.kbd_tab_abvgd_title') || 'Алфавитный порядок А-Я (неизученные буквы неактивны)'}">${t('dosaaf.kbd_tab_abvgd') || 'АБВГД'}</button>
             </div>
         `;
         switcher.querySelectorAll('.dosaaf-kbd-tab').forEach(btn => {
@@ -1481,7 +1510,7 @@
         btn.className = 'dosaaf-key disabled';
         btn.textContent = ch;
         btn.setAttribute('aria-disabled', 'true');
-        btn.title = 'Буква ещё не изучена на этой ступени';
+        btn.title = t('dosaaf.kbd_unlearned_letter') || 'Буква ещё не изучена на этой ступени';
         return btn;
     }
 

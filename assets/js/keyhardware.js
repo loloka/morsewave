@@ -117,10 +117,11 @@
             const elDah = document.getElementById('val-dah-ms');
             const elChar = document.getElementById('val-char-pause-ms');
             const elWord = document.getElementById('val-word-pause-ms');
-            if (elDit) elDit.textContent = `${dMs} мс`;
-            if (elDah) elDah.textContent = `${dMs * 3} мс`;
-            if (elChar) elChar.textContent = `${dMs * 3} мс`;
-            if (elWord) elWord.textContent = `${dMs * 7} мс`;
+            const msUnit = t('js.paris.dot_unit') || 'ms';
+            if (elDit) elDit.textContent = `${dMs} ${msUnit}`;
+            if (elDah) elDah.textContent = `${dMs * 3} ${msUnit}`;
+            if (elChar) elChar.textContent = `${dMs * 3} ${msUnit}`;
+            if (elWord) elWord.textContent = `${dMs * 7} ${msUnit}`;
 
             if (window.TimingLab && window.TimingLab.setWpm) {
                 window.TimingLab.setWpm(currentWpm);
@@ -286,11 +287,11 @@
         if (!('serial' in navigator)) {
             const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             if (window.location.protocol !== 'https:' && !isLocal) {
-                alert('⚠️ WebSerial API требует безопасного соединения HTTPS или localhost!\n\nПожалуйста, откройте страницу через https:// или запустите локальный сервер.');
-                appendTerminal('\n[ОШИБКА] WebSerial заблокирован браузером из-за небезопасного соединения HTTP. Откройте сайт по HTTPS или через localhost!\n', 'sys');
+                alert(t('keyhardware.err_https') || '⚠️ WebSerial API requires HTTPS or localhost!');
+                appendTerminal(t('keyhardware.err_https_term') || '\n[ERROR] WebSerial blocked on insecure HTTP.\n', 'sys');
             } else {
-                alert('⚠️ Ваш браузер не поддерживает WebSerial API (доступ к USB COM-портам).\n\nПожалуйста, используйте браузер на движке Chromium:\n• Google Chrome\n• Яндекс.Браузер\n• Microsoft Edge\n• Opera\n\nВ Mozilla Firefox и Apple Safari технология WebSerial заблокирована разработчиками браузера.');
-                appendTerminal('\n[ОШИБКА] Браузер не поддерживает WebSerial API. Нужен Chrome, Edge, Яндекс.Браузер или Opera (в Firefox и Safari WebSerial не поддерживается).\n', 'sys');
+                alert(t('keyhardware.err_browser') || '⚠️ Your browser does not support WebSerial API.');
+                appendTerminal(t('keyhardware.err_browser_term') || '\n[ERROR] Browser does not support WebSerial API.\n', 'sys');
             }
             return;
         }
@@ -300,10 +301,10 @@
             await port.open({ baudRate: 115200 });
 
             keepReading = true;
-            btnConnect.textContent = 'Отключить ключ';
+            btnConnect.textContent = t('keyhardware.btn_disconnect') || 'Отключить ключ';
             btnConnect.classList.add('connected');
             if (badgeStatus) {
-                badgeStatus.textContent = '● НА СВЯЗИ (115200)';
+                badgeStatus.textContent = t('keyhardware.status_online') || '● НА СВЯЗИ (115200)';
                 badgeStatus.style.color = '#4fd8c4';
                 badgeStatus.style.borderColor = '#4fd8c4';
             }
@@ -313,7 +314,7 @@
             }
             currentDecodedText = '';
 
-            appendTerminal('\n[СИСТЕМА] Порт 115200 бод открыт! Ожидание сигналов с ключа...\n', 'sys');
+            appendTerminal(t('keyhardware.sys_port_open') || '\n[СИСТЕМА] Порт 115200 бод открыт! Ожидание сигналов с ключа...\n', 'sys');
 
             const textDecoder = new TextDecoderStream();
             const readableStreamClosed = port.readable.pipeTo(textDecoder.writable);
@@ -331,12 +332,13 @@
         } catch (err) {
             console.warn('WebSerial error / cancelled:', err);
             if (err.name === 'NotFoundError') {
-                appendTerminal('\n[СИСТЕМА] Выбор COM-порта отменён.\n', 'sys');
+                appendTerminal(t('keyhardware.sys_port_cancelled') || '\n[СИСТЕМА] Выбор COM-порта отменён.\n', 'sys');
             } else {
                 const msg = err.message || String(err);
-                appendTerminal(`\n[ОШИБКА] Не удалось открыть порт: ${msg}\n`, 'sys');
+                const errMsg = (t('keyhardware.err_open_port') || '\n[ОШИБКА] Не удалось открыть порт: {msg}\n').replace('{msg}', msg);
+                appendTerminal(errMsg, 'sys');
                 if (msg.toLowerCase().includes('failed to open') || msg.toLowerCase().includes('access denied') || err.name === 'NetworkError') {
-                    alert('⚠️ Не удалось открыть COM-порт!\n\nВероятная причина: этот COM-порт сейчас занят другой программой (например, в Arduino IDE открыт «Монитор порта»).\n\nПожалуйста, закройте окно Монитора порта в Arduino IDE и нажмите «Подключить» ещё раз!');
+                    alert(t('keyhardware.err_port_busy') || '⚠️ Не удалось открыть COM-порт!');
                 }
             }
             disconnectSerial();
@@ -360,11 +362,11 @@
         }
 
         if (btnConnect) {
-            btnConnect.textContent = 'Подключить ключ по USB';
+            btnConnect.textContent = t('keyhardware.btn_connect') || 'Подключить ключ по USB';
             btnConnect.classList.remove('connected');
         }
         if (badgeStatus) {
-            badgeStatus.textContent = '● ОТКЛЮЧЕН';
+            badgeStatus.textContent = t('keyhardware.status_offline') || '● ОТКЛЮЧЕН';
             badgeStatus.style.color = 'var(--text-muted)';
             badgeStatus.style.borderColor = 'var(--border)';
         }
@@ -372,7 +374,7 @@
             oledTicker.textContent = 'TXT: 73';
         }
         currentDecodedText = '';
-        appendTerminal('\n[СИСТЕМА] Устройство отключено.\n', 'sys');
+        appendTerminal(t('keyhardware.sys_port_disconnected') || '\n[СИСТЕМА] Устройство отключено.\n', 'sys');
     }
 
     if (btnConnect) {
@@ -391,12 +393,12 @@
         });
     } else {
         if (badgeStatus) {
-            badgeStatus.textContent = '● НЕТ WEBSERIAL';
+            badgeStatus.textContent = t('keyhardware.status_no_serial') || '● НЕТ WEBSERIAL';
             badgeStatus.style.color = '#f87171';
             badgeStatus.style.borderColor = 'rgba(239, 68, 68, 0.4)';
         }
         if (btnConnect) {
-            btnConnect.title = 'WebSerial недоступен в этом браузере. Откройте в Chrome, Яндекс.Браузере или Edge.';
+            btnConnect.title = t('keyer.browsers_unsupported') || 'WebSerial недоступен в этом браузере.';
         }
     }
 
@@ -484,7 +486,7 @@
             isPlayingAudio = true;
             if (btnPlayEcho) {
                 btnPlayEcho.style.opacity = '0.7';
-                btnPlayEcho.innerHTML = '<span>🔊</span> <span>Звучит...</span>';
+                btnPlayEcho.innerHTML = '<span>🔊</span> <span>' + (t('keyhardware.echo_playing') || 'Звучит...') + '</span>';
             }
 
             if (currentMorsePlayer && currentMorsePlayer.stop) {
@@ -503,7 +505,7 @@
             isPlayingAudio = false;
             if (btnPlayEcho) {
                 btnPlayEcho.style.opacity = '1';
-                btnPlayEcho.innerHTML = '<span>🔊</span> <span>Повторить</span>';
+                btnPlayEcho.innerHTML = '<span>🔊</span> <span>' + (t('keyhardware.echo_repeat') || 'Повторить') + '</span>';
             }
         }
     }
@@ -515,9 +517,9 @@
                 btnToggleEcho.style.background = '#f59e0b';
                 btnToggleEcho.style.color = '#000';
             }
-            if (echoToggleLabel) echoToggleLabel.textContent = 'Пауза';
+            if (echoToggleLabel) echoToggleLabel.textContent = t('keyhardware.echo_pause') || 'Пауза';
             if (echoResultEl) {
-                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Слушайте позывной и повторяйте на ключе...</span>';
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">' + (t('keyhardware.echo_listen_prompt') || 'Слушайте позывной и повторяйте на ключе...') + '</span>';
             }
             playCurrentEchoAudio();
         } else {
@@ -525,12 +527,12 @@
                 btnToggleEcho.style.background = '#10b981';
                 btnToggleEcho.style.color = '#fff';
             }
-            if (echoToggleLabel) echoToggleLabel.textContent = 'Начать тренировку';
+            if (echoToggleLabel) echoToggleLabel.textContent = t('keyhardware.echo_start') || 'Начать тренировку';
             if (currentMorsePlayer && currentMorsePlayer.stop) {
                 currentMorsePlayer.stop();
             }
             if (echoResultEl) {
-                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Тренировка на паузе. Нажмите [▶ Начать тренировку]</span>';
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">' + (t('keyhardware.echo_paused_prompt') || 'Тренировка на паузе. Нажмите [▶ Начать тренировку]') + '</span>';
             }
         }
     }
@@ -546,9 +548,9 @@
         }
         if (echoResultEl) {
             if (isEchoRunning) {
-                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">' + (t('keyhardware.echo_waiting_paddle') || 'Ожидание передачи веслом...') + '</span>';
             } else {
-                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Нажмите [▶ Начать тренировку], чтобы услышать позывной в эфире</span>';
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">' + (t('keyhardware.echo_click_start_prompt') || 'Нажмите [▶ Начать тренировку], чтобы услышать позывной в эфире') + '</span>';
             }
         }
 
@@ -593,7 +595,7 @@
             if (echoStreakVal) echoStreakVal.textContent = echoStreak;
             if (echoScoreVal) echoScoreVal.textContent = echoScore;
 
-            echoResultEl.innerHTML += ' <b style="color:#e8a33d; margin-left:8px;">✓ 100% В ЭФИРЕ!</b>';
+            echoResultEl.innerHTML += ' <b style="color:#e8a33d; margin-left:8px;">' + (t('keyhardware.echo_perfect') || '✓ 100% В ЭФИРЕ!') + '</b>';
             playSuccessChirp();
 
             setTimeout(() => {
@@ -602,7 +604,7 @@
         } else if (hasError && userEchoBuffer.length >= target.length) {
             echoStreak = 0;
             if (echoStreakVal) echoStreakVal.textContent = echoStreak;
-            echoResultEl.innerHTML += ' <span style="color:#ff5a52; font-size:12px; margin-left:8px;">[Ошибка передачи, нажмите ⌫ Сброс]</span>';
+            echoResultEl.innerHTML += ' <span style="color:#ff5a52; font-size:12px; margin-left:8px;">' + (t('keyhardware.echo_error_reset') || '[Ошибка передачи, нажмите ⌫ Сброс]') + '</span>';
         }
     }
 
@@ -620,7 +622,7 @@
         btnResetEcho.addEventListener('click', () => {
             userEchoBuffer = '';
             if (echoResultEl) {
-                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">Ожидание передачи веслом...</span>';
+                echoResultEl.innerHTML = '<span style="color:var(--text-muted);">' + (t('keyhardware.echo_waiting_paddle') || 'Ожидание передачи веслом...') + '</span>';
             }
         });
     }
@@ -651,7 +653,7 @@
                 btnModeVisual.style.color = 'var(--text-muted)';
             }
             if (echoInstructions) {
-                echoInstructions.textContent = 'Сайт воспроизводит позывной в эфире. Внимательно прослушайте его и повторите веслом на ключе!';
+                echoInstructions.textContent = t('keyhardware.echo_instr_echo') || 'Сайт воспроизводит позывной в эфире. Внимательно прослушайте его и повторите веслом на ключе!';
             }
         } else {
             if (btnModeVisual) {
@@ -665,7 +667,7 @@
                 btnModeEcho.style.color = 'var(--text-muted)';
             }
             if (echoInstructions) {
-                echoInstructions.textContent = 'Читайте текст с экрана и передавайте его вашим манипулятором, отрабатывая ритм и чистоту.';
+                echoInstructions.textContent = t('keyhardware.echo_instr_visual') || 'Читайте текст с экрана и передавайте его вашим манипулятором, отрабатывая ритм и чистоту.';
             }
         }
     }

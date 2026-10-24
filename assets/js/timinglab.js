@@ -137,7 +137,7 @@
             if (ch === ' ') {
                 span.classList.add('space');
                 span.innerHTML = '&middot;';
-                span.title = 'Межсловная пауза 7T';
+                span.title = t('timinglab.space_title') || 'Межсловная пауза 7T';
             } else {
                 span.textContent = ch;
             }
@@ -164,10 +164,10 @@
 
         if (elStatusBadge) {
             elStatusBadge.className = 'timing-badge-status active';
-            elStatusBadge.innerHTML = '● ИДЁТ ЗАМЕР ТАЙМИНГОВ';
+            elStatusBadge.innerHTML = t('timinglab.status_measuring') || '● ИДЁТ ЗАМЕР ТАЙМИНГОВ';
         }
         if (elBtnStart) {
-            elBtnStart.innerHTML = '<span>⏹</span> <span>Завершить замер</span>';
+            elBtnStart.innerHTML = '<span>⏹</span> <span>' + (t('timinglab.btn_stop') || 'Завершить замер') + '</span>';
             elBtnStart.style.background = '#f59e0b';
             elBtnStart.style.color = '#000';
         }
@@ -182,10 +182,10 @@
         state.isRunning = false;
         if (elStatusBadge) {
             elStatusBadge.className = 'timing-badge-status';
-            elStatusBadge.innerHTML = '○ ТЕСТ ЗАВЕРШЁН';
+            elStatusBadge.innerHTML = t('timinglab.status_done') || '○ ТЕСТ ЗАВЕРШЁН';
         }
         if (elBtnStart) {
-            elBtnStart.innerHTML = '<span>▶</span> <span>Начать замер</span>';
+            elBtnStart.innerHTML = '<span>▶</span> <span>' + (t('timinglab.btn_start') || 'Начать замер') + '</span>';
             elBtnStart.style.background = '#10b981';
             elBtnStart.style.color = '#fff';
         }
@@ -205,16 +205,16 @@
 
         if (elStatusBadge) {
             elStatusBadge.className = 'timing-badge-status';
-            elStatusBadge.innerHTML = '○ ГОТОВ К ЗАМЕРУ';
+            elStatusBadge.innerHTML = t('timinglab.status_ready') || '○ ГОТОВ К ЗАМЕРУ';
         }
         if (elBtnStart) {
-            elBtnStart.innerHTML = '<span>▶</span> <span>Начать замер</span>';
+            elBtnStart.innerHTML = '<span>▶</span> <span>' + (t('timinglab.btn_start') || 'Начать замер') + '</span>';
             elBtnStart.style.background = '#10b981';
             elBtnStart.style.color = '#fff';
         }
 
         if (elAuditBody) {
-            elAuditBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">Передавайте знаки ключом для формирования судейского отчёта...</td></tr>';
+            elAuditBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">' + (t('timinglab.audit_waiting') || 'Передавайте знаки ключом для формирования судейского отчёта...') + '</td></tr>';
         }
 
         renderTargetTokens();
@@ -323,31 +323,32 @@
 
         // Оценка знака (0-100)
         let score = 100;
-        let status = 'Идеал';
+        let status = t('timinglab.status_ideal') || 'Идеал';
 
         // Проверка межзнаковой паузы (норма 2.5T - 3.6T)
         if (state.recordedCharPauses.length > 0) {
             if (pauseUnits < 2.2) {
-                status = 'Слипание букв (<2.2T)';
+                status = t('timinglab.status_char_stick') || 'Слипание букв (<2.2T)';
                 score -= 30;
             } else if (pauseUnits > 4.2) {
-                status = 'Зависание (>4.2T)';
+                status = t('timinglab.status_char_hang') || 'Зависание (>4.2T)';
                 score -= 20;
             }
         }
 
         // Проверка соотношения тире/точка (норма 2.8 - 3.2)
         if (ratio < 2.5) {
-            status = 'Куцые тире (<2.5×)';
+            status = t('timinglab.status_dah_short') || 'Куцые тире (<2.5×)';
             score -= 25;
         } else if (ratio > 3.5) {
-            status = 'Затянутые тире (>3.5×)';
+            status = t('timinglab.status_dah_long') || 'Затянутые тире (>3.5×)';
             score -= 20;
         }
 
         if (!isMatch) {
             score -= 40;
-            status = `Ошибка (ожидалось ${expected})`;
+            const errTpl = t('timinglab.status_error_exp') || 'Ошибка (ожидалось {expected})';
+            status = errTpl.replace('{expected}', expected);
         }
         score = Math.max(0, score);
 
@@ -380,18 +381,18 @@
         state.lastWordEndTime = now;
 
         const expected = state.targetChars[state.currentIndex];
-        let status = 'Чистый пробел 7T';
+        let status = t('timinglab.status_word_clean') || 'Чистый пробел 7T';
         let score = 100;
 
         if (pauseUnits < 4.8) {
-            status = 'Слипание слов (<5T)';
+            status = t('timinglab.status_word_stick') || 'Слипание слов (<5T)';
             score -= 35;
         } else if (pauseUnits > 9.5) {
-            status = 'Затянутый пробел (>9.5T)';
+            status = t('timinglab.status_word_hang') || 'Затянутый пробел (>9.5T)';
             score -= 20;
         }
 
-        addAuditRow('(пробел)', 3.0, pauseBeforeMs, pauseUnits, status, score);
+        addAuditRow(t('timinglab.space_label') || '(пробел)', 3.0, pauseBeforeMs, pauseUnits, status, score);
 
         if (expected === ' ' && state.currentIndex < state.targetChars.length) {
             state.currentIndex++;
@@ -418,10 +419,11 @@
         if (score < 70) badgeColor = '#ef4444';
         else if (score < 90) badgeColor = '#f59e0b';
 
+        const msUnit = t('js.paris.dot_unit') || 'мс';
         tr.innerHTML = `
             <td style="font-weight:700; color:#4fd8c4; padding:6px 10px;">${char}</td>
             <td style="color:var(--text); padding:6px 10px;">${ratio.toFixed(2)}×</td>
-            <td style="color:var(--text); padding:6px 10px;">${pauseMs > 0 ? `${pauseMs} мс (${pauseUnits}T)` : '—'}</td>
+            <td style="color:var(--text); padding:6px 10px;">${pauseMs > 0 ? `${pauseMs} ${msUnit} (${pauseUnits}T)` : '—'}</td>
             <td style="padding:6px 10px; color:${badgeColor}; font-weight:600;">${status}</td>
             <td style="padding:6px 10px; font-weight:800; color:${badgeColor};">${score}%</td>
         `;
@@ -449,11 +451,11 @@
         }
         if (elRatioStatus) {
             if (ratio >= 2.85 && ratio <= 3.15) {
-                elRatioStatus.innerHTML = '<span style="color:#10b981;">✓ Идеальный баланс (ITU)</span>';
+                elRatioStatus.innerHTML = '<span style="color:#10b981;">' + (t('timinglab.ratio_ideal') || '✓ Идеальный баланс (ITU)') + '</span>';
             } else if (ratio < 2.85) {
-                elRatioStatus.innerHTML = '<span style="color:#f59e0b;">⚠️ Тире слегка укорочены</span>';
+                elRatioStatus.innerHTML = '<span style="color:#f59e0b;">' + (t('timinglab.ratio_short') || '⚠️ Тире слегка укорочены') + '</span>';
             } else {
-                elRatioStatus.innerHTML = '<span style="color:#f59e0b;">⚠️ Тире затянуты</span>';
+                elRatioStatus.innerHTML = '<span style="color:#f59e0b;">' + (t('timinglab.ratio_long') || '⚠️ Тире затянуты') + '</span>';
             }
         }
 
@@ -463,7 +465,8 @@
             avgCharPause = state.recordedCharPauses.reduce((a, b) => a + b, 0) / state.recordedCharPauses.length;
         }
         const charUnits = (avgCharPause / ditT).toFixed(1);
-        if (elCharPauseVal) elCharPauseVal.textContent = `${charUnits}T (${Math.round(avgCharPause)} мс)`;
+        const msUnit = t('js.paris.dot_unit') || 'мс';
+        if (elCharPauseVal) elCharPauseVal.textContent = `${charUnits}T (${Math.round(avgCharPause)} ${msUnit})`;
         if (elCharPauseBar) {
             const pct = Math.max(0, Math.min(100, ((parseFloat(charUnits) - 1.0) / 4.0) * 100));
             elCharPauseBar.style.width = `${pct}%`;
@@ -473,11 +476,11 @@
         }
         if (elCharPauseStatus) {
             if (charUnits >= 2.6 && charUnits <= 3.5) {
-                elCharPauseStatus.innerHTML = '<span style="color:#10b981;">✓ Чёткий раздельный ритм</span>';
+                elCharPauseStatus.innerHTML = '<span style="color:#10b981;">' + (t('timinglab.char_ideal') || '✓ Чёткий раздельный ритм') + '</span>';
             } else if (charUnits < 2.6) {
-                elCharPauseStatus.innerHTML = '<span style="color:#ef4444;">⚠️ Буквы слипаются (<2.6T)</span>';
+                elCharPauseStatus.innerHTML = '<span style="color:#ef4444;">' + (t('timinglab.char_stick') || '⚠️ Буквы слипаются (<2.6T)') + '</span>';
             } else {
-                elCharPauseStatus.innerHTML = '<span style="color:#f59e0b;">⚠️ Зависание между буквами</span>';
+                elCharPauseStatus.innerHTML = '<span style="color:#f59e0b;">' + (t('timinglab.char_lag') || '⚠️ Зависание между буквами') + '</span>';
             }
         }
 
@@ -487,7 +490,7 @@
             avgWordPause = state.recordedWordPauses.reduce((a, b) => a + b, 0) / state.recordedWordPauses.length;
         }
         const wordUnits = (avgWordPause / ditT).toFixed(1);
-        if (elWordPauseVal) elWordPauseVal.textContent = `${wordUnits}T (${Math.round(avgWordPause)} мс)`;
+        if (elWordPauseVal) elWordPauseVal.textContent = `${wordUnits}T (${Math.round(avgWordPause)} ${msUnit})`;
         if (elWordPauseBar) {
             const pct = Math.max(0, Math.min(100, ((parseFloat(wordUnits) - 3.0) / 8.0) * 100));
             elWordPauseBar.style.width = `${pct}%`;
@@ -497,18 +500,19 @@
         }
         if (elWordPauseStatus) {
             if (wordUnits >= 6.0 && wordUnits <= 8.5) {
-                elWordPauseStatus.innerHTML = '<span style="color:#10b981;">✓ Честный пробел 7T</span>';
+                elWordPauseStatus.innerHTML = '<span style="color:#10b981;">' + (t('timinglab.word_ideal') || '✓ Честный пробел 7T') + '</span>';
             } else if (wordUnits < 6.0) {
-                elWordPauseStatus.innerHTML = '<span style="color:#ef4444;">⚠️ Слова слипаются (<6T)</span>';
+                elWordPauseStatus.innerHTML = '<span style="color:#ef4444;">' + (t('timinglab.word_stick') || '⚠️ Слова слипаются (<6T)') + '</span>';
             } else {
-                elWordPauseStatus.innerHTML = '<span style="color:#f59e0b;">⚠️ Пауза затянута</span>';
+                elWordPauseStatus.innerHTML = '<span style="color:#f59e0b;">' + (t('timinglab.word_lag') || '⚠️ Пауза затянута') + '</span>';
             }
         }
 
         // 4. Скорость и точность ритма
         if (elSpeedWpmVal) elSpeedWpmVal.textContent = `${state.currentWpm} WPM`;
         const effCpm = calculateEffectiveCpm(state.targetText, state.currentWpm);
-        if (elSpeedCpmVal) elSpeedCpmVal.textContent = `~${effCpm} зн/мин`;
+        const cpmUnit = t('timinglab.cpm_unit') || 'зн/мин';
+        if (elSpeedCpmVal) elSpeedCpmVal.textContent = `~${effCpm} ${cpmUnit}`;
 
         // Итоговый балл
         let totalScore = 100;
@@ -526,15 +530,19 @@
 
         if (elClassBadge) {
             if (!state.isRunning && state.auditLog.length === 0) {
-                elClassBadge.innerHTML = '<span style="color:var(--text-muted); font-weight:600;">○ Ожидание замера</span>';
+                elClassBadge.innerHTML = '<span style="color:var(--text-muted); font-weight:600;">' + (t('timinglab.badge_waiting') || '○ Ожидание замера') + '</span>';
             } else if (totalScore >= 95) {
-                elClassBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">🟢 ЭТАЛОННЫЙ МЕТРОНОМ (${totalScore}%)</span>`;
+                const bText = (t('timinglab.badge_metronome') || '🟢 ЭТАЛОННЫЙ МЕТРОНОМ ({score}%)').replace('{score}', totalScore);
+                elClassBadge.innerHTML = `<span style="color:#10b981; font-weight:800;">${bText}</span>`;
             } else if (totalScore >= 85) {
-                elClassBadge.innerHTML = `<span style="color:#4fd8c4; font-weight:800;">🟢 СТАБИЛЬНЫЙ ПОЧЕРК (${totalScore}%)</span>`;
+                const bText = (t('timinglab.badge_stable') || '🟢 СТАБИЛЬНЫЙ ПОЧЕРК ({score}%)').replace('{score}', totalScore);
+                elClassBadge.innerHTML = `<span style="color:#4fd8c4; font-weight:800;">${bText}</span>`;
             } else if (totalScore >= 70) {
-                elClassBadge.innerHTML = `<span style="color:#f59e0b; font-weight:800;">🟡 УДОВЛЕТВОРИТЕЛЬНО (${totalScore}%)</span>`;
+                const bText = (t('timinglab.badge_fair') || '🟡 УДОВЛЕТВОРИТЕЛЬНО ({score}%)').replace('{score}', totalScore);
+                elClassBadge.innerHTML = `<span style="color:#f59e0b; font-weight:800;">${bText}</span>`;
             } else {
-                elClassBadge.innerHTML = `<span style="color:#ef4444; font-weight:800;">🔴 ПЛАВАЮЩИЙ РИТМ (${totalScore}%)</span>`;
+                const bText = (t('timinglab.badge_unstable') || '🔴 ПЛАВАЮЩИЙ РИТМ ({score}%)').replace('{score}', totalScore);
+                elClassBadge.innerHTML = `<span style="color:#ef4444; font-weight:800;">${bText}</span>`;
             }
         }
     }
@@ -606,10 +614,11 @@
         const sum = state.auditLog.reduce((a, b) => a + b.score, 0);
         const avg = Math.round(sum / total);
 
-        let verdictText = `Тест фразы «${state.targetText}» завершён!\nТочность ритма: ${avg}%\n`;
-        if (avg >= 95) verdictText += 'Идеальный эталонный метроном по нормативам ITU!';
-        else if (avg >= 85) verdictText += 'Отличная передача норматива 1-го разряда!';
-        else verdictText += 'Обратите внимание на паузы между знаками в таблице аудита.';
+        const vTpl = t('timinglab.verdict_title') || "Тест фразы «{text}» завершён!\nТочность ритма: {avg}%\n";
+        let verdictText = vTpl.replace('{text}', state.targetText).replace('{avg}', avg);
+        if (avg >= 95) verdictText += (t('timinglab.verdict_itu') || 'Идеальный эталонный метроном по нормативам ITU!');
+        else if (avg >= 85) verdictText += (t('timinglab.verdict_class1') || 'Отличная передача норматива 1-го разряда!');
+        else verdictText += (t('timinglab.verdict_check') || 'Обратите внимание на паузы между знаками в таблице аудита.');
 
         console.log('[TimingLab Verdict]', verdictText);
     }
