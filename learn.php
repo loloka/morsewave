@@ -22,6 +22,7 @@ include __DIR__ . '/includes/header.php';
         <a href="invaders.php" class="chip chip-invaders2" style="text-decoration:none;"><?= t('learn.mode_invaders2') ?> <span class="badge-beta">BETA</span></a>
     </div>
 </div>
+<div id="live-daily-timer-mount"></div>
 
 <!-- ======================= РЕЖИМ: ОТПРАВКА ======================= -->
 <div id="send-mode">

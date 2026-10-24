@@ -23,7 +23,7 @@ for css in css_files:
 js_files = [
     'i18n.js', 'icons.js', 'morse-data.js', 'abbreviations.js', 'words.js',
     'audio-settings.js', 'display-settings.js', 'audio.js', 'input.js',
-    'signal.js', 'progress.js', 'daily.js', 'app.js', 'timinglab.js', 'keyhardware.js',
+    'signal.js', 'progress.js', 'daily.js', 'live-timer.js', 'app.js', 'timinglab.js', 'keyhardware.js',
     'invaders.js'
 ]
 for js in js_files:

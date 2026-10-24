@@ -400,6 +400,16 @@ include __DIR__ . '/includes/header.php';
                 <?= t('acc.daily_goal_rec_text') ?>
             </div>
         </div>
+
+        <div class="mt-3 pt-3" style="border-top:1px solid var(--border);">
+            <label class="flex gap-2" style="align-items:center; cursor:pointer;">
+                <input type="checkbox" id="show-daily-timer-toggle">
+                <span style="font-weight:600; font-size:14px;"><?= t('acc.live_timer_label') ?></span>
+            </label>
+            <p class="muted mt-1" style="font-size:12px; margin-bottom:0; line-height:1.45;">
+                <?= t('acc.live_timer_note') ?>
+            </p>
+        </div>
     </div>
 </div>
 

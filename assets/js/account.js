@@ -1037,6 +1037,16 @@
         });
     }
 
+    const liveTimerToggle = document.getElementById('show-daily-timer-toggle');
+    if (liveTimerToggle) {
+        liveTimerToggle.checked = DisplaySettings.load().showDailyTimer === true;
+        liveTimerToggle.addEventListener('change', () => {
+            const settings = DisplaySettings.load();
+            settings.showDailyTimer = liveTimerToggle.checked;
+            DisplaySettings.save(settings);
+        });
+    }
+
     /* ---------- Дневная норма тренировки ---------- */
     const dailyGoalChips = document.querySelectorAll('.daily-goal-chips .chip, #daily-goal-chips .chip');
     const customWraps = document.querySelectorAll('.daily-goal-custom-wrap');

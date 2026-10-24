@@ -17,6 +17,7 @@ include __DIR__ . '/includes/header.php';
     <div class="chip" data-mode="words"><?= t('groups.mode_words') ?></div>
     <div class="chip" data-mode="abbrev"><?= t('groups.mode_abbrev') ?></div>
 </div>
+<div id="live-daily-timer-mount"></div>
 
 <!-- ======================= РЕЖИМ: ГРУППЫ СИМВОЛОВ ======================= -->
 <div id="groups-mode">

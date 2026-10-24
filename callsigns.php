@@ -8,6 +8,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card-eyebrow"><?= t('cs.eyebrow') ?></div>
 <h1><?= t('cs.h1') ?></h1>
+<div id="live-daily-timer-mount"></div>
 <p><?= t('cs.intro') ?></p>
 
 <div class="card mt-3" id="setup-panel">

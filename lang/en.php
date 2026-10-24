@@ -1802,4 +1802,13 @@ HTML
     'timinglab.verdict_itu' => 'Flawless ITU-standard metronomic keying!',
     'timinglab.verdict_class1' => 'Excellent 1st Class Amateur radio standard!',
     'timinglab.verdict_check' => 'Pay close attention to inter-character pauses in the audit table.',
+
+    // --- Live Daily Timer ---
+    'acc.live_timer_label' => 'Show daily goal timer on training screens',
+    'acc.live_timer_note' => 'Displays a compact live widget with your remaining daily practice time ("5 min left") on exercise screens. Disabled by default.',
+    'live_timer.goal_left' => '🎯 Daily goal: {left} min left',
+    'live_timer.goal_done' => '🎉 Daily goal reached: {today} of {goal} min!',
+    'live_timer.goal_change_title' => 'Goal: {goal} min (click to change)',
+    'live_timer.close_btn' => 'Hide timer',
+    'live_timer.toast_hidden' => 'Timer hidden. You can enable it anytime in Account Settings (Display tab).',
 ];

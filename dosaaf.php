@@ -8,6 +8,7 @@ include __DIR__ . '/includes/header.php';
 
 <div class="card-eyebrow"><?= t('dosaaf.eyebrow') ?></div>
 <h1><?= t('dosaaf.h1') ?></h1>
+<div id="live-daily-timer-mount"></div>
 <p class="dosaaf-header-intro"><?= t('dosaaf.intro') ?></p>
 
 <div class="card p-3 mb-2 dosaaf-header-advice" style="background:var(--surface-2); border-left:3px solid var(--accent); font-size:13px; line-height:1.5;">

@@ -33,6 +33,7 @@
 <script src="<?= asset_v('assets/js/signal.js') ?>"></script>
 <script src="<?= asset_v('assets/js/progress.js') ?>"></script>
 <script src="<?= asset_v('assets/js/daily.js') ?>"></script>
+<script src="<?= asset_v('assets/js/live-timer.js') ?>"></script>
 <script src="<?= asset_v('assets/js/app.js') ?>"></script>
 <?php if (!empty($extraScripts)): foreach ($extraScripts as $es): ?>
 <script src="<?= asset_v('assets/js/' . $es) ?>"></script>
