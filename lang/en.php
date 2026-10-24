@@ -193,7 +193,7 @@ return [
     'dosaaf.napevs_done_msg' => '🎉 All letter melodies for this stage learned! Word Reception unlocked.',
     'dosaaf.napevs_not_done_alert' => '🔒 First listen to all letter melodies of this stage in "Letter Melodies" ({done} of {total} heard).',
     'dosaaf.go_to_napevs' => 'Go to Letter Melodies →',
-    'dosaaf.start_words_btn' => '▶ Start Word Reception',
+    'dosaaf.start_words_btn' => 'Start Word Reception',
     'dosaaf.word_ph' => 'Type received word...',
     'dosaaf.check_btn' => 'Check',
     'dosaaf.btn_backspace' => '⌫ Backspace',

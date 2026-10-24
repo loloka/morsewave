@@ -196,7 +196,7 @@ return [
     'dosaaf.napevs_done_msg' => '🎉 Все напевы этой ступени изучены! Раздел «Приём слов» разблокирован.',
     'dosaaf.napevs_not_done_alert' => '🔒 Сначала прослушайте все напевы букв этой ступени в разделе «Напевы букв» (прослушано {done} из {total}).',
     'dosaaf.go_to_napevs' => 'Перейти к напевам →',
-    'dosaaf.start_words_btn' => '▶ Начать приём слов',
+    'dosaaf.start_words_btn' => 'Начать приём слов',
     'dosaaf.word_ph' => 'Введите принятое слово...',
     'dosaaf.check_btn' => 'Проверить',
     'dosaaf.btn_backspace' => '⌫ Стереть',

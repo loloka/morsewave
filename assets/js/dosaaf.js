@@ -1652,9 +1652,10 @@
         if (cpmEl) {
             const cpmType = getStageCpmType(currentStageNum);
             cpmEl.dataset.cpmType = cpmType;
+            const cpmUnit = (typeof t === 'function' && t('js.common.cpm_unit')) || 'CPM';
             cpmEl.textContent = (typeof cpmHintText === 'function')
                 ? cpmHintText(w, cpmType)
-                : `≈${Math.round(w * (cpmType === 'digits' ? 2.90 : (cpmType === 'mixed' ? 3.65 : 4.22)))} зн/мин`;
+                : `≈${Math.round(w * (cpmType === 'digits' ? 2.90 : (cpmType === 'mixed' ? 3.65 : 4.22)))} ${cpmUnit}`;
         }
     }
 
