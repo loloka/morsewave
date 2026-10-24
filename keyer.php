@@ -2,7 +2,7 @@
 require_once __DIR__ . '/includes/i18n.php';
 require_once __DIR__ . '/includes/auth.php';
 
-$pageTitle = 'Боевой ключ MorseWave Pro · R9OGL Edition';
+$pageTitle = t('keyer.page_title');
 $activePage = 'keyer';
 $pageScript = 'keyhardware.js';
 $extraScripts = ['timinglab.js'];
@@ -16,9 +16,9 @@ include __DIR__ . '/includes/header.php';
     <div class="hardware-callsign-badge">
         <span>⚡</span> R9OGL HARDWARE EDITION · v1.7.2 BETA
     </div>
-    <h1>Боевой электронный ключ MorseWave Pro</h1>
+    <h1><?= t('keyer.hero_title') ?></h1>
     <p class="muted mt-0" style="font-size: 16px; max-width: 860px; line-height: 1.6;">
-        Интерактивный хаб для подключения физического манипулятора к тренажёру MorseWave через браузер по обычному USB-кабелю (WebSerial COM-порт, 115200 бод). Устройство создано для подключения вашего личного манипулятора (однорычажного или двухрычажного) через электронный ключ MorseWave Pro.
+        <?= t('keyer.hero_desc') ?>
     </p>
 
     <!-- Совместимость браузеров (Chromium WebSerial) -->
@@ -26,12 +26,12 @@ include __DIR__ . '/includes/header.php';
         <div style="display: flex; align-items: center; gap: 10px; font-size: 13.5px; line-height: 1.5;">
             <span style="font-size: 20px;">🌐</span>
             <div>
-                <strong style="color: #60a5fa;">Поддерживаемые браузеры:</strong>
-                <span style="color: var(--text);">требуется браузер на движке <b>Chromium</b> (Google Chrome, Яндекс.Браузер, Microsoft Edge, Opera).</span>
+                <strong style="color: #60a5fa;"><?= t('keyer.browsers_supported') ?></strong>
+                <span style="color: var(--text);"><?= t('keyer.browsers_desc') ?></span>
             </div>
         </div>
         <div style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; color: #f87171; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.3); padding: 5px 10px; border-radius: 6px;">
-            <span>❌</span> Firefox и Safari не поддерживаются (нет WebSerial)
+            <span>❌</span> <?= t('keyer.browsers_unsupported') ?>
         </div>
     </div>
 
@@ -40,16 +40,16 @@ include __DIR__ . '/includes/header.php';
         <div style="display: flex; align-items: center; gap: 10px;">
             <span style="font-size: 20px;">🛠️</span>
             <div>
-                <strong style="color: var(--text); font-size: 14px;">Хотите себе такой же ключ?</strong>
-                <div style="font-size: 13px; color: var(--text-muted);">Соберите стартовую версию на макетке за 15 минут или изучите чертежи заводской платы!</div>
+                <strong style="color: var(--text); font-size: 14px;"><?= t('keyer.banner_diy_title') ?></strong>
+                <div style="font-size: 13px; color: var(--text-muted);"><?= t('keyer.banner_diy_desc') ?></div>
             </div>
         </div>
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <a href="donate.php" class="btn btn-secondary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 14px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; border-color: rgba(232, 163, 61, 0.45); color: #e8a33d;">
-                <span>💖</span> Поддержать проект
+                <span>💖</span> <?= t('keyer.banner_donate') ?>
             </a>
             <a href="#diy-keyer" class="btn btn-primary" style="white-space: nowrap; font-size: 13px; font-weight: 700; padding: 7px 16px; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
-                Собрать своими руками ↓
+                <?= t('keyer.banner_diy_btn') ?>
             </a>
         </div>
     </div>
@@ -73,25 +73,25 @@ include __DIR__ . '/includes/header.php';
     <div class="hardware-connect-info-card" style="background: rgba(79, 216, 196, 0.06); border: 1px solid rgba(79, 216, 196, 0.25); border-radius: 12px; padding: 16px 20px; margin-top: 18px; max-width: 860px; display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; color: #4fd8c4; font-size: 15px;">
-                <span>🔌</span> Как устроен и подключается ключ:
+                <span>🔌</span> <?= t('keyer.info_title') ?>
             </div>
             <span style="font-size: 11px; font-weight: 800; color: #f87171; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.04em;">
-                ⚡ ПРОЕКТ В РАЗРАБОТКЕ · СЛЕДИТЕ ЗА ОБНОВЛЕНИЯМИ
+                <?= t('keyer.info_in_dev') ?>
             </span>
         </div>
         <div style="font-size: 14px; color: var(--text); line-height: 1.6;">
-            Манипулятор подключается к компьютеру через плату <b>Arduino (Nano / Uno)</b> со скетчем открытой прошивки.
+            <?= t('keyer.info_desc_main') ?>
             <div style="margin-top: 6px; display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <a href="keydocs.php?doc=sketch" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(79, 216, 196, 0.15); border: 1px solid #4fd8c4; color: #4fd8c4; padding: 6px 14px; border-radius: 6px; font-weight: 700; font-size: 13px; text-decoration: none;">
-                    <span>💻</span> Открыть скетч в просмотрщике →
+                    <span>💻</span> <?= t('keyer.info_open_sketch') ?>
                 </a>
                 <a href="keydocs.php?download=sketch" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; text-decoration: none;">
-                    <span>📥</span> Скачать .ino
+                    <span>📥</span> <?= t('keyer.info_download_ino') ?>
                 </a>
             </div>
         </div>
         <div style="font-size: 13px; color: var(--text-muted); line-height: 1.6;">
-            Поддерживается <b>любой манипулятор</b> — двухрычажный ямбический (с упором на режим Iambic B) или однорычажное весло — через стандартный разъём <b>Jack 3.5 мм</b> (поддержка классического прямого ключа-клоподава будет добавлена в следующих версиях).
+            <?= t('keyer.info_paddle_support') ?>
         </div>
     </div>
 </div>
@@ -105,13 +105,13 @@ include __DIR__ . '/includes/header.php';
     <div class="oled-card">
         <div class="oled-status-bar">
             <div class="key-led-wrapper">
-                <div class="key-led" id="key-led-indicator" title="KEY LED (пин D8 на Arduino)"></div>
+                <div class="key-led" id="key-led-indicator" title="<?= htmlspecialchars(t('keyer.led_title')) ?>"></div>
                 <span>TX KEY</span>
             </div>
             <div style="display:flex; align-items:center; gap:12px;">
                 <label style="font-size:12px; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--text-muted);">
                     <input type="checkbox" id="sidetone-toggle">
-                    <span>Звук в браузере</span>
+                    <span><?= t('keyer.oled_audio_toggle') ?></span>
                 </label>
                 <span class="badge" style="font-family:var(--font-mono); font-size:11px; background:#11161b; color:#4fd8c4; border:1px solid #23343c;">SSD1306 FAST I2C</span>
             </div>
@@ -128,11 +128,11 @@ include __DIR__ . '/includes/header.php';
             <!-- Главный информативный блок: текущий напев + распознанный знак -->
             <div class="oled-main-display-row">
                 <div class="oled-code-col">
-                    <div class="oled-code-label">КОД МОРЗЕ:</div>
+                    <div class="oled-code-label"><?= t('keyer.oled_label_morse') ?></div>
                     <div class="oled-morse-code" id="oled-morse-display">- READY -</div>
                 </div>
                 <div class="oled-char-col">
-                    <div class="oled-char-label">СИМВОЛ:</div>
+                    <div class="oled-char-label"><?= t('keyer.oled_label_char') ?></div>
                     <div class="oled-char-badge" id="oled-last-char">_</div>
                 </div>
             </div>
@@ -142,7 +142,7 @@ include __DIR__ . '/includes/header.php';
                 <div class="oled-footer-ticker" id="oled-ticker-text">
                     TXT: VVV = R9OGL KEYER ONLINE
                 </div>
-                <button type="button" id="btn-clear-oled" class="oled-clear-btn" title="Очистить текст дисплея">
+                <button type="button" id="btn-clear-oled" class="oled-clear-btn" title="<?= htmlspecialchars(t('keyer.oled_clear_tooltip')) ?>">
                     ✕
                 </button>
             </div>
@@ -151,46 +151,46 @@ include __DIR__ . '/includes/header.php';
         <!-- Блок живой метрологии и параметров тайминга -->
         <div class="oled-subcard-telemetry" style="margin-top:16px; background:#040608; border:1px solid #1c232a; border-radius:10px; padding:14px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">
-                <span>Метрология тайминга элементов</span>
-                <span style="color:#4fd8c4; font-family:var(--font-mono); font-size:11px;">СТАНДАРТ ITU PARIS (1 : 3 : 7)</span>
+                <span><?= t('keyer.metro_title') ?></span>
+                <span style="color:#4fd8c4; font-family:var(--font-mono); font-size:11px;"><?= t('keyer.metro_standard') ?></span>
             </div>
             
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; text-align:center; font-family:var(--font-mono);">
                 <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
-                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Точка (Dit)</div>
-                    <div id="val-dit-ms" style="font-size:13px; font-weight:700; color:#4fd8c4; margin-top:2px;">60 мс</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;"><?= t('keyer.metro_dit') ?></div>
+                    <div id="val-dit-ms" style="font-size:13px; font-weight:700; color:#4fd8c4; margin-top:2px;">60 <?= t('js.common.ms') ?? 'ms' ?></div>
                 </div>
                 <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
-                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Тире (Dah)</div>
-                    <div id="val-dah-ms" style="font-size:13px; font-weight:700; color:#e8a33d; margin-top:2px;">180 мс</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;"><?= t('keyer.metro_dah') ?></div>
+                    <div id="val-dah-ms" style="font-size:13px; font-weight:700; color:#e8a33d; margin-top:2px;">180 <?= t('js.common.ms') ?? 'ms' ?></div>
                 </div>
                 <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
-                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Межзнак</div>
-                    <div id="val-char-pause-ms" style="font-size:13px; font-weight:700; color:var(--text); margin-top:2px;">180 мс</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;"><?= t('keyer.metro_char_pause') ?></div>
+                    <div id="val-char-pause-ms" style="font-size:13px; font-weight:700; color:var(--text); margin-top:2px;">180 <?= t('js.common.ms') ?? 'ms' ?></div>
                 </div>
                 <div style="background:#0c1015; border:1px solid #1a222c; border-radius:6px; padding:8px 4px;">
-                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">Межсловная</div>
-                    <div id="val-word-pause-ms" style="font-size:13px; font-weight:700; color:var(--text-muted); margin-top:2px;">420 мс</div>
+                    <div style="font-size:10px; color:var(--text-muted); text-transform:uppercase;"><?= t('keyer.metro_word_pause') ?></div>
+                    <div id="val-word-pause-ms" style="font-size:13px; font-weight:700; color:var(--text-muted); margin-top:2px;">420 <?= t('js.common.ms') ?? 'ms' ?></div>
                 </div>
             </div>
 
             <div style="margin-top:8px; font-size:11px; color:var(--text-faint); text-align:center; font-family:var(--font-mono); border-top:1px dashed #1a222c; padding-top:6px;">
-                Длительности: Точка = 1T &middot; Тире = 3T &middot; Межзнак = 3T &middot; Межсловная = 7T (T = 1200 / WPM)
+                <?= t('keyer.metro_formula') ?>
             </div>
 
             <!-- Архитектурные подсказки с понятным объяснением -->
             <div style="margin-top:10px; display:flex; flex-direction:column; gap:6px; font-size:12px;">
-                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Curtis 8044 — прародитель ямбических ключей. Режим B (Iambic Mode B) автоматически вставляет завершающий противоположный элемент при сжатии и отпускании весел (squeeze keying).">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="<?= htmlspecialchars(t('keyer.metro_curtis_tip')) ?>">
                     <span style="color:#4fd8c4;">⏱</span>
-                    <span><b>Тайминг Curtis:</b> Ямбический алгоритм ITU (Режим B)</span>
+                    <span><b><?= t('keyer.metro_curtis_title') ?></b> <?= t('keyer.metro_curtis_desc') ?></span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Память элементов Lookahead 2-Stage: чип буферизует следующее нажатие прямо во время звучания текущего элемента, исключая пропуски в буквах K (-.-) и R (.-.).">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="<?= htmlspecialchars(t('keyer.metro_memory_tip')) ?>">
                     <span style="color:#e8a33d;">🧠</span>
-                    <span><b>Память элементов:</b> Lookahead 2-Stage (без залипаний)</span>
+                    <span><b><?= t('keyer.metro_memory_title') ?></b> <?= t('keyer.metro_memory_desc') ?></span>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="Антидребезг контактов: аппаратная подтяжка и программный гистерезис полностью отсекают паразитные микроискрения механических контактов манипулятора.">
+                <div style="display:flex; align-items:center; gap:8px; color:var(--text-muted);" title="<?= htmlspecialchars(t('keyer.metro_debounce_tip')) ?>">
                     <span style="color:#60a5fa;">🛡️</span>
-                    <span><b>Антидребезг:</b> Аппаратно-программная фильтрация (Debounce)</span>
+                    <span><b><?= t('keyer.metro_debounce_title') ?></b> <?= t('keyer.metro_debounce_desc') ?></span>
                 </div>
             </div>
         </div>
@@ -202,23 +202,23 @@ include __DIR__ . '/includes/header.php';
         <!-- Кнопка подключения -->
         <div class="card" style="padding: 20px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);">Связь с Arduino</span>
-                <span id="serial-status-badge" class="badge" style="font-size:12px; border-color:var(--border);">● ОТКЛЮЧЕН</span>
+                <span style="font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-muted);"><?= t('keyer.card_arduino') ?></span>
+                <span id="serial-status-badge" class="badge" style="font-size:12px; border-color:var(--border);"><?= t('keyer.status_disconnected') ?></span>
             </div>
             
             <button id="btn-connect-serial" class="btn-usb-connect" style="width:100%;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                <span>Подключить ключ по USB (115200)</span>
+                <span><?= t('keyer.btn_connect') ?></span>
             </button>
             <div style="font-size:11px; color:var(--text-faint); margin-top:8px; text-align:center; line-height:1.4;">
-                Движок <b>Chromium</b>: Chrome, Яндекс, Edge, Opera. <span style="color:#f87171;">Firefox и Safari не поддерживаются</span>.
+                <?= t('keyer.engine_notice') ?>
             </div>
         </div>
 
         <!-- Датчики скорости и тона -->
         <div class="telemetry-gauges">
             <div class="gauge-box">
-                <span class="gauge-title">Скорость WPM</span>
+                <span class="gauge-title"><?= t('keyer.gauge_wpm') ?></span>
                 <span class="gauge-value" id="gauge-wpm-value">20</span>
                 <div class="gauge-bar-track">
                     <div class="gauge-bar-fill wpm" id="gauge-wpm-bar" style="width: 20%;"></div>
@@ -226,7 +226,7 @@ include __DIR__ . '/includes/header.php';
             </div>
 
             <div class="gauge-box">
-                <span class="gauge-title">Тон PITCH</span>
+                <span class="gauge-title"><?= t('keyer.gauge_pitch') ?></span>
                 <span class="gauge-value" id="gauge-pitch-value">700</span>
                 <div class="gauge-bar-track">
                     <div class="gauge-bar-fill pitch" id="gauge-pitch-bar" style="width: 37%;"></div>
@@ -237,11 +237,11 @@ include __DIR__ . '/includes/header.php';
         <!-- Консоль Serial терминала -->
         <div class="serial-terminal-card">
             <div class="terminal-header">
-                <span>SERIAL STREAM (RAW 115200)</span>
-                <button id="btn-clear-terminal" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:11px;">Очистить</button>
+                <span><?= t('keyer.terminal_title') ?></span>
+                <button id="btn-clear-terminal" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:11px;"><?= t('keyer.terminal_clear') ?></button>
             </div>
             <div class="terminal-log-box" id="terminal-log-stream">
-                <span class="log-sys">[СИСТЕМА] Нажмите «Подключить ключ», выберите COM-порт Arduino Nano и начните передачу веслом...</span>
+                <span class="log-sys"><?= t('keyer.terminal_initial_sys') ?></span>
             </div>
         </div>
 
@@ -255,13 +255,13 @@ include __DIR__ . '/includes/header.php';
 <div class="keyer-echo-test">
     <div class="echo-header-bar" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
         <div>
-            <div class="card-eyebrow">ИНТЕРАКТИВНЫЙ САМОКОНТРОЛЬ · ЭХО-ТРЕНАЖЁР CW PRO</div>
-            <h2 style="margin:0;">Эхо-тренажёр боевой передачи</h2>
+            <div class="card-eyebrow"><?= t('keyer.echo_eyebrow') ?></div>
+            <h2 style="margin:0;"><?= t('keyer.echo_title') ?></h2>
         </div>
         <div class="echo-stats-pill" style="display:inline-flex; align-items:center; gap:10px; background:var(--surface-2); border:1px solid var(--border); padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600;">
-            <span>Серия: <b id="echo-streak-val" style="color:var(--signal);">0</b> 🔥</span>
+            <span><?= t('keyer.echo_streak') ?> <b id="echo-streak-val" style="color:var(--signal);">0</b> 🔥</span>
             <span style="opacity:0.4;">·</span>
-            <span>Принято: <b id="echo-score-val" style="color:var(--accent);">0</b></span>
+            <span><?= t('keyer.echo_copied') ?> <b id="echo-score-val" style="color:var(--accent);">0</b></span>
         </div>
     </div>
 
@@ -269,53 +269,53 @@ include __DIR__ . '/includes/header.php';
     <div class="echo-controls-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; background:var(--surface-2); padding:10px 14px; border-radius:10px; border:1px solid var(--border);">
         <div class="echo-mode-switch" style="display:inline-flex; gap:6px;">
             <button type="button" class="btn echo-mode-btn active" data-mode="echo" id="btn-mode-echo" style="font-size:12px; padding:6px 12px; border-radius:6px; font-weight:600; cursor:pointer;">
-                🎧 Режим Эхо (на слух)
+                <?= t('keyer.echo_mode_audio') ?>
             </button>
             <button type="button" class="btn echo-mode-btn" data-mode="visual" id="btn-mode-visual" style="font-size:12px; padding:6px 12px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid transparent; color:var(--text-muted);">
-                👁 Чтение с экрана
+                <?= t('keyer.echo_mode_visual') ?>
             </button>
         </div>
 
         <div style="display:inline-flex; align-items:center; gap:8px;">
-            <label for="echo-category-select" style="font-size:12px; color:var(--text-muted); font-weight:600; margin:0;">Категория:</label>
+            <label for="echo-category-select" style="font-size:12px; color:var(--text-muted); font-weight:600; margin:0;"><?= t('keyer.echo_category_label') ?></label>
             <select id="echo-category-select" style="font-size:12px; padding:5px 10px; background:#0b0f12; color:var(--text); border:1px solid var(--border); border-radius:6px; cursor:pointer;">
-                <option value="callsigns" selected>📻 Позывные (R9OGL, R8OA...)</option>
-                <option value="qcodes">💬 Q-коды и радиожаргон (73, CQ, 599)</option>
-                <option value="contest">🏆 Контест-номера (5NN 001)</option>
-                <option value="groups">🔤 Сокращения и группы (VVV =, PARIS)</option>
+                <option value="callsigns" selected><?= t('keyer.echo_cat_callsigns') ?></option>
+                <option value="qcodes"><?= t('keyer.echo_cat_qcodes') ?></option>
+                <option value="contest"><?= t('keyer.echo_cat_contest') ?></option>
+                <option value="groups"><?= t('keyer.echo_cat_groups') ?></option>
             </select>
         </div>
     </div>
 
     <p class="muted" id="echo-instructions-text" style="margin-top:0; font-size:14px;">
-        Сайт воспроизводит позывной в эфире. Внимательно прослушайте его и повторите веслом на ключе!
+        <?= t('keyer.echo_instructions') ?>
     </p>
 
     <!-- Поле цели и кнопки управления -->
     <div class="echo-target-line" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;">
         <div style="display:inline-flex; align-items:baseline; gap:10px;">
-            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Цель:</span>
+            <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;"><?= t('keyer.echo_target_label') ?></span>
             <span id="echo-target-text" style="letter-spacing:2px;">R9OGL</span>
         </div>
         <div style="display:inline-flex; align-items:center; gap:8px;">
             <button id="btn-toggle-echo" class="btn btn-primary" style="font-size:12px; padding:6px 14px; background:#10b981; color:#fff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                <span>▶</span> <span id="echo-toggle-label">Начать тренировку</span>
+                <span>▶</span> <span id="echo-toggle-label"><?= t('keyer.echo_btn_start') ?></span>
             </button>
-            <button id="btn-play-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;" title="Прослушать позывной ещё раз">
-                <span>🔊</span> <span>Повторить</span>
+            <button id="btn-play-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; display:inline-flex; align-items:center; gap:6px;" title="<?= htmlspecialchars(t('keyer.echo_play_tip')) ?>">
+                <span>🔊</span> <span><?= t('keyer.echo_btn_repeat') ?></span>
             </button>
-            <button id="btn-reset-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 12px;" title="Очистить ваш ввод и попробовать снова">
-                ⌫ Сброс
+            <button id="btn-reset-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 12px;" title="<?= htmlspecialchars(t('keyer.echo_reset_tip')) ?>">
+                ⌫ <?= t('keyer.echo_btn_reset') ?>
             </button>
             <button id="btn-next-echo" class="btn btn-secondary" style="font-size:12px; padding:6px 14px;">
-                Следующая →
+                <?= t('keyer.echo_btn_next') ?>
             </button>
         </div>
     </div>
 
     <div style="margin-top:14px;">
-        <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Ваш ответ с ключа:</span>
-        <div class="echo-user-result" id="echo-result-text" style="letter-spacing:2px;">Нажмите [▶ Начать тренировку], чтобы услышать позывной в эфире</div>
+        <span style="font-size:12px; color:var(--text-muted); text-transform:uppercase; font-weight:700;"><?= t('keyer.echo_user_label') ?></span>
+        <div class="echo-user-result" id="echo-result-text" style="letter-spacing:2px;"><?= t('keyer.echo_user_prompt') ?></div>
     </div>
 </div>
 
@@ -325,19 +325,19 @@ include __DIR__ . '/includes/header.php';
 <div class="keyer-timing-lab" id="keyer-timing-lab">
     <div class="timing-lab-header">
         <div>
-            <div class="card-eyebrow" style="color:#4fd8c4;">ЭТАЛОН ТАЙМИНГОВ · СИСТЕМА ITU / PARIS</div>
-            <h2 style="margin:0 0 6px;">Лаборатория таймингов и анализатор пауз (3T / 7T)</h2>
+            <div class="card-eyebrow" style="color:#4fd8c4;"><?= t('keyer.timing_eyebrow') ?></div>
+            <h2 style="margin:0 0 6px;"><?= t('keyer.timing_title') ?></h2>
             <p class="muted" style="margin:0; font-size:14px; max-width:820px; line-height:1.5;">
-                Аппаратная проверка ритма руки: соотношение точки к тире (1:3), чистота межбуквенных пауз (3T) и защита от слипания слов (7T).
+                <?= t('keyer.timing_desc') ?>
             </p>
         </div>
         <div style="display:inline-flex; align-items:center; gap:10px;">
-            <div class="timing-badge-status" id="timing-status-badge">○ ГОТОВ К ЗАМЕРУ</div>
+            <div class="timing-badge-status" id="timing-status-badge"><?= t('keyer.timing_status_ready') ?></div>
             <button id="btn-timing-start" class="btn btn-primary" style="font-size:12px; padding:7px 16px; background:#10b981; color:#fff; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
-                <span>▶</span> <span>Начать замер</span>
+                <span>▶</span> <span><?= t('keyer.timing_btn_start') ?></span>
             </button>
-            <button id="btn-timing-reset" class="btn btn-secondary" style="font-size:12px; padding:7px 12px;" title="Сбросить статистику замера">
-                ↺ Сброс
+            <button id="btn-timing-reset" class="btn btn-secondary" style="font-size:12px; padding:7px 12px;" title="<?= htmlspecialchars(t('keyer.timing_reset_tip')) ?>">
+                ↺ <?= t('keyer.timing_btn_reset') ?>
             </button>
         </div>
     </div>
@@ -345,26 +345,26 @@ include __DIR__ . '/includes/header.php';
     <!-- Панель выбора контрольного текста -->
     <div class="timing-presets-bar">
         <div style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
-            <span style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Контрольный текст:</span>
-            <button type="button" class="timing-preset-btn active" data-preset="paris">🏆 PARIS PARIS (Эталон ITU)</button>
-            <button type="button" class="timing-preset-btn" data-preset="contest">📻 CQ TEST R9OGL 599 (Эфир)</button>
-            <button type="button" class="timing-preset-btn" data-preset="russian">🇷🇺 РАДИО Ж19Ф5 Э3Ю7 (Сложный ритм)</button>
-            <button type="button" class="timing-preset-btn" data-preset="custom">✍️ Свой текст...</button>
+            <span style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;"><?= t('keyer.timing_preset_label') ?></span>
+            <button type="button" class="timing-preset-btn active" data-preset="paris"><?= t('keyer.timing_preset_paris') ?></button>
+            <button type="button" class="timing-preset-btn" data-preset="contest"><?= t('keyer.timing_preset_contest') ?></button>
+            <button type="button" class="timing-preset-btn" data-preset="russian"><?= t('keyer.timing_preset_russian') ?></button>
+            <button type="button" class="timing-preset-btn" data-preset="custom"><?= t('keyer.timing_preset_custom') ?></button>
         </div>
         <div id="timing-class-badge" style="font-size:13px; font-weight:700;">
-            <span style="color:var(--text-muted);">Точность: <b id="timing-badge-pct" style="color:#4fd8c4;">--%</b> (ожидание замера)</span>
+            <span style="color:var(--text-muted);"><?= t('keyer.timing_accuracy_label') ?> <b id="timing-badge-pct" style="color:#4fd8c4;">--%</b> <?= t('keyer.timing_waiting') ?></span>
         </div>
     </div>
 
     <!-- Поле ввода своего текста (скрыто по умолчанию) -->
     <div id="timing-custom-wrap" style="display:none; align-items:center; gap:8px; margin-bottom:14px; background:#0b0f15; padding:8px 12px; border-radius:8px; border:1px solid #1c2633;">
-        <input type="text" id="timing-custom-input" placeholder="Введите ваш текст для замера (например: R8OA TEST)" style="flex:1; background:#111822; border:1px solid #253342; color:#fff; padding:6px 10px; border-radius:6px; font-family:var(--font-mono); font-size:13px; text-transform:uppercase;">
-        <button type="button" id="btn-apply-custom" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; font-weight:700; color:#4fd8c4;">Применить</button>
+        <input type="text" id="timing-custom-input" placeholder="<?= htmlspecialchars(t('keyer.timing_custom_ph')) ?>" style="flex:1; background:#111822; border:1px solid #253342; color:#fff; padding:6px 10px; border-radius:6px; font-family:var(--font-mono); font-size:13px; text-transform:uppercase;">
+        <button type="button" id="btn-apply-custom" class="btn btn-secondary" style="font-size:12px; padding:6px 14px; font-weight:700; color:#4fd8c4;"><?= t('keyer.timing_custom_apply') ?></button>
     </div>
 
     <!-- Блок отображения цели с токенами знаков -->
     <div class="timing-target-card">
-        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:6px; letter-spacing:0.05em;">Контрольная строка для передачи на ключе:</div>
+        <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:6px; letter-spacing:0.05em;"><?= t('keyer.timing_target_bar_title') ?></div>
         <div class="timing-target-chars" id="timing-target-chars">
             <!-- Токены генерируются JS -->
         </div>
@@ -374,53 +374,53 @@ include __DIR__ . '/includes/header.php';
     <div class="timing-gauges-grid">
         <!-- 1. Соотношение Тире / Точка -->
         <div class="timing-gauge-card">
-            <div class="timing-gauge-title">Соотношение Тире : Точка</div>
+            <div class="timing-gauge-title"><?= t('keyer.timing_gauge_ratio_title') ?></div>
             <div class="timing-gauge-value" id="gauge-ratio-val">3.00×</div>
-            <div class="timing-gauge-sub">Норма ITU: <b>3.0×</b> (допуск 2.8 – 3.2×)</div>
+            <div class="timing-gauge-sub"><?= t('keyer.timing_gauge_ratio_norm') ?></div>
             <div class="timing-gauge-track">
                 <div class="timing-gauge-fill" id="gauge-ratio-bar" style="width:50%;"></div>
             </div>
             <div class="timing-gauge-status" id="gauge-ratio-status">
-                <span style="color:#10b981;">✓ Идеальный баланс (ITU)</span>
+                <span style="color:#10b981;"><?= t('keyer.timing_gauge_ratio_perfect') ?></span>
             </div>
         </div>
 
         <!-- 2. Межзнаковая пауза 3T -->
         <div class="timing-gauge-card">
-            <div class="timing-gauge-title">Межбуквенная пауза (3T)</div>
-            <div class="timing-gauge-value" id="gauge-char-pause-val">3.0T (180 мс)</div>
-            <div class="timing-gauge-sub">Норма: <b>3.0 длительности точки</b> (2.5 – 3.6T)</div>
+            <div class="timing-gauge-title"><?= t('keyer.timing_gauge_char_title') ?></div>
+            <div class="timing-gauge-value" id="gauge-char-pause-val">3.0T (180 <?= t('js.common.ms') ?? 'ms' ?>)</div>
+            <div class="timing-gauge-sub"><?= t('keyer.timing_gauge_char_norm') ?></div>
             <div class="timing-gauge-track">
                 <div class="timing-gauge-fill" id="gauge-char-pause-bar" style="width:50%;"></div>
             </div>
             <div class="timing-gauge-status" id="gauge-char-pause-status">
-                <span style="color:#10b981;">✓ Чёткий раздельный ритм</span>
+                <span style="color:#10b981;"><?= t('keyer.timing_gauge_char_perfect') ?></span>
             </div>
         </div>
 
         <!-- 3. Межсловная пауза 7T -->
         <div class="timing-gauge-card">
-            <div class="timing-gauge-title">Межсловная пауза (7T)</div>
-            <div class="timing-gauge-value" id="gauge-word-pause-val">7.0T (420 мс)</div>
-            <div class="timing-gauge-sub">Норма: <b>7.0 длительностей точки</b> (5.8 – 8.5T)</div>
+            <div class="timing-gauge-title"><?= t('keyer.timing_gauge_word_title') ?></div>
+            <div class="timing-gauge-value" id="gauge-word-pause-val">7.0T (420 <?= t('js.common.ms') ?? 'ms' ?>)</div>
+            <div class="timing-gauge-sub"><?= t('keyer.timing_gauge_word_norm') ?></div>
             <div class="timing-gauge-track">
                 <div class="timing-gauge-fill" id="gauge-word-pause-bar" style="width:50%;"></div>
             </div>
             <div class="timing-gauge-status" id="gauge-word-pause-status">
-                <span style="color:#10b981;">✓ Честный пробел 7T</span>
+                <span style="color:#10b981;"><?= t('keyer.timing_gauge_word_perfect') ?></span>
             </div>
         </div>
 
         <!-- 4. Скорость и класс руки -->
         <div class="timing-gauge-card">
-            <div class="timing-gauge-title">Скорость и точность ритма</div>
+            <div class="timing-gauge-title"><?= t('keyer.timing_gauge_speed_title') ?></div>
             <div class="timing-gauge-value" id="timing-wpm-val" style="color:#4fd8c4;">20 WPM</div>
-            <div class="timing-gauge-sub">Фактический темп: <b id="timing-cpm-val">~100 зн/мин</b></div>
+            <div class="timing-gauge-sub"><?= t('keyer.timing_gauge_actual_pace') ?> <b id="timing-cpm-val">~100 <?= t('js.common.cpm') ?? 'cpm' ?></b></div>
             <div class="timing-gauge-track">
                 <div class="timing-gauge-fill" id="timing-score-bar" style="width:96%; background:#4fd8c4;"></div>
             </div>
             <div class="timing-gauge-status">
-                Точность ритма: <b id="timing-score-val" style="color:#10b981; margin-left:4px;">100%</b>
+                <?= t('keyer.timing_gauge_accuracy_status') ?> <b id="timing-score-val" style="color:#10b981; margin-left:4px;">100%</b>
             </div>
         </div>
     </div>
@@ -428,8 +428,8 @@ include __DIR__ . '/includes/header.php';
     <!-- Холст таймлайна (осциллограмма передачи) -->
     <div class="timing-timeline-wrap">
         <div class="timing-timeline-header">
-            <span>📈 ОСЦИЛЛОГРАММА ПЕРЕДАЧИ В РЕАЛЬНОМ ВРЕМЕНИ (ТОЧКИ, ТИРЕ И ПАУЗЫ В МС)</span>
-            <span style="color:#4fd8c4;">СКОРОСТЬ: ШАГ КВАРЦА 16 МГЦ</span>
+            <span><?= t('keyer.timing_timeline_title') ?></span>
+            <span style="color:#4fd8c4;"><?= t('keyer.timing_timeline_clock') ?></span>
         </div>
         <canvas id="timing-canvas" height="80"></canvas>
     </div>
@@ -437,23 +437,23 @@ include __DIR__ . '/includes/header.php';
     <!-- Журнал посимвольного судейского аудита -->
     <div class="timing-audit-wrap">
         <div style="font-size:11px; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
-            <span>📋 Посимвольный журнал проверки передачи:</span>
-            <span style="color:var(--text-muted);">Строгий учёт отклонений 1:3:7</span>
+            <span><?= t('keyer.timing_audit_title') ?></span>
+            <span style="color:var(--text-muted);"><?= t('keyer.timing_audit_rule') ?></span>
         </div>
         <table class="timing-audit-table">
             <thead>
                 <tr>
-                    <th>Знак</th>
-                    <th>Отношение Тире/Точка</th>
-                    <th>Пауза перед знаком</th>
-                    <th>Судейский вердикт</th>
-                    <th>Балл</th>
+                    <th><?= t('keyer.timing_col_char') ?></th>
+                    <th><?= t('keyer.timing_col_ratio') ?></th>
+                    <th><?= t('keyer.timing_col_pause') ?></th>
+                    <th><?= t('keyer.timing_col_verdict') ?></th>
+                    <th><?= t('keyer.timing_col_score') ?></th>
                 </tr>
             </thead>
             <tbody id="timing-audit-body">
                 <tr>
                     <td colspan="5" style="text-align:center; color:var(--text-muted); padding:16px;">
-                        Включите «Начать замер» и передавайте контрольный текст ключом...
+                        <?= t('keyer.timing_empty_prompt') ?>
                     </td>
                 </tr>
             </tbody>
@@ -465,74 +465,74 @@ include __DIR__ . '/includes/header.php';
      СПЕЦИФИКАЦИЯ И НАЧИНКА КЛЮЧА
      ========================================================= -->
 <div class="mt-5">
-    <div class="card-eyebrow">ИНЖЕНЕРНАЯ АРХИТЕКТУРА</div>
-    <h2>Что внутри электронного блока MorseWave Pro (R9OGL Edition)</h2>
+    <div class="card-eyebrow"><?= t('keyer.specs_eyebrow') ?></div>
+    <h2><?= t('keyer.specs_title') ?></h2>
     <p class="muted">
-        Схемотехника и прошивка разработаны радиолюбителем с упором на ямбический режим B и комфортную работу с любым манипулятором:
+        <?= t('keyer.specs_intro') ?>
     </p>
 
     <div class="specs-grid">
         <div class="spec-item">
             <div class="spec-item-icon">⚡</div>
-            <div class="spec-item-title">Алгоритм Curtis 8044 + Lookahead (Ямбик B)</div>
+            <div class="spec-item-title"><?= t('keyer.spec_curtis_title') ?></div>
             <div class="spec-item-desc">
-                Двухуровневая предвыборка памяти элементов (Lookahead 2-Stage). Чип считывает и буферизует нажатие противоположного контакта прямо во время звучания текущего знака. Знаки «K» (-.-), «R» (.-.) и «C» (-.-.) передаются виртуозно и гладко в ямбическом сжатии (squeeze keying) без залипаний.
+                <?= t('keyer.spec_curtis_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🛡️</div>
-            <div class="spec-item-title">Аппаратный и цифровой антидребезг</div>
+            <div class="spec-item-title"><?= t('keyer.spec_debounce_title') ?></div>
             <div class="spec-item-desc">
-                Механические контакты манипуляторов (особенно скоростных весел СРТ с зазором в доли миллиметра) страдают от микроискрений (bounce). Система с аппаратной подтяжкой и программной фильтрацией на 100% исключает ложные двойные точки и срывы знаков.
+                <?= t('keyer.spec_debounce_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🎛</div>
-            <div class="spec-item-title">3 ручки управления на лету: WPM, Тон и Громкость</div>
+            <div class="spec-item-title"><?= t('keyer.spec_pots_title') ?></div>
             <div class="spec-item-desc">
-                Скорость от 10 до 60 WPM, частота тона от 400 до 1200 Гц и громкость динамика регулируются физическими ручками прямо во время QSO. Экспоненциальный цифровой фильтр АЦП (EMA) полностью изолирует шумы по питанию.
+                <?= t('keyer.spec_pots_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🔊</div>
-            <div class="spec-item-title">Аналоговый мягкий звук (Soft Audio)</div>
+            <div class="spec-item-title"><?= t('keyer.spec_audio_title') ?></div>
             <div class="spec-item-desc">
-                Встроенный 2-звенный сглаживающий RC-фильтр на транзисторе BC547 срезает колючие высокочастотные гармоники цифрового прямоугольного ШИМ, формируя чистый, бархатный аналоговый тон (псевдосинус). Звук не утомляет слух часами даже при долгой работе в наушниках. Плавная регулировка тона (400–1200 Гц) и отдельный реостат громкости с балансировочным шунтом для динамика 8 Ом.
+                <?= t('keyer.spec_audio_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">📟</div>
-            <div class="spec-item-title">Экран OLED 0.96" Fast I2C (400 кГц)</div>
+            <div class="spec-item-title"><?= t('keyer.spec_oled_title') ?></div>
             <div class="spec-item-desc">
-                Шина разогнана до 400 кГц. Позонное обновление экрана занимает всего 0.3 мс, исключая лаги и микрофризы звука. Живой вывод скорости, тона, крупного расшифрованного знака и бегущей строки текста.
+                <?= t('keyer.spec_oled_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🧠</div>
-            <div class="spec-item-title">Умный декодер слитных знаков и пауз ITU</div>
+            <div class="spec-item-title"><?= t('keyer.spec_decoder_title') ?></div>
             <div class="spec-item-desc">
-                Автоматический алгоритм сегментации расшифровывает символы, даже если буквы переданы без идеальной паузы (например, R9 или CQ не превращаются в ошибку). Контроль межсловных пауз 7T выдаёт честные пробелы без спама.
+                <?= t('keyer.spec_decoder_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">🎯</div>
-            <div class="spec-item-title">Single-Paddle Latch (Детектор фронтов)</div>
+            <div class="spec-item-title"><?= t('keyer.spec_latch_title') ?></div>
             <div class="spec-item-desc">
-                Аппаратный захват фронтов касания весла (Edge Latch). Для однорычажных манипуляторов устранена необходимость «дожимать» рычаг: быстрый одиночный клик в 15–20 мс мгновенно встаёт в очередь и доигрывается до конца. Буквы «Ц» (-.-.), «К» (-.-) и «D» (-..) звучат идеально на любых скоростях.
+                <?= t('keyer.spec_latch_desc') ?>
             </div>
         </div>
 
         <div class="spec-item">
             <div class="spec-item-icon">⏱️</div>
-            <div class="spec-item-title">Адаптивный порог ITU-R 2.5T</div>
+            <div class="spec-item-title"><?= t('keyer.spec_threshold_title') ?></div>
             <div class="spec-item-desc">
-                Динамический тайминг межзнаковых пауз: на малых скоростях (10–14 WPM) даёт руке комфортные 300 мс запаса на перенос весла между элементами. Длинные буквы больше не разрываются и не распадаются на части, сохраняя точность расшифровки на дисплее и в эфире.
+                <?= t('keyer.spec_threshold_desc') ?>
             </div>
         </div>
     </div>
@@ -543,30 +543,30 @@ include __DIR__ . '/includes/header.php';
             <div>
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
                     <span style="font-size:11px; font-weight:800; color:#4fd8c4; background:rgba(79,216,196,0.12); border:1px solid rgba(79,216,196,0.3); padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase;">
-                        ⚡ АППАРАТНАЯ ПЛАТФОРМА
+                        <?= t('keyer.pcb_badge_platform') ?>
                     </span>
                     <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:3px 8px; border-radius:4px; letter-spacing:0.06em; text-transform:uppercase; box-shadow:0 0 10px rgba(220,38,38,0.4);">
-                        ● В РАЗРАБОТКЕ
+                        <?= t('keyer.pcb_badge_dev') ?>
                     </span>
                 </div>
                 <h3 style="margin:0 0 8px; font-size:18px; color:#4fd8c4;">
-                    Заводская печатная плата MorseWave Pro v2.0 (100% THT)
+                    <?= t('keyer.pcb_title') ?>
                 </h3>
                 <p class="muted" style="font-size:14px; line-height:1.6; margin:0 0 14px;">
-                    Специально спроектированная фабричная двухсторонняя плата 85×55 мм под стандартный компактный корпус. Полностью на классических выводных компонентах (0 SMD деталей — собирается дома обычным паяльником). Гальваническая опторазвязка манипулятора и PTT на PC817, 2-звенный сглаживающий RC-фильтр звука, универсальные посадочные места под любые потенциометры (9–16 мм, СП3-4) с удобным выводом ручек на лицевую панель и сплошной экран массы B.Cu (>95%).
+                    <?= t('keyer.pcb_desc') ?>
                 </p>
                 <div style="display:flex; flex-wrap:wrap; gap:6px; font-size:11px; margin-bottom:16px;">
                     <span class="badge" style="background:rgba(79,216,196,0.1); color:#4fd8c4; border:1px solid rgba(79,216,196,0.3);">100% THT Classic (0 SMD)</span>
-                    <span class="badge" style="background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);">Класс Резонит 3/4 (DRC 0 ошибок)</span>
-                    <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);">Экран массы B.Cu &gt;95%</span>
-                    <span class="badge" style="background:rgba(168,85,247,0.1); color:#c084fc; border:1px solid rgba(168,85,247,0.3);">Универсальные ручки корпуса</span>
+                    <span class="badge" style="background:rgba(96,165,250,0.1); color:#60a5fa; border:1px solid rgba(96,165,250,0.3);"><?= t('keyer.pcb_badge_drc') ?></span>
+                    <span class="badge" style="background:rgba(232,163,61,0.1); color:#e8a33d; border:1px solid rgba(232,163,61,0.3);"><?= t('keyer.pcb_badge_gnd') ?></span>
+                    <span class="badge" style="background:rgba(168,85,247,0.1); color:#c084fc; border:1px solid rgba(168,85,247,0.3);"><?= t('keyer.pcb_badge_pots') ?></span>
                 </div>
                 <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                     <a href="keydocs.php?doc=pcb" class="btn btn-secondary" style="font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font-weight:700;">
-                        <span>🏭</span> Открыть чертежи и 3D-рендеры платы →
+                        <span>🏭</span> <?= t('keyer.pcb_btn_docs') ?>
                     </a>
                     <a href="donate.php" class="btn" style="background:rgba(232,163,61,0.15); color:#e8a33d; border:1px solid rgba(232,163,61,0.45); font-size:13px; display:inline-flex; align-items:center; gap:6px; padding:7px 16px; font-weight:700; text-decoration:none; border-radius:6px;">
-                        <span>🛠️</span> Поддержать выпуск платы →
+                        <span>🛠️</span> <?= t('keyer.pcb_btn_donate') ?>
                     </a>
                 </div>
             </div>
@@ -574,13 +574,13 @@ include __DIR__ . '/includes/header.php';
             <!-- Правая колонка: интерактивный просмотр 3D платы -->
             <div style="background:#06080a; border:1px solid rgba(79,216,196,0.25); border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
-                    <span style="font-size:11px; color:var(--text-muted); font-weight:600;">Ракурс платы:</span>
+                    <span style="font-size:11px; color:var(--text-muted); font-weight:600;"><?= t('keyer.pcb_view_label') ?></span>
                     <div style="display:inline-flex; gap:6px;">
                         <button type="button" id="btn-pcb-top" onclick="setPcbView('top')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:700; cursor:pointer; background:#162330; border:1px solid #4fd8c4; color:#4fd8c4; transition:all 0.2s ease;">
-                            📐 Вид сверху (Монтажный)
+                            <?= t('keyer.pcb_view_top') ?>
                         </button>
                         <button type="button" id="btn-pcb-iso" onclick="setPcbView('iso')" style="font-size:11px; padding:3px 10px; border-radius:6px; font-weight:600; cursor:pointer; background:transparent; border:1px solid #233140; color:var(--text-muted); transition:all 0.2s ease;">
-                            🔍 3D Изометрия
+                            <?= t('keyer.pcb_view_iso') ?>
                         </button>
                     </div>
                 </div>
@@ -626,67 +626,67 @@ include __DIR__ . '/includes/header.php';
     <div class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px;">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
             <div>
-                <div class="card-eyebrow" style="color:#e8a33d;">СРАВНЕНИЕ АППАРАТНЫХ РЕШЕНИЙ</div>
-                <h3 style="margin:0;">MorseWave Pro против стандартного китайского кейера MX-K2</h3>
+                <div class="card-eyebrow" style="color:#e8a33d;"><?= t('keyer.compare_eyebrow') ?></div>
+                <h3 style="margin:0;"><?= t('keyer.compare_title') ?></h3>
             </div>
             <span style="font-size:12px; font-weight:600; background:#161f28; color:#4fd8c4; border:1px solid #233140; padding:4px 12px; border-radius:12px;">
-                Новое поколение CW-ключей
+                <?= t('keyer.compare_badge') ?>
             </span>
         </div>
 
         <p class="muted" style="font-size:14px; margin-top:0; margin-bottom:18px;">
-            Популярный китайский ключ MX-K2 (Auto Memory Keyer за $15) годами оставался компромиссным решением. Сравните его архитектуру с MorseWave Pro:
+            <?= t('keyer.compare_desc') ?>
         </p>
 
         <div style="overflow-x:auto;">
             <table style="width:100%; border-collapse:collapse; font-size:13px; text-align:left;">
                 <thead>
                     <tr style="border-bottom:1px solid #233140; color:var(--text-muted); font-size:11px; text-transform:uppercase; letter-spacing:0.05em;">
-                        <th style="padding:10px 12px;">Параметр</th>
-                        <th style="padding:10px 12px; color:var(--text-muted); width:35%;">Обычный MX-K2 (Китай)</th>
-                        <th style="padding:10px 12px; color:#4fd8c4; width:45%;">MorseWave Pro (R9OGL Edition)</th>
+                        <th style="padding:10px 12px;"><?= t('keyer.comp_col_param') ?></th>
+                        <th style="padding:10px 12px; color:var(--text-muted); width:35%;"><?= t('keyer.comp_col_mxk2') ?></th>
+                        <th style="padding:10px 12px; color:#4fd8c4; width:45%;"><?= t('keyer.comp_col_mwpro') ?></th>
                     </tr>
                 </thead>
                 <tbody style="line-height:1.5;">
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Связь с ПК и браузером</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет (только автономный манипулятор трансивера)</td>
-                        <td style="padding:12px; color:#4fd8c4; font-weight:600;"><span style="color:#10b981;">✓</span> <b>Прямой WebSerial по USB</b> (наш современный тренажёр в браузере, терминал, логгеры, возможность поддержки протокола Winkeyer для логгеров типа N1MM)</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row1_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row1_mxk2') ?></td>
+                        <td style="padding:12px; color:#4fd8c4; font-weight:600;"><?= t('keyer.comp_row1_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Экран и визуализация</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Нет экрана (настройка вслепую писком через звуковое меню)</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>OLED 0.96" (400 кГц)</b>: живой WPM, тон, большой расшифрованный введённый символ и бегущая строка с введённым текстом</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row2_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row2_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row2_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Регулировка скорости, тона и громкости</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Только кнопками или через сервисное меню</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>3 аналоговые ручки</b>: плавная регулировка WPM (скорость), тона и громкости прямо во время передачи</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row3_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row3_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row3_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Качество звука самоконтроля</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Резкий колючий прямоугольный ШИМ (меандр) без фильтрации или пьезопищалка. Режет слух и утомляет уши уже через 15 минут занятий в наушниках</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>2-звенный сглаживающий RC-фильтр на BC547</b>: срезает резкие гармоники в бархатный аналоговый псевдосинус. Не утомляет слух часами даже в мониторных наушниках. Плавная регулировка тона (400–1200 Гц) и громкости с балансировочным шунтом динамика 8 Ом</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row4_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row4_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row4_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Тайминг и ямбическая память</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Базовый тайминг, глотает точки в ямбике выше 25 WPM</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Curtis 8044 Mode B + Lookahead 2-Stage</b>: идеальные пропорции ITU до 60 WPM</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row5_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row5_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row5_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Защита от дребезга контактов</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#f59e0b;">△</span> Базовая, сбоит на скоростных веслах с узким зазором</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Аппаратный и цифровой антидребезг</b> (чистая передача без ложных точек даже на ультрамалых зазорах)</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row6_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row6_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row6_mwpro') ?></td>
                     </tr>
                     <tr style="border-bottom:1px solid #141a21;">
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Встроенный декодер Морзе</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Отсутствует</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>Умный декодер ITU</b>: защита от склеек знаков и автоматические честные пробелы 7T</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row7_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row7_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row7_mwpro') ?></td>
                     </tr>
                     <tr>
-                        <td style="padding:12px; font-weight:600; color:var(--text);">Открытость и калибровка</td>
-                        <td style="padding:12px; color:var(--text-muted);"><span style="color:#ef4444;">✕</span> Закрытый китайский микроконтроллер (OTP)</td>
-                        <td style="padding:12px; color:var(--text);"><span style="color:#10b981;">✓</span> <b>100% Open Source</b>: C++/Arduino, простая прошивка, открытая схема BOM</td>
+                        <td style="padding:12px; font-weight:600; color:var(--text);"><?= t('keyer.comp_row8_param') ?></td>
+                        <td style="padding:12px; color:var(--text-muted);"><?= t('keyer.comp_row8_mxk2') ?></td>
+                        <td style="padding:12px; color:var(--text);"><?= t('keyer.comp_row8_mwpro') ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -697,14 +697,14 @@ include __DIR__ . '/includes/header.php';
     <div id="diy-keyer" class="card mt-4" style="background:#090d11; border:1px solid #1c232a; border-radius:14px; padding:24px; scroll-margin-top: 80px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:14px;">
             <div>
-                <div class="card-eyebrow" style="color:#4fd8c4;">СДЕЛАЙ САМ (DIY) · СТАРТОВАЯ ВЕРСИЯ</div>
-                <h3 style="margin:0 0 6px;">Где взять ключ? Соберите своими руками прямо сейчас!</h3>
+                <div class="card-eyebrow" style="color:#4fd8c4;"><?= t('keyer.diy_eyebrow') ?></div>
+                <h3 style="margin:0 0 6px;"><?= t('keyer.diy_title') ?></h3>
                 <p class="muted" style="margin:0; font-size:14px; max-width:820px; line-height:1.6;">
-                    Заводская печатная плата <b>MorseWave Pro v2.0</b> сейчас находится в активной разработке и подготовке к производству. Но вам не обязательно ждать! Вы можете прямо сегодня собрать базовую стартовую версию на обычной беспаечной макетке (Breadboard) всего за 15–20 минут. Все детали стандартные и доступны в любом радиомагазине или на Ozon/AliExpress.
+                    <?= t('keyer.diy_desc') ?>
                 </p>
             </div>
             <span style="font-size:11px; font-weight:800; color:#fff; background:#dc2626; border:1px solid #ef4444; padding:4px 10px; border-radius:6px; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap;">
-                ⚡ ПРОЕКТ В РАЗРАБОТКЕ
+                <?= t('keyer.info_in_dev') ?>
             </span>
         </div>
 
@@ -712,46 +712,46 @@ include __DIR__ . '/includes/header.php';
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-top:16px;">
             <a href="keydocs.php?doc=guide" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>📘</span> Полное руководство по сборке →
+                    <span>📘</span> <?= t('keyer.diy_guide_title') ?>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    Пошаговый мануал, список всех деталей с номиналами (BOM) и схема запуска с нуля.
+                    <?= t('keyer.diy_guide_desc') ?>
                 </div>
             </a>
 
             <a href="keydocs.php?doc=wiring" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>🔌</span> Карта соединений на макетке →
+                    <span>🔌</span> <?= t('keyer.diy_wiring_title') ?>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    Наглядная монтажная схема сборки проводками на беспаечной плате за 15 минут.
+                    <?= t('keyer.diy_wiring_desc') ?>
                 </div>
             </a>
 
             <a href="keydocs.php?doc=schematic" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#4fd8c4; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>📐</span> Принципиальная схема →
+                    <span>📐</span> <?= t('keyer.diy_schematic_title') ?>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    Электрическая схема, фильтры радиопомех, опторазвязка манипулятора и распиновка.
+                    <?= t('keyer.diy_schematic_desc') ?>
                 </div>
             </a>
 
             <a href="keydocs.php?doc=sketch" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#e8a33d; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>💻</span> Прошивка: keyer_breadboard.ino →
+                    <span>💻</span> <?= t('keyer.diy_sketch_title') ?>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    Просмотрщик скетча прямо на сайте, копирование в 1 клик и скачивание для Arduino IDE.
+                    <?= t('keyer.diy_sketch_desc') ?>
                 </div>
             </a>
 
             <a href="keydocs.php?doc=pcb" style="text-decoration:none; display:flex; flex-direction:column; gap:4px; background:#0f151c; border:1px solid #222f3d; padding:14px 16px; border-radius:10px; transition:border-color 0.2s ease;" onmouseover="this.style.borderColor='#4fd8c4'" onmouseout="this.style.borderColor='#222f3d'">
                 <div style="font-weight:700; color:#a78bfa; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    <span>🏭</span> Заводская плата v2.0 (KiCad) →
+                    <span>🏭</span> <?= t('keyer.diy_pcb_title') ?>
                 </div>
                 <div style="font-size:12px; color:var(--text-muted); line-height:1.5;">
-                    3D-рендеры платы, схема PDF, характеристики THT-монтажа и файлы для производства.
+                    <?= t('keyer.diy_pcb_desc') ?>
                 </div>
             </a>
         </div>
@@ -760,11 +760,11 @@ include __DIR__ . '/includes/header.php';
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-top:18px; padding-top:14px; border-top:1px dashed #1c2633;">
             <div style="font-size:13px; color:var(--text-muted); display:flex; align-items:center; gap:8px;">
                 <span>🛠️</span>
-                <span>Все схемы, прошивки и спецификации доступны прямо на нашем сайте.</span>
+                <span><?= t('keyer.docs_footer_note') ?></span>
             </div>
             <a href="keydocs.php" class="btn btn-secondary" style="display:inline-flex; align-items:center; gap:8px; font-size:13px;">
                 <span>📚</span>
-                <span>Центр документации и схемотехники ключа →</span>
+                <span><?= t('keyer.docs_footer_btn') ?></span>
             </a>
         </div>
 
@@ -775,19 +775,19 @@ include __DIR__ . '/includes/header.php';
                     <span style="font-size: 32px; line-height: 1;">🛠️</span>
                     <div>
                         <div style="font-size: 11px; font-weight: 800; color: #e8a33d; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;">
-                            УЧАСТИЕ В РАЗРАБОТКЕ И ПРОИЗВОДСТВЕ ПЛАТ
+                            <?= t('keyer.fund_eyebrow') ?>
                         </div>
                         <h3 style="margin: 0 0 6px; font-size: 18px; color: var(--text);">
-                            Хотите ускорить появление аппаратного ключа MorseWave Pro?
+                            <?= t('keyer.fund_title') ?>
                         </h3>
                         <div style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6;">
-                            Все средства идут на заказ опытных заводских плат, компонентов и сборку прототипов. Поддержавшие проект на уровне «Разработка ключа» первыми получат проверенную фабричную печатную плату / DIY-кит в подарок!
+                            <?= t('keyer.fund_desc') ?>
                         </div>
                     </div>
                 </div>
                 <a href="donate.php" class="btn" style="background: var(--accent); color: #111; font-weight: 700; font-size: 14px; padding: 11px 22px; white-space: nowrap; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(232, 163, 61, 0.25);">
                     <span>💖</span>
-                    <span>Поддержать разработку ключа →</span>
+                    <span><?= t('keyer.fund_btn') ?></span>
                 </a>
             </div>
         </div>

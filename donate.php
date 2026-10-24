@@ -89,20 +89,26 @@ include __DIR__ . '/includes/header.php';
 
 <!-- SBP Payment Box -->
 <div class="sbp-card mt-5" id="sbp-block">
-    <div class="card-eyebrow" style="color:var(--accent);">СБП · БЫСТРЫЙ ПЛАТЁЖ</div>
+    <div class="card-eyebrow" style="color:var(--accent);"><?= t('donate.sbp_eyebrow') ?></div>
     <h2 class="mt-1 mb-2"><?= t('donate.sbp_title') ?></h2>
     <p class="muted" style="max-width:550px; margin:0 auto 16px;">
         <?= t('donate.sbp_desc') ?>
     </p>
 
+    <?php if (current_lang() === 'en'): ?>
+    <div class="card mb-4" style="background: rgba(232, 163, 61, 0.08); border: 1px solid rgba(232, 163, 61, 0.35); border-radius: 10px; padding: 14px 18px; text-align: left; max-width: 550px; margin: 0 auto 16px;">
+        <div style="font-weight: 700; color: #e8a33d; margin-bottom: 4px;">🌍 <?= t('donate.intl_notice_title') ?></div>
+        <div style="font-size: 13px; color: var(--text-muted); line-height: 1.5;"><?= t('donate.intl_notice_desc') ?></div>
+    </div>
+    <?php endif; ?>
     <div class="sbp-qr-wrap">
-        <img src="assets/img/ozon_sbp_qr.png" alt="СБП QR Ozon Банк" class="sbp-qr-img" />
+        <img src="assets/img/ozon_sbp_qr.png" alt="<?= htmlspecialchars(t('donate.sbp_qr_alt')) ?>" class="sbp-qr-img" />
     </div>
 
     <div style="margin:10px 0 16px; font-size:14.5px;">
-        <span class="muted"><?= t('donate.sbp_recipient') ?>:</span> <strong>Александр А.</strong>
+        <span class="muted"><?= t('donate.sbp_recipient') ?>:</span> <strong><?= t('donate.sbp_recipient_name') ?></strong>
         <span class="dot">·</span>
-        <span class="muted"><?= t('donate.sbp_bank') ?>:</span> <strong>Ozon Банк</strong>
+        <span class="muted"><?= t('donate.sbp_bank') ?>:</span> <strong><?= t('donate.sbp_bank_name') ?></strong>
     </div>
 
     <div class="btn-row" style="justify-content:center; gap:10px; margin-bottom:14px;">
@@ -123,7 +129,7 @@ include __DIR__ . '/includes/header.php';
 <div class="card mt-5" id="donate-report-form-card">
     <h3 class="mt-0 mb-2">💬 <?= t('donate.form_title') ?></h3>
     <p class="muted" style="font-size:13px; margin-bottom:16px;">
-        Если вы сделали перевод или просто хотите отправить автору добрые пожелания (0 ₽) — заполните форму ниже. Сообщение появится на Стене признания, а вам откроется памятное достижение «Друг MorseWave» 💖!
+        <?= t('donate.form_desc') ?>
     </p>
 
     <form id="donate-report-form">

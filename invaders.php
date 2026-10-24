@@ -24,7 +24,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div>
         <a href="keyer.php" class="btn btn-secondary btn-sm" style="font-size: 13px; display: inline-flex; align-items: center; gap: 6px;">
-            <?= mw_icon('zap', 14) ?> <span>Хаб ключа MorseWave Pro →</span>
+            <?= mw_icon('zap', 14) ?> <span><?= t('invaders.hub_btn') ?></span>
         </a>
     </div>
 </div>
@@ -39,7 +39,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <span style="font-size: 11px; font-weight: 800; color: #f87171; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 3px 8px; border-radius: 6px; letter-spacing: 0.04em; white-space: nowrap;">
-        ⚡ В РАЗРАБОТКЕ
+        ⚡ <?= t('invaders.badge_in_dev') ?>
     </span>
 </div>
 
@@ -188,9 +188,9 @@ include __DIR__ . '/includes/header.php';
         <table class="manual-timing-table">
             <thead>
                 <tr>
-                    <th>Элемент передачи</th>
-                    <th>Эталонная длительность</th>
-                    <th>Допустимое отклонение (Критический перехват х2)</th>
+                    <th><?= t('invaders.table_elem') ?></th>
+                    <th><?= t('invaders.table_ideal') ?></th>
+                    <th><?= t('invaders.table_tolerance') ?></th>
                 </tr>
             </thead>
             <tbody>

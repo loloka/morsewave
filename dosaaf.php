@@ -19,7 +19,7 @@ include __DIR__ . '/includes/header.php';
         <div class="flex-between flex-wrap gap-2 mb-2" style="align-items:center;">
             <div class="muted small" style="font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;">
                 <span><?= t('dosaaf.nav_label') ?></span>
-                <button type="button" class="btn btn-outline" id="dosaaf-reset-progress-btn" style="padding:2px 7px; font-size:11px; line-height:1.2; border-color:var(--border); color:var(--text-muted);" title="Сбросить прогресс ступеней и начать курс сначала">↺ <?= t('dosaaf.reset_progress') ?></button>
+                <button type="button" class="btn btn-outline" id="dosaaf-reset-progress-btn" style="padding:2px 7px; font-size:11px; line-height:1.2; border-color:var(--border); color:var(--text-muted);" title="<?= htmlspecialchars(t('dosaaf.reset_progress_title')) ?>">↺ <?= t('dosaaf.reset_progress') ?></button>
             </div>
             <div class="speed-control dosaaf-speed-box" style="margin:0;">
                 <?= t('learn.speed') ?>
@@ -64,10 +64,10 @@ include __DIR__ . '/includes/header.php';
 
             <!-- Кнопка прямого перехода к приёму слов после изучения напевов -->
             <div id="dosaaf-napevs-next-action" class="card subcard-success p-3 text-center mt-3" style="display:none;">
-                <div class="bold" style="font-size:16px;">🎉 Все напевы ступени изучены!</div>
-                <div class="muted mt-1 mb-2" style="font-size:13px;">Отлично! Теперь закрепите эти буквы приёмом реальных смысловых слов.</div>
+                <div class="bold" style="font-size:16px;"><?= t('dosaaf.napevs_all_done') ?></div>
+                <div class="muted mt-1 mb-2" style="font-size:13px;"><?= t('dosaaf.napevs_all_done_sub') ?></div>
                 <button type="button" class="btn btn-primary" id="dosaaf-goto-words-next-btn" style="font-size:14px; padding:10px 18px;">
-                    <?= mw_icon('radio', 14) ?> Перейти к приёму слов ➔
+                    <?= mw_icon('radio', 14) ?> <?= t('dosaaf.goto_words_next') ?>
                 </button>
             </div>
         </div>
@@ -84,7 +84,7 @@ include __DIR__ . '/includes/header.php';
             <!-- Активная тренировка слов -->
             <div id="dosaaf-words-active">
                 <div id="dosaaf-words-start-box" class="text-center p-3 mb-2" style="background:var(--surface-2); border-radius:var(--radius); border:1px dashed var(--border);">
-                    <p class="muted mt-0 mb-2" style="font-size:14px;">Тренировка смысловых слов текущей ступени. Слушайте слово целиком, не считая точки и тире.</p>
+                    <p class="muted mt-0 mb-2" style="font-size:14px;"><?= t('dosaaf.words_start_desc') ?></p>
                     <button type="button" class="btn btn-primary" id="dosaaf-start-words-btn"><?= mw_icon('play', 14) ?> <?= t('dosaaf.start_words_btn') ?></button>
                 </div>
 
@@ -93,7 +93,7 @@ include __DIR__ . '/includes/header.php';
                         <span class="muted" id="dosaaf-word-length-hint" style="font-size:13px;"></span>
                         <div class="flex-between gap-1">
                             <button type="button" class="btn btn-sm btn-outline" id="dosaaf-play-word-btn" title="<?= t('dosaaf.play_again') ?> (F7)"><?= mw_icon('volume-2', 13) ?> <?= t('dosaaf.play_again') ?> <kbd class="btn-kbd">F7</kbd></button>
-                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-next-word-btn" title="Пропустить и перейти к следующему"><?= mw_icon('skip-forward', 13) ?> <?= t('dosaaf.next_word') ?></button>
+                            <button type="button" class="btn btn-sm btn-outline" id="dosaaf-next-word-btn" title="<?= htmlspecialchars(t('dosaaf.next_word_title')) ?>"><?= mw_icon('skip-forward', 13) ?> <?= t('dosaaf.next_word') ?></button>
                         </div>
                     </div>
 
@@ -123,10 +123,10 @@ include __DIR__ . '/includes/header.php';
 
                     <!-- Кнопка прямого перехода к зачёту ступени после набора нормы слов -->
                     <div id="dosaaf-words-next-action" class="card subcard-success p-3 text-center mt-3" style="display:none;">
-                        <div class="bold" style="font-size:16px;">🎯 Норма выполнена: принято 5 слов!</div>
-                        <div class="muted mt-1 mb-2" style="font-size:13px;">Зачёт ступени разблокирован. Сдайте зачёт, чтобы подтвердить ступень и открыть следующую.</div>
+                        <div class="bold" style="font-size:16px;" id="dosaaf-words-done-title"><?= t('dosaaf.words_goal_reached_title', ['{target}' => 5]) ?></div>
+                        <div class="muted mt-1 mb-2" style="font-size:13px;"><?= t('dosaaf.words_goal_reached_desc') ?></div>
                         <button type="button" class="btn btn-primary" id="dosaaf-goto-exam-next-btn" style="font-size:14px; padding:10px 18px;">
-                            <?= mw_icon('check-circle', 14) ?> Сдать зачёт ступени ➔
+                            <?= mw_icon('check-circle', 14) ?> <?= t('dosaaf.words_goal_goto_exam') ?>
                         </button>
                     </div>
 
@@ -155,11 +155,11 @@ include __DIR__ . '/includes/header.php';
 
                     <!-- Выбор объёма зачёта (10 / 30 / 50 групп) -->
                     <div class="mb-3" id="dosaaf-exam-length-wrapper">
-                        <span class="muted small bold d-block mb-1">Объём радиограммы зачёта:</span>
+                        <span class="muted small bold d-block mb-1"><?= t('dosaaf.exam_length_label') ?></span>
                         <div class="chips-group" id="dosaaf-exam-length-chips" style="display:flex; gap:6px; flex-wrap:wrap;">
-                            <button type="button" class="chip active" data-length="10" title="10 контрольных слов (экспресс-зачёт для допуска к следующей ступени)">10 слов (Экспресс)</button>
-                            <button type="button" class="chip" data-length="30" title="30 групп (радиограмма ДОСААФ ~2.5 мин, норматив на 3-й, 2-й и 1-й класс)">30 групп (Радиограмма ДОСААФ)</button>
-                            <button type="button" class="chip" data-length="50" title="50 групп (квалификационный марафон ~4.5 мин, обязателен для звания «Мастер»)">50 групп (Марафон — Мастер)</button>
+                            <button type="button" class="chip active" data-length="10" title="<?= htmlspecialchars(t('dosaaf.exam_len_10_title')) ?>"><?= t('dosaaf.exam_len_10_chip') ?></button>
+                            <button type="button" class="chip" data-length="30" title="<?= htmlspecialchars(t('dosaaf.exam_len_30_title')) ?>"><?= t('dosaaf.exam_len_30_chip') ?></button>
+                            <button type="button" class="chip" data-length="50" title="<?= htmlspecialchars(t('dosaaf.exam_len_50_title')) ?>"><?= t('dosaaf.exam_len_50_chip') ?></button>
                         </div>
                     </div>
 
