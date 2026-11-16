@@ -283,12 +283,14 @@ window.addEventListener('beforeunload', () => stopSessionAudioNoise());
  * аппроксимация стандартного расчёта ARRL.
  */
 class MorseAudio {
-    constructor({ freq, wpm = 12, farnsworthWpm = null, waveform, letterGapUnits = 3 } = {}) {
+    constructor({ freq, wpm = 12, farnsworthWpm = null, waveform, letterGapUnits = 3, gain = 0.35, qsb = false } = {}) {
         const settings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : { freq: 600, waveform: 'sine' };
         this.freq = freq ?? settings.freq;
         this.waveform = waveform ?? settings.waveform;
         this.wpm = wpm;
         this.farnsworthWpm = farnsworthWpm;
+        this.gain = (gain !== undefined && gain !== null) ? Number(gain) : 0.35;
+        this.qsb = !!qsb;
         // Межбуквенный интервал в единицах — стандартно 3 (не трогать нигде,
         // кроме экзамена, ss. groups.js: там по замеру эталонной записи
         // реального экзамена он оказался 4, не 3).
@@ -331,9 +333,15 @@ class MorseAudio {
             const attack = Math.min(0.005, dur * 0.25);
             const decay = attack;
 
+            // Уровень громкости с поддержкой QSB (ионосферное замирание сигнала)
+            let peak = this.gain;
+            if (this.qsb) {
+                peak = Math.max(0.08, this.gain * (0.65 + 0.35 * Math.sin(Date.now() / 1200)));
+            }
+
             gain.gain.setValueAtTime(0, now);
-            gain.gain.linearRampToValueAtTime(0.35, now + attack);
-            gain.gain.setValueAtTime(0.35, Math.max(now + attack, now + dur - decay));
+            gain.gain.linearRampToValueAtTime(peak, now + attack);
+            gain.gain.setValueAtTime(peak, Math.max(now + attack, now + dur - decay));
             gain.gain.linearRampToValueAtTime(0, now + dur);
 
             osc.connect(gain).connect(bus.input);

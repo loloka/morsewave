@@ -23,6 +23,8 @@ if (!empty($currentUser['name'])) {
 include __DIR__ . '/includes/header.php';
 ?>
 
+<link rel="stylesheet" href="<?= asset_v('assets/css/contest-cockpit.css') ?>">
+
 <div class="card-eyebrow"><?= t('cs.eyebrow') ?></div>
 <h1><?= t('cs.h1') ?></h1>
 <div id="live-daily-timer-mount"></div>
@@ -79,27 +81,66 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Параметры для режима Контеста -->
-    <div id="cs-contest-setup-wrap" class="subcard mt-3" style="display:none; border-left:3px solid var(--accent); padding:12px 14px;">
-        <div class="flex-wrap gap-3" style="align-items:center;">
-            <label style="font-size:13px; font-weight:700;">
-                <?= t('cs.contest_my_call') ?>
-                <input type="text" id="cs-contest-mycall" class="answer-input mono" style="width:130px; text-transform:uppercase; margin-left:6px; padding:4px 8px; font-size:14px;" value="<?= htmlspecialchars($defaultCall) ?>" data-default-call="<?= htmlspecialchars($defaultCall) ?>" maxlength="10">
-            </label>
-            <div class="muted" style="font-size:12px;">
-                Формат обмена: RST <b>599</b> (авто) + порядковый номер QSO
+    <div id="cs-contest-setup-wrap" class="subcard mt-3" style="display:none; border-left:3px solid var(--accent); padding:14px 16px;">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">
+            <div>
+                <label style="font-size:13px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+                    <?= t('cs.contest_my_call') ?>
+                    <input type="text" id="cs-contest-mycall" class="answer-input mono" style="width:120px; text-transform:uppercase; padding:4px 8px; font-size:14px; font-weight:700;" value="<?= htmlspecialchars($defaultCall) ?>" data-default-call="<?= htmlspecialchars($defaultCall) ?>" maxlength="10">
+                </label>
+            </div>
+            <div class="muted mono" style="font-size:12px;">
+                Формат обмена: <b>599 [NR]</b> (RST + порядковый номер связи)
             </div>
         </div>
-        <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <label class="chip" style="gap:8px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="cs-contest-detune" checked> <?= t('cs.contest_detune_label') ?>
-            </label>
-            <div class="muted mt-1" style="font-size:11px; margin-left:26px;"><?= t('cs.contest_detune_hint') ?></div>
+
+        <div style="font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:0.8px; color:var(--text-muted); margin:12px 0 8px;">
+            Условия эфира и реализм (Morse Runner)
         </div>
-        <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
-            <label class="chip" style="gap:8px; font-size:12px; cursor:pointer;">
-                <input type="checkbox" id="cs-contest-cut-numbers" checked> <?= t('cs.contest_cut_numbers_label') ?>
-            </label>
-            <div class="muted mt-1" style="font-size:11px; margin-left:26px;"><?= t('cs.contest_cut_numbers_hint') ?></div>
+
+        <div class="cs-contest-options-grid">
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-cut-numbers" checked>
+                    <span><?= t('cs.contest_cut_numbers_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_cut_numbers_hint') ?></div>
+            </div>
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-detune" checked>
+                    <span><?= t('cs.contest_detune_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_detune_hint') ?></div>
+            </div>
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-pileup">
+                    <span><?= t('cs.contest_pileup_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_pileup_hint') ?></div>
+            </div>
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-qsb">
+                    <span><?= t('cs.contest_qsb_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_qsb_hint') ?></div>
+            </div>
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-qrm">
+                    <span><?= t('cs.contest_qrm_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_qrm_hint') ?></div>
+            </div>
+            <div class="cs-option-card">
+                <label class="cs-option-label">
+                    <input type="checkbox" id="cs-contest-lids">
+                    <span><?= t('cs.contest_lids_label') ?></span>
+                </label>
+                <div class="cs-option-desc"><?= t('cs.contest_lids_hint') ?></div>
+            </div>
         </div>
     </div>
 
@@ -254,121 +295,135 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="signal-line mt-2" id="cs-signal"></div>
 
-    <style>
-        .cs-hk-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 10px;
-            align-items: stretch;
-            margin: 12px 0;
-        }
-        .cs-hk-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: var(--surface-2, rgba(255,255,255,0.06));
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            white-space: nowrap;
-        }
-        .cs-hk-btn:hover {
-            background: var(--surface-3, rgba(255,255,255,0.14));
-            border-color: var(--accent);
-            color: var(--accent);
-            transform: translateY(-1px);
-        }
-        .cs-hk-btn:active {
-            transform: translateY(0);
-        }
-        .cs-hk-btn .btn-kbd {
-            background: rgba(255,255,255,0.12);
-            color: var(--accent);
-            font-size: 11px;
-            font-weight: 700;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-family: var(--font-mono);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .cs-hk-desc {
-            opacity: 0.75;
-            font-weight: 400;
-            font-size: 11px;
-            margin-left: 2px;
-        }
-        @media (max-width: 640px) {
-            .cs-hk-grid {
-                gap: 6px;
-            }
-            .cs-hk-btn {
-                padding: 6px 8px;
-                font-size: 11px;
-                flex: 1 1 calc(50% - 6px);
-                justify-content: center;
-            }
-            .cs-contest-inputs-row {
-                flex-direction: column;
-                align-items: stretch !important;
-                gap: 8px;
-            }
-            .cs-contest-inputs-subrow {
-                display: flex;
-                gap: 6px;
-                width: 100%;
-            }
-            #cs-contest-rst { width: 55px !important; }
-            #cs-contest-sent-nr { width: 55px !important; }
-            #cs-contest-recv-nr { flex: 1 !important; width: auto !important; }
-            #cs-contest-log-table { font-size: 11px; }
-            #cs-contest-log-table th, #cs-contest-log-table td { padding: 4px 6px; }
-        }
-    </style>
-
     <!-- Виджет контеста: статусная строка, поля ввода и аппаратный журнал в стиле соревнований -->
     <div id="cs-contest-session-display" style="display:none; margin-top:10px;">
-        <div class="flex-between flex-wrap gap-2 subcard" style="align-items:center; padding:10px 14px;">
-            <div class="mono" style="font-size:14px; display:flex; align-items:center; gap:8px;">
-                <span class="badge" style="background:var(--accent); color:#000; font-weight:700; font-size:11px; padding:2px 7px; border-radius:4px;">CONTEST</span>
-                <b>CQ DE</b> <span id="cs-contest-live-mycall" style="color:var(--accent); font-weight:700;">R9O</span>
+        <!-- Статусная панель «Кокпит трансивера» (Cockpit HUD) -->
+        <div class="cs-cockpit-hud">
+            <div class="cs-hud-station">
+                <span class="cs-hud-badge-mode">CONTEST</span>
+                <div class="cs-hud-mycall-box">
+                    <span class="cs-hud-mycall-label">CQ DE</span>
+                    <span id="cs-contest-live-mycall" class="cs-hud-mycall-val">R9O</span>
+                </div>
+                <div class="cs-hud-led-group">
+                    <div class="cs-hud-led led-rx" id="cs-hud-rx-led" title="Приём эфира">
+                        <span class="cs-hud-led-dot"></span>
+                        <span>RX</span>
+                    </div>
+                    <div class="cs-hud-led led-tx" id="cs-hud-tx-led" title="Передача морзе (TX)">
+                        <span class="cs-hud-led-dot"></span>
+                        <span>TX</span>
+                    </div>
+                </div>
             </div>
-            <div class="flex flex-wrap gap-3 mono" style="font-size:13px; align-items:center;">
-                <span>QSO: <b id="cs-contest-live-qsos">0</b></span>
-                <span>Rate: <b id="cs-contest-live-rate">0</b>/h</span>
-                <span>⏱ <b id="cs-contest-live-timer">00:00</b></span>
-                <span>XP: <b id="cs-contest-live-xp" style="color:var(--accent);">0</b></span>
-                <span id="cs-contest-live-rit" class="muted" style="font-size:12px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">RIT: 0 Hz</span>
+            <div class="cs-hud-telemetry">
+                <div class="cs-hud-pod">
+                    <span class="cs-hud-pod-label">QSO</span>
+                    <b id="cs-contest-live-qsos" class="cs-hud-pod-value">0</b>
+                </div>
+                <div class="cs-hud-pod">
+                    <span class="cs-hud-pod-label">RATE</span>
+                    <span class="cs-hud-pod-value"><b id="cs-contest-live-rate">0</b><span style="font-size:11px; opacity:0.7;">/h</span></span>
+                </div>
+                <div class="cs-hud-pod">
+                    <span class="cs-hud-pod-label">TIME</span>
+                    <b id="cs-contest-live-timer" class="cs-hud-pod-value accent-gold">00:00</b>
+                </div>
+                <div class="cs-hud-pod">
+                    <span class="cs-hud-pod-label">XP</span>
+                    <b id="cs-contest-live-xp" class="cs-hud-pod-value accent-gold">0</b>
+                </div>
+                <div id="cs-contest-live-rit" class="cs-hud-rit rit-zero" title="Расстройка частоты корреспондента (RIT)">
+                    RIT 0 Hz
+                </div>
             </div>
         </div>
 
-        <div class="flex-wrap gap-2 mt-2 cs-contest-inputs-row" style="align-items:center;">
-            <div style="flex:2; min-width:140px; position:relative; display:flex; align-items:center;">
-                <input type="text" id="cs-contest-call" class="answer-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="width:100%; text-transform:uppercase; font-size:18px; font-weight:700;" autocomplete="off">
-                <span id="cs-contest-dupe-badge" class="badge" style="display:none; position:absolute; right:8px; background:#ef4444; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; pointer-events:none; z-index:2;">⚠️ DUPE</span>
-            </div>
-            <div class="cs-contest-inputs-subrow flex gap-2" style="align-items:center;">
-                <input type="text" id="cs-contest-rst" class="answer-input mono text-center" value="599" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Рапорт 599 ставится автоматически">
-                <input type="text" id="cs-contest-sent-nr" class="answer-input mono text-center" value="001" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Ваш исходящий номер">
-                <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:120px; font-size:18px; font-weight:700;" autocomplete="off">
+        <!-- Слот ввода трансивера (Cockpit Inputs Deck) -->
+        <div class="cs-cockpit-deck">
+            <div class="cs-cockpit-inputs-row">
+                <div class="cs-cockpit-input-wrap call-wrap">
+                    <input type="text" id="cs-contest-call" class="cs-cockpit-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="width:100%; text-transform:uppercase;" autocomplete="off">
+                    <span id="cs-contest-dupe-badge" class="cs-cockpit-dupe-pill" style="display:none;">⚠️ DUPE</span>
+                </div>
+                <div class="cs-cockpit-subrow">
+                    <input type="text" id="cs-contest-rst" class="cs-cockpit-input is-readonly mono rst-val" value="599" style="width:72px;" readonly title="Рапорт 599 ставится автоматически">
+                    <input type="text" id="cs-contest-sent-nr" class="cs-cockpit-input is-readonly mono nr-sent" value="001" style="width:72px;" readonly title="Ваш исходящий номер">
+                    <input type="text" id="cs-contest-recv-nr" class="cs-cockpit-input mono nr-recv" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:125px; text-align:center;" autocomplete="off">
+                </div>
             </div>
         </div>
 
-        <!-- Горячие клавиши контеста -->
-        <div class="cs-hk-grid mt-2" id="cs-contest-hotkeys-toolbar">
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f1" title="F1 — Общий вызов CQ"><kbd class="btn-kbd">F1</kbd> <span>CQ</span> <span class="cs-hk-desc">(Вызов)</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f2" title="F2 — Контрольный номер (Exchange): рапорт 599 и порядковый номер"><kbd class="btn-kbd">F2</kbd> <span>Номер (Exch)</span> <span class="cs-hk-desc">(599 №)</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f3" title="F3 — Завершить и зачесть связь (TU — Thank You)"><kbd class="btn-kbd">F3</kbd> <span>Зачёт (TU)</span> <span class="cs-hk-desc">(Спасибо)</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f4" title="F4 — Передать свой позывной"><kbd class="btn-kbd">F4</kbd> <span>Мой call</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f5" title="F5 — Передать позывной корреспондента"><kbd class="btn-kbd">F5</kbd> <span>Его call</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f6" title="F6 — Запросить повтор номера (?)"><kbd class="btn-kbd">F6</kbd> <span>?</span> <span class="cs-hk-desc">(Повтор AGN)</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f7" title="F7 — Повторить свой контрольный номер"><kbd class="btn-kbd">F7</kbd> <span>Повтор 599 №</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-enter" title="Enter — Умный авто-шаг (ESM: вызов → номер → зачёт TU)"><kbd class="btn-kbd">Enter</kbd> <span>Авто-шаг (ESM)</span></button>
-            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-esc" title="Esc — Прервать воспроизведение звука"><kbd class="btn-kbd">Esc</kbd> <span>Стоп звук</span></button>
+        <!-- Тактильная клавиатура станции (Cockpit Control Panel) -->
+        <div class="cs-cockpit-keypad" id="cs-contest-hotkeys-toolbar">
+            <div class="cs-keypad-zones">
+                <!-- Зона передачи (Transmit Zone) -->
+                <div class="cs-keypad-zone">
+                    <div class="cs-zone-header tx-header">
+                        <span>TX / ПЕРЕДАЧА</span>
+                        <span>F1 – F3</span>
+                    </div>
+                    <div class="cs-zone-grid">
+                        <button type="button" class="cs-station-key key-tx" id="cs-key-f1" title="F1 — Общий вызов CQ">
+                            <kbd class="cs-key-kbd">F1</kbd>
+                            <span>CQ</span>
+                            <span class="cs-key-desc">Вызов</span>
+                        </button>
+                        <button type="button" class="cs-station-key key-tx" id="cs-key-f2" title="F2 — Контрольный номер (Exchange): 599 [NR]">
+                            <kbd class="cs-key-kbd">F2</kbd>
+                            <span>Exch</span>
+                            <span class="cs-key-desc">599 №</span>
+                        </button>
+                        <button type="button" class="cs-station-key key-tx" id="cs-key-f3" title="F3 — Завершить и зачесть связь (TU Thank You)">
+                            <kbd class="cs-key-kbd">F3</kbd>
+                            <span>TU</span>
+                            <span class="cs-key-desc">Зачёт</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Зона идентификации и повтора (Recall / RX Zone) -->
+                <div class="cs-keypad-zone">
+                    <div class="cs-zone-header">
+                        <span>RECALL / ПОВТОР</span>
+                        <span>F4 – F7</span>
+                    </div>
+                    <div class="cs-zone-grid">
+                        <button type="button" class="cs-station-key" id="cs-key-f4" title="F4 — Передать свой позывной">
+                            <kbd class="cs-key-kbd">F4</kbd>
+                            <span>My Call</span>
+                        </button>
+                        <button type="button" class="cs-station-key" id="cs-key-f5" title="F5 — Передать позывной корреспондента">
+                            <kbd class="cs-key-kbd">F5</kbd>
+                            <span>His Call</span>
+                        </button>
+                        <button type="button" class="cs-station-key" id="cs-key-f6" title="F6 — Запросить повтор номера (?)">
+                            <kbd class="cs-key-kbd">F6</kbd>
+                            <span>?</span>
+                            <span class="cs-key-desc">AGN</span>
+                        </button>
+                        <button type="button" class="cs-station-key" id="cs-key-f7" title="F7 — Повторить свой контрольный номер">
+                            <kbd class="cs-key-kbd">F7</kbd>
+                            <span>5NN №</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Главная педаль ESM (Enter Sends Message) и Стоп -->
+            <div class="cs-pedal-deck">
+                <button type="button" class="cs-esm-pedal-btn" id="cs-key-enter" title="Enter — Умный авто-шаг (ESM: вызов → номер → зачёт TU)">
+                    <div class="cs-esm-pedal-left">
+                        <kbd class="cs-esm-kbd">Enter ↵</kbd>
+                        <span class="cs-esm-title">АВТО-ШАГ (ESM)</span>
+                    </div>
+                    <span class="cs-esm-action-pill" id="cs-esm-action-hint">1. Вызов CQ</span>
+                </button>
+                <button type="button" class="cs-esc-btn" id="cs-key-esc" title="Esc — Прервать передачу или звук">
+                    <kbd class="cs-key-kbd" style="color:var(--danger,#e2584f);">Esc</kbd>
+                    <span>Стоп</span>
+                </button>
+            </div>
         </div>
         <div class="subcard mt-2" style="font-size:12px; line-height:1.5; padding:10px 14px; background:rgba(0,0,0,0.2);">
             <div style="font-weight:700; color:var(--accent); margin-bottom:4px;">💡 Пояснения и алгоритм соревнований (ESM — Enter Sends Message):</div>
@@ -384,28 +439,28 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <!-- Аппаратный журнал контеста (Live QSO Log) -->
-        <div id="cs-contest-log-wrap" class="mt-3 subcard" style="padding:12px; border-left:3px solid var(--accent);">
-            <div class="flex-between flex-wrap gap-2" style="align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px; margin-bottom:8px;">
-                <span style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:var(--accent);">
+        <div id="cs-contest-log-wrap" class="cs-cockpit-log-chassis">
+            <div class="cs-log-header">
+                <span class="cs-log-title">
                     <?= mw_icon('list', 14) ?> <?= t('cs.contest_log_title') ?>
                 </span>
-                <span class="muted" style="font-size:12px;" id="cs-contest-log-count">0 связей</span>
+                <span class="cs-log-count-badge" id="cs-contest-log-count">0 связей</span>
             </div>
-            <div style="overflow-x:auto; max-height:240px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
-                <table style="width:100%; font-family:var(--font-mono); font-size:13px; border-collapse:collapse;" id="cs-contest-log-table">
+            <div class="cs-log-scroll-pane">
+                <table class="cs-cockpit-log-table" id="cs-contest-log-table">
                     <thead>
-                        <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-size:11px; text-transform:uppercase;">
-                            <th style="padding:4px 8px; width:45px;">#</th>
-                            <th style="padding:4px 8px; width:70px;">Время</th>
-                            <th style="padding:4px 8px;">Позывной</th>
-                            <th style="padding:4px 8px; width:90px;">RST/Отпр</th>
-                            <th style="padding:4px 8px; width:150px;">RST/Принят</th>
-                            <th style="padding:4px 8px; width:120px; text-align:right;">Очки (XP)</th>
+                        <tr>
+                            <th style="width:45px;">#</th>
+                            <th style="width:70px;">Время</th>
+                            <th>Позывной</th>
+                            <th style="width:90px;">RST/Отпр</th>
+                            <th style="width:160px;">RST/Принят</th>
+                            <th style="width:110px; text-align:right;">Очки</th>
                         </tr>
                     </thead>
                     <tbody id="cs-contest-log-body">
                         <tr id="cs-contest-log-empty">
-                            <td colspan="6" class="muted text-center" style="padding:14px; font-style:italic;">
+                            <td colspan="6" class="muted text-center" style="padding:16px; font-style:italic;">
                                 <?= t('cs.contest_log_empty') ?>
                             </td>
                         </tr>

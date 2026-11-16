@@ -48,7 +48,7 @@ header next to the profile, see "How it works internally" below for details.
 | 🔢 **Character groups** | Copy 2–5 character groups by ear: letters / digits / mixed / learned-only / custom set, with speed and Farnsworth spacing as sliders; an exam mode matching ham radio license requirements |
 | 📝 **Real words** | Copying common English words and Q&A radio phrases (`CQ CQ DE R9OGL K`, `UR RST 599 599`): trains recognizing a word as a single sound shape rather than assembling it letter by letter. Third tab under "Groups" |
 | 💬 **Abbreviations** | Q-codes and ham radio abbreviations (CQ, QTH, 73…) by ear, multiple choice |
-| 📡 **Callsigns** | Practice on real-format callsigns (including Russian formats), the bank grows via a generator script |
+| 📡 **Callsigns & Contest** | Practice on real-format callsigns (including Russian call patterns), RufzXP mode with adaptive speed acceleration, and a full Morse Runner-style contest simulator (transceiver cockpit HUD, multi-station pileups with concurrent audio streams, RIT pitch offsets, Cut Numbers T/N, tactile ESM pedal, and live contest log) |
 | 🏆 **Achievements** | Achievement conditions live in the database (`achievements`) — new ones can be added without touching code |
 | 🎯 **Daily challenge** | A challenge tailored to the player's stage (beginner → "learn some letters", further along → "copy by ear", knows the alphabet → groups) plus a +50 XP bonus once a day |
 | 💡 **Signal lamp** | A visual analog of the sound — you can train with no sound at all |

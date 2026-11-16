@@ -1,0 +1,846 @@
+/* =========================================================
+   MorseWave Contest Cockpit UI
+   Эстетика радиококпита / трансивера (Transceiver Interface)
+   Тёмный фрезерованный металл, янтарные и рубиновые индикаторы
+   ========================================================= */
+
+/* --- HUD Панель трансивера (Cockpit HUD) --- */
+.cs-cockpit-hud {
+    background: #111418;
+    background: radial-gradient(120% 100% at 50% 0%, #1b2128 0%, #101317 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    padding: 10px 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 20px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    position: relative;
+    user-select: none;
+}
+
+/* Левая секция: станция и светодиоды RX/TX */
+.cs-hud-station {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.cs-hud-badge-mode {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    background: rgba(232, 163, 61, 0.14);
+    color: var(--accent, #e8a33d);
+    border: 1px solid rgba(232, 163, 61, 0.35);
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.cs-hud-mycall-box {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text, #eae6df);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cs-hud-mycall-label {
+    font-size: 11px;
+    color: var(--text-muted, #8b9198);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.cs-hud-mycall-val {
+    color: var(--accent, #e8a33d);
+    letter-spacing: 0.5px;
+}
+
+/* Светодиодные индикаторы RX / TX */
+.cs-hud-led-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cs-hud-led {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 800;
+    font-family: var(--font-mono);
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: #656d76;
+    transition: all 0.15s ease;
+}
+
+.cs-hud-led-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2b3036;
+    transition: all 0.15s ease;
+}
+
+/* Состояние: В ЭФИРЕ (TX - Передача) */
+.cs-hud-led.led-tx.is-active {
+    background: rgba(239, 68, 68, 0.16);
+    border-color: rgba(239, 68, 68, 0.45);
+    color: #fca5a5;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.cs-hud-led.led-tx.is-active .cs-hud-led-dot {
+    background: #ef4444;
+    box-shadow: 0 0 6px #ef4444, 0 0 10px #f87171;
+    animation: cw-tx-pulse 0.4s infinite alternate ease-in-out;
+}
+
+@keyframes cw-tx-pulse {
+    0% { transform: scale(0.9); opacity: 0.75; }
+    100% { transform: scale(1.15); opacity: 1; }
+}
+
+/* Состояние: ПРИЁМ (RX) */
+.cs-hud-led.led-rx.is-active {
+    background: rgba(79, 216, 196, 0.14);
+    border-color: rgba(79, 216, 196, 0.4);
+    color: #5eead4;
+    box-shadow: 0 0 10px rgba(79, 216, 196, 0.25);
+}
+
+.cs-hud-led.led-rx.is-active .cs-hud-led-dot {
+    background: #4fd8c4;
+    box-shadow: 0 0 6px #4fd8c4;
+}
+
+/* Правая секция: Цифровые счётчики и приборы */
+.cs-hud-telemetry {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px 12px;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+}
+
+.cs-hud-pod {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+}
+
+.cs-hud-pod-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-muted, #8b9198);
+}
+
+.cs-hud-pod-value {
+    font-weight: 700;
+    color: var(--text, #eae6df);
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-hud-pod-value.accent-gold {
+    color: var(--accent, #e8a33d);
+}
+
+/* Прибор расстройки (RIT: Receiver Incremental Tuning) */
+.cs-hud-rit {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+    transition: all 0.2s ease;
+}
+
+.cs-hud-rit.rit-zero {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.08);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.cs-hud-rit.rit-detuned {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.12);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    box-shadow: 0 0 8px rgba(251, 191, 36, 0.2);
+}
+
+@media (max-width: 640px) {
+    .cs-cockpit-hud {
+        padding: 8px 10px;
+        gap: 8px;
+    }
+    .cs-hud-telemetry {
+        width: 100%;
+        justify-content: space-between;
+        gap: 6px;
+    }
+    .cs-hud-pod {
+        padding: 2px 6px;
+        font-size: 12px;
+    }
+}
+
+/* --- Слот ввода трансивера (Cockpit Inputs Deck) --- */
+.cs-cockpit-deck {
+    background: #0f1216;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-top: 10px;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.cs-cockpit-inputs-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cs-cockpit-input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.cs-cockpit-input-wrap.call-wrap {
+    flex: 2;
+    min-width: 150px;
+}
+
+.cs-cockpit-subrow {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* Поле ввода аппаратуры */
+.cs-cockpit-input {
+    background: #14181e;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    color: #f1f3f5;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    padding: 8px 12px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.cs-cockpit-input::placeholder {
+    color: rgba(255, 255, 255, 0.28);
+    font-weight: 500;
+}
+
+/* Янтарный фокус приёма (Amber CW Focus) */
+.cs-cockpit-input:focus {
+    background: #171d25;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* Пассивные слоты (RST 599 и исходящий номер 001) */
+.cs-cockpit-input.is-readonly {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted, #8b9198);
+    font-size: 15px;
+    text-align: center;
+    cursor: default;
+    user-select: none;
+}
+
+/* Индикация ДУБЛЯ (DUPE State) */
+.cs-cockpit-input.is-dupe {
+    border-color: #ef4444 !important;
+    background: rgba(239, 68, 68, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25), inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+.cs-cockpit-dupe-pill {
+    position: absolute;
+    right: 8px;
+    background: rgba(239, 68, 68, 0.88);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    pointer-events: none;
+    z-index: 3;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    animation: dupe-pill-pop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dupe-pill-pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Плавный импульс отправки (ESM Pulse Flash) */
+.cs-cockpit-input.esm-flash {
+    animation: esm-send-flash 0.35s ease-out;
+}
+
+@keyframes esm-send-flash {
+    0% {
+        border-color: #22c55e;
+        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4);
+    }
+    100% {
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .cs-cockpit-inputs-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .cs-cockpit-input-wrap.call-wrap {
+        width: 100%;
+    }
+    .cs-cockpit-subrow {
+        width: 100%;
+        display: flex;
+    }
+    .cs-cockpit-input.nr-recv {
+        flex: 1;
+    }
+    .cs-cockpit-input.nr-sent,
+    .cs-cockpit-input.rst-val {
+        width: 60px !important;
+    }
+}
+
+/* --- Тактильная клавиатура станции (Cockpit Control Panel) --- */
+.cs-cockpit-keypad {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 10px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.cs-keypad-zones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.cs-keypad-zone {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+.cs-zone-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    color: var(--text-muted, #8b9198);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cs-zone-header.tx-header {
+    color: var(--accent, #e8a33d);
+}
+
+.cs-zone-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Тактильная клавиша пульта */
+.cs-station-key {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #171c23;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.65);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text, #eae6df);
+    cursor: pointer;
+    transition: all 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.cs-station-key:hover {
+    background: #202731;
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.cs-station-key:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.cs-station-key .cs-key-kbd {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--accent, #e8a33d);
+}
+
+.cs-station-key .cs-key-desc {
+    font-size: 11px;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+/* Акцентные клавиши передачи (TX Zone) */
+.cs-station-key.key-tx {
+    border-color: rgba(232, 163, 61, 0.3);
+}
+
+.cs-station-key.key-tx:hover {
+    border-color: rgba(232, 163, 61, 0.6);
+}
+
+/* Свечение при активной передаче морзе данным макросом */
+.cs-station-key.is-tx-active {
+    background: rgba(232, 163, 61, 0.22) !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Нижняя панель: Педаль ESM и аварийный Esc */
+.cs-pedal-deck {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.cs-esm-pedal-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #222a35 0%, #151a21 100%);
+    border: 1px solid rgba(232, 163, 61, 0.45);
+    border-bottom: 3px solid rgba(0, 0, 0, 0.85);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 3px 8px rgba(0, 0, 0, 0.35);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.12s ease;
+    user-select: none;
+}
+
+.cs-esm-pedal-btn:hover {
+    background: linear-gradient(180deg, #2a3442 0%, #192028 100%);
+    border-color: var(--accent, #e8a33d);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 0 14px rgba(232, 163, 61, 0.35);
+}
+
+.cs-esm-pedal-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.7);
+}
+
+.cs-esm-pedal-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cs-esm-kbd {
+    background: var(--accent, #e8a33d);
+    color: #0d0f11;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.cs-esm-title {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.3px;
+}
+
+.cs-esm-action-pill {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: #fde047;
+    background: rgba(253, 224, 71, 0.12);
+    border: 1px solid rgba(253, 224, 71, 0.25);
+    padding: 3px 9px;
+    border-radius: 12px;
+}
+
+.cs-esc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #171b21;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted, #8b9198);
+    cursor: pointer;
+    transition: all 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.cs-esc-btn:hover {
+    background: #20252d;
+    color: var(--danger, #e2584f);
+    border-color: rgba(226, 88, 79, 0.35);
+}
+
+.cs-esc-btn:active {
+    transform: translateY(2px);
+    border-bottom-width: 1px;
+}
+
+/* --- Аппаратный журнал контеста (Cockpit Live Log) --- */
+.cs-cockpit-log-chassis {
+    background: #111419;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.cs-log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+}
+
+.cs-log-title {
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--accent, #e8a33d);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+}
+
+.cs-log-count-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted, #8b9198);
+    background: rgba(0, 0, 0, 0.35);
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cs-log-scroll-pane {
+    max-height: 250px;
+    overflow-y: auto;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.25);
+}
+
+/* Тонкий аппаратный скроллбар */
+.cs-log-scroll-pane::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.cs-log-scroll-pane::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.cs-log-scroll-pane::-webkit-scrollbar-thumb {
+    background: #272d36;
+    border-radius: 3px;
+}
+
+.cs-log-scroll-pane::-webkit-scrollbar-thumb:hover {
+    background: #39424e;
+}
+
+.cs-cockpit-log-table {
+    width: 100%;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    border-collapse: collapse;
+    white-space: nowrap;
+}
+
+.cs-cockpit-log-table thead tr {
+    position: sticky;
+    top: 0;
+    background: #14181f;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-muted, #8b9198);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    z-index: 2;
+}
+
+.cs-cockpit-log-table th,
+.cs-cockpit-log-table td {
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.cs-cockpit-log-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.2s ease;
+}
+
+.cs-cockpit-log-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Микро-анимация появления новой связи сверху */
+.cs-log-row-new {
+    animation: log-row-enter 0.5s ease-out;
+}
+
+@keyframes log-row-enter {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+        background: rgba(232, 163, 61, 0.22);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(0);
+        background: rgba(232, 163, 61, 0.12);
+    }
+    100% {
+        background: transparent;
+    }
+}
+
+/* Бейджи результатов QSO в логе */
+.cs-log-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+}
+
+.cs-log-tag.tag-ok {
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.3);
+}
+
+.cs-log-tag.tag-err {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.cs-log-tag.tag-warn {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.14);
+    border: 1px solid rgba(251, 191, 36, 0.35);
+    font-size: 11px;
+    margin-left: 5px;
+}
+
+.cs-log-xp-badge {
+    font-weight: 800;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: #fde047;
+    text-shadow: 0 0 10px rgba(253, 224, 71, 0.3);
+    font-variant-numeric: tabular-nums;
+}
+
+.cs-log-xp-zero {
+    color: var(--text-muted, #8b9198);
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+/* --- Мобильная эргономика «под один палец» (One-Thumb Ergonomics) --- */
+@media (max-width: 640px) {
+    .cs-keypad-zones {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .cs-pedal-deck {
+        margin-top: 6px;
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .cs-esm-pedal-btn {
+        padding: 10px 14px;
+        min-height: 48px;
+    }
+
+    .cs-esm-title {
+        font-size: 12px;
+    }
+
+    .cs-esm-action-pill {
+        font-size: 10px;
+        padding: 2px 7px;
+    }
+
+    .cs-esc-btn {
+        min-height: 48px;
+        padding: 10px 12px;
+    }
+
+    .cs-station-key {
+        padding: 8px 10px;
+        min-height: 40px;
+        font-size: 12px;
+        flex: 1 1 calc(33% - 6px);
+        justify-content: center;
+    }
+
+    .cs-cockpit-log-table {
+        font-size: 11px;
+    }
+
+    .cs-cockpit-log-table th,
+    .cs-cockpit-log-table td {
+        padding: 5px 6px;
+    }
+}
+
+/* --- Сетка опций контеста и реализма эфира --- */
+.cs-contest-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.cs-option-card {
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.15s ease;
+}
+
+.cs-option-card:hover {
+    border-color: rgba(232, 163, 61, 0.35);
+    background: rgba(0, 0, 0, 0.38);
+}
+
+.cs-option-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text, #eae6df);
+    cursor: pointer;
+    user-select: none;
+}
+
+.cs-option-label input[type="checkbox"] {
+    accent-color: var(--accent, #e8a33d);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+.cs-option-desc {
+    font-size: 11px;
+    color: var(--text-muted, #8b9198);
+    margin-top: 4px;
+    margin-left: 23px;
+    line-height: 1.4;
+}
+
+
+
+

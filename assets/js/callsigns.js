@@ -505,6 +505,30 @@
         });
     }
 
+    // Настройка режима Пайлап (Pileup: 2-3 станции одновременно)
+    const csContestPileupEl = document.getElementById('cs-contest-pileup');
+    if (csContestPileupEl) {
+        const savedPileup = safeStorage.getItem('morse_cs_contest_pileup');
+        if (savedPileup !== null) {
+            csContestPileupEl.checked = (savedPileup === 'true');
+        }
+        csContestPileupEl.addEventListener('change', () => {
+            safeStorage.setItem('morse_cs_contest_pileup', csContestPileupEl.checked ? 'true' : 'false');
+        });
+    }
+
+    // Настройка замираний сигнала (QSB)
+    const csContestQsbEl = document.getElementById('cs-contest-qsb');
+    if (csContestQsbEl) {
+        const savedQsb = safeStorage.getItem('morse_cs_contest_qsb');
+        if (savedQsb !== null) {
+            csContestQsbEl.checked = (savedQsb === 'true');
+        }
+        csContestQsbEl.addEventListener('change', () => {
+            safeStorage.setItem('morse_cs_contest_qsb', csContestQsbEl.checked ? 'true' : 'false');
+        });
+    }
+
     let session = null;
     let isPlaying = false;
     let currentAudio = null;
@@ -1088,6 +1112,9 @@
     const contestSentNrInput = document.getElementById('cs-contest-sent-nr');
     const contestRecvNrInput = document.getElementById('cs-contest-recv-nr');
     const contestDupeBadge = document.getElementById('cs-contest-dupe-badge');
+    const hudTxLed = document.getElementById('cs-hud-tx-led');
+    const hudRxLed = document.getElementById('cs-hud-rx-led');
+    const liveRitEl = document.getElementById('cs-contest-live-rit');
 
     function formatCutNumber(nrStr) {
         // Сокращённые цифры (Cut Numbers): замена ведущих 0 на T (001 -> TT1, 014 -> T14, 042 -> T42)
@@ -1111,8 +1138,74 @@
             const prev = contestSession.workedCalls.get(typed);
             contestDupeBadge.style.display = 'inline-flex';
             contestDupeBadge.textContent = `⚠️ DUPE (#${prev.qsoIndex})`;
+            contestCallInput?.classList.add('is-dupe');
         } else {
             contestDupeBadge.style.display = 'none';
+            contestCallInput?.classList.remove('is-dupe');
+        }
+    }
+
+    function triggerEsmPulse(inputEl) {
+        if (!inputEl) return;
+        inputEl.classList.remove('esm-flash');
+        void inputEl.offsetWidth;
+        inputEl.classList.add('esm-flash');
+    }
+
+    function setActiveKeyLight(keyId, active) {
+        const el = document.getElementById(keyId);
+        if (!el) return;
+        if (active) el.classList.add('is-tx-active');
+        else el.classList.remove('is-tx-active');
+    }
+
+    function clearAllKeyLights() {
+        ['cs-key-f1', 'cs-key-f2', 'cs-key-f3', 'cs-key-f4', 'cs-key-f5', 'cs-key-f6', 'cs-key-f7'].forEach(id => {
+            document.getElementById(id)?.classList.remove('is-tx-active');
+        });
+    }
+
+    function updateEsmHint() {
+        const hintEl = document.getElementById('cs-esm-action-hint');
+        if (!hintEl || !contestSession || !contestSession.active) return;
+        const callVal = (contestCallInput?.value || '').trim();
+        const nrVal = (contestRecvNrInput?.value || '').trim();
+
+        if (!contestSession.currentCaller && contestSession.state === 'IDLE') {
+            hintEl.textContent = '1. Вызов CQ (Enter)';
+        } else if (contestSession.state === 'WAITING_EXCHANGE' || (!nrVal && callVal)) {
+            hintEl.textContent = '2. Передать номер (Enter)';
+        } else if (contestSession.state === 'WAITING_TU' || (callVal && nrVal)) {
+            hintEl.textContent = '3. Зачесть QSO (Enter)';
+        } else if (!callVal) {
+            hintEl.textContent = '1. Вызов CQ (Enter)';
+        } else {
+            hintEl.textContent = '2. Передать номер (Enter)';
+        }
+    }
+
+    function executeContestEsm() {
+        if (!contestSession || !contestSession.active) return;
+        contestSession.lastUserActivity = Date.now();
+        const callVal = (contestCallInput?.value || '').trim();
+        const nrVal = (contestRecvNrInput?.value || '').trim();
+
+        if (document.activeElement === contestCallInput) {
+            if (!callVal) {
+                contestSendCQ();
+            } else {
+                contestSendExchange();
+            }
+        } else if (document.activeElement === contestRecvNrInput) {
+            contestSendTU();
+        } else {
+            if (!callVal) {
+                contestSendCQ();
+            } else if (!nrVal) {
+                contestSendExchange();
+            } else {
+                contestSendTU();
+            }
         }
     }
 
@@ -1129,17 +1222,39 @@
         }
     }
 
-    async function playContestMorse(text, { freq, wpm, isCaller = false } = {}) {
-        if (!contestSession || !contestSession.active) return;
+    const activeContestAudioList = new Set();
+
+    function stopAllContestAudio() {
+        for (const a of activeContestAudioList) {
+            try { a.stop(); } catch (_) {}
+        }
+        activeContestAudioList.clear();
         if (currentAudio) {
-            currentAudio.stop();
+            try { currentAudio.stop(); } catch (_) {}
             currentAudio = null;
         }
+        isPlaying = false;
+        hudRxLed?.classList.remove('is-active');
+        hudTxLed?.classList.remove('is-active');
+    }
+
+    async function playContestMorse(text, { freq, wpm, isCaller = false, gain = 0.35, qsb } = {}) {
+        if (!contestSession || !contestSession.active) return;
+        stopAllContestAudio();
         const useFreq = freq || contestSession.baseFreq;
         const useWpm = wpm || contestSession.wpm;
-        const audio = new MorseAudio({ wpm: useWpm, freq: useFreq });
+        const useQsb = (qsb !== undefined) ? qsb : (isCaller && !!csContestQsbEl?.checked);
+        const audio = new MorseAudio({ wpm: useWpm, freq: useFreq, gain, qsb: useQsb });
         currentAudio = audio;
+        activeContestAudioList.add(audio);
         isPlaying = true;
+        if (isCaller) {
+            hudRxLed?.classList.add('is-active');
+            hudTxLed?.classList.remove('is-active');
+        } else {
+            hudTxLed?.classList.add('is-active');
+            hudRxLed?.classList.remove('is-active');
+        }
         try {
             await audio.play(text, {
                 onSymbol: ({ symbol, durationMs }) => {
@@ -1154,9 +1269,68 @@
         } catch (e) {
             // ignore aborted
         } finally {
-            if (currentAudio === audio) {
+            activeContestAudioList.delete(audio);
+            if (activeContestAudioList.size === 0) {
+                if (currentAudio === audio) currentAudio = null;
+                isPlaying = false;
+                hudRxLed?.classList.remove('is-active');
+                hudTxLed?.classList.remove('is-active');
+            }
+        }
+    }
+
+    async function playContestPileup(callers) {
+        if (!contestSession || !contestSession.active || !callers || !callers.length) return;
+        stopAllContestAudio();
+        isPlaying = true;
+        hudRxLed?.classList.add('is-active');
+        hudTxLed?.classList.remove('is-active');
+
+        const useQsb = !!csContestQsbEl?.checked;
+        const dominantCaller = callers[0];
+
+        const promises = callers.map(async (caller) => {
+            if (caller.delayMs > 0) {
+                await new Promise(r => setTimeout(r, caller.delayMs));
+                if (!contestSession || !contestSession.active) return;
+            }
+
+            const audio = new MorseAudio({
+                wpm: caller.wpm,
+                freq: caller.freq,
+                gain: caller.gain || 0.28,
+                qsb: useQsb
+            });
+            activeContestAudioList.add(audio);
+
+            try {
+                await audio.play(caller.callsign, {
+                    onSymbol: ({ symbol, durationMs }) => {
+                        if (!contestSession || !contestSession.active) {
+                            audio.stop();
+                            return;
+                        }
+                        if (caller === dominantCaller) {
+                            signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                            lamp.flash(durationMs);
+                        }
+                    }
+                });
+            } catch (_) {
+                // ignore aborted
+            } finally {
+                activeContestAudioList.delete(audio);
+            }
+        });
+
+        try {
+            await Promise.all(promises);
+        } finally {
+            if (activeContestAudioList.size === 0) {
                 currentAudio = null;
                 isPlaying = false;
+                hudRxLed?.classList.remove('is-active');
+                hudTxLed?.classList.remove('is-active');
             }
         }
     }
@@ -1174,22 +1348,32 @@
         if (emptyRow) emptyRow.remove();
 
         const tr = document.createElement('tr');
-        tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        tr.className = 'cs-log-row-new';
+
+        const recvCellHtml = data.isNrCorrect
+            ? `<span class="cs-log-tag tag-ok">599 ${data.enteredNr} ✓</span>`
+            : `<span class="cs-log-tag tag-err">599 ${data.enteredNr} ❌ <span style="font-size:11px; font-weight:400; opacity:0.8;">(${data.expectedNr})</span></span>`;
+
+        const noteHtml = data.note
+            ? `<span class="cs-log-tag tag-warn">${data.note}</span>`
+            : '';
+
+        const xpHtml = data.qsoXp > 0
+            ? `<span class="cs-log-xp-badge">+${data.qsoXp} XP</span>`
+            : `<span class="cs-log-xp-zero">0 XP</span>`;
+
         tr.innerHTML = `
-            <td style="padding:6px 8px; color:var(--text-muted);">${String(data.qsoIndex).padStart(3, '0')}</td>
-            <td style="padding:6px 8px; color:var(--text-muted);">${data.timeStr}</td>
-            <td style="padding:6px 8px; font-weight:700;">
-                ${data.isCallCorrect ? `<span style="color:var(--text);">${data.callsign}</span>` : `<span style="color:var(--danger,#ff5555); text-decoration:line-through;">${data.enteredCall}</span> <span style="font-size:11px; color:var(--text-muted);">(${data.callsign})</span>`}
+            <td style="color:var(--text-muted);">${String(data.qsoIndex).padStart(3, '0')}</td>
+            <td style="color:var(--text-muted);">${data.timeStr}</td>
+            <td style="font-weight:700;">
+                ${data.isCallCorrect ? `<span style="color:var(--text);">${data.callsign}</span>` : `<span style="color:var(--danger,#e2584f); text-decoration:line-through;">${data.enteredCall}</span> <span style="font-size:11px; color:var(--text-muted);">(${data.callsign})</span>`}
             </td>
-            <td style="padding:6px 8px; color:var(--text-muted);">${data.sentExchange}</td>
-            <td style="padding:6px 8px;">
-                ${data.isNrCorrect 
-                    ? `<span style="color:var(--ok,#4ade80); font-weight:700;">599 ${data.enteredNr} ✓</span>` 
-                    : `<span style="color:var(--danger,#ff5555); font-weight:700;">599 ${data.enteredNr} ❌ <span style="font-size:11px; font-weight:400; color:var(--text-muted);">(${data.expectedNr})</span></span>`}
-                ${data.note ? `<span class="badge" style="font-size:10px; margin-left:4px; opacity:0.85;">${data.note}</span>` : ''}
+            <td style="color:var(--text-muted);">${data.sentExchange}</td>
+            <td>
+                ${recvCellHtml}${noteHtml}
             </td>
-            <td style="padding:6px 8px; text-align:right; font-weight:700; color:${data.qsoXp > 0 ? 'var(--accent)' : 'var(--text-muted)'};">
-                +${data.qsoXp} XP
+            <td style="text-align:right;">
+                ${xpHtml}
             </td>
         `;
         if (logBody.firstChild) {
@@ -1223,6 +1407,7 @@
             state: 'IDLE',
             actionToken: 0,
             currentCaller: null,
+            activePileup: [],
             pool: pool && pool.length ? pool : [...FALLBACK_CALLSIGNS],
             poolIndex: 0,
             xpEarned: 0,
@@ -1251,8 +1436,13 @@
         if (contestLiveTimer) contestLiveTimer.textContent = '00:00';
         const liveXpEl = document.getElementById('cs-contest-live-xp');
         if (liveXpEl) liveXpEl.textContent = '0';
-        const liveRitEl = document.getElementById('cs-contest-live-rit');
-        if (liveRitEl) liveRitEl.textContent = 'RIT: 0 Hz';
+        if (liveRitEl) {
+            liveRitEl.className = 'cs-hud-rit rit-zero';
+            liveRitEl.textContent = 'RIT 0 Hz';
+        }
+        hudRxLed?.classList.remove('is-active');
+        hudTxLed?.classList.remove('is-active');
+        clearAllKeyLights();
 
         const logBody = document.getElementById('cs-contest-log-body');
         if (logBody) {
@@ -1271,9 +1461,13 @@
         if (contestRstInput) contestRstInput.value = '599';
         if (contestCallInput) {
             contestCallInput.value = '';
+            contestCallInput.classList.remove('is-dupe');
             contestCallInput.focus();
         }
         if (contestRecvNrInput) contestRecvNrInput.value = '';
+
+        clearAllKeyLights();
+        updateEsmHint();
 
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = 'Нажмите Enter или F1 чтобы дать общий вызов (CQ)';
@@ -1306,11 +1500,8 @@
             clearInterval(contestSession.timerInterval);
             contestSession.timerInterval = null;
         }
-        if (currentAudio) {
-            currentAudio.stop();
-            currentAudio = null;
-            isPlaying = false;
-        }
+        stopAllContestAudio();
+        clearAllKeyLights();
 
         abortCurrentSession();
 
@@ -1356,6 +1547,45 @@
         }
     }
 
+    function generateContestCaller({ pool, index, baseFreq, baseWpm, allowDetune, detuneOffset = null, gain = 0.32, delayMs = 0 }) {
+        const callerItem = pool[index % pool.length];
+        const callsign = (callerItem && callerItem.callsign) ? callerItem.callsign : 'UA3XYZ';
+
+        let callerFreq = baseFreq;
+        let callerWpm = baseWpm;
+        let detuneHz = 0;
+        if (allowDetune) {
+            detuneHz = (detuneOffset !== null) ? detuneOffset : (Math.floor(Math.random() * 81) - 40);
+            callerFreq = Math.max(300, Math.min(1200, baseFreq + detuneHz));
+            const wpmDelta = Math.floor(Math.random() * 5) - 2; // ±2 WPM
+            callerWpm = Math.max(12, Math.min(45, baseWpm + wpmDelta));
+        }
+
+        let rawNr;
+        if (Math.random() < 0.12) {
+            rawNr = Math.floor(Math.random() * 4) + 1;
+        } else {
+            const currentSent = contestSession?.sentNr || 1;
+            const elapsedMinutes = Math.max(0.5, (contestSession?.contestSeconds || 0) / 60);
+            const expectedBase = Math.max(currentSent, Math.round(elapsedMinutes * 1.5));
+            const activityFactor = 0.25 + Math.random() * 1.45;
+            const jitter = Math.floor(Math.random() * 5) - 2;
+            rawNr = Math.max(1, Math.round(expectedBase * activityFactor) + jitter);
+        }
+        const nr = String(rawNr).padStart(3, '0');
+
+        return {
+            callsign,
+            nr,
+            freq: callerFreq,
+            wpm: callerWpm,
+            detuneHz,
+            gain,
+            delayMs,
+            askedRepeat: false
+        };
+    }
+
     async function contestSendCQ() {
         if (!contestSession || !contestSession.active) return;
         if (contestSession.state === 'SENDING_CQ' || contestSession.state === 'CALLER_CALLING') {
@@ -1366,74 +1596,109 @@
         contestSession.state = 'SENDING_CQ';
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `CQ TEST ${contestSession.myCall}`;
+        setActiveKeyLight('cs-key-f1', true);
         await playContestMorse(`CQ TEST ${contestSession.myCall}`);
+        setActiveKeyLight('cs-key-f1', false);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         await new Promise(r => setTimeout(r, 450));
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
-        const callerItem = contestSession.pool[contestSession.poolIndex % contestSession.pool.length];
-        contestSession.poolIndex++;
-        const callsign = (callerItem && callerItem.callsign) ? callerItem.callsign : 'UA3XYZ';
-
-        // Тонкая расстройка частоты (±40 Гц) и микро-вариации скорости корреспондента
-        let callerFreq = contestSession.baseFreq;
-        let callerWpm = contestSession.wpm;
-        let detuneHz = 0;
+        const isPileupEnabled = !!(csContestPileupEl && csContestPileupEl.checked);
         const allowDetune = !csContestDetuneEl || csContestDetuneEl.checked;
-        if (allowDetune) {
-            detuneHz = Math.floor(Math.random() * 81) - 40; // ±40 Hz
-            callerFreq = Math.max(300, Math.min(1200, contestSession.baseFreq + detuneHz));
-            const wpmDelta = Math.floor(Math.random() * 5) - 2; // ±2 WPM
-            callerWpm = Math.max(12, Math.min(45, contestSession.wpm + wpmDelta));
-        }
-        const liveRitEl = document.getElementById('cs-contest-live-rit');
-        if (liveRitEl) {
-            liveRitEl.textContent = allowDetune 
-                ? `RIT: ${detuneHz >= 0 ? '+' : ''}${detuneHz} Hz` 
-                : 'RIT: 0 Hz';
-        }
 
-        // Реалистичный расчёт порядкового номера корреспондента (как в реальном эфире и Morse Runner):
-        // 1) ~12% станций — это «только включившиеся» в эфир (casual / check-in),
-        //    которые даже в разгар контеста передают стартовые номера 001, 002, 003 или 004.
-        // 2) Остальные 88% — активные участники, чьи номера растут по мере времени и темпа теста.
-        let rawNr;
-        if (Math.random() < 0.12) {
-            // Только что подошедшая станция на поиск
-            rawNr = Math.floor(Math.random() * 4) + 1; // 1..4 (001, 002, 003, 004)
+        let callersList = [];
+
+        // Если с прошлого пайлапа остались неотвеченные станции, они зовут снова!
+        if (isPileupEnabled && contestSession.activePileup && contestSession.activePileup.length > 0) {
+            callersList = contestSession.activePileup;
+            callersList.forEach((c, idx) => {
+                c.delayMs = idx === 0 ? 0 : (Math.floor(Math.random() * 100) + 60);
+            });
+            if (callersList.length === 1 && Math.random() < 0.6) {
+                const newCaller = generateContestCaller({
+                    pool: contestSession.pool,
+                    index: contestSession.poolIndex++,
+                    baseFreq: contestSession.baseFreq,
+                    baseWpm: contestSession.wpm,
+                    allowDetune,
+                    detuneOffset: (Math.floor(Math.random() * 40) + 20) * (Math.random() < 0.5 ? 1 : -1),
+                    gain: 0.20,
+                    delayMs: Math.floor(Math.random() * 100) + 80
+                });
+                callersList.push(newCaller);
+            }
+        } else if (isPileupEnabled) {
+            const count = (Math.random() < 0.35) ? 3 : 2;
+            const offsets = [
+                Math.floor(Math.random() * 21) - 10,
+                Math.floor(Math.random() * 30) + 25,
+                -(Math.floor(Math.random() * 30) + 25)
+            ];
+            const gains = [0.32, 0.22, 0.14];
+            const delays = [0, Math.floor(Math.random() * 80) + 60, Math.floor(Math.random() * 100) + 160];
+
+            for (let i = 0; i < count; i++) {
+                const c = generateContestCaller({
+                    pool: contestSession.pool,
+                    index: contestSession.poolIndex++,
+                    baseFreq: contestSession.baseFreq,
+                    baseWpm: contestSession.wpm,
+                    allowDetune,
+                    detuneOffset: offsets[i],
+                    gain: gains[i],
+                    delayMs: delays[i]
+                });
+                callersList.push(c);
+            }
         } else {
-            const currentSent = contestSession.sentNr || 1;
-            const elapsedMinutes = Math.max(0.5, contestSession.contestSeconds / 60);
-            const expectedBase = Math.max(currentSent, Math.round(elapsedMinutes * 1.5));
-            const activityFactor = 0.25 + Math.random() * 1.45; // от умеренных до лидеров контеста
-            const jitter = Math.floor(Math.random() * 5) - 2;
-            rawNr = Math.max(1, Math.round(expectedBase * activityFactor) + jitter);
+            const single = generateContestCaller({
+                pool: contestSession.pool,
+                index: contestSession.poolIndex++,
+                baseFreq: contestSession.baseFreq,
+                baseWpm: contestSession.wpm,
+                allowDetune,
+                gain: 0.35,
+                delayMs: 0
+            });
+            callersList.push(single);
         }
-        const callerNr = String(rawNr).padStart(3, '0');
-        contestSession.currentCaller = {
-            callsign,
-            nr: callerNr,
-            freq: callerFreq,
-            wpm: callerWpm,
-            detuneHz,
-            askedRepeat: false
-        };
-        contestSession.state = 'CALLER_CALLING';
 
-        feedbackEl.textContent = 'Вам отвечает станция...';
-        await playContestMorse(callsign, { freq: callerFreq, wpm: callerWpm, isCaller: true });
+        contestSession.activePileup = callersList;
+        contestSession.currentCaller = (callersList.length === 1) ? callersList[0] : null;
+
+        const dominant = callersList[0];
+        if (liveRitEl) {
+            if (allowDetune && dominant.detuneHz !== 0) {
+                liveRitEl.className = 'cs-hud-rit rit-detuned';
+                liveRitEl.textContent = `RIT ${dominant.detuneHz >= 0 ? '+' : ''}${dominant.detuneHz} Hz`;
+            } else {
+                liveRitEl.className = 'cs-hud-rit rit-zero';
+                liveRitEl.textContent = 'RIT 0 Hz';
+            }
+        }
+
+        contestSession.state = 'CALLER_CALLING';
+        feedbackEl.className = 'feedback show';
+        feedbackEl.textContent = callersList.length > 1
+            ? `Пайлап! Зовут ${callersList.length} станции одновременно...`
+            : 'Вам отвечает станция...';
+
+        await playContestPileup(callersList);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         contestSession.state = 'WAITING_EXCHANGE';
-        feedbackEl.textContent = 'Примите позывной и нажмите Enter (F2)';
+        updateEsmHint();
+        feedbackEl.textContent = callersList.length > 1
+            ? 'Выделите позывной из пайлапа и нажмите Enter (F2)'
+            : 'Примите позывной и нажмите Enter (F2)';
         focusContestInput(contestCallInput);
     }
 
     async function contestSendExchange() {
         if (!contestSession || !contestSession.active) return;
         contestSession.lastUserActivity = Date.now();
-        if (!contestSession.currentCaller) {
+        if ((!contestSession.activePileup || !contestSession.activePileup.length) && !contestSession.currentCaller) {
             contestSendCQ();
             return;
         }
@@ -1447,33 +1712,69 @@
 
         const token = ++contestSession.actionToken;
         contestSession.state = 'SENDING_EXCH';
+        triggerEsmPulse(contestCallInput);
         const nrStr = String(contestSession.sentNr).padStart(3, '0');
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `${enteredCall} 5NN ${nrStr}`;
+        setActiveKeyLight('cs-key-f2', true);
         await playContestMorse(`${enteredCall} 5NN ${nrStr}`);
+        setActiveKeyLight('cs-key-f2', false);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         await new Promise(r => setTimeout(r, 350));
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
-        const caller = contestSession.currentCaller;
-        if (enteredCall === caller.callsign.toUpperCase()) {
+        // Поиск совпадения в пайлапе (полное совпадение или префикс от 2 символов)
+        let matchedCaller = null;
+        if (contestSession.activePileup && contestSession.activePileup.length > 0) {
+            matchedCaller = contestSession.activePileup.find(c => c.callsign.toUpperCase() === enteredCall);
+            if (!matchedCaller && enteredCall.length >= 2) {
+                matchedCaller = contestSession.activePileup.find(c =>
+                    c.callsign.toUpperCase().startsWith(enteredCall) ||
+                    c.callsign.toUpperCase().includes(enteredCall)
+                );
+            }
+        } else if (contestSession.currentCaller) {
+            if (contestSession.currentCaller.callsign.toUpperCase() === enteredCall ||
+                (enteredCall.length >= 2 && contestSession.currentCaller.callsign.toUpperCase().startsWith(enteredCall))) {
+                matchedCaller = contestSession.currentCaller;
+            }
+        }
+
+        if (matchedCaller) {
+            contestSession.currentCaller = matchedCaller;
+            if (contestSession.activePileup) {
+                contestSession.activePileup = contestSession.activePileup.filter(c => c !== matchedCaller);
+            }
+
+            if (contestCallInput && contestCallInput.value.toUpperCase() !== matchedCaller.callsign) {
+                contestCallInput.value = matchedCaller.callsign;
+                updateDupeBadge();
+            }
+
             contestSession.state = 'CALLER_ACK';
-            feedbackEl.textContent = `${enteredCall} передаёт контрольный номер...`;
+            feedbackEl.textContent = `${matchedCaller.callsign} передаёт контрольный номер...`;
             const useCut = !csContestCutNumbersEl || csContestCutNumbersEl.checked;
-            const txNr = (useCut && Math.random() < 0.75) ? formatCutNumber(caller.nr) : caller.nr;
-            await playContestMorse(`R 5NN ${txNr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            const txNr = (useCut && Math.random() < 0.75) ? formatCutNumber(matchedCaller.nr) : matchedCaller.nr;
+            await playContestMorse(`R 5NN ${txNr}`, {
+                freq: matchedCaller.freq,
+                wpm: matchedCaller.wpm,
+                isCaller: true,
+                gain: matchedCaller.gain || 0.35
+            });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
             contestSession.state = 'WAITING_TU';
+            updateEsmHint();
             feedbackEl.textContent = 'Введите номер корреспондента и нажмите Enter (F3)';
             focusContestInput(contestRecvNrInput);
         } else {
             feedbackEl.className = 'feedback show bad';
-            feedbackEl.textContent = 'Корреспондент переспрашивает (?)';
-            await playContestMorse('?', { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            feedbackEl.textContent = 'Станции не расслышали свой позывной (?)';
+            await playContestMorse('?', { freq: contestSession.baseFreq, wpm: contestSession.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             contestSession.state = 'WAITING_EXCHANGE';
+            updateEsmHint();
             focusContestInput(contestCallInput);
         }
     }
@@ -1489,9 +1790,12 @@
 
         const token = ++contestSession.actionToken;
         contestSession.state = 'SENDING_TU';
+        triggerEsmPulse(contestRecvNrInput);
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `TU ${contestSession.myCall} CQ`;
+        setActiveKeyLight('cs-key-f3', true);
         await playContestMorse(`TU ${contestSession.myCall} CQ`);
+        setActiveKeyLight('cs-key-f3', false);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         const isCallCorrect = (enteredCall === caller.callsign.toUpperCase());
@@ -1568,7 +1872,10 @@
         if (liveXpEl) liveXpEl.textContent = contestSession.xpEarned;
         if (contestSentNrInput) contestSentNrInput.value = String(contestSession.sentNr).padStart(3, '0');
 
-        if (contestCallInput) contestCallInput.value = '';
+        if (contestCallInput) {
+            contestCallInput.value = '';
+            contestCallInput.classList.remove('is-dupe');
+        }
         if (contestRecvNrInput) contestRecvNrInput.value = '';
         if (contestDupeBadge) contestDupeBadge.style.display = 'none';
 
@@ -1583,6 +1890,7 @@
 
         contestSession.currentCaller = null;
         contestSession.state = 'IDLE';
+        updateEsmHint();
 
         setTimeout(() => {
             if (contestSession && contestSession.active && contestSession.state === 'IDLE' && contestSession.actionToken === token) {
@@ -1594,46 +1902,67 @@
     async function contestSendMyCall() {
         if (!contestSession || !contestSession.active) return;
         contestSession.lastUserActivity = Date.now();
+        setActiveKeyLight('cs-key-f4', true);
         await playContestMorse(contestSession.myCall);
+        setActiveKeyLight('cs-key-f4', false);
     }
 
     async function contestSendHisCall() {
         if (!contestSession || !contestSession.active) return;
         contestSession.lastUserActivity = Date.now();
         const c = contestCallInput?.value.trim().toUpperCase() || (contestSession.currentCaller?.callsign);
-        if (c) await playContestMorse(c);
+        if (c) {
+            setActiveKeyLight('cs-key-f5', true);
+            await playContestMorse(c);
+            setActiveKeyLight('cs-key-f5', false);
+        }
     }
 
     async function contestSendRepeat() {
-        if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
+        if (!contestSession || !contestSession.active) return;
+        const callers = (contestSession.activePileup && contestSession.activePileup.length)
+            ? contestSession.activePileup
+            : (contestSession.currentCaller ? [contestSession.currentCaller] : []);
+        if (!callers.length) return;
+
         contestSession.lastUserActivity = Date.now();
-        contestSession.currentCaller.askedRepeat = true;
         const token = ++contestSession.actionToken;
         feedbackEl.className = 'feedback show';
         feedbackEl.textContent = 'Запрос повтора (?)';
+        setActiveKeyLight('cs-key-f6', true);
         await playContestMorse('?');
+        setActiveKeyLight('cs-key-f6', false);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         await new Promise(r => setTimeout(r, 400));
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
-        const caller = contestSession.currentCaller;
-        // Если мы ещё не зафиксировали верный позывной — станция повторяет только свой позывной,
-        // и мы НЕ спойлерим его в текстовой подсказке!
         if (contestSession.state !== 'WAITING_TU') {
-            feedbackEl.textContent = 'Корреспондент повторяет свой позывной...';
-            await playContestMorse(caller.callsign, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            callers.forEach(c => { c.askedRepeat = true; });
+            feedbackEl.textContent = callers.length > 1
+                ? 'Станции повторяют свои позывные...'
+                : 'Корреспондент повторяет свой позывной...';
+            await playContestPileup(callers);
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             contestSession.state = 'WAITING_EXCHANGE';
+            updateEsmHint();
             focusContestInput(contestCallInput);
         } else {
-            // Если позывной уже принят и ждём только номер:
+            const caller = contestSession.currentCaller;
+            if (!caller) return;
+            caller.askedRepeat = true;
             const enteredCall = (contestCallInput?.value || '').trim().toUpperCase();
             feedbackEl.textContent = `${enteredCall || 'Корреспондент'} повторяет контрольный номер...`;
             const useCut = !csContestCutNumbersEl || csContestCutNumbersEl.checked;
             const txNr = (useCut && Math.random() < 0.75) ? formatCutNumber(caller.nr) : caller.nr;
-            await playContestMorse(`${caller.callsign} 5NN ${txNr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            await playContestMorse(`${caller.callsign} 5NN ${txNr}`, {
+                freq: caller.freq,
+                wpm: caller.wpm,
+                isCaller: true,
+                gain: caller.gain || 0.35
+            });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+            updateEsmHint();
             focusContestInput(contestRecvNrInput);
         }
     }
@@ -1642,7 +1971,9 @@
         if (!contestSession || !contestSession.active) return;
         contestSession.lastUserActivity = Date.now();
         const nrStr = String(contestSession.sentNr).padStart(3, '0');
+        setActiveKeyLight('cs-key-f7', true);
         await playContestMorse(`5NN ${nrStr}`);
+        setActiveKeyLight('cs-key-f7', false);
     }
 
     document.getElementById('cs-key-f1')?.addEventListener('click', () => contestSendCQ());
@@ -1652,14 +1983,17 @@
     document.getElementById('cs-key-f5')?.addEventListener('click', () => contestSendHisCall());
     document.getElementById('cs-key-f6')?.addEventListener('click', () => contestSendRepeat());
     document.getElementById('cs-key-f7')?.addEventListener('click', () => contestSendMyExchange());
+    document.getElementById('cs-key-enter')?.addEventListener('click', () => executeContestEsm());
     document.getElementById('cs-key-esc')?.addEventListener('click', () => {
         if (contestSession && contestSession.active) {
             contestSession.actionToken++;
             contestSession.state = 'IDLE';
             feedbackEl.className = 'feedback show';
             feedbackEl.textContent = 'Приём/передача прерваны (Esc). Нажмите F1 или Enter для вызова CQ.';
+            clearAllKeyLights();
+            updateEsmHint();
         }
-        if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+        stopAllContestAudio();
     });
     document.getElementById('cs-contest-finish-btn')?.addEventListener('click', () => {
         stopContestSession();
@@ -1668,9 +2002,11 @@
     contestCallInput?.addEventListener('input', () => {
         if (contestSession) contestSession.lastUserActivity = Date.now();
         updateDupeBadge();
+        updateEsmHint();
     });
     contestRecvNrInput?.addEventListener('input', () => {
         if (contestSession) contestSession.lastUserActivity = Date.now();
+        updateEsmHint();
     });
 
     async function startSessionWithItems(retryItems) {
@@ -1895,11 +2231,8 @@
     }
 
     async function finishSession() {
-        if (currentAudio) {
-            currentAudio.stop();
-            currentAudio = null;
-            isPlaying = false;
-        }
+        stopAllContestAudio();
+        clearAllKeyLights();
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
         if (paperResultBlock) paperResultBlock.style.display = 'none';
@@ -2056,11 +2389,8 @@
             session.paperStopped = true;
         }
         cancelCsPaperSleep();
-        if (currentAudio) {
-            currentAudio.stop();
-            currentAudio = null;
-            isPlaying = false;
-        }
+        stopAllContestAudio();
+        clearAllKeyLights();
         if (answerInput) {
             answerInput.bufferMaxAllowed = null;
             answerInput.removeAttribute('maxlength');
@@ -2218,7 +2548,9 @@
                 contestSession.state = 'IDLE';
                 feedbackEl.className = 'feedback show';
                 feedbackEl.textContent = 'Приём/передача прерваны (Esc). Нажмите F1 или Enter для вызова CQ.';
-                if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+                clearAllKeyLights();
+                updateEsmHint();
+                stopAllContestAudio();
                 if (contestCallInput) contestCallInput.focus();
                 return;
             }
@@ -2233,23 +2565,7 @@
             }
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if (document.activeElement === contestCallInput) {
-                    if (!contestCallInput.value.trim()) {
-                        contestSendCQ();
-                    } else {
-                        contestSendExchange();
-                    }
-                } else if (document.activeElement === contestRecvNrInput) {
-                    contestSendTU();
-                } else {
-                    if (!contestCallInput.value.trim()) {
-                        contestSendCQ();
-                    } else if (!contestRecvNrInput.value.trim()) {
-                        contestSendExchange();
-                    } else {
-                        contestSendTU();
-                    }
-                }
+                executeContestEsm();
                 return;
             }
             return;
