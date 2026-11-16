@@ -1171,7 +1171,9 @@
         const callVal = (contestCallInput?.value || '').trim();
         const nrVal = (contestRecvNrInput?.value || '').trim();
 
-        if (!contestSession.currentCaller && contestSession.state === 'IDLE') {
+        if (contestSession.state === 'CALLER_CALLING' || contestSession.state === 'SENDING_CQ') {
+            hintEl.textContent = 'Приём вызова...';
+        } else if (!contestSession.currentCaller && contestSession.state === 'IDLE' && (!contestSession.activePileup || !contestSession.activePileup.length)) {
             hintEl.textContent = '1. Вызов CQ (Enter)';
         } else if (contestSession.state === 'WAITING_EXCHANGE' || (!nrVal && callVal)) {
             hintEl.textContent = '2. Передать номер (Enter)';
@@ -1586,22 +1588,7 @@
         };
     }
 
-    async function contestSendCQ() {
-        if (!contestSession || !contestSession.active) return;
-        if (contestSession.state === 'SENDING_CQ' || contestSession.state === 'CALLER_CALLING') {
-            return; // Spam prevention
-        }
-        contestSession.lastUserActivity = Date.now();
-        const token = ++contestSession.actionToken;
-        contestSession.state = 'SENDING_CQ';
-        feedbackEl.className = 'feedback show ok';
-        feedbackEl.textContent = `CQ TEST ${contestSession.myCall}`;
-        setActiveKeyLight('cs-key-f1', true);
-        await playContestMorse(`CQ TEST ${contestSession.myCall}`);
-        setActiveKeyLight('cs-key-f1', false);
-        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
-
-        await new Promise(r => setTimeout(r, 450));
+    async function contestSpawnCallers(token) {
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         const isPileupEnabled = !!(csContestPileupEl && csContestPileupEl.checked);
@@ -1695,6 +1682,27 @@
         focusContestInput(contestCallInput);
     }
 
+    async function contestSendCQ() {
+        if (!contestSession || !contestSession.active) return;
+        if (contestSession.state === 'SENDING_CQ' || contestSession.state === 'CALLER_CALLING') {
+            return; // Spam prevention
+        }
+        contestSession.lastUserActivity = Date.now();
+        const token = ++contestSession.actionToken;
+        contestSession.state = 'SENDING_CQ';
+        feedbackEl.className = 'feedback show ok';
+        feedbackEl.textContent = `CQ TEST ${contestSession.myCall}`;
+        setActiveKeyLight('cs-key-f1', true);
+        await playContestMorse(`CQ TEST ${contestSession.myCall}`);
+        setActiveKeyLight('cs-key-f1', false);
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+
+        await new Promise(r => setTimeout(r, 450));
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+
+        await contestSpawnCallers(token);
+    }
+
     async function contestSendExchange() {
         if (!contestSession || !contestSession.active) return;
         contestSession.lastUserActivity = Date.now();
@@ -1770,7 +1778,7 @@
             focusContestInput(contestRecvNrInput);
         } else {
             feedbackEl.className = 'feedback show bad';
-            feedbackEl.textContent = 'Станции не расслышали свой позывной (?)';
+            feedbackEl.textContent = 'Неверный позывной. Введите позывной правильно или нажмите ? (F6) для повтора';
             await playContestMorse('?', { freq: contestSession.baseFreq, wpm: contestSession.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             contestSession.state = 'WAITING_EXCHANGE';
@@ -1894,11 +1902,11 @@
             contestSession.state = 'IDLE';
             updateEsmHint();
 
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (contestSession && contestSession.active && contestSession.state === 'IDLE' && contestSession.actionToken === token) {
-                    contestSendCQ();
+                    await contestSpawnCallers(token);
                 }
-            }, 900);
+            }, 550);
         } catch (err) {
             console.error('Contest TU processing error:', err);
             contestSession.currentCaller = null;
