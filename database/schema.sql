@@ -58,7 +58,9 @@ CREATE TABLE IF NOT EXISTS achievements (
         'dosaaf_class3',
         'dosaaf_class2',
         'dosaaf_class1',
-        'dosaaf_master'
+        'dosaaf_master',
+        'contest_time_seconds',
+        'contest_qsos'
     ) NOT NULL,
     condition_value INT NOT NULL,
     sort_order      INT NOT NULL DEFAULT 0
@@ -68,9 +70,14 @@ CREATE TABLE IF NOT EXISTS achievements (
 -- Банк позывных для тренажёра "Позывные"
 -- ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS callsigns (
-    id        INT PRIMARY KEY AUTO_INCREMENT,
-    callsign  VARCHAR(20) NOT NULL,
-    country   VARCHAR(60) DEFAULT NULL
+    id           INT PRIMARY KEY AUTO_INCREMENT,
+    callsign     VARCHAR(20) NOT NULL UNIQUE,
+    country      VARCHAR(60) DEFAULT NULL,
+    country_code VARCHAR(4)  NOT NULL DEFAULT 'RU',
+    region       VARCHAR(20) NOT NULL DEFAULT 'russia',
+    is_short     TINYINT(1)  NOT NULL DEFAULT 0,
+    INDEX idx_region (region),
+    INDEX idx_region_short (region, is_short)
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------
@@ -121,7 +128,9 @@ INSERT IGNORE INTO achievements (code, title, description, icon, condition_type,
 ('dosaaf_class3',   'Радиотелеграфист 3-го класса', 'Освойте полный курс ДОСААФ (все 7 ступеней) и сдайте зачёт со скоростью ≥ 60 зн/мин (14 WPM)', '🥉', 'dosaaf_class3', 1, 29),
 ('dosaaf_class2',   'Радиотелеграфист 2-го класса', 'Освойте полный курс ДОСААФ и подтвердите норматив скорости ≥ 80 зн/мин (19 WPM)', '🥈', 'dosaaf_class2', 1, 30),
 ('dosaaf_class1',   'Радиотелеграфист 1-го класса', 'Освойте полный курс ДОСААФ и сдайте зачёт со скоростью ≥ 100 зн/мин (24 WPM)', '🥇', 'dosaaf_class1', 1, 31),
-('dosaaf_master',   'Мастер радиосвязи ДОСААФ', 'Высшая квалификация: приём радиограмм полного курса со скоростью ≥ 120 зн/мин (28 WPM)', '🏆', 'dosaaf_master', 1, 32);
+('dosaaf_master',   'Мастер радиосвязи ДОСААФ', 'Высшая квалификация: приём радиограмм полного курса со скоростью ≥ 120 зн/мин (28 WPM)', '🏆', 'dosaaf_master', 1, 32),
+('contest_first_qso','Первое QSO',               'Проведите первую радиосвязь в контест-тренажёре',                                   '📻', 'contest_qsos', 1, 33),
+('contest_marathon', 'Контест-марафон',          'Проведите суммарно 60 минут в режиме соревнований',                                 '⏱️', 'contest_time_seconds', 3600, 34);
 
 -- ---------------------------------------------------------
 -- Сид: примеры позывных (можно и нужно расширять)

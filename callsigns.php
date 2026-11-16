@@ -14,7 +14,58 @@ include __DIR__ . '/includes/header.php';
 <div class="card mt-3" id="setup-panel">
     <h3><?= t('cs.settings') ?></h3>
 
-    <div class="groups-speed-bar mt-2">
+    <!-- Выбор режима тренировки -->
+    <div class="mt-2">
+        <div class="muted" style="font-size:12px; margin-bottom:6px;"><?= t('cs.mode_title') ?></div>
+        <div class="chip-row flex-wrap" id="cs-mode-chips" style="gap:8px;">
+            <div class="chip active" data-mode="standard"><?= mw_icon('headphones', 14) ?> <?= t('cs.mode_standard') ?></div>
+            <div class="chip" data-mode="rufz"><?= mw_icon('zap', 14) ?> <?= t('cs.mode_rufz') ?></div>
+            <div class="chip" data-mode="contest"><?= mw_icon('radio', 14) ?> <?= t('cs.mode_contest') ?></div>
+        </div>
+    </div>
+
+    <!-- Выбор базы / регионов позывных -->
+    <div class="mt-3" id="cs-region-controls">
+        <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+            <span class="muted" style="font-size:12px;"><?= t('cs.filter_regions') ?></span>
+            <button type="button" class="btn btn-sm btn-ghost" id="cs-custom-regions-toggle" style="font-size:12px; padding:2px 8px;">
+                <?= t('cs.filter_custom_btn') ?>
+            </button>
+        </div>
+        <div class="chip-row flex-wrap mt-1" id="cs-preset-chips" style="gap:8px;">
+            <div class="chip active" data-preset="ru"><?= t('cs.preset_ru') ?></div>
+            <div class="chip" data-preset="ru_asia"><?= t('cs.preset_ru_asia') ?></div>
+            <div class="chip" data-preset="world"><?= t('cs.preset_world') ?></div>
+        </div>
+
+        <div id="cs-custom-regions-panel" class="subcard mt-2" style="display:none; border-left:3px solid var(--accent); padding:10px 14px;">
+            <div class="chip-row flex-wrap" style="gap:8px;">
+                <label class="chip"><input type="checkbox" class="cs-reg-check" value="russia" checked> <?= t('cs.reg_russia') ?></label>
+                <label class="chip"><input type="checkbox" class="cs-reg-check" value="central_asia"> <?= t('cs.reg_central_asia') ?></label>
+                <label class="chip"><input type="checkbox" class="cs-reg-check" value="japan"> <?= t('cs.reg_japan') ?></label>
+                <label class="chip"><input type="checkbox" class="cs-reg-check" value="north_america"> <?= t('cs.reg_north_america') ?></label>
+                <label class="chip"><input type="checkbox" class="cs-reg-check" value="europe"> <?= t('cs.reg_europe') ?></label>
+            </div>
+            <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+                <label class="chip"><input type="checkbox" id="cs-short-only"> <?= t('cs.short_calls_only') ?></label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Параметры для режима Контеста -->
+    <div id="cs-contest-setup-wrap" class="subcard mt-3" style="display:none; border-left:3px solid var(--accent); padding:12px 14px;">
+        <div class="flex-wrap gap-3" style="align-items:center;">
+            <label style="font-size:13px; font-weight:700;">
+                <?= t('cs.contest_my_call') ?>
+                <input type="text" id="cs-contest-mycall" class="answer-input mono" style="width:120px; text-transform:uppercase; margin-left:6px; padding:4px 8px; font-size:14px;" value="R9OLD" maxlength="10">
+            </label>
+            <div class="muted" style="font-size:12px;">
+                Формат: RST <b>599</b> (авто) + порядковый номер QSO
+            </div>
+        </div>
+    </div>
+
+    <div class="groups-speed-bar mt-3">
         <div class="speed-control" id="cs-wpm-control">
             <span class="speed-label"><?= t('cs.speed') ?></span>
             <input type="range" id="cs-wpm" min="5" max="45" step="1" value="12">
@@ -165,6 +216,42 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="signal-line mt-2" id="cs-signal"></div>
 
+    <!-- Виджет контеста: статусная строка и поля ввода в стиле Morse Runner -->
+    <div id="cs-contest-session-display" style="display:none; margin-top:10px;">
+        <div class="flex-between flex-wrap gap-2 subcard" style="align-items:center; padding:10px 14px;">
+            <div class="mono" style="font-size:14px;">
+                <b>CQ DE</b> <span id="cs-contest-live-mycall" style="color:var(--accent); font-weight:700;">R9OLD</span>
+            </div>
+            <div class="flex gap-3 mono" style="font-size:13px;">
+                <span>QSO: <b id="cs-contest-live-qsos">0</b></span>
+                <span>Rate: <b id="cs-contest-live-rate">0</b>/h</span>
+                <span>⏱ <b id="cs-contest-live-timer">00:00</b></span>
+            </div>
+        </div>
+
+        <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
+            <input type="text" id="cs-contest-call" class="answer-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="flex:2; min-width:140px; text-transform:uppercase; font-size:18px; font-weight:700;" autocomplete="off">
+            <input type="text" id="cs-contest-rst" class="answer-input mono text-center" value="599" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Рапорт 599 ставится автоматически">
+            <input type="text" id="cs-contest-sent-nr" class="answer-input mono text-center" value="001" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Ваш исходящий номер">
+            <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:100px; font-size:18px; font-weight:700;" autocomplete="off">
+        </div>
+
+        <!-- Горячие клавиши контеста -->
+        <div class="chip-row flex-wrap mt-2" style="gap:6px; font-size:12px;">
+            <button type="button" class="chip chip-sm" id="cs-key-f1" title="F1">F1 CQ</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f2" title="F2">F2 5NN</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f3" title="F3">F3 TU</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f4" title="F4">F4 My</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f5" title="F5">F5 His</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f6" title="F6">F6 ?</button>
+            <button type="button" class="chip chip-sm" id="cs-key-f7" title="F7">F7 AGN</button>
+            <button type="button" class="chip chip-sm" id="cs-key-esc" title="Esc">Esc Stop</button>
+        </div>
+        <div class="muted mt-1" style="font-size:11px;">
+            <?= t('cs.contest_help') ?>
+        </div>
+    </div>
+
     <!-- Режим приёма на бумагу: индикатор воспроизведения / паузы -->
     <div id="cs-paper-session-display" style="display:none; text-align:center; padding:24px 0;">
         <div class="flex gap-1" style="align-items:center; justify-content:center; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--accent); font-weight:700;"><?= mw_icon('notebook', 16) ?> <?= t('groups.paper_mode') ?></div>
@@ -195,6 +282,38 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-accuracy">0%</span><span class="label"><?= t('cs.result_exact') ?></span></div>
         <div class="stat"><span class="value" id="result-correct">0</span><span class="label"><?= t('cs.result_correct') ?></span></div>
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('cs.result_xp') ?></span></div>
+    </div>
+
+    <!-- RufzXP Результаты и график скорости -->
+    <div id="cs-rufz-result-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent);">RufzXP Спринт (HST)</h4>
+        <div class="grid grid-3 mt-2">
+            <div class="stat"><span class="value" id="cs-rufz-score">0</span><span class="label"><?= t('cs.rufz_hst_score') ?></span></div>
+            <div class="stat"><span class="value" id="cs-rufz-peak">0</span><span class="label"><?= t('cs.rufz_peak_wpm') ?></span></div>
+            <div class="stat"><span class="value" id="cs-rufz-avg">0</span><span class="label"><?= t('cs.rufz_avg_wpm') ?></span></div>
+        </div>
+        <div class="muted mt-2" style="font-size:12px;">Динамика скорости WPM по 50 позывным:</div>
+        <div id="cs-rufz-chart-wrap" class="mt-2" style="width:100%; height:140px; background:var(--surface); border:1px solid rgba(255,255,255,0.08); border-radius:6px; overflow:hidden;">
+            <svg id="cs-rufz-svg" width="100%" height="100%" viewBox="0 0 500 140" style="display:block;"></svg>
+        </div>
+    </div>
+
+    <!-- Контест результаты -->
+    <div id="cs-contest-result-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent);">Итоги контест-сессии</h4>
+        <div class="grid grid-3 mt-2">
+            <div class="stat"><span class="value" id="cs-contest-res-qsos">0</span><span class="label"><?= t('cs.contest_qsos') ?></span></div>
+            <div class="stat"><span class="value" id="cs-contest-res-rate">0</span><span class="label"><?= t('cs.contest_rate') ?></span></div>
+            <div class="stat"><span class="value" id="cs-contest-res-time">00:00</span><span class="label"><?= t('cs.contest_time') ?></span></div>
+        </div>
+    </div>
+
+    <!-- Отработка ошибок (как в Группах) -->
+    <div class="card mt-2" id="cs-mistakes-block" style="display:none; background:var(--surface-2);">
+        <p class="mt-0" style="font-size:14px;"><?= t('groups.mistakes_hint') ?></p>
+        <button class="btn btn-primary" id="cs-retrain-mistakes-btn" type="button">
+            <?= t('cs.retrain_mistakes') ?><span id="cs-mistake-count">0</span>)
+        </button>
     </div>
 
     <!-- Блок радиограммы для проверки записи на бумагу -->

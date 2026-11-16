@@ -28,3 +28,5 @@ _autosave-*
 .history/
 offline-keyer/
 morse-keyer-offline.zip
+database/MASTER.SCP
+database/callsigns_pool.json

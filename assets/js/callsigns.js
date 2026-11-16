@@ -350,6 +350,97 @@
         });
     }
 
+    // -------------------------------------------------------------
+    // Выбор режима тренировки: Обычный / RufzXP Спринт / Контест (Morse Runner)
+    // -------------------------------------------------------------
+    let selectedMode = safeStorage.getItem('morse_cs_mode') || 'standard';
+    const csModeChips = document.querySelectorAll('#cs-mode-chips .chip');
+    const contestSetupWrap = document.getElementById('cs-contest-setup-wrap');
+    const csCountWrapper = csCountEl ? csCountEl.closest('label') : null;
+
+    function applySelectedMode(mode) {
+        selectedMode = mode;
+        safeStorage.setItem('morse_cs_mode', mode);
+        csModeChips.forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
+
+        if (contestSetupWrap) contestSetupWrap.style.display = (mode === 'contest') ? 'block' : 'none';
+        if (csCountWrapper) csCountWrapper.style.display = (mode === 'standard') ? 'inline-flex' : 'none';
+
+        const extraWrapper = document.querySelector('.groups-extra-wrapper');
+        if (extraWrapper) {
+            extraWrapper.style.display = (mode === 'contest') ? 'none' : 'block';
+        }
+    }
+
+    csModeChips.forEach(chip => {
+        chip.addEventListener('click', () => applySelectedMode(chip.dataset.mode));
+    });
+    applySelectedMode(selectedMode);
+
+    // -------------------------------------------------------------
+    // Выбор базы / пресетов регионов
+    // -------------------------------------------------------------
+    let selectedPreset = safeStorage.getItem('morse_cs_preset') || 'ru';
+    const csPresetChips = document.querySelectorAll('#cs-preset-chips .chip');
+    const csCustomRegionsToggle = document.getElementById('cs-custom-regions-toggle');
+    const csCustomRegionsPanel = document.getElementById('cs-custom-regions-panel');
+    const csRegCheckboxes = document.querySelectorAll('.cs-reg-check');
+    const csShortOnlyCheckbox = document.getElementById('cs-short-only');
+
+    if (csCustomRegionsToggle && csCustomRegionsPanel) {
+        csCustomRegionsToggle.addEventListener('click', () => {
+            const isHidden = csCustomRegionsPanel.style.display === 'none';
+            csCustomRegionsPanel.style.display = isHidden ? 'block' : 'none';
+            csCustomRegionsToggle.textContent = isHidden ? 'Скрыть регионы ▴' : (typeof t === 'function' ? t('cs.filter_custom_btn') : 'Настроить регионы ▾');
+        });
+    }
+
+    function applyRegionPreset(preset) {
+        selectedPreset = preset;
+        safeStorage.setItem('morse_cs_preset', preset);
+        csPresetChips.forEach(c => c.classList.toggle('active', c.dataset.preset === preset));
+
+        if (preset === 'ru') {
+            csRegCheckboxes.forEach(cb => { cb.checked = (cb.value === 'russia'); });
+        } else if (preset === 'ru_asia') {
+            csRegCheckboxes.forEach(cb => { cb.checked = (cb.value === 'russia' || cb.value === 'central_asia'); });
+        } else if (preset === 'world') {
+            csRegCheckboxes.forEach(cb => { cb.checked = true; });
+        }
+    }
+
+    csPresetChips.forEach(chip => {
+        chip.addEventListener('click', () => applyRegionPreset(chip.dataset.preset));
+    });
+
+    csRegCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            csPresetChips.forEach(c => c.classList.remove('active'));
+            selectedPreset = 'custom';
+            safeStorage.setItem('morse_cs_preset', 'custom');
+        });
+    });
+
+    if (csShortOnlyCheckbox) {
+        const savedShort = safeStorage.getItem('morse_cs_short_only') === '1';
+        csShortOnlyCheckbox.checked = savedShort;
+        csShortOnlyCheckbox.addEventListener('change', () => {
+            safeStorage.setItem('morse_cs_short_only', csShortOnlyCheckbox.checked ? '1' : '0');
+        });
+    }
+
+    applyRegionPreset(selectedPreset);
+
+    // Мой позывной для контеста
+    const csContestMyCallEl = document.getElementById('cs-contest-mycall');
+    if (csContestMyCallEl) {
+        const savedMyCall = safeStorage.getItem('morse_cs_contest_mycall') || 'R9OLD';
+        csContestMyCallEl.value = savedMyCall;
+        csContestMyCallEl.addEventListener('input', () => {
+            safeStorage.setItem('morse_cs_contest_mycall', csContestMyCallEl.value.trim().toUpperCase());
+        });
+    }
+
     let session = null;
     let isPlaying = false;
     let currentAudio = null;
@@ -458,7 +549,20 @@
         try {
             const controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
             const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
-            const res = await fetch(`api/callsigns.php?count=${count}`, controller ? { signal: controller.signal } : {});
+            
+            const q = new URLSearchParams();
+            q.set('count', count);
+            if (selectedPreset && selectedPreset !== 'custom') {
+                q.set('preset', selectedPreset);
+            } else {
+                const regs = Array.from(csRegCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+                if (regs.length) q.set('regions', regs.join(','));
+            }
+            if (csShortOnlyCheckbox && csShortOnlyCheckbox.checked) {
+                q.set('short_only', '1');
+            }
+
+            const res = await fetch(`api/callsigns.php?${q.toString()}`, controller ? { signal: controller.signal } : {});
             if (timer) clearTimeout(timer);
             if (!res.ok) throw new Error('status_' + res.status);
             const data = await res.json();
@@ -858,10 +962,406 @@
     window.addEventListener('beforeunload', abortCurrentSession);
     window.addEventListener('pagehide', abortCurrentSession);
 
+    // -------------------------------------------------------------
+    // Чистый символьный Diff для позывных (зелёный/красный, без точек/тире)
+    // -------------------------------------------------------------
+    function renderCallsignDiff(expected, typed) {
+        let diff = '';
+        const maxLen = Math.max(expected.length, typed.length);
+        for (let i = 0; i < maxLen; i++) {
+            const expCh = expected[i] || '';
+            const typCh = typed[i] || '';
+            if (expCh && typCh && expCh === typCh) {
+                diff += `<span style="color:#22c55e; font-weight:700;">${expCh}</span>`;
+            } else if (expCh) {
+                diff += `<span style="color:#ef4444; font-weight:700; text-decoration:underline;">${expCh}</span>`;
+            }
+        }
+        const typedNote = typed ? ` <span class="muted" style="font-size:12px;">(вы ввели: ${typed})</span>` : ` <span class="muted" style="font-size:12px;">(пусто)</span>`;
+        return `<div class="mono" style="font-size:18px; letter-spacing:1.5px;">${diff}${typedNote}</div>`;
+    }
+
+    // -------------------------------------------------------------
+    // Отрисовка графика скорости RufzXP (SVG)
+    // -------------------------------------------------------------
+    function renderRufzSpeedChart(wpmHistory) {
+        const svg = document.getElementById('cs-rufz-svg');
+        if (!svg || !wpmHistory || wpmHistory.length < 2) return;
+        const w = 500, h = 140, padX = 25, padY = 20;
+        const minWpm = Math.max(5, Math.min(...wpmHistory) - 2);
+        const maxWpm = Math.max(...wpmHistory) + 2;
+        const rangeWpm = maxWpm - minWpm || 1;
+        const points = wpmHistory.map((val, idx) => {
+            const x = padX + (idx / (wpmHistory.length - 1)) * (w - 2 * padX);
+            const y = h - padY - ((val - minWpm) / rangeWpm) * (h - 2 * padY);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+        });
+        const lineD = 'M ' + points.join(' L ');
+        const fillD = `M ${padX},${h - padY} L ` + points.join(' L ') + ` L ${w - padX},${h - padY} Z`;
+        svg.innerHTML = `
+            <defs>
+                <linearGradient id="rufzGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.0"/>
+                </linearGradient>
+            </defs>
+            <path d="${fillD}" fill="url(#rufzGrad)"/>
+            <path d="${lineD}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        `;
+    }
+
+    // -------------------------------------------------------------
+    // Контест-симулятор (Morse Runner / MorseWalker)
+    // -------------------------------------------------------------
+    let contestSession = null;
+    const contestDisplay = document.getElementById('cs-contest-session-display');
+    const contestLiveMyCall = document.getElementById('cs-contest-live-mycall');
+    const contestLiveQsos = document.getElementById('cs-contest-live-qsos');
+    const contestLiveRate = document.getElementById('cs-contest-live-rate');
+    const contestLiveTimer = document.getElementById('cs-contest-live-timer');
+    const contestCallInput = document.getElementById('cs-contest-call');
+    const contestRstInput = document.getElementById('cs-contest-rst');
+    const contestSentNrInput = document.getElementById('cs-contest-sent-nr');
+    const contestRecvNrInput = document.getElementById('cs-contest-recv-nr');
+
+    async function playContestMorse(text, { freq, wpm, isCaller = false } = {}) {
+        if (!contestSession || !contestSession.active) return;
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+        }
+        const useFreq = freq || contestSession.baseFreq;
+        const useWpm = wpm || contestSession.wpm;
+        const audio = new MorseAudio({ wpm: useWpm, freq: useFreq });
+        currentAudio = audio;
+        isPlaying = true;
+        try {
+            await audio.play(text, {
+                onSymbol: ({ symbol, durationMs }) => {
+                    if (!contestSession || !contestSession.active) {
+                        audio.stop();
+                        return;
+                    }
+                    signalLine.pulse(symbol === '.' ? 'dot' : 'dash', durationMs);
+                    lamp.flash(durationMs);
+                }
+            });
+        } catch (e) {
+            // ignore aborted
+        } finally {
+            if (currentAudio === audio) {
+                currentAudio = null;
+                isPlaying = false;
+            }
+        }
+    }
+
+    function formatTimeMMSS(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startContestSession(pool, wpm) {
+        abortCurrentSession();
+        if (typeof startSessionAudioNoise === 'function') startSessionAudioNoise();
+
+        const myCall = (csContestMyCallEl?.value.trim().toUpperCase()) || 'R9OLD';
+        const baseFreq = parseInt(document.getElementById('cs-tone-freq')?.value, 10) || 600;
+
+        contestSession = {
+            active: true,
+            myCall: myCall,
+            wpm: wpm,
+            baseFreq: baseFreq,
+            qsos: 0,
+            sentNr: 1,
+            startTime: Date.now(),
+            contestSeconds: 0,
+            timerInterval: null,
+            state: 'IDLE',
+            currentCaller: null,
+            pool: pool && pool.length ? pool : [...FALLBACK_CALLSIGNS],
+            poolIndex: 0,
+            xpEarned: 0
+        };
+
+        setupPanel.style.display = 'none';
+        resultPanel.style.display = 'none';
+        sessionPanel.style.display = 'block';
+
+        if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
+        if (paperControlsRow) paperControlsRow.style.display = 'none';
+        if (answerInput) answerInput.style.display = 'none';
+        if (csSubmitRow) csSubmitRow.style.display = 'none';
+        if (replayBtn) replayBtn.style.display = 'none';
+        if (contestDisplay) contestDisplay.style.display = 'block';
+
+        if (contestLiveMyCall) contestLiveMyCall.textContent = myCall;
+        if (contestLiveQsos) contestLiveQsos.textContent = '0';
+        if (contestLiveRate) contestLiveRate.textContent = '0';
+        if (contestLiveTimer) contestLiveTimer.textContent = '00:00';
+
+        if (contestSentNrInput) contestSentNrInput.value = '001';
+        if (contestRstInput) contestRstInput.value = '599';
+        if (contestCallInput) {
+            contestCallInput.value = '';
+            contestCallInput.focus();
+        }
+        if (contestRecvNrInput) contestRecvNrInput.value = '';
+
+        feedbackEl.className = 'feedback show ok';
+        feedbackEl.textContent = 'Нажмите Enter или F1 чтобы дать общий вызов (CQ)';
+
+        contestSession.timerInterval = setInterval(() => {
+            if (!contestSession || !contestSession.active) return;
+            contestSession.contestSeconds++;
+            if (contestLiveTimer) contestLiveTimer.textContent = formatTimeMMSS(contestSession.contestSeconds);
+            if (contestSession.qsos > 0) {
+                const rate = Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600));
+                if (contestLiveRate) contestLiveRate.textContent = rate;
+            }
+            if (contestSession.contestSeconds % 10 === 0) {
+                Progress.incrementStat('contestTimeSeconds', 10);
+                Progress.checkAchievements();
+            }
+        }, 1000);
+    }
+
+    function stopContestSession() {
+        if (!contestSession || !contestSession.active) return;
+        contestSession.active = false;
+        if (contestSession.timerInterval) {
+            clearInterval(contestSession.timerInterval);
+            contestSession.timerInterval = null;
+        }
+        if (currentAudio) {
+            currentAudio.stop();
+            currentAudio = null;
+            isPlaying = false;
+        }
+
+        abortCurrentSession();
+
+        sessionPanel.style.display = 'none';
+        resultPanel.style.display = 'block';
+
+        const stdGrid = document.getElementById('cs-standard-stat-grid');
+        if (stdGrid) stdGrid.style.display = 'none';
+        const rufzRes = document.getElementById('cs-rufz-result-block');
+        if (rufzRes) rufzRes.style.display = 'none';
+        const mistakesBlock = document.getElementById('cs-mistakes-block');
+        if (mistakesBlock) mistakesBlock.style.display = 'none';
+
+        const contestRes = document.getElementById('cs-contest-result-block');
+        if (contestRes) {
+            contestRes.style.display = 'block';
+            document.getElementById('cs-contest-res-qsos').textContent = contestSession.qsos;
+            const rate = contestSession.contestSeconds > 0
+                ? Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600))
+                : 0;
+            document.getElementById('cs-contest-res-rate').textContent = rate;
+            document.getElementById('cs-contest-res-time').textContent = formatTimeMMSS(contestSession.contestSeconds);
+        }
+
+        document.getElementById('result-accuracy').textContent = '100%';
+        document.getElementById('result-correct').textContent = `${contestSession.qsos} QSO`;
+        document.getElementById('result-xp').textContent = contestSession.xpEarned;
+
+        Progress.markDailyActivity();
+        postStat('total_sessions', 1);
+        flushStats();
+
+        if (contestSession.contestSeconds >= 3 && typeof Progress.addTrainingTime === 'function') {
+            Progress.addTrainingTime(contestSession.contestSeconds);
+        }
+        if (typeof Progress.renderTrainingSummary === 'function') {
+            Progress.renderTrainingSummary('cs-daily-time-block', contestSession.contestSeconds);
+        }
+    }
+
+    async function contestSendCQ() {
+        if (!contestSession || !contestSession.active) return;
+        contestSession.state = 'SENDING_CQ';
+        feedbackEl.className = 'feedback show ok';
+        feedbackEl.textContent = `CQ TEST ${contestSession.myCall}`;
+        await playContestMorse(`CQ TEST ${contestSession.myCall}`);
+        if (!contestSession || !contestSession.active) return;
+
+        await new Promise(r => setTimeout(r, 400));
+        if (!contestSession || !contestSession.active) return;
+
+        const callerItem = contestSession.pool[contestSession.poolIndex % contestSession.pool.length];
+        contestSession.poolIndex++;
+        const callsign = (callerItem && callerItem.callsign) ? callerItem.callsign : 'UA3XYZ';
+        const callerFreq = contestSession.baseFreq + (Math.floor(Math.random() * 160) - 80);
+        const callerWpm = Math.max(12, contestSession.wpm + (Math.floor(Math.random() * 7) - 3));
+        const callerNr = String(Math.floor(Math.random() * 350) + 1).padStart(3, '0');
+
+        contestSession.currentCaller = { callsign, nr: callerNr, freq: callerFreq, wpm: callerWpm };
+        contestSession.state = 'CALLER_CALLING';
+
+        feedbackEl.textContent = 'Вам отвечает станция...';
+        await playContestMorse(callsign, { freq: callerFreq, wpm: callerWpm, isCaller: true });
+        if (!contestSession || !contestSession.active) return;
+
+        contestSession.state = 'WAITING_EXCHANGE';
+        feedbackEl.textContent = 'Примите позывной и нажмите Enter (F2)';
+        if (contestCallInput) contestCallInput.focus();
+    }
+
+    async function contestSendExchange() {
+        if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
+        const enteredCall = contestCallInput.value.trim().toUpperCase();
+        if (!enteredCall) {
+            contestSendCQ();
+            return;
+        }
+
+        contestSession.state = 'SENDING_EXCH';
+        const nrStr = String(contestSession.sentNr).padStart(3, '0');
+        feedbackEl.className = 'feedback show ok';
+        feedbackEl.textContent = `${enteredCall} 5NN ${nrStr}`;
+        await playContestMorse(`${enteredCall} 5NN ${nrStr}`);
+        if (!contestSession || !contestSession.active) return;
+
+        await new Promise(r => setTimeout(r, 350));
+        if (!contestSession || !contestSession.active) return;
+
+        const caller = contestSession.currentCaller;
+        if (enteredCall === caller.callsign.toUpperCase()) {
+            contestSession.state = 'CALLER_ACK';
+            feedbackEl.textContent = `${caller.callsign} передаёт контрольный номер...`;
+            await playContestMorse(`R 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            if (!contestSession || !contestSession.active) return;
+
+            contestSession.state = 'WAITING_TU';
+            feedbackEl.textContent = 'Введите номер корреспондента и нажмите Enter (F3)';
+            if (contestRecvNrInput) contestRecvNrInput.focus();
+        } else {
+            feedbackEl.className = 'feedback show bad';
+            feedbackEl.textContent = 'Корреспондент переспрашивает (?)';
+            await playContestMorse('?', { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            if (!contestSession || !contestSession.active) return;
+            contestSession.state = 'WAITING_EXCHANGE';
+            if (contestCallInput) contestCallInput.focus();
+        }
+    }
+
+    async function contestSendTU() {
+        if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
+        const caller = contestSession.currentCaller;
+
+        contestSession.state = 'SENDING_TU';
+        feedbackEl.className = 'feedback show ok';
+        feedbackEl.textContent = `TU ${contestSession.myCall} CQ`;
+        await playContestMorse(`TU ${contestSession.myCall} CQ`);
+        if (!contestSession || !contestSession.active) return;
+
+        contestSession.qsos++;
+        contestSession.sentNr++;
+        const qsoXp = Math.round(25 * (contestSession.wpm / 15));
+        contestSession.xpEarned += qsoXp;
+        Progress.addXp(qsoXp);
+        Progress.incrementStat('contestQsos', 1);
+        Progress.checkAchievements();
+
+        if (contestLiveQsos) contestLiveQsos.textContent = contestSession.qsos;
+        if (contestSentNrInput) contestSentNrInput.value = String(contestSession.sentNr).padStart(3, '0');
+        if (contestCallInput) contestCallInput.value = '';
+        if (contestRecvNrInput) contestRecvNrInput.value = '';
+
+        feedbackEl.textContent = `✓ Связь с ${caller.callsign} зачтена (+${qsoXp} XP)!`;
+
+        setTimeout(() => {
+            if (contestSession && contestSession.active) {
+                contestSendCQ();
+            }
+        }, 1000);
+    }
+
+    async function contestSendMyCall() {
+        if (!contestSession || !contestSession.active) return;
+        await playContestMorse(contestSession.myCall);
+    }
+
+    async function contestSendHisCall() {
+        if (!contestSession || !contestSession.active) return;
+        const c = contestCallInput.value.trim().toUpperCase() || (contestSession.currentCaller?.callsign);
+        if (c) await playContestMorse(c);
+    }
+
+    async function contestSendRepeat() {
+        if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
+        await playContestMorse('?');
+        const caller = contestSession.currentCaller;
+        await new Promise(r => setTimeout(r, 400));
+        if (contestSession && contestSession.active) {
+            await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+        }
+    }
+
+    async function contestSendMyExchange() {
+        if (!contestSession || !contestSession.active) return;
+        const nrStr = String(contestSession.sentNr).padStart(3, '0');
+        await playContestMorse(`5NN ${nrStr}`);
+    }
+
+    document.getElementById('cs-key-f1')?.addEventListener('click', () => contestSendCQ());
+    document.getElementById('cs-key-f2')?.addEventListener('click', () => contestSendExchange());
+    document.getElementById('cs-key-f3')?.addEventListener('click', () => contestSendTU());
+    document.getElementById('cs-key-f4')?.addEventListener('click', () => contestSendMyCall());
+    document.getElementById('cs-key-f5')?.addEventListener('click', () => contestSendHisCall());
+    document.getElementById('cs-key-f6')?.addEventListener('click', () => contestSendRepeat());
+    document.getElementById('cs-key-f7')?.addEventListener('click', () => contestSendMyExchange());
+    document.getElementById('cs-key-esc')?.addEventListener('click', () => {
+        if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+    });
+
+    async function startSessionWithItems(retryItems) {
+        if (!retryItems || !retryItems.length) return;
+        abortCurrentSession();
+        if (typeof startSessionAudioNoise === 'function') startSessionAudioNoise();
+        const wpm = parseInt(wpmSlider.value, 10);
+        const farnsworth = fwEnabled && fwEnabled.checked ? parseInt(fwSlider.value, 10) : null;
+        let speedMult = speedXpFactor(wpm);
+        let xpPerCallsign = Math.round(20 * speedMult);
+
+        session = {
+            items: retryItems, index: 0, wpm, farnsworth,
+            isBufferMode: false, bufferDepth: selectedBufferDepth,
+            isPaperMode: false, paperGap: 3.0, playedCount: 0,
+            paperStopped: false, finished: false,
+            correct: 0, dbXpEarned: 0,
+            startTime: Date.now(), history: [], xpPerCallsign, isDaily: false,
+            isRufz: false,
+            wrongCallsigns: [],
+            replayedCurrent: false,
+            rufz: null
+        };
+
+        setupPanel.style.display = 'none';
+        resultPanel.style.display = 'none';
+        sessionPanel.style.display = 'block';
+        if (contestDisplay) contestDisplay.style.display = 'none';
+        csTotalEl.textContent = retryItems.length;
+        csIndexEl.textContent = 1;
+        feedbackEl.className = 'feedback';
+        feedbackEl.textContent = '';
+        if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
+        if (paperControlsRow) paperControlsRow.style.display = 'none';
+        if (answerInput) {
+            answerInput.style.display = 'block';
+            answerInput.value = '';
+            answerInput.focus();
+        }
+        if (csSubmitRow) csSubmitRow.style.display = 'flex';
+        playCurrent();
+    }
+
     async function startSession() {
         const dailyBlock = document.getElementById('cs-daily-time-block');
         if (dailyBlock) dailyBlock.style.display = 'none';
-        // Синхронно разблокируем Web Audio прямо в стеке пользовательского тапа/клика
         const ctx = getSharedAudioContext();
         if (typeof unlockAudioContext === 'function') {
             unlockAudioContext(ctx);
@@ -885,7 +1385,11 @@
         const isPaperMode = paperCheckbox ? paperCheckbox.checked : false;
         const isBufferMode = !isPaperMode && bufferCheckbox ? bufferCheckbox.checked : false;
         const paperGap = paperGapSlider ? parseFloat(paperGapSlider.value) : 3.0;
-        const count = parseInt(document.getElementById('cs-count').value, 10);
+        
+        const isRufz = (selectedMode === 'rufz');
+        const isContest = (selectedMode === 'contest');
+        const count = isRufz ? 50 : (isContest ? 30 : parseInt(document.getElementById('cs-count').value, 10));
+
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const readySignalEnabled = !!(readySignalEl ? readySignalEl.checked : (audioSettings && audioSettings.readySignal));
         setupError.className = 'feedback';
@@ -907,21 +1411,33 @@
             }
         }
 
+        if (isContest) {
+            startContestSession(items, wpm);
+            return;
+        }
+
         let isDaily = new URLSearchParams(window.location.search).get('daily') === '1';
         let speedMult = isDaily ? speedXpFactor(wpm) : 1;
         let xpPerCallsign = Math.round(20 * speedMult);
 
         session = {
             items, index: 0, wpm, farnsworth,
-            isBufferMode, bufferDepth: selectedBufferDepth,
-            isPaperMode, paperGap, playedCount: 0,
+            isBufferMode: !isRufz && isBufferMode,
+            bufferDepth: selectedBufferDepth,
+            isPaperMode: !isRufz && isPaperMode,
+            paperGap, playedCount: 0,
             paperStopped: false, finished: false,
             correct: 0, dbXpEarned: 0,
-            startTime: Date.now(), history: [], xpPerCallsign, isDaily
+            startTime: Date.now(), history: [], xpPerCallsign, isDaily,
+            isRufz,
+            wrongCallsigns: [],
+            replayedCurrent: false,
+            rufz: isRufz ? { score: 0, peakWpm: wpm, wpmHistory: [wpm] } : null
         };
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        if (contestDisplay) contestDisplay.style.display = 'none';
         csTotalEl.textContent = items.length;
         csIndexEl.textContent = 1;
         feedbackEl.className = 'feedback';
@@ -941,7 +1457,7 @@
                 runPaperPlayback();
             }
         } else {
-            if (replayBtn) replayBtn.style.display = 'inline-flex';
+            if (replayBtn) replayBtn.style.display = isRufz ? 'none' : 'inline-flex';
             if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
             if (paperControlsRow) paperControlsRow.style.display = 'none';
             if (answerInput) {
@@ -965,19 +1481,44 @@
         const typed = answerInput.value.trim().toUpperCase();
         const isCorrect = typed === expected;
 
+        if (!session.wrongCallsigns) session.wrongCallsigns = [];
+
         if (isCorrect) {
             session.correct++;
             feedbackEl.textContent = t('js.cs.correct', { '{expected}': expected });
             feedbackEl.className = 'feedback show ok';
+
+            if (session.isRufz) {
+                const isRepeat = !!session.replayedCurrent;
+                const scoreAdd = Math.round(session.wpm * expected.length * (isRepeat ? 0.5 : 1.0));
+                session.rufz.score += scoreAdd;
+                session.xpPerCallsign = Math.round(scoreAdd * 0.1);
+                session.wpm = Math.min(60, session.wpm + 1);
+                session.rufz.peakWpm = Math.max(session.rufz.peakWpm, session.wpm);
+                session.rufz.wpmHistory.push(session.wpm);
+                if (wpmSlider) wpmSlider.value = session.wpm;
+                if (wpmValue) wpmValue.textContent = session.wpm;
+            }
+
             session.dbXpEarned += session.xpPerCallsign;
             Progress.addXp(session.xpPerCallsign);
             Progress.incrementStat('callsignsCompleted', 1);
             postStat('total_callsigns', 1);
         } else {
-            feedbackEl.textContent = t('js.cs.wrong', { '{expected}': expected, '{typed}': typed || t('js.cs.empty_placeholder') });
+            session.wrongCallsigns.push(session.items[session.index]);
+
+            if (session.isRufz) {
+                session.wpm = Math.max(8, session.wpm - 1);
+                session.rufz.wpmHistory.push(session.wpm);
+                if (wpmSlider) wpmSlider.value = session.wpm;
+                if (wpmValue) wpmValue.textContent = session.wpm;
+            }
+
+            feedbackEl.innerHTML = renderCallsignDiff(expected, typed);
             feedbackEl.className = 'feedback show bad';
         }
-        
+
+        session.replayedCurrent = false;
         session.history.push({ e: expected, t: typed, xp: isCorrect ? session.xpPerCallsign : 0 });
 
         session.index++;
@@ -1005,12 +1546,15 @@
         const stdGrid = document.getElementById('cs-standard-stat-grid');
         if (stdGrid) stdGrid.style.display = 'grid';
 
+        const contestRes = document.getElementById('cs-contest-result-block');
+        if (contestRes) contestRes.style.display = 'none';
+
         // Clean up previous result notes
         resultPanel.querySelectorAll('.js-result-note').forEach(n => n.remove());
 
         const total = session.items.length;
         const accuracy = total ? session.correct / total : 0;
-        let xpEarned = session.correct * session.xpPerCallsign;
+        let xpEarned = session.isRufz ? (session.rufz ? Math.round(session.rufz.score * 0.1) : session.dbXpEarned) : (session.correct * session.xpPerCallsign);
         let baseXP = session.correct * 20;
         let hasDailyBonus = false;
         
@@ -1028,7 +1572,7 @@
                     dailyBonusFail = true;
                     dailyBonusMsg = t('js.groups.daily_mismatch', {
                         '{count}': req.count,
-                        '{len}': 0, // Not applicable for callsigns
+                        '{len}': 0,
                         '{wpm}': req.wpm
                     });
                 } else if (accuracy < 0.6) {
@@ -1076,7 +1620,9 @@
         
         let parts = [];
         let speedMult = session.isDaily ? speedXpFactor(session.wpm) : 1;
-        if (speedMult > 1) {
+        if (session.isRufz) {
+            parts.push(`RufzXP Score: ${session.rufz ? session.rufz.score : 0}`);
+        } else if (speedMult > 1) {
             parts.push(`${baseXP} &times; ${speedMult.toFixed(1)} (скорость)`);
         } else {
             parts.push(`${baseXP} (база)`);
@@ -1085,7 +1631,33 @@
         brBox.innerHTML = parts.join(' + ') + ` = <b>${Math.round(xpEarned)} XP</b>`;
         if (grid) grid.insertAdjacentElement('afterend', brBox);
 
-        // Clean up previous daily note if any
+        // RufzXP блок
+        const rufzBlock = document.getElementById('cs-rufz-result-block');
+        if (rufzBlock) {
+            if (session.isRufz && session.rufz) {
+                rufzBlock.style.display = 'block';
+                document.getElementById('cs-rufz-score').textContent = session.rufz.score;
+                document.getElementById('cs-rufz-peak').textContent = session.rufz.peakWpm + ' wpm';
+                const avg = Math.round(session.rufz.wpmHistory.reduce((a, b) => a + b, 0) / session.rufz.wpmHistory.length);
+                document.getElementById('cs-rufz-avg').textContent = avg + ' wpm';
+                renderRufzSpeedChart(session.rufz.wpmHistory);
+            } else {
+                rufzBlock.style.display = 'none';
+            }
+        }
+
+        // Блок работы над ошибками
+        const mistakesBlock = document.getElementById('cs-mistakes-block');
+        const mistakeCountEl = document.getElementById('cs-mistake-count');
+        if (mistakesBlock) {
+            if (!session.isPaperMode && session.wrongCallsigns && session.wrongCallsigns.length > 0) {
+                if (mistakeCountEl) mistakeCountEl.textContent = session.wrongCallsigns.length;
+                mistakesBlock.style.display = 'block';
+            } else {
+                mistakesBlock.style.display = 'none';
+            }
+        }
+
         const oldNote = document.getElementById('cs-daily-note');
         if (oldNote) oldNote.remove();
 
@@ -1116,6 +1688,10 @@
     }
 
     function stopCallsignsSession() {
+        if (contestSession && contestSession.active) {
+            stopContestSession();
+            return;
+        }
         if (session) {
             session.paperStopped = true;
         }
@@ -1209,13 +1785,34 @@
 
     document.getElementById('start-session').addEventListener('click', startSession);
     document.getElementById('submit-answer').addEventListener('click', submitAnswer);
-    if (replayBtn) replayBtn.addEventListener('click', playCurrent);
+    if (replayBtn) {
+        replayBtn.addEventListener('click', () => {
+            if (session) session.replayedCurrent = true;
+            playCurrent();
+        });
+    }
+
+    const retrainMistakesBtn = document.getElementById('cs-retrain-mistakes-btn');
+    if (retrainMistakesBtn) {
+        retrainMistakesBtn.addEventListener('click', () => {
+            if (!session || !session.wrongCallsigns || !session.wrongCallsigns.length) return;
+            const retryCalls = [...session.wrongCallsigns];
+            startSessionWithItems(retryCalls);
+        });
+    }
+
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
         if (paperResultBlock) paperResultBlock.style.display = 'none';
         const stdGrid = document.getElementById('cs-standard-stat-grid');
         if (stdGrid) stdGrid.style.display = 'grid';
+        const rufzRes = document.getElementById('cs-rufz-result-block');
+        if (rufzRes) rufzRes.style.display = 'none';
+        const contestRes = document.getElementById('cs-contest-result-block');
+        if (contestRes) contestRes.style.display = 'none';
+        const mistakesBlock = document.getElementById('cs-mistakes-block');
+        if (mistakesBlock) mistakesBlock.style.display = 'none';
     });
     answerInput.addEventListener('keydown', (e) => {
         if (typeof answerInput.bufferMaxAllowed === 'number' && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
@@ -1244,8 +1841,48 @@
     });
 
     // Запуск и перезапуск сессии клавишей Enter с экрана настроек/результатов,
-    // а также завершение активной сессии по Escape
+    // а также завершение активной сессии по Escape и горячие клавиши контеста F1..F7
     window.addEventListener('keydown', (e) => {
+        if (contestSession && contestSession.active) {
+            if (e.key === 'F1') { e.preventDefault(); contestSendCQ(); return; }
+            if (e.key === 'F2') { e.preventDefault(); contestSendExchange(); return; }
+            if (e.key === 'F3') { e.preventDefault(); contestSendTU(); return; }
+            if (e.key === 'F4') { e.preventDefault(); contestSendMyCall(); return; }
+            if (e.key === 'F5') { e.preventDefault(); contestSendHisCall(); return; }
+            if (e.key === 'F6') { e.preventDefault(); contestSendRepeat(); return; }
+            if (e.key === 'F7') { e.preventDefault(); contestSendMyExchange(); return; }
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+                return;
+            }
+            if (e.key === 'Tab' || e.key === ' ') {
+                e.preventDefault();
+                if (document.activeElement === contestCallInput) {
+                    if (contestRecvNrInput) contestRecvNrInput.focus();
+                } else {
+                    if (contestCallInput) contestCallInput.focus();
+                }
+                return;
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (document.activeElement === contestCallInput) {
+                    if (!contestCallInput.value.trim()) {
+                        contestSendCQ();
+                    } else {
+                        contestSendExchange();
+                    }
+                } else if (document.activeElement === contestRecvNrInput) {
+                    contestSendTU();
+                } else {
+                    contestSendCQ();
+                }
+                return;
+            }
+            return;
+        }
+
         if (e.key === 'Escape') {
             if (sessionPanel && sessionPanel.style.display !== 'none') {
                 e.preventDefault();

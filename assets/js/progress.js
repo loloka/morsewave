@@ -144,6 +144,8 @@ const Progress = (() => {
             wordsCompleted: 0,
             invasionWavesCompleted: 0,
             projectSupporter: 0,
+            contestTimeSeconds: 0,
+            contestQsos: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -1379,6 +1381,8 @@ const Progress = (() => {
                 case 'koch_level': return state.kochLevelEarned;
                 case 'groups_completed': return state.stats.groupsCompleted;
                 case 'callsigns_completed': return state.stats.callsignsCompleted;
+                case 'contest_time_seconds': return (state.stats && state.stats.contestTimeSeconds) || 0;
+                case 'contest_qsos': return (state.stats && state.stats.contestQsos) || 0;
                 case 'recognized_count': return state.stats.recognizedCount;
                 case 'recognize_best_streak': return state.stats.recognizeBestStreak;
                 case 'exam_passed_count': return state.stats.examsPassed;
