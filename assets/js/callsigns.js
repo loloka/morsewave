@@ -1351,15 +1351,22 @@
                 : 'RIT: 0 Hz';
         }
 
-        // Реалистичный расчёт порядкового номера корреспондента (по алгоритму Morse Runner):
-        // Номер зависит от прогресса сессии: в начале теста номера маленькие (001..008),
-        // а затем плавно растут в зависимости от времени и числа проведённых QSO.
-        const currentSent = contestSession.sentNr || 1;
-        const elapsedMinutes = Math.max(0.5, contestSession.contestSeconds / 60);
-        const expectedBase = Math.max(currentSent, Math.round(elapsedMinutes * 1.5));
-        const activityFactor = 0.4 + Math.random() * 1.4; // 0.4x .. 1.8x разброс активности
-        const jitter = Math.floor(Math.random() * 5) - 2;
-        const rawNr = Math.max(1, Math.round(expectedBase * activityFactor) + jitter);
+        // Реалистичный расчёт порядкового номера корреспондента (как в реальном эфире и Morse Runner):
+        // 1) ~12% станций — это «только включившиеся» в эфир (casual / check-in),
+        //    которые даже в разгар контеста передают стартовые номера 001, 002, 003 или 004.
+        // 2) Остальные 88% — активные участники, чьи номера растут по мере времени и темпа теста.
+        let rawNr;
+        if (Math.random() < 0.12) {
+            // Только что подошедшая станция на поиск
+            rawNr = Math.floor(Math.random() * 4) + 1; // 1..4 (001, 002, 003, 004)
+        } else {
+            const currentSent = contestSession.sentNr || 1;
+            const elapsedMinutes = Math.max(0.5, contestSession.contestSeconds / 60);
+            const expectedBase = Math.max(currentSent, Math.round(elapsedMinutes * 1.5));
+            const activityFactor = 0.25 + Math.random() * 1.45; // от умеренных до лидеров контеста
+            const jitter = Math.floor(Math.random() * 5) - 2;
+            rawNr = Math.max(1, Math.round(expectedBase * activityFactor) + jitter);
+        }
         const callerNr = String(rawNr).padStart(3, '0');
         contestSession.currentCaller = {
             callsign,
