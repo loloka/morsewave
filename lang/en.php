@@ -486,6 +486,8 @@ return [
     'cs.contest_time' => 'Time in Contest',
     'cs.contest_detune_label' => 'Realistic air: QRM pitch detune (±40 Hz) and speed variations',
     'cs.contest_detune_hint' => 'Callers call with individual pitch offset and sending speed',
+    'cs.contest_cut_numbers_label' => 'Cut Numbers (T = 0, N = 9)',
+    'cs.contest_cut_numbers_hint' => 'Contesters send T instead of 0 (TT1 = 001, 5NN = 599). Number field accepts both letters and digits (001, TT1 or 1)',
     'cs.contest_log_title' => 'Contest Log (QSO Log)',
     'cs.contest_log_empty' => 'Log is empty. Press F1 or Enter to call CQ.',
     'cs.contest_finish_btn' => 'Finish contest and show results',

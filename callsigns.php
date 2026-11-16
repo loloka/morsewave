@@ -93,7 +93,13 @@ include __DIR__ . '/includes/header.php';
             <label class="chip" style="gap:8px; font-size:12px; cursor:pointer;">
                 <input type="checkbox" id="cs-contest-detune" checked> <?= t('cs.contest_detune_label') ?>
             </label>
-            <span class="muted" style="font-size:11px; margin-left:8px;"><?= t('cs.contest_detune_hint') ?></span>
+            <div class="muted mt-1" style="font-size:11px; margin-left:26px;"><?= t('cs.contest_detune_hint') ?></div>
+        </div>
+        <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            <label class="chip" style="gap:8px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="cs-contest-cut-numbers" checked> <?= t('cs.contest_cut_numbers_label') ?>
+            </label>
+            <div class="muted mt-1" style="font-size:11px; margin-left:26px;"><?= t('cs.contest_cut_numbers_hint') ?></div>
         </div>
     </div>
 
@@ -296,6 +302,32 @@ include __DIR__ . '/includes/header.php';
             font-size: 11px;
             margin-left: 2px;
         }
+        @media (max-width: 640px) {
+            .cs-hk-grid {
+                gap: 6px;
+            }
+            .cs-hk-btn {
+                padding: 6px 8px;
+                font-size: 11px;
+                flex: 1 1 calc(50% - 6px);
+                justify-content: center;
+            }
+            .cs-contest-inputs-row {
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 8px;
+            }
+            .cs-contest-inputs-subrow {
+                display: flex;
+                gap: 6px;
+                width: 100%;
+            }
+            #cs-contest-rst { width: 55px !important; }
+            #cs-contest-sent-nr { width: 55px !important; }
+            #cs-contest-recv-nr { flex: 1 !important; width: auto !important; }
+            #cs-contest-log-table { font-size: 11px; }
+            #cs-contest-log-table th, #cs-contest-log-table td { padding: 4px 6px; }
+        }
     </style>
 
     <!-- Виджет контеста: статусная строка, поля ввода и аппаратный журнал в стиле соревнований -->
@@ -314,11 +346,16 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
-        <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
-            <input type="text" id="cs-contest-call" class="answer-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="flex:2; min-width:140px; text-transform:uppercase; font-size:18px; font-weight:700;" autocomplete="off">
-            <input type="text" id="cs-contest-rst" class="answer-input mono text-center" value="599" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Рапорт 599 ставится автоматически">
-            <input type="text" id="cs-contest-sent-nr" class="answer-input mono text-center" value="001" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Ваш исходящий номер">
-            <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:120px; font-size:18px; font-weight:700;" autocomplete="off">
+        <div class="flex-wrap gap-2 mt-2 cs-contest-inputs-row" style="align-items:center;">
+            <div style="flex:2; min-width:140px; position:relative; display:flex; align-items:center;">
+                <input type="text" id="cs-contest-call" class="answer-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="width:100%; text-transform:uppercase; font-size:18px; font-weight:700;" autocomplete="off">
+                <span id="cs-contest-dupe-badge" class="badge" style="display:none; position:absolute; right:8px; background:#ef4444; color:#fff; font-size:11px; font-weight:700; padding:2px 8px; border-radius:4px; pointer-events:none; z-index:2;">⚠️ DUPE</span>
+            </div>
+            <div class="cs-contest-inputs-subrow flex gap-2" style="align-items:center;">
+                <input type="text" id="cs-contest-rst" class="answer-input mono text-center" value="599" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Рапорт 599 ставится автоматически">
+                <input type="text" id="cs-contest-sent-nr" class="answer-input mono text-center" value="001" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Ваш исходящий номер">
+                <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:120px; font-size:18px; font-weight:700;" autocomplete="off">
+            </div>
         </div>
 
         <!-- Горячие клавиши контеста -->
@@ -354,7 +391,7 @@ include __DIR__ . '/includes/header.php';
                 </span>
                 <span class="muted" style="font-size:12px;" id="cs-contest-log-count">0 связей</span>
             </div>
-            <div style="overflow-x:auto;">
+            <div style="overflow-x:auto; max-height:240px; overflow-y:auto; -webkit-overflow-scrolling:touch; border-radius:6px; border:1px solid rgba(255,255,255,0.06);">
                 <table style="width:100%; font-family:var(--font-mono); font-size:13px; border-collapse:collapse;" id="cs-contest-log-table">
                     <thead>
                         <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-size:11px; text-transform:uppercase;">

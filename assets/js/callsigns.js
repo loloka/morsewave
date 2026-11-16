@@ -493,6 +493,18 @@
         });
     }
 
+    // Настройка сокращённых цифр (Cut Numbers)
+    const csContestCutNumbersEl = document.getElementById('cs-contest-cut-numbers');
+    if (csContestCutNumbersEl) {
+        const savedCut = safeStorage.getItem('morse_cs_contest_cut_numbers');
+        if (savedCut !== null) {
+            csContestCutNumbersEl.checked = (savedCut === 'true');
+        }
+        csContestCutNumbersEl.addEventListener('change', () => {
+            safeStorage.setItem('morse_cs_contest_cut_numbers', csContestCutNumbersEl.checked ? 'true' : 'false');
+        });
+    }
+
     let session = null;
     let isPlaying = false;
     let currentAudio = null;
@@ -1075,6 +1087,34 @@
     const contestRstInput = document.getElementById('cs-contest-rst');
     const contestSentNrInput = document.getElementById('cs-contest-sent-nr');
     const contestRecvNrInput = document.getElementById('cs-contest-recv-nr');
+    const contestDupeBadge = document.getElementById('cs-contest-dupe-badge');
+
+    function formatCutNumber(nrStr) {
+        // Сокращённые цифры (Cut Numbers): замена ведущих 0 на T (001 -> TT1, 014 -> T14, 042 -> T42)
+        return nrStr.replace(/^00/, 'TT').replace(/^0/, 'T');
+    }
+
+    function normalizeContestNumber(inputStr) {
+        if (!inputStr) return NaN;
+        // Приводим сокращённые цифры к обычным (T->0, N->9, A->1)
+        const clean = inputStr.trim().toUpperCase()
+            .replace(/T/g, '0')
+            .replace(/N/g, '9')
+            .replace(/A/g, '1');
+        return parseInt(clean, 10);
+    }
+
+    function updateDupeBadge() {
+        if (!contestDupeBadge || !contestSession) return;
+        const typed = (contestCallInput?.value || '').trim().toUpperCase();
+        if (typed && contestSession.workedCalls?.has(typed)) {
+            const prev = contestSession.workedCalls.get(typed);
+            contestDupeBadge.style.display = 'inline-flex';
+            contestDupeBadge.textContent = `⚠️ DUPE (#${prev.qsoIndex})`;
+        } else {
+            contestDupeBadge.style.display = 'none';
+        }
+    }
 
     function focusContestInput(inputEl) {
         if (!inputEl) return;
@@ -1185,8 +1225,11 @@
             currentCaller: null,
             pool: pool && pool.length ? pool : [...FALLBACK_CALLSIGNS],
             poolIndex: 0,
-            xpEarned: 0
+            xpEarned: 0,
+            workedCalls: new Map()
         };
+
+        if (contestDupeBadge) contestDupeBadge.style.display = 'none';
 
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
@@ -1417,7 +1460,9 @@
         if (enteredCall === caller.callsign.toUpperCase()) {
             contestSession.state = 'CALLER_ACK';
             feedbackEl.textContent = `${enteredCall} передаёт контрольный номер...`;
-            await playContestMorse(`R 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            const useCut = !csContestCutNumbersEl || csContestCutNumbersEl.checked;
+            const txNr = (useCut && Math.random() < 0.75) ? formatCutNumber(caller.nr) : caller.nr;
+            await playContestMorse(`R 5NN ${txNr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
             contestSession.state = 'WAITING_TU';
@@ -1451,14 +1496,20 @@
 
         const isCallCorrect = (enteredCall === caller.callsign.toUpperCase());
         const expectedNrInt = parseInt(caller.nr, 10);
-        const enteredNrInt = parseInt(enteredNr, 10);
+        const enteredNrInt = normalizeContestNumber(enteredNr);
         const isNrCorrect = !isNaN(enteredNrInt) && (enteredNrInt === expectedNrInt);
 
         const speedMult = speedXpFactor(contestSession.wpm);
         let qsoXp = 0;
         let note = '';
 
-        if (isCallCorrect && isNrCorrect) {
+        const callUpper = caller.callsign.toUpperCase();
+        const isDupe = contestSession.workedCalls?.has(callUpper);
+
+        if (isDupe) {
+            qsoXp = 0;
+            note = 'DUPE (повтор, 0 XP)';
+        } else if (isCallCorrect && isNrCorrect) {
             let base = Math.round(25 * speedMult);
             if (caller.askedRepeat) {
                 qsoXp = Math.max(1, Math.round(base * 0.5));
@@ -1466,10 +1517,18 @@
             } else {
                 qsoXp = base;
             }
+            contestSession.workedCalls?.set(callUpper, {
+                qsoIndex,
+                timeStr: formatTimeMMSS(contestSession.contestSeconds)
+            });
         } else if (isCallCorrect && !isNrCorrect) {
             // За верный позывной даем по 1 XP за символ, если номер не принят
             qsoXp = caller.callsign.length;
             note = 'ошибка в номере';
+            contestSession.workedCalls?.set(callUpper, {
+                qsoIndex,
+                timeStr: formatTimeMMSS(contestSession.contestSeconds)
+            });
         } else {
             qsoXp = 0;
             note = 'ошибка в позывном';
@@ -1511,6 +1570,7 @@
 
         if (contestCallInput) contestCallInput.value = '';
         if (contestRecvNrInput) contestRecvNrInput.value = '';
+        if (contestDupeBadge) contestDupeBadge.style.display = 'none';
 
         // Фокус СРАЗУ переносим в поле позывного для следующей связи
         focusContestInput(contestCallInput);
@@ -1570,7 +1630,9 @@
             // Если позывной уже принят и ждём только номер:
             const enteredCall = (contestCallInput?.value || '').trim().toUpperCase();
             feedbackEl.textContent = `${enteredCall || 'Корреспондент'} повторяет контрольный номер...`;
-            await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            const useCut = !csContestCutNumbersEl || csContestCutNumbersEl.checked;
+            const txNr = (useCut && Math.random() < 0.75) ? formatCutNumber(caller.nr) : caller.nr;
+            await playContestMorse(`${caller.callsign} 5NN ${txNr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             focusContestInput(contestRecvNrInput);
         }
@@ -1605,6 +1667,7 @@
 
     contestCallInput?.addEventListener('input', () => {
         if (contestSession) contestSession.lastUserActivity = Date.now();
+        updateDupeBadge();
     });
     contestRecvNrInput?.addEventListener('input', () => {
         if (contestSession) contestSession.lastUserActivity = Date.now();
