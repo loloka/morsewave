@@ -19,15 +19,29 @@
             return;
         }
 
-        grid.innerHTML = defs.map(a => `
-            <div class="badge ${unlocked.includes(a.code) ? 'unlocked' : ''}">
+        grid.innerHTML = defs.map(a => {
+            const isUnlocked = unlocked.includes(a.code);
+            let extraBadge = '';
+            let extraDesc = '';
+            if (a.code === 'contest_marathon') {
+                const mCount = (state.stats && state.stats.contestMarathonCount) || 0;
+                const activeSec = (state.stats && state.stats.contestTimeSeconds) || 0;
+                const activeMin = Math.floor(activeSec / 60);
+                if (mCount > 0) {
+                    extraBadge = ` <span style="background:var(--accent); color:#000; font-size:11px; padding:1px 6px; border-radius:10px; font-weight:700;">x${mCount}</span>`;
+                }
+                extraDesc = `<div class="muted mt-1" style="font-size:11px;">⏱ В активном эфире: ${activeMin} мин. (${activeMin % 60}/60 мин. до следующей награды +500 XP)</div>`;
+            }
+            return `
+            <div class="badge ${isUnlocked ? 'unlocked' : ''}">
                 <div class="icon">${a.icon}</div>
                 <div class="badge-text">
-                    <div class="title">${a.title}</div>
-                    <div class="desc">${a.description}</div>
+                    <div class="title">${a.title}${extraBadge}</div>
+                    <div class="desc">${a.description}${extraDesc}</div>
                 </div>
             </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     renderGrid();

@@ -146,6 +146,7 @@ const Progress = (() => {
             projectSupporter: 0,
             contestTimeSeconds: 0,
             contestQsos: 0,
+            contestMarathonCount: 0,
         },
         unlockedAchievements: [],
         dailyChallengeDate: null,
@@ -1449,6 +1450,27 @@ const Progress = (() => {
         };
 
         for (const a of defs) {
+            if (a.code === 'contest_marathon') {
+                const totalActiveSeconds = (state.stats && state.stats.contestTimeSeconds) || 0;
+                const completedCount = Math.floor(totalActiveSeconds / 3600);
+                const currentAwardedCount = (state.stats && state.stats.contestMarathonCount) || 0;
+                if (completedCount > currentAwardedCount) {
+                    const timesToAward = completedCount - currentAwardedCount;
+                    state.stats.contestMarathonCount = completedCount;
+                    const bonusXp = 500 * timesToAward;
+                    state.xp = (state.xp || 0) + bonusXp;
+                    if (!state.unlockedAchievements.includes('contest_marathon')) {
+                        state.unlockedAchievements.push('contest_marathon');
+                    }
+                    newly.push({
+                        ...a,
+                        title: `${a.title}${completedCount > 1 ? ` (x${completedCount})` : ''}`,
+                        description: `Вы провели ${completedCount * 60} мин. в активном эфире контеста! Награда: +${bonusXp} XP!`,
+                        repeatCount: completedCount
+                    });
+                }
+                continue;
+            }
             if (state.unlockedAchievements.includes(a.code)) continue;
             if (statValue(a.condition_type) >= a.condition_value) {
                 state.unlockedAchievements.push(a.code);

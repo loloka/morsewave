@@ -48,6 +48,15 @@ if (isset($want['achievements']) || isset($want['leaderboard']) || isset($want['
 }
 
 if (isset($want['achievements'])) {
+    try {
+        $pdo->exec("ALTER TABLE achievements MODIFY COLUMN condition_type VARCHAR(64) NOT NULL");
+        $pdo->exec("
+            INSERT IGNORE INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order) VALUES
+            ('contest_first_qso', 'Первое QSO', 'Проведите первую радиосвязь в контест-тренажёре', '📻', 'contest_qsos', 1, 33),
+            ('contest_marathon', 'Контест-марафон', 'Проведите суммарно 60 минут в эфире контест-тренажёра', '⏱️', 'contest_time_seconds', 3600, 34)
+        ");
+    } catch (Throwable $e) {}
+
     $stmt = $pdo->query('SELECT code, title, description, icon, condition_type, condition_value FROM achievements ORDER BY sort_order ASC');
     $rows = $stmt->fetchAll();
 

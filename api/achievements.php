@@ -5,6 +5,16 @@ require_once __DIR__ . '/../includes/i18n.php';
 require_once __DIR__ . '/../includes/donation_service.php';
 ensure_donation_tables($pdo);
 
+try {
+    $pdo->exec("ALTER TABLE achievements MODIFY COLUMN condition_type VARCHAR(64) NOT NULL");
+    $pdo->exec("
+        INSERT IGNORE INTO achievements (code, title, description, icon, condition_type, condition_value, sort_order) VALUES
+        ('contest_first_qso', 'Первое QSO', 'Проведите первую радиосвязь в контест-тренажёре', '📻', 'contest_qsos', 1, 33),
+        ('contest_marathon', 'Контест-марафон', 'Проведите суммарно 60 минут в активном эфире контест-тренажёра (+500 XP, повторяемая)', '⏱️', 'contest_time_seconds', 3600, 34)
+        ON DUPLICATE KEY UPDATE description = VALUES(description);
+    ");
+} catch (Throwable $e) {}
+
 $stmt = $pdo->query('SELECT code, title, description, icon, condition_type, condition_value FROM achievements ORDER BY sort_order ASC');
 $rows = $stmt->fetchAll();
 

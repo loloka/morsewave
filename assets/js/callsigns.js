@@ -351,24 +351,45 @@
     }
 
     // -------------------------------------------------------------
-    // Выбор режима тренировки: Обычный / RufzXP Спринт / Контест (Morse Runner)
+    // Выбор режима тренировки: Тренировка позывных / Симулятор соревнований (contest mode)
     // -------------------------------------------------------------
     let selectedMode = safeStorage.getItem('morse_cs_mode') || 'standard';
+    if (selectedMode === 'rufz') {
+        selectedMode = 'standard';
+        safeStorage.setItem('morse_cs_sprint_enabled', 'true');
+    }
     const csModeChips = document.querySelectorAll('#cs-mode-chips .chip');
     const contestSetupWrap = document.getElementById('cs-contest-setup-wrap');
-    const csCountWrapper = csCountEl ? csCountEl.closest('label') : null;
+    const csSprintToggleWrap = document.getElementById('cs-sprint-toggle-wrap');
+    const csSprintEnabledEl = document.getElementById('cs-sprint-enabled');
+    const csCountWrapper = document.getElementById('cs-count-wrapper') || (csCountEl ? csCountEl.closest('label') : null);
+
+    let isSprint = safeStorage.getItem('morse_cs_sprint_enabled') === 'true';
+    if (csSprintEnabledEl) {
+        csSprintEnabledEl.checked = isSprint;
+        csSprintEnabledEl.addEventListener('change', () => {
+            isSprint = csSprintEnabledEl.checked;
+            safeStorage.setItem('morse_cs_sprint_enabled', isSprint ? 'true' : 'false');
+            if (isSprint && csCountEl && (!csCountEl.value || csCountEl.value === '5')) {
+                csCountEl.value = '50';
+                safeStorage.setItem('morse_cs_count', '50');
+            }
+        });
+    }
 
     function applySelectedMode(mode) {
         selectedMode = mode;
         safeStorage.setItem('morse_cs_mode', mode);
         csModeChips.forEach(c => c.classList.toggle('active', c.dataset.mode === mode));
 
-        if (contestSetupWrap) contestSetupWrap.style.display = (mode === 'contest') ? 'block' : 'none';
-        if (csCountWrapper) csCountWrapper.style.display = (mode === 'standard') ? 'inline-flex' : 'none';
+        const isContest = (mode === 'contest');
+        if (contestSetupWrap) contestSetupWrap.style.display = isContest ? 'block' : 'none';
+        if (csSprintToggleWrap) csSprintToggleWrap.style.display = isContest ? 'none' : 'block';
+        if (csCountWrapper) csCountWrapper.style.display = isContest ? 'none' : 'inline-flex';
 
         const extraWrapper = document.querySelector('.groups-extra-wrapper');
         if (extraWrapper) {
-            extraWrapper.style.display = (mode === 'contest') ? 'none' : 'block';
+            extraWrapper.style.display = isContest ? 'none' : 'block';
         }
     }
 
@@ -431,13 +452,44 @@
 
     applyRegionPreset(selectedPreset);
 
-    // Мой позывной для контеста
+    function isValidAmateurCallsign(str) {
+        if (!str || typeof str !== 'string') return false;
+        const s = str.trim().toUpperCase();
+        if (/[\s\u0400-\u04FF]/.test(s)) return false;
+        return /^([A-Z]{1,2}\d[A-Z]{1,4}|[0-9][A-Z]\d[A-Z]{1,4})(\/[A-Z0-9]{1,4})?$/i.test(s);
+    }
+
+    // Мой позывной для контеста: автоподстановка из ника (если валидный позывной) либо R9O
     const csContestMyCallEl = document.getElementById('cs-contest-mycall');
     if (csContestMyCallEl) {
-        const savedMyCall = safeStorage.getItem('morse_cs_contest_mycall') || 'R9OLD';
-        csContestMyCallEl.value = savedMyCall;
+        const serverDefault = (csContestMyCallEl.dataset.defaultCall || 'R9O').trim().toUpperCase();
+        let savedMyCall = (safeStorage.getItem('morse_cs_contest_mycall') || '').trim().toUpperCase();
+        if (savedMyCall === 'R9OLD') {
+            savedMyCall = '';
+            safeStorage.removeItem('morse_cs_contest_mycall');
+        }
+        if (savedMyCall && isValidAmateurCallsign(savedMyCall)) {
+            csContestMyCallEl.value = savedMyCall;
+        } else {
+            csContestMyCallEl.value = isValidAmateurCallsign(serverDefault) ? serverDefault : 'R9O';
+        }
         csContestMyCallEl.addEventListener('input', () => {
-            safeStorage.setItem('morse_cs_contest_mycall', csContestMyCallEl.value.trim().toUpperCase());
+            const val = csContestMyCallEl.value.trim().toUpperCase();
+            if (isValidAmateurCallsign(val)) {
+                safeStorage.setItem('morse_cs_contest_mycall', val);
+            }
+        });
+    }
+
+    // Настройка расстройки корреспондентов (QRM / Detune)
+    const csContestDetuneEl = document.getElementById('cs-contest-detune');
+    if (csContestDetuneEl) {
+        const savedDetune = safeStorage.getItem('morse_cs_contest_detune');
+        if (savedDetune !== null) {
+            csContestDetuneEl.checked = (savedDetune === 'true');
+        }
+        csContestDetuneEl.addEventListener('change', () => {
+            safeStorage.setItem('morse_cs_contest_detune', csContestDetuneEl.checked ? 'true' : 'false');
         });
     }
 
@@ -1062,11 +1114,45 @@
         return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
+    function appendContestLogRow(data) {
+        const logBody = document.getElementById('cs-contest-log-body');
+        if (!logBody) return;
+        const emptyRow = document.getElementById('cs-contest-log-empty');
+        if (emptyRow) emptyRow.remove();
+
+        const tr = document.createElement('tr');
+        tr.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        tr.innerHTML = `
+            <td style="padding:6px 8px; color:var(--text-muted);">${String(data.qsoIndex).padStart(3, '0')}</td>
+            <td style="padding:6px 8px; color:var(--text-muted);">${data.timeStr}</td>
+            <td style="padding:6px 8px; font-weight:700;">
+                ${data.isCallCorrect ? `<span style="color:var(--text);">${data.callsign}</span>` : `<span style="color:var(--danger,#ff5555); text-decoration:line-through;">${data.enteredCall}</span> <span style="font-size:11px; color:var(--text-muted);">(${data.callsign})</span>`}
+            </td>
+            <td style="padding:6px 8px; color:var(--text-muted);">${data.sentExchange}</td>
+            <td style="padding:6px 8px;">
+                ${data.isNrCorrect 
+                    ? `<span style="color:var(--ok,#4ade80); font-weight:700;">599 ${data.enteredNr} ✓</span>` 
+                    : `<span style="color:var(--danger,#ff5555); font-weight:700;">599 ${data.enteredNr} ❌ <span style="font-size:11px; font-weight:400; color:var(--text-muted);">(${data.expectedNr})</span></span>`}
+                ${data.note ? `<span class="badge" style="font-size:10px; margin-left:4px; opacity:0.85;">${data.note}</span>` : ''}
+            </td>
+            <td style="padding:6px 8px; text-align:right; font-weight:700; color:${data.qsoXp > 0 ? 'var(--accent)' : 'var(--text-muted)'};">
+                +${data.qsoXp} XP
+            </td>
+        `;
+        if (logBody.firstChild) {
+            logBody.insertBefore(tr, logBody.firstChild);
+        } else {
+            logBody.appendChild(tr);
+        }
+        const logCountEl = document.getElementById('cs-contest-log-count');
+        if (logCountEl) logCountEl.textContent = `${data.qsoIndex} связей`;
+    }
+
     function startContestSession(pool, wpm) {
         abortCurrentSession();
         if (typeof startSessionAudioNoise === 'function') startSessionAudioNoise();
 
-        const myCall = (csContestMyCallEl?.value.trim().toUpperCase()) || 'R9OLD';
+        const myCall = (csContestMyCallEl?.value.trim().toUpperCase()) || 'R9O';
         const baseFreq = parseInt(document.getElementById('cs-tone-freq')?.value, 10) || 600;
 
         contestSession = {
@@ -1078,8 +1164,11 @@
             sentNr: 1,
             startTime: Date.now(),
             contestSeconds: 0,
+            activeAirSeconds: 0,
+            lastUserActivity: Date.now(),
             timerInterval: null,
             state: 'IDLE',
+            actionToken: 0,
             currentCaller: null,
             pool: pool && pool.length ? pool : [...FALLBACK_CALLSIGNS],
             poolIndex: 0,
@@ -1089,6 +1178,9 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+
+        const sessionCounter = document.getElementById('cs-session-counter');
+        if (sessionCounter) sessionCounter.style.display = 'none';
 
         if (paperSessionDisplay) paperSessionDisplay.style.display = 'none';
         if (paperControlsRow) paperControlsRow.style.display = 'none';
@@ -1101,6 +1193,23 @@
         if (contestLiveQsos) contestLiveQsos.textContent = '0';
         if (contestLiveRate) contestLiveRate.textContent = '0';
         if (contestLiveTimer) contestLiveTimer.textContent = '00:00';
+        const liveXpEl = document.getElementById('cs-contest-live-xp');
+        if (liveXpEl) liveXpEl.textContent = '0';
+        const liveRitEl = document.getElementById('cs-contest-live-rit');
+        if (liveRitEl) liveRitEl.textContent = 'RIT: 0 Hz';
+
+        const logBody = document.getElementById('cs-contest-log-body');
+        if (logBody) {
+            logBody.innerHTML = `
+                <tr id="cs-contest-log-empty">
+                    <td colspan="6" class="muted text-center" style="padding:14px; font-style:italic;">
+                        ${(typeof t === 'function' ? t('cs.contest_log_empty') : 'Журнал пуст. Нажмите F1 или Enter для первого вызова CQ.')}
+                    </td>
+                </tr>
+            `;
+        }
+        const logCountEl = document.getElementById('cs-contest-log-count');
+        if (logCountEl) logCountEl.textContent = '0 связей';
 
         if (contestSentNrInput) contestSentNrInput.value = '001';
         if (contestRstInput) contestRstInput.value = '599';
@@ -1121,9 +1230,14 @@
                 const rate = Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600));
                 if (contestLiveRate) contestLiveRate.textContent = rate;
             }
-            if (contestSession.contestSeconds % 10 === 0) {
-                Progress.incrementStat('contestTimeSeconds', 10);
-                Progress.checkAchievements();
+            // Anti-AFK: активность считается только если играет звук или юзер вводил данные < 35 сек назад
+            const isRecentlyActive = isPlaying || (Date.now() - contestSession.lastUserActivity < 35000);
+            if (isRecentlyActive) {
+                contestSession.activeAirSeconds++;
+                if (contestSession.activeAirSeconds % 10 === 0) {
+                    Progress.incrementStat('contestTimeSeconds', 10);
+                    Progress.checkAchievements();
+                }
             }
         }, 1000);
     }
@@ -1131,6 +1245,7 @@
     function stopContestSession() {
         if (!contestSession || !contestSession.active) return;
         contestSession.active = false;
+        contestSession.actionToken++;
         if (contestSession.timerInterval) {
             clearInterval(contestSession.timerInterval);
             contestSession.timerInterval = null;
@@ -1145,6 +1260,9 @@
 
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
+
+        const sessionCounter = document.getElementById('cs-session-counter');
+        if (sessionCounter) sessionCounter.style.display = 'block';
 
         const stdGrid = document.getElementById('cs-standard-stat-grid');
         if (stdGrid) stdGrid.style.display = 'none';
@@ -1162,6 +1280,8 @@
                 : 0;
             document.getElementById('cs-contest-res-rate').textContent = rate;
             document.getElementById('cs-contest-res-time').textContent = formatTimeMMSS(contestSession.contestSeconds);
+            const resXp = document.getElementById('cs-contest-res-xp');
+            if (resXp) resXp.textContent = contestSession.xpEarned;
         }
 
         document.getElementById('result-accuracy').textContent = '100%';
@@ -1182,127 +1302,251 @@
 
     async function contestSendCQ() {
         if (!contestSession || !contestSession.active) return;
+        if (contestSession.state === 'SENDING_CQ' || contestSession.state === 'CALLER_CALLING') {
+            return; // Spam prevention
+        }
+        contestSession.lastUserActivity = Date.now();
+        const token = ++contestSession.actionToken;
         contestSession.state = 'SENDING_CQ';
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `CQ TEST ${contestSession.myCall}`;
         await playContestMorse(`CQ TEST ${contestSession.myCall}`);
-        if (!contestSession || !contestSession.active) return;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
-        await new Promise(r => setTimeout(r, 400));
-        if (!contestSession || !contestSession.active) return;
+        await new Promise(r => setTimeout(r, 450));
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         const callerItem = contestSession.pool[contestSession.poolIndex % contestSession.pool.length];
         contestSession.poolIndex++;
         const callsign = (callerItem && callerItem.callsign) ? callerItem.callsign : 'UA3XYZ';
-        const callerFreq = contestSession.baseFreq + (Math.floor(Math.random() * 160) - 80);
-        const callerWpm = Math.max(12, contestSession.wpm + (Math.floor(Math.random() * 7) - 3));
-        const callerNr = String(Math.floor(Math.random() * 350) + 1).padStart(3, '0');
 
-        contestSession.currentCaller = { callsign, nr: callerNr, freq: callerFreq, wpm: callerWpm };
+        // Тонкая расстройка частоты (±40 Гц) и микро-вариации скорости корреспондента
+        let callerFreq = contestSession.baseFreq;
+        let callerWpm = contestSession.wpm;
+        let detuneHz = 0;
+        const allowDetune = !csContestDetuneEl || csContestDetuneEl.checked;
+        if (allowDetune) {
+            detuneHz = Math.floor(Math.random() * 81) - 40; // ±40 Hz
+            callerFreq = Math.max(300, Math.min(1200, contestSession.baseFreq + detuneHz));
+            const wpmDelta = Math.floor(Math.random() * 5) - 2; // ±2 WPM
+            callerWpm = Math.max(12, Math.min(45, contestSession.wpm + wpmDelta));
+        }
+        const liveRitEl = document.getElementById('cs-contest-live-rit');
+        if (liveRitEl) {
+            liveRitEl.textContent = allowDetune 
+                ? `RIT: ${detuneHz >= 0 ? '+' : ''}${detuneHz} Hz` 
+                : 'RIT: 0 Hz';
+        }
+
+        const callerNr = String(Math.floor(Math.random() * 350) + 1).padStart(3, '0');
+        contestSession.currentCaller = {
+            callsign,
+            nr: callerNr,
+            freq: callerFreq,
+            wpm: callerWpm,
+            detuneHz,
+            askedRepeat: false
+        };
         contestSession.state = 'CALLER_CALLING';
 
         feedbackEl.textContent = 'Вам отвечает станция...';
         await playContestMorse(callsign, { freq: callerFreq, wpm: callerWpm, isCaller: true });
-        if (!contestSession || !contestSession.active) return;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         contestSession.state = 'WAITING_EXCHANGE';
         feedbackEl.textContent = 'Примите позывной и нажмите Enter (F2)';
-        if (contestCallInput) contestCallInput.focus();
+        if (contestCallInput) {
+            contestCallInput.focus();
+            contestCallInput.select?.();
+        }
     }
 
     async function contestSendExchange() {
-        if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
-        const enteredCall = contestCallInput.value.trim().toUpperCase();
+        if (!contestSession || !contestSession.active) return;
+        contestSession.lastUserActivity = Date.now();
+        if (!contestSession.currentCaller) {
+            contestSendCQ();
+            return;
+        }
+        if (contestSession.state === 'SENDING_EXCH' || contestSession.state === 'CALLER_ACK') return;
+
+        const enteredCall = (contestCallInput?.value || '').trim().toUpperCase();
         if (!enteredCall) {
             contestSendCQ();
             return;
         }
 
+        const token = ++contestSession.actionToken;
         contestSession.state = 'SENDING_EXCH';
         const nrStr = String(contestSession.sentNr).padStart(3, '0');
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `${enteredCall} 5NN ${nrStr}`;
         await playContestMorse(`${enteredCall} 5NN ${nrStr}`);
-        if (!contestSession || !contestSession.active) return;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         await new Promise(r => setTimeout(r, 350));
-        if (!contestSession || !contestSession.active) return;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         const caller = contestSession.currentCaller;
         if (enteredCall === caller.callsign.toUpperCase()) {
             contestSession.state = 'CALLER_ACK';
             feedbackEl.textContent = `${caller.callsign} передаёт контрольный номер...`;
             await playContestMorse(`R 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
-            if (!contestSession || !contestSession.active) return;
+            if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
             contestSession.state = 'WAITING_TU';
             feedbackEl.textContent = 'Введите номер корреспондента и нажмите Enter (F3)';
-            if (contestRecvNrInput) contestRecvNrInput.focus();
+            if (contestRecvNrInput) {
+                contestRecvNrInput.focus();
+                contestRecvNrInput.select?.();
+            }
         } else {
             feedbackEl.className = 'feedback show bad';
             feedbackEl.textContent = 'Корреспондент переспрашивает (?)';
             await playContestMorse('?', { freq: caller.freq, wpm: caller.wpm, isCaller: true });
-            if (!contestSession || !contestSession.active) return;
+            if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             contestSession.state = 'WAITING_EXCHANGE';
-            if (contestCallInput) contestCallInput.focus();
+            if (contestCallInput) {
+                contestCallInput.focus();
+                contestCallInput.select?.();
+            }
         }
     }
 
     async function contestSendTU() {
         if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
-        const caller = contestSession.currentCaller;
+        if (contestSession.state === 'SENDING_TU') return;
+        contestSession.lastUserActivity = Date.now();
 
+        const caller = contestSession.currentCaller;
+        const enteredCall = (contestCallInput?.value || '').trim().toUpperCase();
+        const enteredNr = (contestRecvNrInput?.value || '').trim();
+
+        const token = ++contestSession.actionToken;
         contestSession.state = 'SENDING_TU';
         feedbackEl.className = 'feedback show ok';
         feedbackEl.textContent = `TU ${contestSession.myCall} CQ`;
         await playContestMorse(`TU ${contestSession.myCall} CQ`);
-        if (!contestSession || !contestSession.active) return;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+
+        const isCallCorrect = (enteredCall === caller.callsign.toUpperCase());
+        const expectedNrInt = parseInt(caller.nr, 10);
+        const enteredNrInt = parseInt(enteredNr, 10);
+        const isNrCorrect = !isNaN(enteredNrInt) && (enteredNrInt === expectedNrInt);
+
+        const speedMult = speedXpFactor(contestSession.wpm);
+        let qsoXp = 0;
+        let note = '';
+
+        if (isCallCorrect && isNrCorrect) {
+            let base = Math.round(25 * speedMult);
+            if (caller.askedRepeat) {
+                qsoXp = Math.max(1, Math.round(base * 0.5));
+                note = 'повтор (-50%)';
+            } else {
+                qsoXp = base;
+            }
+        } else if (isCallCorrect && !isNrCorrect) {
+            // За верный позывной даем по 1 XP за символ, если номер не принят
+            qsoXp = caller.callsign.length;
+            note = 'ошибка в номере';
+        } else {
+            qsoXp = 0;
+            note = 'ошибка в позывном';
+        }
 
         contestSession.qsos++;
+        const qsoIndex = contestSession.qsos;
+        const sentNrStr = String(contestSession.sentNr).padStart(3, '0');
         contestSession.sentNr++;
-        const qsoXp = Math.round(25 * (contestSession.wpm / 15));
         contestSession.xpEarned += qsoXp;
-        Progress.addXp(qsoXp);
+        if (qsoXp > 0) {
+            Progress.addXp(qsoXp);
+        }
         Progress.incrementStat('contestQsos', 1);
         Progress.checkAchievements();
 
+        appendContestLogRow({
+            qsoIndex,
+            timeStr: formatTimeMMSS(contestSession.contestSeconds),
+            callsign: caller.callsign,
+            enteredCall: enteredCall || '—',
+            sentExchange: `599 ${sentNrStr}`,
+            expectedNr: caller.nr,
+            enteredNr: enteredNr || '—',
+            isCallCorrect,
+            isNrCorrect,
+            qsoXp,
+            note
+        });
+
         if (contestLiveQsos) contestLiveQsos.textContent = contestSession.qsos;
+        const rate = contestSession.contestSeconds > 0
+            ? Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600))
+            : 0;
+        if (contestLiveRate) contestLiveRate.textContent = rate;
+        const liveXpEl = document.getElementById('cs-contest-live-xp');
+        if (liveXpEl) liveXpEl.textContent = contestSession.xpEarned;
         if (contestSentNrInput) contestSentNrInput.value = String(contestSession.sentNr).padStart(3, '0');
+
         if (contestCallInput) contestCallInput.value = '';
         if (contestRecvNrInput) contestRecvNrInput.value = '';
 
-        feedbackEl.textContent = `✓ Связь с ${caller.callsign} зачтена (+${qsoXp} XP)!`;
+        // Фокус СРАЗУ переносим в поле позывного для следующей связи
+        if (contestCallInput) contestCallInput.focus();
+
+        const feedbackColor = (isCallCorrect && isNrCorrect) ? 'ok' : (qsoXp > 0 ? 'ok' : 'bad');
+        feedbackEl.className = `feedback show ${feedbackColor}`;
+        feedbackEl.textContent = isCallCorrect && isNrCorrect
+            ? `✓ Связь с ${caller.callsign} зачтена (+${qsoXp} XP)!`
+            : `⚠ Связь с ${caller.callsign}: ${note} (+${qsoXp} XP)`;
+
+        contestSession.currentCaller = null;
+        contestSession.state = 'IDLE';
 
         setTimeout(() => {
-            if (contestSession && contestSession.active) {
+            if (contestSession && contestSession.active && contestSession.state === 'IDLE' && contestSession.actionToken === token) {
                 contestSendCQ();
             }
-        }, 1000);
+        }, 900);
     }
 
     async function contestSendMyCall() {
         if (!contestSession || !contestSession.active) return;
+        contestSession.lastUserActivity = Date.now();
         await playContestMorse(contestSession.myCall);
     }
 
     async function contestSendHisCall() {
         if (!contestSession || !contestSession.active) return;
-        const c = contestCallInput.value.trim().toUpperCase() || (contestSession.currentCaller?.callsign);
+        contestSession.lastUserActivity = Date.now();
+        const c = contestCallInput?.value.trim().toUpperCase() || (contestSession.currentCaller?.callsign);
         if (c) await playContestMorse(c);
     }
 
     async function contestSendRepeat() {
         if (!contestSession || !contestSession.active || !contestSession.currentCaller) return;
+        contestSession.lastUserActivity = Date.now();
+        contestSession.currentCaller.askedRepeat = true;
+        const token = ++contestSession.actionToken;
+        feedbackEl.className = 'feedback show';
+        feedbackEl.textContent = 'Запрос повтора (?)';
         await playContestMorse('?');
-        const caller = contestSession.currentCaller;
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+
         await new Promise(r => setTimeout(r, 400));
-        if (contestSession && contestSession.active) {
-            await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
-        }
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+
+        const caller = contestSession.currentCaller;
+        feedbackEl.textContent = `${caller.callsign} повторяет контрольный номер...`;
+        await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+        if (contestRecvNrInput) contestRecvNrInput.focus();
     }
 
     async function contestSendMyExchange() {
         if (!contestSession || !contestSession.active) return;
+        contestSession.lastUserActivity = Date.now();
         const nrStr = String(contestSession.sentNr).padStart(3, '0');
         await playContestMorse(`5NN ${nrStr}`);
     }
@@ -1315,7 +1559,23 @@
     document.getElementById('cs-key-f6')?.addEventListener('click', () => contestSendRepeat());
     document.getElementById('cs-key-f7')?.addEventListener('click', () => contestSendMyExchange());
     document.getElementById('cs-key-esc')?.addEventListener('click', () => {
+        if (contestSession && contestSession.active) {
+            contestSession.actionToken++;
+            contestSession.state = 'IDLE';
+            feedbackEl.className = 'feedback show';
+            feedbackEl.textContent = 'Приём/передача прерваны (Esc). Нажмите F1 или Enter для вызова CQ.';
+        }
         if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+    });
+    document.getElementById('cs-contest-finish-btn')?.addEventListener('click', () => {
+        stopContestSession();
+    });
+
+    contestCallInput?.addEventListener('input', () => {
+        if (contestSession) contestSession.lastUserActivity = Date.now();
+    });
+    contestRecvNrInput?.addEventListener('input', () => {
+        if (contestSession) contestSession.lastUserActivity = Date.now();
     });
 
     async function startSessionWithItems(retryItems) {
@@ -1343,6 +1603,8 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        const sessionCounter = document.getElementById('cs-session-counter');
+        if (sessionCounter) sessionCounter.style.display = 'block';
         if (contestDisplay) contestDisplay.style.display = 'none';
         csTotalEl.textContent = retryItems.length;
         csIndexEl.textContent = 1;
@@ -1386,9 +1648,10 @@
         const isBufferMode = !isPaperMode && bufferCheckbox ? bufferCheckbox.checked : false;
         const paperGap = paperGapSlider ? parseFloat(paperGapSlider.value) : 3.0;
         
-        const isRufz = (selectedMode === 'rufz');
+        const isSprint = (selectedMode === 'rufz') || (selectedMode === 'standard' && !!csSprintEnabledEl?.checked);
+        const isRufz = isSprint;
         const isContest = (selectedMode === 'contest');
-        const count = isRufz ? 50 : (isContest ? 30 : parseInt(document.getElementById('cs-count').value, 10));
+        const count = isContest ? 30 : parseInt(document.getElementById('cs-count')?.value || '50', 10);
 
         const audioSettings = (typeof AudioSettings !== 'undefined') ? AudioSettings.load() : null;
         const readySignalEnabled = !!(readySignalEl ? readySignalEl.checked : (audioSettings && audioSettings.readySignal));
@@ -1437,6 +1700,8 @@
         setupPanel.style.display = 'none';
         resultPanel.style.display = 'none';
         sessionPanel.style.display = 'block';
+        const sessionCounter = document.getElementById('cs-session-counter');
+        if (sessionCounter) sessionCounter.style.display = 'block';
         if (contestDisplay) contestDisplay.style.display = 'none';
         csTotalEl.textContent = items.length;
         csIndexEl.textContent = 1;
@@ -1844,6 +2109,7 @@
     // а также завершение активной сессии по Escape и горячие клавиши контеста F1..F7
     window.addEventListener('keydown', (e) => {
         if (contestSession && contestSession.active) {
+            contestSession.lastUserActivity = Date.now();
             if (e.key === 'F1') { e.preventDefault(); contestSendCQ(); return; }
             if (e.key === 'F2') { e.preventDefault(); contestSendExchange(); return; }
             if (e.key === 'F3') { e.preventDefault(); contestSendTU(); return; }
@@ -1853,7 +2119,12 @@
             if (e.key === 'F7') { e.preventDefault(); contestSendMyExchange(); return; }
             if (e.key === 'Escape') {
                 e.preventDefault();
+                contestSession.actionToken++;
+                contestSession.state = 'IDLE';
+                feedbackEl.className = 'feedback show';
+                feedbackEl.textContent = 'Приём/передача прерваны (Esc). Нажмите F1 или Enter для вызова CQ.';
                 if (currentAudio) { currentAudio.stop(); currentAudio = null; isPlaying = false; }
+                if (contestCallInput) contestCallInput.focus();
                 return;
             }
             if (e.key === 'Tab' || e.key === ' ') {
@@ -1876,7 +2147,13 @@
                 } else if (document.activeElement === contestRecvNrInput) {
                     contestSendTU();
                 } else {
-                    contestSendCQ();
+                    if (!contestCallInput.value.trim()) {
+                        contestSendCQ();
+                    } else if (!contestRecvNrInput.value.trim()) {
+                        contestSendExchange();
+                    } else {
+                        contestSendTU();
+                    }
                 }
                 return;
             }

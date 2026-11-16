@@ -1,8 +1,25 @@
 <?php
 require_once __DIR__ . '/includes/i18n.php';
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/includes/auth.php';
+
 $pageTitle = t('cs.title');
 $activePage = 'callsigns';
 $pageScript = 'callsigns.js';
+
+$currentUser = !empty($pdo) ? current_user($pdo) : null;
+$defaultCall = 'R9O';
+if (!empty($currentUser['name'])) {
+    $cand = trim(strtoupper($currentUser['name']));
+    // Проверяем: валидный радиолюбительский позывной:
+    // Префикс (1-2 буквы или цифра+буква), цифра района, суффикс (1-4 буквы)
+    // Примеры: R9O, R9OLD, UA3AAA, K1N, 4X4DK, 9A1A.
+    // Без пробелов и кириллицы
+    if (preg_match('/^([A-Z]{1,2}\d[A-Z]{1,4}|[0-9][A-Z]\d[A-Z]{1,4})(\/[A-Z0-9]{1,4})?$/i', $cand)) {
+        $defaultCall = $cand;
+    }
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 
@@ -14,13 +31,22 @@ include __DIR__ . '/includes/header.php';
 <div class="card mt-3" id="setup-panel">
     <h3><?= t('cs.settings') ?></h3>
 
-    <!-- Выбор режима тренировки -->
+    <!-- Выбор режима: 2 основных режима -->
     <div class="mt-2">
         <div class="muted" style="font-size:12px; margin-bottom:6px;"><?= t('cs.mode_title') ?></div>
         <div class="chip-row flex-wrap" id="cs-mode-chips" style="gap:8px;">
             <div class="chip active" data-mode="standard"><?= mw_icon('headphones', 14) ?> <?= t('cs.mode_standard') ?></div>
-            <div class="chip" data-mode="rufz"><?= mw_icon('zap', 14) ?> <?= t('cs.mode_rufz') ?></div>
             <div class="chip" data-mode="contest"><?= mw_icon('radio', 14) ?> <?= t('cs.mode_contest') ?></div>
+        </div>
+    </div>
+
+    <!-- Режим Спринта (адаптивная скорость RufzXP) внутри Тренировки позывных -->
+    <div id="cs-sprint-toggle-wrap" class="subcard mt-2" style="border-left:3px solid var(--accent); padding:10px 14px;">
+        <label class="chip" style="gap:8px; font-weight:700; cursor:pointer;">
+            <input type="checkbox" id="cs-sprint-enabled"> <?= mw_icon('zap', 14) ?> <?= t('cs.mode_sprint_toggle') ?>
+        </label>
+        <div class="muted mt-1" id="cs-sprint-desc" style="font-size:12px; line-height:1.4;">
+            <?= t('cs.mode_sprint_desc') ?>
         </div>
     </div>
 
@@ -57,11 +83,17 @@ include __DIR__ . '/includes/header.php';
         <div class="flex-wrap gap-3" style="align-items:center;">
             <label style="font-size:13px; font-weight:700;">
                 <?= t('cs.contest_my_call') ?>
-                <input type="text" id="cs-contest-mycall" class="answer-input mono" style="width:120px; text-transform:uppercase; margin-left:6px; padding:4px 8px; font-size:14px;" value="R9OLD" maxlength="10">
+                <input type="text" id="cs-contest-mycall" class="answer-input mono" style="width:130px; text-transform:uppercase; margin-left:6px; padding:4px 8px; font-size:14px;" value="<?= htmlspecialchars($defaultCall) ?>" data-default-call="<?= htmlspecialchars($defaultCall) ?>" maxlength="10">
             </label>
             <div class="muted" style="font-size:12px;">
-                Формат: RST <b>599</b> (авто) + порядковый номер QSO
+                Формат обмена: RST <b>599</b> (авто) + порядковый номер QSO
             </div>
+        </div>
+        <div class="mt-2" style="border-top:1px solid rgba(255,255,255,0.06); padding-top:8px;">
+            <label class="chip" style="gap:8px; font-size:12px; cursor:pointer;">
+                <input type="checkbox" id="cs-contest-detune" checked> <?= t('cs.contest_detune_label') ?>
+            </label>
+            <span class="muted" style="font-size:11px; margin-left:8px;"><?= t('cs.contest_detune_hint') ?></span>
         </div>
     </div>
 
@@ -74,10 +106,10 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <div class="flex-wrap gap-2 mt-2" style="align-items:center;">
+    <div class="flex-wrap gap-2 mt-2" style="align-items:center;" id="cs-count-wrapper">
         <label class="chip"><?= t('cs.per_session') ?>
             <select id="cs-count" style="background:transparent;border:none;color:var(--text);margin-left:6px;">
-                <option value="5" selected>5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="50">50</option>
+                <option value="5">5</option><option value="10">10</option><option value="15">15</option><option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="50" selected>50</option><option value="100">100</option><option value="999">∞</option>
             </select>
         </label>
     </div>
@@ -206,8 +238,8 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <div class="card mt-3" id="session-panel" style="display:none;">
-    <div class="flex-between flex-wrap gap-1">
-        <div class="muted mono" style="white-space:nowrap;"><?= t('cs.callsign_label') ?> <span id="cs-index">1</span> / <span id="cs-total">5</span></div>
+    <div class="flex-between flex-wrap gap-1" id="cs-session-header">
+        <div class="muted mono" id="cs-session-counter" style="white-space:nowrap;"><?= t('cs.callsign_label') ?> <span id="cs-index">1</span> / <span id="cs-total">5</span></div>
         <div class="lamp-row">
             <div class="morse-lamp" id="cs-lamp"></div>
             <button class="btn btn-sm" id="cs-signal-toggle"></button>
@@ -216,16 +248,69 @@ include __DIR__ . '/includes/header.php';
     </div>
     <div class="signal-line mt-2" id="cs-signal"></div>
 
-    <!-- Виджет контеста: статусная строка и поля ввода в стиле Morse Runner -->
+    <style>
+        .cs-hk-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 10px;
+            align-items: stretch;
+            margin: 12px 0;
+        }
+        .cs-hk-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--surface-2, rgba(255,255,255,0.06));
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+        .cs-hk-btn:hover {
+            background: var(--surface-3, rgba(255,255,255,0.14));
+            border-color: var(--accent);
+            color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .cs-hk-btn:active {
+            transform: translateY(0);
+        }
+        .cs-hk-btn .btn-kbd {
+            background: rgba(255,255,255,0.12);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .cs-hk-desc {
+            opacity: 0.75;
+            font-weight: 400;
+            font-size: 11px;
+            margin-left: 2px;
+        }
+    </style>
+
+    <!-- Виджет контеста: статусная строка, поля ввода и аппаратный журнал в стиле соревнований -->
     <div id="cs-contest-session-display" style="display:none; margin-top:10px;">
         <div class="flex-between flex-wrap gap-2 subcard" style="align-items:center; padding:10px 14px;">
-            <div class="mono" style="font-size:14px;">
-                <b>CQ DE</b> <span id="cs-contest-live-mycall" style="color:var(--accent); font-weight:700;">R9OLD</span>
+            <div class="mono" style="font-size:14px; display:flex; align-items:center; gap:8px;">
+                <span class="badge" style="background:var(--accent); color:#000; font-weight:700; font-size:11px; padding:2px 7px; border-radius:4px;">CONTEST</span>
+                <b>CQ DE</b> <span id="cs-contest-live-mycall" style="color:var(--accent); font-weight:700;">R9O</span>
             </div>
-            <div class="flex gap-3 mono" style="font-size:13px;">
+            <div class="flex flex-wrap gap-3 mono" style="font-size:13px; align-items:center;">
                 <span>QSO: <b id="cs-contest-live-qsos">0</b></span>
                 <span>Rate: <b id="cs-contest-live-rate">0</b>/h</span>
                 <span>⏱ <b id="cs-contest-live-timer">00:00</b></span>
+                <span>XP: <b id="cs-contest-live-xp" style="color:var(--accent);">0</b></span>
+                <span id="cs-contest-live-rit" class="muted" style="font-size:12px; background:rgba(255,255,255,0.06); padding:2px 6px; border-radius:4px;">RIT: 0 Hz</span>
             </div>
         </div>
 
@@ -233,22 +318,68 @@ include __DIR__ . '/includes/header.php';
             <input type="text" id="cs-contest-call" class="answer-input mono" placeholder="<?= htmlspecialchars(t('cs.contest_call_placeholder')) ?>" style="flex:2; min-width:140px; text-transform:uppercase; font-size:18px; font-weight:700;" autocomplete="off">
             <input type="text" id="cs-contest-rst" class="answer-input mono text-center" value="599" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Рапорт 599 ставится автоматически">
             <input type="text" id="cs-contest-sent-nr" class="answer-input mono text-center" value="001" style="width:70px; opacity:0.85; font-size:16px; cursor:default;" readonly title="Ваш исходящий номер">
-            <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:100px; font-size:18px; font-weight:700;" autocomplete="off">
+            <input type="text" id="cs-contest-recv-nr" class="answer-input mono text-center" placeholder="<?= htmlspecialchars(t('cs.contest_nr_placeholder')) ?>" style="width:120px; font-size:18px; font-weight:700;" autocomplete="off">
         </div>
 
         <!-- Горячие клавиши контеста -->
-        <div class="chip-row flex-wrap mt-2" style="gap:6px; font-size:12px;">
-            <button type="button" class="chip chip-sm" id="cs-key-f1" title="F1">F1 CQ</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f2" title="F2">F2 5NN</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f3" title="F3">F3 TU</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f4" title="F4">F4 My</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f5" title="F5">F5 His</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f6" title="F6">F6 ?</button>
-            <button type="button" class="chip chip-sm" id="cs-key-f7" title="F7">F7 AGN</button>
-            <button type="button" class="chip chip-sm" id="cs-key-esc" title="Esc">Esc Stop</button>
+        <div class="cs-hk-grid mt-2" id="cs-contest-hotkeys-toolbar">
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f1" title="F1 — Общий вызов CQ"><kbd class="btn-kbd">F1</kbd> <span>CQ</span> <span class="cs-hk-desc">(Вызов)</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f2" title="F2 — Контрольный номер (Exchange): рапорт 599 и порядковый номер"><kbd class="btn-kbd">F2</kbd> <span>Номер (Exch)</span> <span class="cs-hk-desc">(599 №)</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f3" title="F3 — Завершить и зачесть связь (TU — Thank You)"><kbd class="btn-kbd">F3</kbd> <span>Зачёт (TU)</span> <span class="cs-hk-desc">(Спасибо)</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f4" title="F4 — Передать свой позывной"><kbd class="btn-kbd">F4</kbd> <span>Мой call</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f5" title="F5 — Передать позывной корреспондента"><kbd class="btn-kbd">F5</kbd> <span>Его call</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f6" title="F6 — Запросить повтор номера (?)"><kbd class="btn-kbd">F6</kbd> <span>?</span> <span class="cs-hk-desc">(Повтор AGN)</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-f7" title="F7 — Повторить свой контрольный номер"><kbd class="btn-kbd">F7</kbd> <span>Повтор 599 №</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-enter" title="Enter — Умный авто-шаг (ESM: вызов → номер → зачёт TU)"><kbd class="btn-kbd">Enter</kbd> <span>Авто-шаг (ESM)</span></button>
+            <button type="button" class="btn btn-sm cs-hk-btn" id="cs-key-esc" title="Esc — Прервать воспроизведение звука"><kbd class="btn-kbd">Esc</kbd> <span>Стоп звук</span></button>
         </div>
-        <div class="muted mt-1" style="font-size:11px;">
-            <?= t('cs.contest_help') ?>
+        <div class="subcard mt-2" style="font-size:12px; line-height:1.5; padding:10px 14px; background:rgba(0,0,0,0.2);">
+            <div style="font-weight:700; color:var(--accent); margin-bottom:4px;">💡 Пояснения и алгоритм соревнований (ESM — Enter Sends Message):</div>
+            <div>• <b>Exch (Exchange)</b> — контрольный номер (рапорт RST 599 + порядковый номер связи).</div>
+            <div>• <b>TU (Thank You)</b> — благодарность за связь, фиксация QSO в журнале и начисление очков.</div>
+            <div class="mt-1"><b>Быстрый цикл связи:</b></div>
+            <div><b>1.</b> <kbd>Enter</kbd> или <kbd>F1</kbd> — общий вызов (<b>CQ</b>).</div>
+            <div><b>2.</b> Принимаем позывной корреспондента, пишем в первое поле.</div>
+            <div><b>3.</b> Нажимаем <kbd>Enter</kbd> (или <kbd>F2</kbd>) — передаём <b>Exch</b> (599 и наш порядковый номер).</div>
+            <div><b>4.</b> Корреспондент передаёт свой номер. Вводим его во второе поле. Если не расслышали — <kbd>F6</kbd> (повтор <b>?</b>).</div>
+            <div><b>5.</b> Нажимаем <kbd>Enter</kbd> (или <kbd>F3</kbd>) — <b>TU</b> (зачёт связи в аппаратный журнал, начисление XP). Фокус сразу вернётся в поле позывного.</div>
+            <div class="muted mt-1" style="font-size:11px;">Клавиши <kbd>Space</kbd> / <kbd>Tab</kbd> быстро переключают фокус между позывным и номером. <kbd>Esc</kbd> глушит звук.</div>
+        </div>
+
+        <!-- Аппаратный журнал контеста (Live QSO Log) -->
+        <div id="cs-contest-log-wrap" class="mt-3 subcard" style="padding:12px; border-left:3px solid var(--accent);">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:6px; margin-bottom:8px;">
+                <span style="font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:0.5px; color:var(--accent);">
+                    <?= mw_icon('list', 14) ?> <?= t('cs.contest_log_title') ?>
+                </span>
+                <span class="muted" style="font-size:12px;" id="cs-contest-log-count">0 связей</span>
+            </div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; font-family:var(--font-mono); font-size:13px; border-collapse:collapse;" id="cs-contest-log-table">
+                    <thead>
+                        <tr style="text-align:left; border-bottom:1px solid rgba(255,255,255,0.1); color:var(--text-muted); font-size:11px; text-transform:uppercase;">
+                            <th style="padding:4px 8px; width:45px;">#</th>
+                            <th style="padding:4px 8px; width:70px;">Время</th>
+                            <th style="padding:4px 8px;">Позывной</th>
+                            <th style="padding:4px 8px; width:90px;">RST/Отпр</th>
+                            <th style="padding:4px 8px; width:150px;">RST/Принят</th>
+                            <th style="padding:4px 8px; width:120px; text-align:right;">Очки (XP)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cs-contest-log-body">
+                        <tr id="cs-contest-log-empty">
+                            <td colspan="6" class="muted text-center" style="padding:14px; font-style:italic;">
+                                <?= t('cs.contest_log_empty') ?>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="btn-row mt-3">
+                <button class="btn btn-sm btn-primary" id="cs-contest-finish-btn" type="button">
+                    <?= mw_icon('check-circle', 14) ?> <?= t('cs.contest_finish_btn') ?>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -284,15 +415,15 @@ include __DIR__ . '/includes/header.php';
         <div class="stat"><span class="value" id="result-xp">0</span><span class="label"><?= t('cs.result_xp') ?></span></div>
     </div>
 
-    <!-- RufzXP Результаты и график скорости -->
+    <!-- Результаты Спринта позывных и график скорости -->
     <div id="cs-rufz-result-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:16px;">
-        <h4 class="mt-0" style="color:var(--accent);">RufzXP Спринт (HST)</h4>
+        <h4 class="mt-0" style="color:var(--accent);">Спринт позывных</h4>
         <div class="grid grid-3 mt-2">
             <div class="stat"><span class="value" id="cs-rufz-score">0</span><span class="label"><?= t('cs.rufz_hst_score') ?></span></div>
             <div class="stat"><span class="value" id="cs-rufz-peak">0</span><span class="label"><?= t('cs.rufz_peak_wpm') ?></span></div>
             <div class="stat"><span class="value" id="cs-rufz-avg">0</span><span class="label"><?= t('cs.rufz_avg_wpm') ?></span></div>
         </div>
-        <div class="muted mt-2" style="font-size:12px;">Динамика скорости WPM по 50 позывным:</div>
+        <div class="muted mt-2" style="font-size:12px;">Динамика скорости WPM по позывным сессии:</div>
         <div id="cs-rufz-chart-wrap" class="mt-2" style="width:100%; height:140px; background:var(--surface); border:1px solid rgba(255,255,255,0.08); border-radius:6px; overflow:hidden;">
             <svg id="cs-rufz-svg" width="100%" height="100%" viewBox="0 0 500 140" style="display:block;"></svg>
         </div>
@@ -300,11 +431,14 @@ include __DIR__ . '/includes/header.php';
 
     <!-- Контест результаты -->
     <div id="cs-contest-result-block" class="card mt-2" style="display:none; background:var(--surface-2); padding:16px;">
-        <h4 class="mt-0" style="color:var(--accent);">Итоги контест-сессии</h4>
+        <h4 class="mt-0" style="color:var(--accent);">Итоги соревнований (Contest mode)</h4>
         <div class="grid grid-3 mt-2">
             <div class="stat"><span class="value" id="cs-contest-res-qsos">0</span><span class="label"><?= t('cs.contest_qsos') ?></span></div>
             <div class="stat"><span class="value" id="cs-contest-res-rate">0</span><span class="label"><?= t('cs.contest_rate') ?></span></div>
             <div class="stat"><span class="value" id="cs-contest-res-time">00:00</span><span class="label"><?= t('cs.contest_time') ?></span></div>
+        </div>
+        <div class="mt-2 text-center" style="font-size:15px; font-weight:700; color:var(--accent);">
+            Начислено опыта: +<span id="cs-contest-res-xp">0</span> XP
         </div>
     </div>
 
