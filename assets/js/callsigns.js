@@ -1798,105 +1798,114 @@
         setActiveKeyLight('cs-key-f3', false);
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
-        const isCallCorrect = (enteredCall === caller.callsign.toUpperCase());
-        const expectedNrInt = parseInt(caller.nr, 10);
-        const enteredNrInt = normalizeContestNumber(enteredNr);
-        const isNrCorrect = !isNaN(enteredNrInt) && (enteredNrInt === expectedNrInt);
+        try {
+            const isCallCorrect = (enteredCall === caller.callsign.toUpperCase());
+            const expectedNrInt = parseInt(caller.nr, 10);
+            const enteredNrInt = normalizeContestNumber(enteredNr);
+            const isNrCorrect = !isNaN(enteredNrInt) && (enteredNrInt === expectedNrInt);
 
-        const speedMult = speedXpFactor(contestSession.wpm);
-        let qsoXp = 0;
-        let note = '';
+            const speedMult = speedXpFactor(contestSession.wpm);
+            let qsoXp = 0;
+            let note = '';
 
-        const callUpper = caller.callsign.toUpperCase();
-        const isDupe = contestSession.workedCalls?.has(callUpper);
+            contestSession.qsos++;
+            const qsoIndex = contestSession.qsos;
+            const sentNrStr = String(contestSession.sentNr).padStart(3, '0');
+            contestSession.sentNr++;
 
-        if (isDupe) {
-            qsoXp = 0;
-            note = 'DUPE (повтор, 0 XP)';
-        } else if (isCallCorrect && isNrCorrect) {
-            let base = Math.round(25 * speedMult);
-            if (caller.askedRepeat) {
-                qsoXp = Math.max(1, Math.round(base * 0.5));
-                note = 'повтор (-50%)';
+            const callUpper = caller.callsign.toUpperCase();
+            const isDupe = contestSession.workedCalls?.has(callUpper);
+
+            if (isDupe) {
+                qsoXp = 0;
+                note = 'DUPE (повтор, 0 XP)';
+            } else if (isCallCorrect && isNrCorrect) {
+                let base = Math.round(25 * speedMult);
+                if (caller.askedRepeat) {
+                    qsoXp = Math.max(1, Math.round(base * 0.5));
+                    note = 'повтор (-50%)';
+                } else {
+                    qsoXp = base;
+                }
+                contestSession.workedCalls?.set(callUpper, {
+                    qsoIndex,
+                    timeStr: formatTimeMMSS(contestSession.contestSeconds)
+                });
+            } else if (isCallCorrect && !isNrCorrect) {
+                // За верный позывной даем по 1 XP за символ, если номер не принят
+                qsoXp = caller.callsign.length;
+                note = 'ошибка в номере';
+                contestSession.workedCalls?.set(callUpper, {
+                    qsoIndex,
+                    timeStr: formatTimeMMSS(contestSession.contestSeconds)
+                });
             } else {
-                qsoXp = base;
+                qsoXp = 0;
+                note = 'ошибка в позывном';
             }
-            contestSession.workedCalls?.set(callUpper, {
-                qsoIndex,
-                timeStr: formatTimeMMSS(contestSession.contestSeconds)
-            });
-        } else if (isCallCorrect && !isNrCorrect) {
-            // За верный позывной даем по 1 XP за символ, если номер не принят
-            qsoXp = caller.callsign.length;
-            note = 'ошибка в номере';
-            contestSession.workedCalls?.set(callUpper, {
-                qsoIndex,
-                timeStr: formatTimeMMSS(contestSession.contestSeconds)
-            });
-        } else {
-            qsoXp = 0;
-            note = 'ошибка в позывном';
-        }
 
-        contestSession.qsos++;
-        const qsoIndex = contestSession.qsos;
-        const sentNrStr = String(contestSession.sentNr).padStart(3, '0');
-        contestSession.sentNr++;
-        contestSession.xpEarned += qsoXp;
-        if (qsoXp > 0) {
-            Progress.addXp(qsoXp);
-        }
-        Progress.incrementStat('contestQsos', 1);
-        Progress.checkAchievements();
-
-        appendContestLogRow({
-            qsoIndex,
-            timeStr: formatTimeMMSS(contestSession.contestSeconds),
-            callsign: caller.callsign,
-            enteredCall: enteredCall || '—',
-            sentExchange: `599 ${sentNrStr}`,
-            expectedNr: caller.nr,
-            enteredNr: enteredNr || '—',
-            isCallCorrect,
-            isNrCorrect,
-            qsoXp,
-            note
-        });
-
-        if (contestLiveQsos) contestLiveQsos.textContent = contestSession.qsos;
-        const rate = contestSession.contestSeconds > 0
-            ? Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600))
-            : 0;
-        if (contestLiveRate) contestLiveRate.textContent = rate;
-        const liveXpEl = document.getElementById('cs-contest-live-xp');
-        if (liveXpEl) liveXpEl.textContent = contestSession.xpEarned;
-        if (contestSentNrInput) contestSentNrInput.value = String(contestSession.sentNr).padStart(3, '0');
-
-        if (contestCallInput) {
-            contestCallInput.value = '';
-            contestCallInput.classList.remove('is-dupe');
-        }
-        if (contestRecvNrInput) contestRecvNrInput.value = '';
-        if (contestDupeBadge) contestDupeBadge.style.display = 'none';
-
-        // Фокус СРАЗУ переносим в поле позывного для следующей связи
-        focusContestInput(contestCallInput);
-
-        const feedbackColor = (isCallCorrect && isNrCorrect) ? 'ok' : (qsoXp > 0 ? 'ok' : 'bad');
-        feedbackEl.className = `feedback show ${feedbackColor}`;
-        feedbackEl.textContent = isCallCorrect && isNrCorrect
-            ? `✓ Связь с ${caller.callsign} зачтена (+${qsoXp} XP)!`
-            : `⚠ Связь с ${caller.callsign}: ${note} (+${qsoXp} XP)`;
-
-        contestSession.currentCaller = null;
-        contestSession.state = 'IDLE';
-        updateEsmHint();
-
-        setTimeout(() => {
-            if (contestSession && contestSession.active && contestSession.state === 'IDLE' && contestSession.actionToken === token) {
-                contestSendCQ();
+            contestSession.xpEarned += qsoXp;
+            if (qsoXp > 0) {
+                Progress.addXp(qsoXp);
             }
-        }, 900);
+            Progress.incrementStat('contestQsos', 1);
+            Progress.checkAchievements();
+
+            appendContestLogRow({
+                qsoIndex,
+                timeStr: formatTimeMMSS(contestSession.contestSeconds),
+                callsign: caller.callsign,
+                enteredCall: enteredCall || '—',
+                sentExchange: `599 ${sentNrStr}`,
+                expectedNr: caller.nr,
+                enteredNr: enteredNr || '—',
+                isCallCorrect,
+                isNrCorrect,
+                qsoXp,
+                note
+            });
+
+            if (contestLiveQsos) contestLiveQsos.textContent = contestSession.qsos;
+            const rate = contestSession.contestSeconds > 0
+                ? Math.round(contestSession.qsos / (contestSession.contestSeconds / 3600))
+                : 0;
+            if (contestLiveRate) contestLiveRate.textContent = rate;
+            const liveXpEl = document.getElementById('cs-contest-live-xp');
+            if (liveXpEl) liveXpEl.textContent = contestSession.xpEarned;
+            if (contestSentNrInput) contestSentNrInput.value = String(contestSession.sentNr).padStart(3, '0');
+
+            if (contestCallInput) {
+                contestCallInput.value = '';
+                contestCallInput.classList.remove('is-dupe');
+            }
+            if (contestRecvNrInput) contestRecvNrInput.value = '';
+            if (contestDupeBadge) contestDupeBadge.style.display = 'none';
+
+            // Фокус СРАЗУ переносим в поле позывного для следующей связи
+            focusContestInput(contestCallInput);
+
+            const feedbackColor = (isCallCorrect && isNrCorrect) ? 'ok' : (qsoXp > 0 ? 'ok' : 'bad');
+            feedbackEl.className = `feedback show ${feedbackColor}`;
+            feedbackEl.textContent = isCallCorrect && isNrCorrect
+                ? `✓ Связь с ${caller.callsign} зачтена (+${qsoXp} XP)!`
+                : `⚠ Связь с ${caller.callsign}: ${note} (+${qsoXp} XP)`;
+
+            contestSession.currentCaller = null;
+            contestSession.state = 'IDLE';
+            updateEsmHint();
+
+            setTimeout(() => {
+                if (contestSession && contestSession.active && contestSession.state === 'IDLE' && contestSession.actionToken === token) {
+                    contestSendCQ();
+                }
+            }, 900);
+        } catch (err) {
+            console.error('Contest TU processing error:', err);
+            contestSession.currentCaller = null;
+            contestSession.state = 'IDLE';
+            updateEsmHint();
+            focusContestInput(contestCallInput);
+        }
     }
 
     async function contestSendMyCall() {
