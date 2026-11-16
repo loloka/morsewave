@@ -1351,7 +1351,16 @@
                 : 'RIT: 0 Hz';
         }
 
-        const callerNr = String(Math.floor(Math.random() * 350) + 1).padStart(3, '0');
+        // Реалистичный расчёт порядкового номера корреспондента (по алгоритму Morse Runner):
+        // Номер зависит от прогресса сессии: в начале теста номера маленькие (001..008),
+        // а затем плавно растут в зависимости от времени и числа проведённых QSO.
+        const currentSent = contestSession.sentNr || 1;
+        const elapsedMinutes = Math.max(0.5, contestSession.contestSeconds / 60);
+        const expectedBase = Math.max(currentSent, Math.round(elapsedMinutes * 1.5));
+        const activityFactor = 0.4 + Math.random() * 1.4; // 0.4x .. 1.8x разброс активности
+        const jitter = Math.floor(Math.random() * 5) - 2;
+        const rawNr = Math.max(1, Math.round(expectedBase * activityFactor) + jitter);
+        const callerNr = String(rawNr).padStart(3, '0');
         contestSession.currentCaller = {
             callsign,
             nr: callerNr,
