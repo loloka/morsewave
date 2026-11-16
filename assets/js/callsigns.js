@@ -1076,6 +1076,19 @@
     const contestSentNrInput = document.getElementById('cs-contest-sent-nr');
     const contestRecvNrInput = document.getElementById('cs-contest-recv-nr');
 
+    function focusContestInput(inputEl) {
+        if (!inputEl) return;
+        if (document.activeElement !== inputEl) {
+            inputEl.focus();
+        }
+        // Не вызываем select(), чтобы не сбрасывать введённые на слух буквы!
+        // Ставим курсор в конец строки
+        const len = inputEl.value ? inputEl.value.length : 0;
+        if (len > 0) {
+            try { inputEl.setSelectionRange(len, len); } catch (_) {}
+        }
+    }
+
     async function playContestMorse(text, { freq, wpm, isCaller = false } = {}) {
         if (!contestSession || !contestSession.active) return;
         if (currentAudio) {
@@ -1355,10 +1368,7 @@
 
         contestSession.state = 'WAITING_EXCHANGE';
         feedbackEl.textContent = 'Примите позывной и нажмите Enter (F2)';
-        if (contestCallInput) {
-            contestCallInput.focus();
-            contestCallInput.select?.();
-        }
+        focusContestInput(contestCallInput);
     }
 
     async function contestSendExchange() {
@@ -1396,20 +1406,14 @@
 
             contestSession.state = 'WAITING_TU';
             feedbackEl.textContent = 'Введите номер корреспондента и нажмите Enter (F3)';
-            if (contestRecvNrInput) {
-                contestRecvNrInput.focus();
-                contestRecvNrInput.select?.();
-            }
+            focusContestInput(contestRecvNrInput);
         } else {
             feedbackEl.className = 'feedback show bad';
             feedbackEl.textContent = 'Корреспондент переспрашивает (?)';
             await playContestMorse('?', { freq: caller.freq, wpm: caller.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
             contestSession.state = 'WAITING_EXCHANGE';
-            if (contestCallInput) {
-                contestCallInput.focus();
-                contestCallInput.select?.();
-            }
+            focusContestInput(contestCallInput);
         }
     }
 
@@ -1493,7 +1497,7 @@
         if (contestRecvNrInput) contestRecvNrInput.value = '';
 
         // Фокус СРАЗУ переносим в поле позывного для следующей связи
-        if (contestCallInput) contestCallInput.focus();
+        focusContestInput(contestCallInput);
 
         const feedbackColor = (isCallCorrect && isNrCorrect) ? 'ok' : (qsoXp > 0 ? 'ok' : 'bad');
         feedbackEl.className = `feedback show ${feedbackColor}`;
@@ -1541,7 +1545,7 @@
         feedbackEl.textContent = `${caller.callsign} повторяет контрольный номер...`;
         await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
-        if (contestRecvNrInput) contestRecvNrInput.focus();
+        focusContestInput(contestRecvNrInput);
     }
 
     async function contestSendMyExchange() {
