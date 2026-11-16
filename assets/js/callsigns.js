@@ -1400,7 +1400,7 @@
         const caller = contestSession.currentCaller;
         if (enteredCall === caller.callsign.toUpperCase()) {
             contestSession.state = 'CALLER_ACK';
-            feedbackEl.textContent = `${caller.callsign} передаёт контрольный номер...`;
+            feedbackEl.textContent = `${enteredCall} передаёт контрольный номер...`;
             await playContestMorse(`R 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
             if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
@@ -1542,10 +1542,22 @@
         if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
 
         const caller = contestSession.currentCaller;
-        feedbackEl.textContent = `${caller.callsign} повторяет контрольный номер...`;
-        await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
-        if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
-        focusContestInput(contestRecvNrInput);
+        // Если мы ещё не зафиксировали верный позывной — станция повторяет только свой позывной,
+        // и мы НЕ спойлерим его в текстовой подсказке!
+        if (contestSession.state !== 'WAITING_TU') {
+            feedbackEl.textContent = 'Корреспондент повторяет свой позывной...';
+            await playContestMorse(caller.callsign, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+            contestSession.state = 'WAITING_EXCHANGE';
+            focusContestInput(contestCallInput);
+        } else {
+            // Если позывной уже принят и ждём только номер:
+            const enteredCall = (contestCallInput?.value || '').trim().toUpperCase();
+            feedbackEl.textContent = `${enteredCall || 'Корреспондент'} повторяет контрольный номер...`;
+            await playContestMorse(`${caller.callsign} 5NN ${caller.nr}`, { freq: caller.freq, wpm: caller.wpm, isCaller: true });
+            if (!contestSession || !contestSession.active || contestSession.actionToken !== token) return;
+            focusContestInput(contestRecvNrInput);
+        }
     }
 
     async function contestSendMyExchange() {
