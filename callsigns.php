@@ -333,8 +333,8 @@ include __DIR__ . '/includes/header.php';
                     <span class="cs-hud-pod-label">XP</span>
                     <b id="cs-contest-live-xp" class="cs-hud-pod-value accent-gold">0</b>
                 </div>
-                <div id="cs-contest-live-rit" class="cs-hud-rit rit-zero" title="Расстройка частоты корреспондента (RIT)">
-                    RIT 0 Hz
+                <div id="cs-contest-live-rit" class="cs-hud-rit rit-zero" title="Смещение тона корреспондента (±40 Гц)">
+                    Δf 0 Hz
                 </div>
             </div>
         </div>

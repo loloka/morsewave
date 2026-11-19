@@ -45,11 +45,11 @@ include __DIR__ . '/includes/header.php';
             <div class="card promo-card promo-card-contest">
                 <div class="promo-header">
                     <div class="promo-terminal-path mono">
-                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-amber">contest</span>
+                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-amber">callsigns</span>
                     </div>
                     <div class="promo-badges">
                         <span class="promo-badge mono badge-v"><?= MW_VERSION ?></span>
-                        <span class="promo-badge mono badge-contest">📻 <?= t('index.contest_badge') ?></span>
+                        <span class="promo-badge mono badge-contest">⭐ <?= t('index.contest_badge') ?></span>
                     </div>
                 </div>
 
@@ -58,15 +58,15 @@ include __DIR__ . '/includes/header.php';
                     <p class="promo-card-desc"><?= t('index.contest_text') ?></p>
 
                     <div class="promo-tags-row mono">
-                        <span class="promo-tag"><span class="tag-pulse tag-pulse-amber"></span><?= t('index.contest_tag_pileup') ?></span>
-                        <span class="promo-tag"><?= mw_icon('globe', 12) ?> <?= t('index.contest_tag_calls') ?></span>
+                        <span class="promo-tag"><span class="tag-pulse tag-pulse-amber"></span><?= t('index.contest_tag_calls') ?></span>
+                        <span class="promo-tag"><?= mw_icon('radio', 12) ?> <?= t('index.contest_tag_contest') ?></span>
+                        <span class="promo-tag"><?= mw_icon('headphones', 12) ?> <?= t('index.contest_tag_pileup') ?></span>
                         <span class="promo-tag"><?= mw_icon('zap', 12) ?> <?= t('index.contest_tag_sprint') ?></span>
-                        <span class="promo-tag"><?= t('index.contest_tag_rit') ?></span>
                     </div>
 
                     <div class="promo-card-footer">
-                        <a href="callsigns.php?mode=contest" class="btn btn-contest btn-sm"><?= t('index.contest_btn') ?></a>
-                        <span class="promo-sub-meta mono muted">callsigns.php?mode=contest</span>
+                        <a href="callsigns.php" class="btn btn-contest btn-sm"><?= t('index.contest_btn') ?></a>
+                        <span class="promo-sub-meta mono muted">callsigns.php</span>
                     </div>
                 </div>
             </div>

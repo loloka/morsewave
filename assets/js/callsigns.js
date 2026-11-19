@@ -1452,7 +1452,7 @@
         if (liveXpEl) liveXpEl.textContent = '0';
         if (liveRitEl) {
             liveRitEl.className = 'cs-hud-rit rit-zero';
-            liveRitEl.textContent = 'RIT 0 Hz';
+            liveRitEl.textContent = 'Δf 0 Hz';
         }
         hudRxLed?.classList.remove('is-active');
         hudTxLed?.classList.remove('is-active');
@@ -1670,10 +1670,10 @@
         if (liveRitEl) {
             if (allowDetune && dominant.detuneHz !== 0) {
                 liveRitEl.className = 'cs-hud-rit rit-detuned';
-                liveRitEl.textContent = `RIT ${dominant.detuneHz >= 0 ? '+' : ''}${dominant.detuneHz} Hz`;
+                liveRitEl.textContent = `Δf ${dominant.detuneHz >= 0 ? '+' : ''}${dominant.detuneHz} Hz`;
             } else {
                 liveRitEl.className = 'cs-hud-rit rit-zero';
-                liveRitEl.textContent = 'RIT 0 Hz';
+                liveRitEl.textContent = 'Δf 0 Hz';
             }
         }
 
