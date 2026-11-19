@@ -396,6 +396,18 @@
     csModeChips.forEach(chip => {
         chip.addEventListener('click', () => applySelectedMode(chip.dataset.mode));
     });
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlMode = urlParams.get('mode');
+        if (urlMode === 'contest' || urlMode === 'standard') {
+            selectedMode = urlMode;
+        }
+        if (urlParams.get('sprint') === '1' && csSprintEnabledEl) {
+            csSprintEnabledEl.checked = true;
+            isSprint = true;
+            safeStorage.setItem('morse_cs_sprint_enabled', 'true');
+        }
+    } catch (_) {}
     applySelectedMode(selectedMode);
 
     // -------------------------------------------------------------

@@ -42,29 +42,31 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="hero-promo">
-            <div class="card promo-card zapret-style">
+            <div class="card promo-card promo-card-contest">
                 <div class="promo-header">
                     <div class="promo-terminal-path mono">
-                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name">invasion</span>
+                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-amber">contest</span>
                     </div>
                     <div class="promo-badges">
                         <span class="promo-badge mono badge-v"><?= MW_VERSION ?></span>
+                        <span class="promo-badge mono badge-contest">📻 <?= t('index.contest_badge') ?></span>
                     </div>
                 </div>
 
                 <div class="promo-card-body">
-                    <h3 class="promo-card-title"><?= t('index.invasion_title') ?></h3>
-                    <p class="promo-card-desc"><?= t('index.invasion_text') ?></p>
+                    <h3 class="promo-card-title"><?= t('index.contest_title') ?></h3>
+                    <p class="promo-card-desc"><?= t('index.contest_text') ?></p>
 
                     <div class="promo-tags-row mono">
-                        <span class="promo-tag"><span class="tag-pulse"></span><?= t('index.invasion_tag_wave') ?></span>
-                        <span class="promo-tag"><?= t('index.invasion_tag_bosses') ?></span>
-                        <span class="promo-tag"><?= mw_icon('star', 12) ?> <?= t('index.invasion_tag_bonus') ?></span>
+                        <span class="promo-tag"><span class="tag-pulse tag-pulse-amber"></span><?= t('index.contest_tag_pileup') ?></span>
+                        <span class="promo-tag"><?= mw_icon('globe', 12) ?> <?= t('index.contest_tag_calls') ?></span>
+                        <span class="promo-tag"><?= mw_icon('zap', 12) ?> <?= t('index.contest_tag_sprint') ?></span>
+                        <span class="promo-tag"><?= t('index.contest_tag_rit') ?></span>
                     </div>
 
                     <div class="promo-card-footer">
-                        <a href="learn.php?mode=invasion" class="btn btn-primary btn-sm"><?= t('index.invasion_btn') ?></a>
-                        <span class="promo-sub-meta mono muted">learn.php?mode=invasion</span>
+                        <a href="callsigns.php?mode=contest" class="btn btn-contest btn-sm"><?= t('index.contest_btn') ?></a>
+                        <span class="promo-sub-meta mono muted">callsigns.php?mode=contest</span>
                     </div>
                 </div>
             </div>
@@ -72,27 +74,30 @@ include __DIR__ . '/includes/header.php';
             <div class="card promo-card promo-card-invaders2">
                 <div class="promo-header">
                     <div class="promo-terminal-path mono">
-                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-phosphor">interceptor-2</span>
+                        <span class="path-root">morsewave</span><span class="path-slash">/</span><span class="path-name path-phosphor">arcade</span>
                     </div>
                     <div class="promo-badges">
-                        <span class="promo-badge mono badge-key">⚡ KEY PRO</span>
+                        <span class="promo-badge mono badge-key">👾 <?= t('index.arcade_badge') ?></span>
                         <span class="promo-badge mono badge-beta">BETA</span>
                     </div>
                 </div>
 
                 <div class="promo-card-body">
-                    <h3 class="promo-card-title"><?= t('index.invaders2_title') ?></h3>
-                    <p class="promo-card-desc"><?= t('index.invaders2_text') ?></p>
+                    <h3 class="promo-card-title"><?= t('index.arcade_title') ?></h3>
+                    <p class="promo-card-desc"><?= t('index.arcade_text') ?></p>
 
                     <div class="promo-tags-row mono">
-                        <span class="promo-tag"><span class="tag-pulse tag-pulse-phosphor"></span><?= t('index.invaders2_tag_key') ?></span>
-                        <span class="promo-tag"><?= mw_icon('zap', 12) ?> <?= t('index.invaders2_tag_rhythm') ?></span>
-                        <span class="promo-tag"><?= mw_icon('target', 12) ?> <?= t('index.invaders2_tag_crt') ?></span>
+                        <span class="promo-tag"><span class="tag-pulse tag-pulse-phosphor"></span><?= t('index.arcade_tag_audio') ?></span>
+                        <span class="promo-tag"><?= mw_icon('zap', 12) ?> <?= t('index.arcade_tag_key') ?></span>
+                        <span class="promo-tag"><?= mw_icon('star', 12) ?> <?= t('index.arcade_tag_bosses') ?></span>
                     </div>
 
                     <div class="promo-card-footer">
-                        <a href="invaders.php" class="btn btn-invaders2 btn-sm"><?= t('index.invaders2_btn') ?></a>
-                        <span class="promo-sub-meta mono muted">invaders.php</span>
+                        <div class="flex gap-1 flex-wrap">
+                            <a href="learn.php?mode=invasion" class="btn btn-sm"><?= t('index.arcade_btn_inv1') ?></a>
+                            <a href="invaders.php" class="btn btn-invaders2 btn-sm"><?= t('index.arcade_btn_inv2') ?></a>
+                        </div>
+                        <span class="promo-sub-meta mono muted">learn.php · invaders.php</span>
                     </div>
                 </div>
             </div>

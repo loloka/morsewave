@@ -1942,6 +1942,59 @@ input[type="range"] {
     border: 1px solid rgba(0, 255, 102, 0.45);
 }
 
+/* ---------- Promo card (Contest Cockpit) ---------- */
+.promo-card-contest {
+    background: radial-gradient(circle at 85% 15%, rgba(245, 158, 11, 0.09) 0%, #0e1217 65%, #080a0e 100%);
+    border: 1px solid rgba(245, 158, 11, 0.32);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.promo-card-contest::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+    opacity: 0.85;
+    pointer-events: none;
+}
+.promo-card-contest:hover {
+    border-color: rgba(245, 158, 11, 0.65);
+    box-shadow: 0 8px 28px rgba(245, 158, 11, 0.18), 0 4px 18px rgba(0, 0, 0, 0.55);
+    transform: translateY(-2px);
+}
+.promo-terminal-path .path-name.path-amber {
+    color: #f59e0b;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.45);
+}
+.promo-badge.badge-contest {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.tag-pulse-amber {
+    background: #f59e0b !important;
+    box-shadow: 0 0 8px #f59e0b !important;
+}
+.btn-contest {
+    background: #f59e0b;
+    color: #0b0f19;
+    font-weight: 700;
+    border: 1px solid #f59e0b;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.32);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-contest:hover {
+    background: #fbbf24;
+    color: #05070c;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+    transform: translateY(-1px);
+}
+
 .daily-card {
     background: linear-gradient(135deg, var(--surface), #1f1a10 150%);
     border: 1px solid var(--accent-dim);
