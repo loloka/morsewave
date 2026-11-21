@@ -52,6 +52,26 @@
     const fwValue = document.getElementById('groups-farnsworth-value');
     const fwPanel = document.getElementById('groups-farnsworth-panel');
 
+    const dynamicSpeedCheckbox = document.getElementById('groups-dynamic-speed-enabled');
+    const dynamicSpeedWrap = document.getElementById('groups-dynamic-speed-wrap');
+    const liveWpmBadge = document.getElementById('groups-live-wpm-badge');
+    const liveWpmEl = document.getElementById('groups-live-wpm');
+    const dynamicSpeedResultBlock = document.getElementById('groups-dynamic-speed-result-block');
+    const dynStartWpmEl = document.getElementById('groups-dyn-start-wpm');
+    const dynPeakWpmEl = document.getElementById('groups-dyn-peak-wpm');
+    const dynFinalWpmEl = document.getElementById('groups-dyn-final-wpm');
+    const dynSvg = document.getElementById('groups-dyn-svg');
+
+    if (dynamicSpeedCheckbox) {
+        const savedDyn = localStorage.getItem('morse_groups_dynamic_speed');
+        if (savedDyn !== null) {
+            dynamicSpeedCheckbox.checked = (savedDyn === '1');
+        }
+        dynamicSpeedCheckbox.addEventListener('change', () => {
+            localStorage.setItem('morse_groups_dynamic_speed', dynamicSpeedCheckbox.checked ? '1' : '0');
+        });
+    }
+
     function updateFarnsworthVisibility() {
         const on = fwEnabled && fwEnabled.checked;
         if (fwPanel) fwPanel.style.display = on ? 'block' : 'none';
@@ -1308,6 +1328,7 @@
 
     function abortCurrentSession() {
         document.body.classList.remove('morse-session-active');
+        if (liveWpmBadge) liveWpmBadge.style.display = 'none';
         if (currentAudio) {
             currentAudio.stop();
             currentAudio = null;
@@ -1515,10 +1536,12 @@
         }
 
         const isCyrillic = isCyrillicSession(isPairs ? pairsCharsetKey : activeCharsetKey, activeCharset);
+        const isDynamicSpeed = (currentSubmode === 'training') && !isExam && !isPairs && !isPaperMode && !!dynamicSpeedCheckbox && dynamicSpeedCheckbox.checked;
 
         session = {
             groups: generatedGroups,
             index: 0, wpm: activeWpm, farnsworth: activeFarnsworth,
+            initialWpm: activeWpm,
             groupLen: activeGroupLen,
             correctChars: 0, totalChars: 0, xpEarned: 0, dbXpEarned: 0,
             xpRate: xpRateForSession(isPairs ? pairsCharsetKey : activeCharsetKey, isPairs ? 2 : (activeCharset ? activeCharset.length : 26), activeGroupLen, { daily: isDailyChallenge, wpm: activeWpm }),
@@ -1531,6 +1554,13 @@
             isPaperMode,
             paperGap: paperGapSlider ? parseFloat(paperGapSlider.value) || 3.0 : 3.0,
             paperStopped: false,
+            isDynamicSpeed,
+            dynamicSpeed: isDynamicSpeed ? {
+                startWpm: activeWpm,
+                peakWpm: activeWpm,
+                wpmHistory: [activeWpm]
+            } : null,
+            replayedCurrent: false,
             ...(pairData || {})
         };
         updateInputLayoutState();
@@ -1544,6 +1574,12 @@
         window.scrollTo({ top: 0, behavior: 'auto' });
         groupTotalEl.textContent = activeCount;
         groupIndexEl.textContent = 1;
+        if (liveWpmBadge) {
+            liveWpmBadge.style.display = isDynamicSpeed ? 'inline-flex' : 'none';
+        }
+        if (liveWpmEl) {
+            liveWpmEl.textContent = activeWpm;
+        }
 
         const pairsBanner = document.getElementById('pairs-disabled-banner');
         if (isPairs && pairData.disabledChar && pairsBanner) {
@@ -2388,6 +2424,26 @@
             feedbackEl.className = 'feedback show bad';
         }
 
+        if (session.isDynamicSpeed && session.dynamicSpeed) {
+            const isRepeat = !!session.replayedCurrent;
+            if (correct === expected.length) {
+                // Если группа была прослушана повторно вручную — не разгоняем скорость,
+                // чтобы зафиксировать уверенный приём именно с первого раза
+                if (!isRepeat) {
+                    session.wpm = Math.min(60, session.wpm + 1);
+                }
+            } else {
+                session.wpm = Math.max(5, session.wpm - 1);
+            }
+            session.dynamicSpeed.peakWpm = Math.max(session.dynamicSpeed.peakWpm, session.wpm);
+            session.dynamicSpeed.wpmHistory.push(session.wpm);
+            session.replayedCurrent = false;
+
+            if (liveWpmEl) {
+                liveWpmEl.textContent = session.wpm;
+            }
+        }
+
         session.index++;
         answerInput.value = '';
         answerInput.bufferMaxAllowed = null;
@@ -2405,8 +2461,54 @@
         return new Date().toISOString().slice(0, 10);
     }
 
+    function renderGroupsDynamicSpeedChart(wpmHistory) {
+        if (!dynSvg || !wpmHistory || wpmHistory.length === 0) return;
+        const w = 500, h = 120, padX = 30, padY = 22;
+        if (wpmHistory.length === 1) {
+            const y = h / 2;
+            dynSvg.innerHTML = `
+                <line x1="${padX}" y1="${y}" x2="${w - padX}" y2="${y}" stroke="var(--accent)" stroke-width="2.5"/>
+                <circle cx="${w / 2}" cy="${y}" r="4" fill="var(--accent)"/>
+            `;
+            return;
+        }
+        const minWpm = Math.max(5, Math.min(...wpmHistory) - 2);
+        const maxWpm = Math.max(...wpmHistory) + 2;
+        const rangeWpm = maxWpm - minWpm || 1;
+        const points = wpmHistory.map((val, idx) => {
+            const x = padX + (idx / (wpmHistory.length - 1)) * (w - 2 * padX);
+            const y = h - padY - ((val - minWpm) / rangeWpm) * (h - 2 * padY);
+            return `${x.toFixed(1)},${y.toFixed(1)}`;
+        });
+        const lineD = 'M ' + points.join(' L ');
+        const fillD = `M ${padX},${h - padY} L ` + points.join(' L ') + ` L ${w - padX},${h - padY} Z`;
+
+        const startPt = points[0].split(',');
+        const peakVal = Math.max(...wpmHistory);
+        const peakIdx = wpmHistory.indexOf(peakVal);
+        const peakPt = points[peakIdx].split(',');
+        const finalPt = points[points.length - 1].split(',');
+
+        dynSvg.innerHTML = `
+            <defs>
+                <linearGradient id="dynSpeedGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.35"/>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0.0"/>
+                </linearGradient>
+            </defs>
+            <line x1="${padX}" y1="${padY}" x2="${w - padX}" y2="${padY}" stroke="rgba(255,255,255,0.07)" stroke-width="1" stroke-dasharray="3 3"/>
+            <line x1="${padX}" y1="${h - padY}" x2="${w - padX}" y2="${h - padY}" stroke="rgba(255,255,255,0.12)" stroke-width="1"/>
+            <path d="${fillD}" fill="url(#dynSpeedGrad)"/>
+            <path d="${lineD}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="${startPt[0]}" cy="${startPt[1]}" r="3.5" fill="var(--text)" opacity="0.8"/>
+            <circle cx="${peakPt[0]}" cy="${peakPt[1]}" r="4.5" fill="var(--accent)"/>
+            <circle cx="${finalPt[0]}" cy="${finalPt[1]}" r="4" fill="var(--text)"/>
+        `;
+    }
+
     async function finishSession() {
         if (window.hideLayoutHint) window.hideLayoutHint();
+        if (liveWpmBadge) liveWpmBadge.style.display = 'none';
         sessionPanel.style.display = 'none';
         resultPanel.style.display = 'block';
 
@@ -2423,10 +2525,11 @@
         let dailyBonusMsg = '';
         let dailyBonusFail = false;
         if (isDailyChallenge && !session.skipDailyCheck) {
+            const checkWpm = (session.isDynamicSpeed && session.initialWpm) ? session.initialWpm : session.wpm;
             const matchesRequirement = dailyRequired
                 && session.index >= dailyRequired.count
                 && groupLen === dailyRequired.len
-                && session.wpm === dailyRequired.wpm;
+                && checkWpm === dailyRequired.wpm;
 
             // Защита от "прокликивания": раньше можно было жать "Ответить"
             // с пустым полем и в конце всё равно получить бонус — проверялись
@@ -2549,6 +2652,16 @@
             if (qrqBlock) qrqBlock.style.display = 'none';
         }
 
+        if (session.isDynamicSpeed && session.dynamicSpeed && dynamicSpeedResultBlock) {
+            dynamicSpeedResultBlock.style.display = 'block';
+            if (dynStartWpmEl) dynStartWpmEl.textContent = session.dynamicSpeed.startWpm;
+            if (dynPeakWpmEl) dynPeakWpmEl.textContent = session.dynamicSpeed.peakWpm;
+            if (dynFinalWpmEl) dynFinalWpmEl.textContent = session.wpm;
+            renderGroupsDynamicSpeedChart(session.dynamicSpeed.wpmHistory);
+        } else if (dynamicSpeedResultBlock) {
+            dynamicSpeedResultBlock.style.display = 'none';
+        }
+
         const restartBtn = document.getElementById('restart-btn');
         if (restartBtn) restartBtn.style.display = session.isPairs ? 'none' : 'inline-block';
 
@@ -2562,7 +2675,8 @@
         brBox.style.fontSize = '14px';
         let parts = [];
         let baseXP = Math.round(session.xpEarned);
-        let speedMult = isDailyChallenge ? speedXpFactor(session.wpm) : 1;
+        const checkSpeed = (session.isDynamicSpeed && session.initialWpm) ? session.initialWpm : session.wpm;
+        let speedMult = isDailyChallenge ? speedXpFactor(checkSpeed) : 1;
         if (speedMult > 1) {
             parts.push(`${Math.round(baseXP / speedMult)} &times; ${speedMult.toFixed(1)} (скорость)`);
         } else {
@@ -3427,12 +3541,17 @@
         });
     }
     examSubmitBtn.addEventListener('click', () => finishExamSession());
-    replayBtn.addEventListener('click', playCurrentGroup);
+    replayBtn.addEventListener('click', () => {
+        if (session && session.isDynamicSpeed) session.replayedCurrent = true;
+        playCurrentGroup();
+    });
     document.getElementById('restart-btn').addEventListener('click', () => {
         resultPanel.style.display = 'none';
         setupPanel.style.display = 'block';
         session = null;
         updateInputLayoutState();
+        if (dynamicSpeedResultBlock) dynamicSpeedResultBlock.style.display = 'none';
+        if (liveWpmBadge) liveWpmBadge.style.display = 'none';
         const startBtn = document.getElementById('start-session');
         if (startBtn) {
             if (currentSubmode === 'exam' || currentSubmode === 'pairs' || currentSubmode === 'qrq') {
@@ -3482,6 +3601,9 @@
     (function applyDailyParams() {
         const params = new URLSearchParams(location.search);
         if (params.get('daily') !== '1') return;
+        if (dynamicSpeedCheckbox) {
+            dynamicSpeedCheckbox.checked = false;
+        }
         // Бонус за задание дня начисляется только если СЕГОДНЯШНЕЕ задание для
         // этого игрока — действительно приём групп (на другом этапе оно другого
         // типа и выполняется в другом режиме). Иначе параметры из URL применим,

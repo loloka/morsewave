@@ -167,6 +167,22 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
 
+        <!-- Динамическая скорость (адаптивный темп) -->
+        <div id="groups-dynamic-speed-wrap" class="subcard mt-2" style="border-left:3px solid var(--accent); padding:10px 14px;">
+            <div class="flex-between flex-wrap gap-2" style="align-items:center;">
+                <label class="chip" style="gap:8px; font-weight:700; cursor:pointer; margin:0;">
+                    <input type="checkbox" id="groups-dynamic-speed-enabled">
+                    <?= mw_icon('zap', 14) ?> <?= t('groups.dynamic_speed_toggle') ?>
+                </label>
+                <div class="muted mono" style="font-size:11px;" id="groups-dynamic-speed-status">
+                    <?= t('groups.dynamic_speed_badge') ?>
+                </div>
+            </div>
+            <div class="muted mt-1" style="font-size:12px; line-height:1.4;">
+                <?= t('groups.dynamic_speed_desc') ?>
+            </div>
+        </div>
+
         <!-- 4. Дополнительные опции (Фарнсворт, Буфер, Бумага) -->
         <div class="groups-extra-wrapper mt-2">
             <button type="button" class="groups-extra-btn" id="groups-extra-toggle-btn">
@@ -538,7 +554,10 @@ include __DIR__ . '/includes/header.php';
     <div id="pairs-disabled-banner" class="alert-banner mb-2" style="display:none; background:rgba(226, 88, 79, 0.15); border:1px solid var(--danger); color:var(--text); padding:10px 14px; border-radius:8px; font-size:13px; font-weight:600; text-align:center;"></div>
 
     <div class="flex-between">
-        <div class="muted mono"><?= t('groups.group_label') ?> <span id="group-index">1</span> / <span id="group-total">10</span></div>
+        <div class="muted mono flex gap-2" style="align-items:center;">
+            <span><?= t('groups.group_label') ?> <span id="group-index">1</span> / <span id="group-total">10</span></span>
+            <span id="groups-live-wpm-badge" class="badge" style="display:none; font-size:11px; background:rgba(255,255,255,0.08); padding:2px 7px; border-radius:4px; font-family:var(--font-mono); font-weight:700; color:var(--accent);">⚡ <span id="groups-live-wpm">12</span> wpm</span>
+        </div>
         <div class="lamp-row">
             <div class="morse-lamp" id="groups-lamp"></div>
             <button class="btn btn-sm" id="groups-signal-toggle"></button>
@@ -624,6 +643,21 @@ include __DIR__ . '/includes/header.php';
         </div>
         <p class="muted mt-1" style="font-size:13px;"><?= t('groups.paper_result_desc') ?></p>
         <pre id="paper-radiogram-text" class="mono mt-2" style="font-size:15px; letter-spacing:1.5px; line-height:1.9; color:var(--text); background:rgba(0,0,0,0.3); padding:16px; border-radius:8px; border:1px solid var(--border); max-height:360px; overflow-y:auto; user-select:text; white-space:pre-wrap; margin:0;"></pre>
+    </div>
+
+    <!-- Блок результатов динамической скорости -->
+    <div class="card mt-2" id="groups-dynamic-speed-result-block" style="display:none; background:var(--surface-2); padding:16px;">
+        <h4 class="mt-0" style="color:var(--accent); display:flex; align-items:center; gap:6px;">
+            <?= mw_icon('zap', 16) ?> <?= t('groups.dynamic_speed_res_title') ?>
+        </h4>
+        <div class="grid grid-3 mt-2">
+            <div class="stat"><span class="value mono" id="groups-dyn-start-wpm">12</span><span class="label"><?= t('groups.dynamic_speed_res_start') ?></span></div>
+            <div class="stat"><span class="value mono" id="groups-dyn-peak-wpm" style="color:var(--accent);">18</span><span class="label"><?= t('groups.dynamic_speed_res_peak') ?></span></div>
+            <div class="stat"><span class="value mono" id="groups-dyn-final-wpm">16</span><span class="label"><?= t('groups.dynamic_speed_res_final') ?></span></div>
+        </div>
+        <div id="groups-dyn-chart-wrap" class="mt-2" style="max-width:100%; overflow:hidden;">
+            <svg id="groups-dyn-svg" viewBox="0 0 500 120" style="width:100%; height:auto; display:block; background:rgba(0,0,0,0.25); border-radius:6px; border:1px solid rgba(255,255,255,0.06);"></svg>
+        </div>
     </div>
 
     <div class="card mt-2" id="mistakes-block" style="display:none; background:var(--surface-2);">
