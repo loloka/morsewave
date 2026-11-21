@@ -402,7 +402,14 @@
         if (urlMode === 'contest' || urlMode === 'standard') {
             selectedMode = urlMode;
         }
-        if (urlParams.get('sprint') === '1' && csSprintEnabledEl) {
+        if (urlParams.get('daily') === '1') {
+            selectedMode = 'standard';
+            if (csSprintEnabledEl && urlParams.get('sprint') !== '1') {
+                csSprintEnabledEl.checked = false;
+                isSprint = false;
+                safeStorage.setItem('morse_cs_sprint_enabled', 'false');
+            }
+        } else if (urlParams.get('sprint') === '1' && csSprintEnabledEl) {
             csSprintEnabledEl.checked = true;
             isSprint = true;
             safeStorage.setItem('morse_cs_sprint_enabled', 'true');
@@ -2134,6 +2141,10 @@
             }
         }
 
+        if (items && items.length > count) {
+            items = items.slice(0, count);
+        }
+
         if (isContest) {
             startContestSession(items, wpm);
             return;
@@ -2145,6 +2156,7 @@
 
         session = {
             items, index: 0, wpm, farnsworth,
+            initialWpm: wpm,
             isBufferMode: !isRufz && isBufferMode,
             bufferDepth: selectedBufferDepth,
             isPaperMode: !isRufz && isPaperMode,
@@ -2289,7 +2301,8 @@
         if (params.get('daily') === '1') {
             const req = DailyChallenge.forToday();
             if (req.type === 'callsigns') {
-                const matches = (total === req.count) && (session.wpm === req.wpm);
+                const startWpm = (typeof session.initialWpm === 'number') ? session.initialWpm : session.wpm;
+                const matches = (total === req.count) && (startWpm === req.wpm);
                 if (!matches) {
                     dailyBonusFail = true;
                     dailyBonusMsg = t('js.groups.daily_mismatch', {
@@ -2315,6 +2328,12 @@
                     }
                 }
             }
+        }
+
+        if (session.isDaily && typeof session.initialWpm === 'number') {
+            if (wpmSlider) wpmSlider.value = session.initialWpm;
+            if (wpmValue) wpmValue.textContent = session.initialWpm;
+            if (wpmCpm) wpmCpm.textContent = cpmHintText(session.initialWpm, 'callsigns');
         }
 
         document.getElementById('result-accuracy').textContent = `${Math.round(accuracy * 100)}%`;
@@ -2696,9 +2715,10 @@
             document.getElementById('setup-panel').appendChild(banner);
             
             function updateCsDailyBanner() {
-                const count = parseInt(document.getElementById('cs-count').value, 10);
-                const wpm = parseInt(wpmSlider.value, 10);
-                const matches = (count === req.count) && (wpm === req.wpm);
+                const count = parseInt(document.getElementById('cs-count')?.value || '0', 10);
+                const wpm = parseInt(wpmSlider?.value || '0', 10);
+                const isContest = (selectedMode === 'contest');
+                const matches = (count === req.count) && (wpm === req.wpm) && !isContest;
                 if (matches) {
                     banner.className = 'feedback show ok mt-2';
                     banner.textContent = t('js.groups.daily_banner');
@@ -2711,8 +2731,10 @@
                     });
                 }
             }
-            document.getElementById('cs-count').addEventListener('change', updateCsDailyBanner);
-            wpmSlider.addEventListener('input', updateCsDailyBanner);
+            document.getElementById('cs-count')?.addEventListener('change', updateCsDailyBanner);
+            wpmSlider?.addEventListener('input', updateCsDailyBanner);
+            csModeChips?.forEach(c => c.addEventListener('click', () => setTimeout(updateCsDailyBanner, 20)));
+            csSprintEnabledEl?.addEventListener('change', updateCsDailyBanner);
         }
     }
 })();
